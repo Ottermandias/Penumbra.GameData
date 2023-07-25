@@ -18,7 +18,7 @@ public readonly struct EquipItem
     public readonly FullEquipType Type;
 
     public uint ItemId
-        => (uint)Id;
+        => Id > (1ul << 48) ? 0 : (uint)Id;
 
     public bool Valid
         => Type != FullEquipType.Unknown;
@@ -56,7 +56,7 @@ public readonly struct EquipItem
         => new(it.Item1, it.Item2, it.Item3, it.Item4, it.Item5, it.Item6, (FullEquipType)it.Item7);
 
     public static explicit operator PseudoEquipItem(EquipItem it)
-        => (it.Name, it.ItemId, it.IconId, (ushort)it.ModelId, (ushort)it.WeaponType, it.Variant, (byte)it.Type);
+        => (it.Name, it.Id, it.IconId, (ushort)it.ModelId, (ushort)it.WeaponType, it.Variant, (byte)it.Type);
 
     public static EquipItem FromArmor(Item item)
     {
@@ -98,7 +98,7 @@ public readonly struct EquipItem
         FullEquipType equipType = FullEquipType.Unknown, string? name = null)
     {
         name ??= $"Unknown ({modelId.Value}-{(type.Value != 0 ? $"{type.Value}-" : string.Empty)}{variant})";
-        var fullId = itemId == 0
+        var fullId = itemId is 0
             ? modelId.Value | ((ulong)type.Value << 16) | ((ulong)variant << 32) | ((ulong)equipType << 40) | (1ul << 48)
             : itemId;
         return new EquipItem(name, fullId, iconId, modelId, type, variant, equipType);
