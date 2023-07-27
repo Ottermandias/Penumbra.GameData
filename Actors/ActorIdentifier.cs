@@ -44,7 +44,8 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         return Type switch
         {
             IdentifierType.Player => HomeWorld == other.HomeWorld && PlayerName.EqualsCi(other.PlayerName),
-            IdentifierType.Retainer => PlayerName.EqualsCi(other.PlayerName),
+            IdentifierType.Retainer => (Retainer == other.Retainer || Retainer == RetainerType.Both || other.Retainer == RetainerType.Both)
+             && PlayerName.EqualsCi(other.PlayerName),
             IdentifierType.Owned => HomeWorld == other.HomeWorld && PlayerName.EqualsCi(other.PlayerName) && Manager.DataIdEquals(this, other),
             IdentifierType.Special => Special == other.Special,
             IdentifierType.Npc => Manager.DataIdEquals(this, other)
@@ -69,22 +70,38 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
     public string Incognito(string? name)
     {
         name ??= ToString();
-        if (Type is not (IdentifierType.Player or IdentifierType.Owned))
-            return name;
-
-        var parts = name.Split(' ', 3);
-        return string.Join(" ",
-            parts.Length != 3 ? parts.Select(n => $"{n[0]}.") : parts[..2].Select(n => $"{n[0]}.").Append(parts[2]));
+        switch (Type)
+        {
+            case IdentifierType.Player:
+            case IdentifierType.Owned:
+            {
+                var parts = name.Split(' ', 3);
+                return string.Join(" ",
+                    parts.Length != 3 ? parts.Select(n => $"{n[0]}.") : parts[..2].Select(n => $"{n[0]}.").Append(parts[2]));
+            }
+            case IdentifierType.Retainer:
+            {
+                var parts = name.Split(' ', 2);
+                return $"{parts[0][0]}. {parts[1]}";
+            }
+            default: return name;
+        }
     }
 
     public override string ToString()
         => Manager?.ToString(this)
          ?? Type switch
             {
-                IdentifierType.Player   => $"{PlayerName} ({HomeWorld})",
-                IdentifierType.Retainer => $"{PlayerName} (Retainer)",
-                IdentifierType.Owned    => $"{PlayerName}s {Kind.ToName()} {DataId} ({HomeWorld})",
-                IdentifierType.Special  => Special.ToName(),
+                IdentifierType.Player => $"{PlayerName} ({HomeWorld})",
+                IdentifierType.Retainer =>
+                    $"{PlayerName}{Retainer switch
+                    {
+                        RetainerType.Bell      => " (Bell)",
+                        RetainerType.Mannequin => " (Mannequin)",
+                        _                      => " (Retainer)",
+                    }}",
+                IdentifierType.Owned   => $"{PlayerName}s {Kind.ToName()} {DataId} ({HomeWorld})",
+                IdentifierType.Special => Special.ToName(),
                 IdentifierType.Npc =>
                     Index == ushort.MaxValue
                         ? $"{Kind.ToName()} #{DataId}"
@@ -131,6 +148,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                 return ret;
             case IdentifierType.Retainer:
                 ret.Add(nameof(PlayerName), PlayerName.ToString());
+                ret.Add(nameof(Retainer),   Retainer.ToString());
                 return ret;
             case IdentifierType.Owned:
                 ret.Add(nameof(PlayerName), PlayerName.ToString());

@@ -33,7 +33,9 @@ public partial class ActorManager
             case IdentifierType.Retainer:
             {
                 var name = ByteString.FromStringUnsafe(data[nameof(ActorIdentifier.PlayerName)]?.ToObject<string>(), false);
-                return CreateRetainer(name, 0);
+                var retainerType = data[nameof(ActorIdentifier.Retainer)]?.ToObject<ActorIdentifier.RetainerType>()
+                 ?? ActorIdentifier.RetainerType.Both;
+                return CreateRetainer(name, retainerType);
             }
             case IdentifierType.Owned:
             {
@@ -75,7 +77,12 @@ public partial class ActorManager
             IdentifierType.Player => id.HomeWorld != _clientState.LocalPlayer?.HomeWorld.Id
                 ? $"{id.PlayerName} ({Data.ToWorldName(id.HomeWorld)})"
                 : id.PlayerName.ToString(),
-            IdentifierType.Retainer => id.PlayerName.ToString(),
+            IdentifierType.Retainer => $"{id.PlayerName}{id.Retainer switch
+            {
+                ActorIdentifier.RetainerType.Bell      => " (Bell)",
+                ActorIdentifier.RetainerType.Mannequin => " (Mannequin)",
+                _                                      => " (Retainer)",
+            }}",
             IdentifierType.Owned => id.HomeWorld != _clientState.LocalPlayer?.HomeWorld.Id
                 ? $"{id.PlayerName} ({Data.ToWorldName(id.HomeWorld)})'s {Data.ToName(id.Kind, id.DataId)}"
                 : $"{id.PlayerName}s {Data.ToName(id.Kind,                                     id.DataId)}",
