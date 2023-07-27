@@ -73,11 +73,14 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         switch (Type)
         {
             case IdentifierType.Player:
+            {
+                var parts = name.Split(' ', 3);
+                return parts.Length == 2 ? $"{parts[0][0]}. {parts[1][0]}." : $"{parts[0][0]}. {parts[1][0]}. {parts[2]}";
+            }
             case IdentifierType.Owned:
             {
                 var parts = name.Split(' ', 3);
-                return string.Join(" ",
-                    parts.Length != 3 ? parts.Select(n => $"{n[0]}.") : parts[..2].Select(n => $"{n[0]}.").Append(parts[2]));
+                return parts[2][0] == '(' ? $"{parts[0][0]}. {parts[1][0]}. {parts[2]}" : $"{parts[0][0]}. {parts[1][0]}.'s {parts[2]}";
             }
             case IdentifierType.Retainer:
             {
