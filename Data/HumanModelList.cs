@@ -5,6 +5,7 @@ using Dalamud.Data;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Lumina.Excel.GeneratedSheets;
+using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
 
@@ -21,8 +22,8 @@ public sealed class HumanModelList : DataSharer
         _humanModels = TryCatchData(Tag, () => GetValidHumanModels(gameData));
     }
 
-    public bool IsHuman(uint modelId)
-        => modelId < _humanModels.Count && _humanModels[(int)modelId];
+    public bool IsHuman(ModelCharaId modelId)
+        => modelId.Id < _humanModels.Count && _humanModels[(int)modelId.Id];
 
     public int Count
         => _humanModels.Count;

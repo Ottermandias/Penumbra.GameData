@@ -20,7 +20,7 @@ namespace Penumbra.GameData.Data;
 
 internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
 {
-    public const int IdentificationVersion = 4;
+    public const int IdentificationVersion = 5;
 
     public           IGamePathParser                                                       GamePathParser { get; } = new GamePathParser();
     public readonly  IReadOnlyList<IReadOnlyList<uint>>                                    BnpcNames;
@@ -45,6 +45,9 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
         ModelCharaToObjects          = TryCatchData("ModelObjects", () => CreateModelObjects(_actorData, dataManager, language));
     }
 
+    public string Name(ObjectKind kind, NpcId id)
+        => _actorData.ToName(kind, id);
+
     public void Identify(IDictionary<string, object?> set, string path)
     {
         if (path.EndsWith(".pap", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".tmb", StringComparison.OrdinalIgnoreCase))
@@ -62,19 +65,23 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
         return ret;
     }
 
-    public IEnumerable<EquipItem> Identify(SetId setId, WeaponType weaponType, ushort variant, EquipSlot slot)
+    public IEnumerable<EquipItem> Identify(SetId setId, WeaponType weaponType, Variant variant, EquipSlot slot)
         => slot switch
         {
-            EquipSlot.MainHand => _weapons.Between(setId, weaponType, (byte)variant),
-            EquipSlot.OffHand  => _weapons.Between(setId, weaponType, (byte)variant),
-            _                  => _equipment.Between(setId, slot, (byte)variant),
+            EquipSlot.MainHand => _weapons.Between(setId, weaponType, variant),
+            EquipSlot.OffHand  => _weapons.Between(setId, weaponType, variant),
+            _                  => _equipment.Between(setId, slot, variant),
         };
 
-    public IReadOnlyList<uint> GetBnpcNames(uint bNpcId)
-        => bNpcId >= BnpcNames.Count ? Array.Empty<uint>() : BnpcNames[(int)bNpcId];
+    public IReadOnlyList<BnpcNameId> GetBnpcNames(BnpcId bNpcId)
+        => bNpcId.Id >= BnpcNames.Count
+            ? Array.Empty<BnpcNameId>()
+            : new TransformList<uint, BnpcNameId>(BnpcNames[(int)bNpcId.Id], i => (BnpcNameId)i);
 
-    public IReadOnlyList<(string Name, ObjectKind Kind, uint Id)> ModelCharaNames(uint modelId)
-        => modelId >= ModelCharaToObjects.Count ? Array.Empty<(string Name, ObjectKind Kind, uint Id)>() : ModelCharaToObjects[(int)modelId];
+    public IReadOnlyList<(string Name, ObjectKind Kind, uint Id)> ModelCharaNames(ModelCharaId modelId)
+        => modelId.Id >= ModelCharaToObjects.Count
+            ? Array.Empty<(string Name, ObjectKind Kind, uint Id)>()
+            : ModelCharaToObjects[(int)modelId.Id];
 
     public int NumModelChara
         => ModelCharaToObjects.Count;
@@ -296,7 +303,8 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
 
         var options = new ParallelOptions()
         {
-            MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount / 2),
+            MaxDegreeOfParallelism = Math.Max(1, 1),
+            //MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount / 2),
         };
 
         Parallel.ForEach(gameData.GetExcelSheet<BNpcBase>(language)!.Where(b => b.RowId < BnpcNames.Count), options, bNpc =>

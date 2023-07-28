@@ -111,10 +111,10 @@ public partial class DisassembledShader
     public DisassembledShader(ByteString rawDisassembly)
     {
         RawDisassembly = rawDisassembly;
-        var lines = rawDisassembly.Split((byte) '\n');
+        var lines = rawDisassembly.Split((byte)'\n');
         Instructions = lines.FindAll(ln => !ln.StartsWith("//"u8) && ln.Length > 0);
-        var shaderModel = Instructions[0].Trim().Split((byte) '_');
-        Stage       = (ShaderStage)(byte)char.ToUpper((char) shaderModel[0][0]);
+        var shaderModel = Instructions[0].Trim().Split((byte)'_');
+        Stage       = (ShaderStage)(byte)char.ToUpper((char)shaderModel[0][0]);
         ShaderModel = (uint.Parse(shaderModel[1].ToString()) << 8) | uint.Parse(shaderModel[2].ToString());
         var header = PreParseHeader(lines.Take(lines.IndexOf(Instructions[0])).Select(l => l.ToString()).ToArray());
         switch (ShaderModel >> 8)

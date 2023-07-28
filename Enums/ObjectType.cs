@@ -21,7 +21,7 @@ public enum ObjectType : byte
 
 public static class ObjectTypeExtensions
 {
-    public static string ToName( this ObjectType type )
+    public static string ToName(this ObjectType type)
         => type switch
         {
             ObjectType.Vfx           => "Visual Effect",

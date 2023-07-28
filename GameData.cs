@@ -21,7 +21,8 @@ public static class GameData
     /// <summary>
     /// Obtain an object identifier that can link a game path to game objects that use it using the given language.
     /// </summary>
-    public static IObjectIdentifier GetIdentifier(DalamudPluginInterface pluginInterface, DataManager dataManager, ItemData itemData, ClientLanguage language)
+    public static IObjectIdentifier GetIdentifier(DalamudPluginInterface pluginInterface, DataManager dataManager, ItemData itemData,
+        ClientLanguage language)
         => new ObjectIdentification(pluginInterface, dataManager, itemData, language);
 
     /// <summary>
@@ -58,17 +59,20 @@ public interface IObjectIdentifier : IDisposable
     /// <param name="weaponType">The secondary model ID for weapons, WeaponType.Zero for equipment and accessories.</param>
     /// <param name="variant">The variant ID of the model.</param>
     /// <param name="slot">The equipment slot the piece of equipment uses.</param>
-    public IEnumerable<EquipItem> Identify(SetId setId, WeaponType weaponType, ushort variant, EquipSlot slot);
+    public IEnumerable<EquipItem> Identify(SetId setId, WeaponType weaponType, Variant variant, EquipSlot slot);
 
-    /// <inheritdoc cref="Identify(SetId, WeaponType, ushort, EquipSlot)"/>
-    public IEnumerable<EquipItem> Identify(SetId setId, ushort variant, EquipSlot slot)
+    /// <inheritdoc cref="Identify(SetId, WeaponType, Variant, EquipSlot)"/>
+    public IEnumerable<EquipItem> Identify(SetId setId, Variant variant, EquipSlot slot)
         => Identify(setId, 0, variant, slot);
 
     /// <summary> Obtain a list of BNPC Name Ids associated with a BNPC Id. </summary>
-    public IReadOnlyList<uint> GetBnpcNames(uint bNpcId);
+    public IReadOnlyList<BnpcNameId> GetBnpcNames(BnpcId bNpcId);
+
+    /// <summary> Obtain the name for an NPC. </summary>
+    public string Name(ObjectKind kind, NpcId id);
 
     /// <summary> Obtain a list of Names and Object Kinds associated with a ModelChara ID. </summary>
-    public IReadOnlyList<(string Name, ObjectKind Kind, uint Id)> ModelCharaNames(uint modelId);
+    public IReadOnlyList<(string Name, ObjectKind Kind, uint Id)> ModelCharaNames(ModelCharaId modelId);
 
     public int NumModelChara { get; }
 }

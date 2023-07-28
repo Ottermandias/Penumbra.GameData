@@ -21,7 +21,7 @@ public enum FileType : byte
 
 public static partial class Names
 {
-    public static readonly Dictionary< string, FileType > ExtensionToFileType = new()
+    public static readonly Dictionary<string, FileType> ExtensionToFileType = new()
     {
         { ".mdl", FileType.Model },
         { ".tex", FileType.Texture },

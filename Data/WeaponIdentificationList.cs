@@ -20,7 +20,7 @@ internal sealed class WeaponIdentificationList : KeyList<PseudoEquipItem>
     public IEnumerable<EquipItem> Between(SetId modelId)
         => Between(ToKey(modelId, 0, 0), ToKey(modelId, 0xFFFF, 0xFF)).Select(e => (EquipItem)e);
 
-    public IEnumerable<EquipItem> Between(SetId modelId, WeaponType type, byte variant = 0)
+    public IEnumerable<EquipItem> Between(SetId modelId, WeaponType type, Variant variant = default)
     {
         if (type == 0)
             return Between(ToKey(modelId, 0, 0), ToKey(modelId, 0xFFFF, 0xFF)).Select(e => (EquipItem)e);
@@ -33,8 +33,8 @@ internal sealed class WeaponIdentificationList : KeyList<PseudoEquipItem>
     public void Dispose(DalamudPluginInterface pi, ClientLanguage language)
         => DataSharer.DisposeTag(pi, Tag, language, Version);
 
-    public static ulong ToKey(SetId modelId, WeaponType type, byte variant)
-        => ((ulong)modelId << 32) | ((ulong)type << 16) | variant;
+    public static ulong ToKey(SetId modelId, WeaponType type, Variant variant)
+        => ((ulong)modelId.Id << 32) | ((ulong)type.Id << 16) | variant.Id;
 
     public static ulong ToKey(EquipItem i)
         => ToKey(i.ModelId, i.WeaponType, i.Variant);

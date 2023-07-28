@@ -25,7 +25,7 @@ public partial class StmFile
         public readonly IReadOnlyList<Half>                     SpecularPowerEntries;
 
         public DyePack this[StainId idx]
-            => this[(int)idx.Value];
+            => this[(int)idx.Id];
 
         public DyePack this[int idx]
         {

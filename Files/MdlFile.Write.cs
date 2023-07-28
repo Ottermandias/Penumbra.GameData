@@ -257,12 +257,12 @@ public partial class MdlFile
                 w.Write(bone);
 
             var pos     = w.BaseStream.Position + 1;
-            var padding = (byte) (pos & 0b111);
+            var padding = (byte)(pos & 0b111);
             if (padding > 0)
-                padding = (byte) (8 - padding);
+                padding = (byte)(8 - padding);
             w.Write(padding);
             for (var i = 0; i < padding; ++i)
-                w.Write((byte) (0xDEADBEEFF00DCAFEu >> (8 * (7 - i))));
+                w.Write((byte)(0xDEADBEEFF00DCAFEu >> (8 * (7 - i))));
 
             Write(w, BoundingBoxes);
             Write(w, ModelBoundingBoxes);

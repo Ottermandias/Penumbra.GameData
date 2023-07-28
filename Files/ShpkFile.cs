@@ -129,15 +129,15 @@ public partial class ShpkFile : IWritable
         {
             new()
             {
-                Id        = 1,
+                Id           = 1,
                 DefaultValue = subViewKey1Default,
-                Values    = Array.Empty<uint>(),
+                Values       = Array.Empty<uint>(),
             },
             new()
             {
-                Id        = 2,
+                Id           = 2,
                 DefaultValue = subViewKey2Default,
-                Values    = Array.Empty<uint>(),
+                Values       = Array.Empty<uint>(),
             },
         };
 
@@ -398,9 +398,9 @@ public partial class ShpkFile : IWritable
         {
             ret[i] = new Key
             {
-                Id        = r.ReadUInt32(),
+                Id           = r.ReadUInt32(),
                 DefaultValue = r.ReadUInt32(),
-                Values    = Array.Empty<uint>(),
+                Values       = Array.Empty<uint>(),
             };
         }
 

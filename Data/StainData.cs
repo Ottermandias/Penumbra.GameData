@@ -45,17 +45,17 @@ public sealed class StainData : DataSharer, IReadOnlyDictionary<StainId, Stain>
         => Data.Count;
 
     public bool ContainsKey(StainId key)
-        => Data.ContainsKey(key.Value);
+        => Data.ContainsKey(key.Id);
 
     public bool TryGetValue(StainId key, out Stain value)
     {
-        if (!Data.TryGetValue(key.Value, out var data))
+        if (!Data.TryGetValue(key.Id, out var data))
         {
             value = default;
             return false;
         }
 
-        value = new Stain(data.Name, data.Dye, key.Value, data.Gloss);
+        value = new Stain(data.Name, data.Dye, key.Id, data.Gloss);
         return true;
     }
 

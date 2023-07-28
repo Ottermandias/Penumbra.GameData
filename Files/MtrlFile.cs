@@ -74,20 +74,15 @@ public partial class MtrlFile : IWritable
             return null;
 
         return ShaderPackage.ShaderValues.AsSpan().Slice(constant.ByteOffset >> 2, constant.ByteSize >> 2);
-
     }
 
     public List<(Sampler?, ShpkFile.Resource?)> GetSamplersByTexture(ShpkFile? shpk)
     {
         var samplers = new List<(Sampler?, ShpkFile.Resource?)>();
         for (var i = 0; i < Textures.Length; ++i)
-        {
             samplers.Add((null, null));
-        }
         foreach (var sampler in ShaderPackage.Samplers)
-        {
             samplers[sampler.TextureIndex] = (sampler, shpk?.GetSamplerById(sampler.SamplerId));
-        }
 
         return samplers;
     }

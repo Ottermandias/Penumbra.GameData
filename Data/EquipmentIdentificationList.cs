@@ -16,7 +16,7 @@ internal sealed class EquipmentIdentificationList : KeyList<PseudoEquipItem>
         : base(pi, Tag, language, ObjectIdentification.IdentificationVersion, CreateEquipmentList(data))
     { }
 
-    public IEnumerable<EquipItem> Between(SetId modelId, EquipSlot slot = EquipSlot.Unknown, byte variant = 0)
+    public IEnumerable<EquipItem> Between(SetId modelId, EquipSlot slot = EquipSlot.Unknown, Variant variant = default)
     {
         if (slot == EquipSlot.Unknown)
             return Between(ToKey(modelId, 0, 0), ToKey(modelId, (EquipSlot)0xFF, 0xFF)).Select(e => (EquipItem)e);
@@ -29,8 +29,8 @@ internal sealed class EquipmentIdentificationList : KeyList<PseudoEquipItem>
     public void Dispose(DalamudPluginInterface pi, ClientLanguage language)
         => DataSharer.DisposeTag(pi, Tag, language, ObjectIdentification.IdentificationVersion);
 
-    public static ulong ToKey(SetId modelId, EquipSlot slot, byte variant)
-        => ((ulong)modelId << 32) | ((ulong)slot << 16) | variant;
+    public static ulong ToKey(SetId modelId, EquipSlot slot, Variant variant)
+        => ((ulong)modelId.Id << 32) | ((ulong)slot << 16) | variant.Id;
 
     public static ulong ToKey(EquipItem i)
         => ToKey(i.ModelId, i.Type.ToSlot(), i.Variant);

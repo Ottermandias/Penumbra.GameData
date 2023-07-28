@@ -13,41 +13,46 @@ public struct CharacterWeapon : IEquatable<CharacterWeapon>
     public WeaponType Type;
 
     [FieldOffset(4)]
-    public ushort Variant;
+    public Variant Variant;
+
+    [FieldOffset(5)]
+    private readonly byte _padding = 0;
 
     [FieldOffset(6)]
     public StainId Stain;
 
     public readonly ulong Value
-        => (ulong)Set | ((ulong)Type << 16) | ((ulong)Variant << 32) | ((ulong)Stain << 48);
+        => (ulong)Set.Id | ((ulong)Type.Id << 16) | ((ulong)Variant.Id << 32) | ((ulong)Stain.Id << 48);
 
     public override readonly string ToString()
         => $"{Set},{Type},{Variant},{Stain}";
 
-    public CharacterWeapon(SetId set, WeaponType type, ushort variant, StainId stain)
+    public CharacterWeapon(SetId set, WeaponType type, Variant variant, StainId stain)
     {
-        Set     = set;
-        Type    = type;
-        Variant = variant;
-        Stain   = stain;
+        Set      = set;
+        Type     = type;
+        Variant  = variant;
+        Stain    = stain;
+        _padding = 0;
     }
 
     public CharacterWeapon(ulong value)
     {
-        Set     = (SetId)value;
-        Type    = (WeaponType)(value >> 16);
-        Variant = (ushort)(value >> 32);
-        Stain   = (StainId)(value >> 48);
+        Set      = (SetId)value;
+        Type     = (WeaponType)(value >> 16);
+        Variant  = (Variant)(value >> 32);
+        Stain    = (StainId)(value >> 48);
+        _padding = 0;
     }
 
     public readonly CharacterWeapon With(StainId stain)
         => new(Set, Type, Variant, stain);
 
     public readonly CharacterArmor ToArmor()
-        => new(Set, (byte)Variant, Stain);
+        => new(Set, Variant, Stain);
 
     public readonly CharacterArmor ToArmor(StainId stain)
-        => new(Set, (byte)Variant, stain);
+        => new(Set, Variant, stain);
 
     public static readonly CharacterWeapon Empty = new(0, 0, 0, 0);
 

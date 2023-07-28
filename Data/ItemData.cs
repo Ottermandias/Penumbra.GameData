@@ -36,10 +36,10 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
                 {
                     if (type is FullEquipType.Fists && item.ModelSub < 0x100000000)
                     {
-                        tmp[(int)FullEquipType.Hands].Add(new EquipItem(mh.Name + $" (Gauntlets)", mh.Id, mh.IconId, (SetId)item.ModelSub, 0,
+                        tmp[(int)FullEquipType.Hands].Add(new EquipItem(mh.Name + " (Gauntlets)", mh.Id, mh.IconId, (SetId)item.ModelSub, 0,
                             (byte)(item.ModelSub >> 16), FullEquipType.Hands));
                         tmp[(int)FullEquipType.FistsOff].Add(new EquipItem(mh.Name + FullEquipType.FistsOff.OffhandTypeSuffix(), mh.Id,
-                            mh.IconId, (SetId)(mh.ModelId.Value + 50), mh.WeaponType, mh.Variant, FullEquipType.FistsOff));
+                            mh.IconId, (SetId)(mh.ModelId.Id + 50), mh.WeaponType, mh.Variant, FullEquipType.FistsOff));
                     }
                     else
                     {
@@ -142,16 +142,16 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
     public IReadOnlyList<EquipItem> this[FullEquipType key]
         => TryGetValue(key, out var ret) ? ret : throw new IndexOutOfRangeException();
 
-    public IEnumerable<(uint, EquipItem)> AllItems(bool main)
-        => (main ? _mainItems : _offItems).Select(i => (i.Key, (EquipItem)i.Value));
+    public IEnumerable<(ItemId, EquipItem)> AllItems(bool main)
+        => (main ? _mainItems : _offItems).Select(i => ((ItemId) i.Key, (EquipItem)i.Value));
 
     public int TotalItemCount(bool main)
         => main ? _mainItems.Count : _offItems.Count;
 
-    public bool TryGetValue(uint key, EquipSlot slot, out EquipItem value)
+    public bool TryGetValue(ItemId key, EquipSlot slot, out EquipItem value)
     {
         var dict = slot is EquipSlot.OffHand ? _offItems : _mainItems;
-        if (slot is EquipSlot.Hands && _gauntlets.TryGetValue(key, out var v) || dict.TryGetValue(key, out v))
+        if (slot is EquipSlot.Hands && _gauntlets.TryGetValue(key.Id, out var v) || dict.TryGetValue(key.Id, out v))
         {
             value = v;
             return true;

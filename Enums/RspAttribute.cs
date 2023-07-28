@@ -23,7 +23,7 @@ public enum RspAttribute : byte
 
 public static class RspAttributeExtensions
 {
-    public static Gender ToGender( this RspAttribute attribute )
+    public static Gender ToGender(this RspAttribute attribute)
     {
         return attribute switch
         {
@@ -45,7 +45,7 @@ public static class RspAttributeExtensions
         };
     }
 
-    public static string ToUngenderedString( this RspAttribute attribute )
+    public static string ToUngenderedString(this RspAttribute attribute)
     {
         return attribute switch
         {
@@ -67,7 +67,7 @@ public static class RspAttributeExtensions
         };
     }
 
-    public static string ToFullString( this RspAttribute attribute )
+    public static string ToFullString(this RspAttribute attribute)
     {
         return attribute switch
         {

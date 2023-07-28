@@ -16,7 +16,7 @@ internal sealed class ModelIdentificationList : KeyList<ModelChara>
         : base(pi, Tag, language, ObjectIdentification.IdentificationVersion, CreateModelList(gameData, language))
     { }
 
-    public IEnumerable<ModelChara> Between(CharacterBase.ModelType type, SetId modelId, byte modelBase = 0, byte variant = 0)
+    public IEnumerable<ModelChara> Between(CharacterBase.ModelType type, SetId modelId, byte modelBase = 0, Variant variant = default)
     {
         if (modelBase == 0)
             return Between(ToKey(type, modelId, 0, 0), ToKey(type, modelId, 0xFF, 0xFF));
@@ -30,8 +30,8 @@ internal sealed class ModelIdentificationList : KeyList<ModelChara>
         => DataSharer.DisposeTag(pi, Tag, language, ObjectIdentification.IdentificationVersion);
 
 
-    public static ulong ToKey(CharacterBase.ModelType type, SetId model, byte modelBase, byte variant)
-        => ((ulong)type << 32) | ((ulong)model << 16) | ((ulong)modelBase << 8) | variant;
+    public static ulong ToKey(CharacterBase.ModelType type, SetId model, byte modelBase, Variant variant)
+        => ((ulong)type << 32) | ((ulong)model.Id << 16) | ((ulong)modelBase << 8) | variant.Id;
 
     private static ulong ToKey(ModelChara row)
         => ToKey((CharacterBase.ModelType)row.Type, row.Model, row.Base, row.Variant);

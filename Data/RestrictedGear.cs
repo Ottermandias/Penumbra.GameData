@@ -50,7 +50,7 @@ public sealed class RestrictedGear : DataSharer
     /// <returns>True and the changed-to piece of gear or false and the same piece of gear.</returns>
     public (bool Replaced, CharacterArmor Armor) ResolveRestricted(CharacterArmor armor, EquipSlot slot, Race race, Gender gender)
     {
-        var quad = armor.Set.Value | ((uint)armor.Variant << 16);
+        var quad = armor.Set.Id | ((uint)armor.Variant.Id << 16);
         // Check racial gear, this does not need slots.
         if (RaceGenderGroup.Contains(quad))
         {

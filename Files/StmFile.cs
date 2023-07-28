@@ -39,7 +39,7 @@ public partial class StmFile
 
     /// <inheritdoc cref="this[ushort, StainId]"/>
     public DyePack this[ushort template, StainId idx]
-        => this[template, (int)idx.Value];
+        => this[template, (int)idx.Id];
 
     /// <summary>
     /// Try to access a specific dye pack.
@@ -50,7 +50,7 @@ public partial class StmFile
     /// <returns>True on success, false otherwise.</returns>
     public bool TryGetValue(ushort template, StainId idx, out DyePack dyes)
     {
-        if (idx.Value is > 0 and <= StainingTemplateEntry.NumElements && Entries.TryGetValue(template, out var entry))
+        if (idx.Id is > 0 and <= StainingTemplateEntry.NumElements && Entries.TryGetValue(template, out var entry))
         {
             dyes = entry[idx];
             return true;

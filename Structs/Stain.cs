@@ -8,10 +8,10 @@ public readonly struct Stain
     // An empty stain with transparent color.
     public static readonly Stain None = new("None");
 
-    public readonly string Name;
-    public readonly uint   RgbaColor;
-    public readonly byte   RowIndex;
-    public readonly bool   Gloss;
+    public readonly string  Name;
+    public readonly uint    RgbaColor;
+    public readonly StainId RowIndex;
+    public readonly bool    Gloss;
 
     public byte R
         => (byte)(RgbaColor & 0xFF);
@@ -30,10 +30,10 @@ public readonly struct Stain
         => ((color & 0xFF) << 16) | ((color >> 16) & 0xFF) | (color & 0xFF00) | 0xFF000000;
 
     public Stain(Lumina.Excel.GeneratedSheets.Stain stain)
-        : this(stain.Name.ToDalamudString().ToString(), SeColorToRgba(stain.Color), (byte)stain.RowId, stain.Unknown5)
+        : this(stain.Name.ToDalamudString().ToString(), SeColorToRgba(stain.Color), (StainId)stain.RowId, stain.Unknown5)
     { }
 
-    internal Stain(string name, uint dye, byte index, bool gloss)
+    internal Stain(string name, uint dye, StainId index, bool gloss)
     {
         Name      = name;
         RowIndex  = index;

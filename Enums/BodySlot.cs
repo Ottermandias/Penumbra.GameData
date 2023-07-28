@@ -16,7 +16,7 @@ public enum BodySlot : byte
 
 public static class BodySlotEnumExtension
 {
-    public static string ToSuffix( this BodySlot value )
+    public static string ToSuffix(this BodySlot value)
         => value switch
         {
             BodySlot.Zear => "zear",
@@ -46,13 +46,13 @@ public static class BodySlotEnumExtension
             BodySlot.Tail => CustomizationType.Tail,
             BodySlot.Body => CustomizationType.Body,
             BodySlot.Zear => CustomizationType.Zear,
-            _             => throw new ArgumentOutOfRangeException(nameof(value), value, null)
+            _             => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
 }
 
 public static partial class Names
 {
-    public static readonly Dictionary< string, BodySlot > StringToBodySlot = new()
+    public static readonly Dictionary<string, BodySlot> StringToBodySlot = new()
     {
         { BodySlot.Zear.ToSuffix(), BodySlot.Zear },
         { BodySlot.Face.ToSuffix(), BodySlot.Face },

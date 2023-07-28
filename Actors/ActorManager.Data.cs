@@ -48,7 +48,7 @@ public sealed partial class ActorManager : IDisposable
         public IReadOnlyDictionary<uint, string> ENpcs { get; }
 
         public ActorManagerData(DalamudPluginInterface pluginInterface, DataManager gameData, ClientLanguage language)
-            : base(pluginInterface, language, 2)
+            : base(pluginInterface, language, 3)
         {
             var worldTask      = TryCatchDataAsync("Worlds",     CreateWorldData(gameData));
             var mountsTask     = TryCatchDataAsync("Mounts",     CreateMountData(gameData));
@@ -68,39 +68,39 @@ public sealed partial class ActorManager : IDisposable
         /// <summary>
         /// Return the world name including the Any World option.
         /// </summary>
-        public string ToWorldName(ushort worldId)
-            => worldId == ushort.MaxValue ? "Any World" : Worlds.TryGetValue(worldId, out var name) ? name : "Invalid";
+        public string ToWorldName(WorldId worldId)
+            => worldId == WorldId.AnyWorld ? "Any World" : Worlds.TryGetValue(worldId.Id, out var name) ? name : "Invalid";
 
         /// <summary>
         /// Return the world id corresponding to the given name.
         /// </summary>
         /// <returns>ushort.MaxValue if the name is empty, 0 if it is not a valid world, or the worlds id.</returns>
-        public ushort ToWorldId(string worldName)
+        public WorldId ToWorldId(string worldName)
             => worldName.Length != 0
-                ? Worlds.FirstOrDefault(kvp => string.Equals(kvp.Value, worldName, StringComparison.OrdinalIgnoreCase), default).Key
-                : ushort.MaxValue;
+                ? (WorldId)Worlds.FirstOrDefault(kvp => string.Equals(kvp.Value, worldName, StringComparison.OrdinalIgnoreCase), default).Key
+                : WorldId.AnyWorld;
 
         /// <summary>
         /// Convert a given ID for a certain ObjectKind to a name.
         /// </summary>
         /// <returns>Invalid or a valid name.</returns>
-        public string ToName(ObjectKind kind, uint dataId)
+        public string ToName(ObjectKind kind, NpcId dataId)
             => TryGetName(kind, dataId, out var ret) ? ret : "Invalid";
 
 
         /// <summary>
         /// Convert a given ID for a certain ObjectKind to a name.
         /// </summary>
-        public bool TryGetName(ObjectKind kind, uint dataId, [NotNullWhen(true)] out string? name)
+        public bool TryGetName(ObjectKind kind, NpcId dataId, [NotNullWhen(true)] out string? name)
         {
             name = null;
             return kind switch
             {
-                ObjectKind.MountType => Mounts.TryGetValue(dataId, out name),
-                ObjectKind.Companion => Companions.TryGetValue(dataId, out name),
-                ObjectKind.Ornament  => Ornaments.TryGetValue(dataId, out name),
-                ObjectKind.BattleNpc => BNpcs.TryGetValue(dataId, out name),
-                ObjectKind.EventNpc  => ENpcs.TryGetValue(dataId, out name),
+                ObjectKind.MountType => Mounts.TryGetValue(dataId.Id, out name),
+                ObjectKind.Companion => Companions.TryGetValue(dataId.Id, out name),
+                ObjectKind.Ornament  => Ornaments.TryGetValue(dataId.Id, out name),
+                ObjectKind.BattleNpc => BNpcs.TryGetValue(dataId.Id, out name),
+                ObjectKind.EventNpc  => ENpcs.TryGetValue(dataId.Id, out name),
                 _                    => false,
             };
         }
@@ -237,20 +237,23 @@ public sealed partial class ActorManager : IDisposable
         if (agent == null || !agent->AgentInterface.IsAgentActive())
             return false;
 
-        var idx       = (ushort)type - (ushort)ScreenActor.CharacterScreen;
-        var character = agent->Character(idx);
-        if (character == null)
+        var idx = (ushort)type - (ushort)ScreenActor.CharacterScreen;
+        if (agent->Data == null)
             return true;
 
-        var name = new ByteString(character->Name1.StringPtr);
-        id = CreatePlayer(name, (ushort)character->WorldId);
+        ref var character = ref agent->Data->CharacterArraySpan[idx];
+
+        var name = new ByteString(character.Name1.StringPtr);
+        id = CreatePlayer(name, (WorldId)character.WorldId);
         return true;
     }
 
-    private unsafe bool SearchPlayerCustomize(Character* character, int idx, out ActorIdentifier id)
+    private unsafe bool SearchPlayerCustomize(Character* character, ObjectIndex idx, out ActorIdentifier id)
     {
-        var other = (Character*)_objects.GetObjectAddress(idx);
-        if (other == null || !CustomizeData.ScreenActorEquals((CustomizeData*)character->DrawData.CustomizeData.Data, (CustomizeData*)other->DrawData.CustomizeData.Data))
+        var other = (Character*)_objects.GetObjectAddress(idx.Index);
+        if (other == null
+         || !CustomizeData.ScreenActorEquals((CustomizeData*)character->DrawData.CustomizeData.Data,
+                (CustomizeData*)other->DrawData.CustomizeData.Data))
         {
             id = ActorIdentifier.Invalid;
             return false;
@@ -260,7 +263,7 @@ public sealed partial class ActorManager : IDisposable
         return true;
     }
 
-    private unsafe ActorIdentifier SearchPlayersCustomize(Character* gameObject, int idx1, int idx2, int idx3)
+    private unsafe ActorIdentifier SearchPlayersCustomize(Character* gameObject, ObjectIndex idx1, ObjectIndex idx2, ObjectIndex idx3)
         => SearchPlayerCustomize(gameObject,  idx1, out var ret)
          || SearchPlayerCustomize(gameObject, idx2, out ret)
          || SearchPlayerCustomize(gameObject, idx3, out ret)
@@ -277,7 +280,7 @@ public sealed partial class ActorManager : IDisposable
             return equals;
         }
 
-        for (var i = 0; i < (int)ScreenActor.CutsceneStart; i += 2)
+        for (var i = 0; i < ObjectIndex.CutsceneStart.Index; i += 2)
         {
             var obj = (GameObject*)_objects.GetObjectAddress(i);
             if (obj != null
@@ -384,7 +387,7 @@ public sealed partial class ActorManager : IDisposable
     private static unsafe ushort InspectWorldId
         => *_inspectWorldId;
 
-    public static readonly IReadOnlySet<uint> MannequinIds = new HashSet<uint>()
+    public static readonly IReadOnlySet<EnpcId> MannequinIds = new HashSet<EnpcId>()
     {
         1026228u,
         1026229u,

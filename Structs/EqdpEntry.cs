@@ -51,7 +51,7 @@ public enum EqdpEntry : ushort
 
 public static class Eqdp
 {
-    public static int Offset( EquipSlot slot )
+    public static int Offset(EquipSlot slot)
         => slot switch
         {
             EquipSlot.Head    => 0,
@@ -67,40 +67,36 @@ public static class Eqdp
             _                 => throw new InvalidEnumArgumentException(),
         };
 
-    public static (bool, bool) ToBits( this EqdpEntry entry, EquipSlot slot )
+    public static (bool, bool) ToBits(this EqdpEntry entry, EquipSlot slot)
         => slot switch
         {
-            EquipSlot.Head    => ( entry.HasFlag( EqdpEntry.Head1 ), entry.HasFlag( EqdpEntry.Head2 ) ),
-            EquipSlot.Body    => ( entry.HasFlag( EqdpEntry.Body1 ), entry.HasFlag( EqdpEntry.Body2 ) ),
-            EquipSlot.Hands   => ( entry.HasFlag( EqdpEntry.Hands1 ), entry.HasFlag( EqdpEntry.Hands2 ) ),
-            EquipSlot.Legs    => ( entry.HasFlag( EqdpEntry.Legs1 ), entry.HasFlag( EqdpEntry.Legs2 ) ),
-            EquipSlot.Feet    => ( entry.HasFlag( EqdpEntry.Feet1 ), entry.HasFlag( EqdpEntry.Feet2 ) ),
-            EquipSlot.Ears    => ( entry.HasFlag( EqdpEntry.Ears1 ), entry.HasFlag( EqdpEntry.Ears2 ) ),
-            EquipSlot.Neck    => ( entry.HasFlag( EqdpEntry.Neck1 ), entry.HasFlag( EqdpEntry.Neck2 ) ),
-            EquipSlot.Wrists  => ( entry.HasFlag( EqdpEntry.Wrists1 ), entry.HasFlag( EqdpEntry.Wrists2 ) ),
-            EquipSlot.RFinger => ( entry.HasFlag( EqdpEntry.RingR1 ), entry.HasFlag( EqdpEntry.RingR2 ) ),
-            EquipSlot.LFinger => ( entry.HasFlag( EqdpEntry.RingL1 ), entry.HasFlag( EqdpEntry.RingL2 ) ),
+            EquipSlot.Head    => (entry.HasFlag(EqdpEntry.Head1), entry.HasFlag(EqdpEntry.Head2)),
+            EquipSlot.Body    => (entry.HasFlag(EqdpEntry.Body1), entry.HasFlag(EqdpEntry.Body2)),
+            EquipSlot.Hands   => (entry.HasFlag(EqdpEntry.Hands1), entry.HasFlag(EqdpEntry.Hands2)),
+            EquipSlot.Legs    => (entry.HasFlag(EqdpEntry.Legs1), entry.HasFlag(EqdpEntry.Legs2)),
+            EquipSlot.Feet    => (entry.HasFlag(EqdpEntry.Feet1), entry.HasFlag(EqdpEntry.Feet2)),
+            EquipSlot.Ears    => (entry.HasFlag(EqdpEntry.Ears1), entry.HasFlag(EqdpEntry.Ears2)),
+            EquipSlot.Neck    => (entry.HasFlag(EqdpEntry.Neck1), entry.HasFlag(EqdpEntry.Neck2)),
+            EquipSlot.Wrists  => (entry.HasFlag(EqdpEntry.Wrists1), entry.HasFlag(EqdpEntry.Wrists2)),
+            EquipSlot.RFinger => (entry.HasFlag(EqdpEntry.RingR1), entry.HasFlag(EqdpEntry.RingR2)),
+            EquipSlot.LFinger => (entry.HasFlag(EqdpEntry.RingL1), entry.HasFlag(EqdpEntry.RingL2)),
             _                 => throw new InvalidEnumArgumentException(),
         };
 
-    public static EqdpEntry FromSlotAndBits( EquipSlot slot, bool bit1, bool bit2 )
+    public static EqdpEntry FromSlotAndBits(EquipSlot slot, bool bit1, bool bit2)
     {
         EqdpEntry ret    = 0;
-        var       offset = Offset( slot );
-        if( bit1 )
-        {
-            ret |= ( EqdpEntry )( 1 << offset );
-        }
+        var       offset = Offset(slot);
+        if (bit1)
+            ret |= (EqdpEntry)(1 << offset);
 
-        if( bit2 )
-        {
-            ret |= ( EqdpEntry )( 1 << ( offset + 1 ) );
-        }
+        if (bit2)
+            ret |= (EqdpEntry)(1 << (offset + 1));
 
         return ret;
     }
 
-    public static EqdpEntry Mask( EquipSlot slot )
+    public static EqdpEntry Mask(EquipSlot slot)
     {
         return slot switch
         {

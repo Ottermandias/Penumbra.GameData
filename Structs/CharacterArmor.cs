@@ -15,12 +15,12 @@ public struct CharacterArmor : IEquatable<CharacterArmor>
     public SetId Set;
 
     [FieldOffset(2)]
-    public byte Variant;
+    public Variant Variant;
 
     [FieldOffset(3)]
     public StainId Stain;
 
-    public CharacterArmor(SetId set, byte variant, StainId stain)
+    public CharacterArmor(SetId set, Variant variant, StainId stain)
     {
         Value   = 0;
         Set     = set;

@@ -4,6 +4,7 @@ using System.Linq;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Newtonsoft.Json.Linq;
+using Penumbra.GameData.Structs;
 using Penumbra.String;
 using Character = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
@@ -47,7 +48,7 @@ public partial class ActorManager
             }
             case IdentifierType.Special:
             {
-                var special = data[nameof(ActorIdentifier.Special)]?.ToObject<ScreenActor>() ?? 0;
+                var special = data["Special"]?.ToObject<ScreenActor>() ?? 0;
                 return CreateSpecial(special);
             }
             case IdentifierType.Npc:
@@ -74,7 +75,7 @@ public partial class ActorManager
     {
         return id.Type switch
         {
-            IdentifierType.Player => id.HomeWorld != _clientState.LocalPlayer?.HomeWorld.Id
+            IdentifierType.Player => id.HomeWorld.Id != _clientState.LocalPlayer?.HomeWorld.Id
                 ? $"{id.PlayerName} ({Data.ToWorldName(id.HomeWorld)})"
                 : id.PlayerName.ToString(),
             IdentifierType.Retainer => $"{id.PlayerName}{id.Retainer switch
@@ -83,10 +84,10 @@ public partial class ActorManager
                 ActorIdentifier.RetainerType.Mannequin => " (Mannequin)",
                 _                                      => " (Retainer)",
             }}",
-            IdentifierType.Owned => id.HomeWorld != _clientState.LocalPlayer?.HomeWorld.Id
+            IdentifierType.Owned => id.HomeWorld.Id != _clientState.LocalPlayer?.HomeWorld.Id
                 ? $"{id.PlayerName} ({Data.ToWorldName(id.HomeWorld)})'s {Data.ToName(id.Kind, id.DataId)}"
                 : $"{id.PlayerName}s {Data.ToName(id.Kind,                                     id.DataId)}",
-            IdentifierType.Special => id.Special.ToName(),
+            IdentifierType.Special => ((ScreenActor)id.Index.Index).ToName(),
             IdentifierType.Npc =>
                 id.Index == ushort.MaxValue
                     ? Data.ToName(id.Kind, id.DataId)
@@ -108,7 +109,7 @@ public partial class ActorManager
             IdentifierType.Player    => id.PlayerName.ToString(),
             IdentifierType.Retainer  => id.PlayerName.ToString(),
             IdentifierType.Owned     => $"{id.PlayerName}s {Data.ToName(id.Kind, id.DataId)}",
-            IdentifierType.Special   => id.Special.ToName(),
+            IdentifierType.Special   => ((ScreenActor)id.Index.Index).ToName(),
             IdentifierType.Npc       => Data.ToName(id.Kind, id.DataId),
             IdentifierType.UnkObject => id.PlayerName.IsEmpty ? id.PlayerName.ToString() : "Unknown Object",
             _                        => "Invalid",
@@ -149,11 +150,11 @@ public partial class ActorManager
 
         IdentifierType type;
         var            playerName = ByteString.Empty;
-        ushort         worldId    = 0;
+        WorldId        worldId    = 0;
         var            kind       = ObjectKind.Player;
-        var            objectId   = 0u;
+        NpcId          objectId   = 0u;
 
-        (ByteString, ushort) ParsePlayer(string player)
+        (ByteString, WorldId) ParsePlayer(string player)
         {
             var parts = player.Split('@', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             if (!VerifyPlayerName(parts[0]))
@@ -173,8 +174,8 @@ public partial class ActorManager
 
         (ObjectKind, uint) ParseNpc(string npc)
         {
-            var split = npc.Split(':', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            if (split.Length != 2)
+            var split2 = npc.Split(':', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (split2.Length != 2)
                 throw new IdentifierParseError("NPCs need to be specified by '[Object Type]:[NPC Name]'.");
 
             static bool FindDataId(string name, IReadOnlyDictionary<uint, string> data, out uint dataId)
@@ -185,42 +186,42 @@ public partial class ActorManager
                 return kvp.Value.Length > 0;
             }
 
-            switch (split[0].ToLowerInvariant())
+            switch (split2[0].ToLowerInvariant())
             {
                 case "m":
                 case "mount":
-                    return FindDataId(split[1], Data.Mounts, out var id)
+                    return FindDataId(split2[1], Data.Mounts, out var id)
                         ? (ObjectKind.MountType, id)
-                        : throw new IdentifierParseError($"Could not identify a Mount named {split[1]}.");
+                        : throw new IdentifierParseError($"Could not identify a Mount named {split2[1]}.");
                 case "c":
                 case "companion":
                 case "minion":
                 case "mini":
-                    return FindDataId(split[1], Data.Companions, out id)
+                    return FindDataId(split2[1], Data.Companions, out id)
                         ? (ObjectKind.Companion, id)
-                        : throw new IdentifierParseError($"Could not identify a Minion named {split[1]}.");
+                        : throw new IdentifierParseError($"Could not identify a Minion named {split2[1]}.");
                 case "a":
                 case "o":
                 case "accessory":
                 case "ornament":
-                    return FindDataId(split[1], Data.Ornaments, out id)
+                    return FindDataId(split2[1], Data.Ornaments, out id)
                         ? (ObjectKind.Ornament, id)
-                        : throw new IdentifierParseError($"Could not identify an Accessory named {split[1]}.");
+                        : throw new IdentifierParseError($"Could not identify an Accessory named {split2[1]}.");
                 case "e":
                 case "enpc":
                 case "eventnpc":
                 case "event npc":
-                    return FindDataId(split[1], Data.ENpcs, out id)
+                    return FindDataId(split2[1], Data.ENpcs, out id)
                         ? (ObjectKind.EventNpc, id)
-                        : throw new IdentifierParseError($"Could not identify an Event NPC named {split[1]}.");
+                        : throw new IdentifierParseError($"Could not identify an Event NPC named {split2[1]}.");
                 case "b":
                 case "bnpc":
                 case "battlenpc":
                 case "battle npc":
-                    return FindDataId(split[1], Data.BNpcs, out id)
+                    return FindDataId(split2[1], Data.BNpcs, out id)
                         ? (ObjectKind.BattleNpc, id)
-                        : throw new IdentifierParseError($"Could not identify a Battle NPC named {split[1]}.");
-                default: throw new IdentifierParseError($"The argument {split[0]} is not a valid NPC Type.");
+                        : throw new IdentifierParseError($"Could not identify a Battle NPC named {split2[1]}.");
+                default: throw new IdentifierParseError($"The argument {split2[0]} is not a valid NPC Type.");
             }
         }
 
@@ -260,7 +261,7 @@ public partial class ActorManager
                     $"{split[0]} is not a valid identifier type. Valid types are [P]layer, [R]etainer, [N]PC, or [O]wned");
         }
 
-        return CreateIndividualUnchecked(type, playerName, worldId, kind, objectId);
+        return CreateIndividualUnchecked(type, playerName, worldId.Id, kind, objectId);
     }
 
     /// <summary>
@@ -274,9 +275,9 @@ public partial class ActorManager
             return ActorIdentifier.Invalid;
 
         actor = HandleCutscene(actor);
-        var idx = actor->ObjectIndex;
-        if (idx is >= (ushort)ScreenActor.CharacterScreen and <= (ushort)ScreenActor.Card8)
-            return CreateIndividualUnchecked(IdentifierType.Special, ByteString.Empty, idx, ObjectKind.None, uint.MaxValue);
+        ObjectIndex idx = actor->ObjectIndex;
+        if (idx.Index is >= (ushort)ScreenActor.CharacterScreen and <= (ushort)ScreenActor.Card8)
+            return CreateIndividualUnchecked(IdentifierType.Special, ByteString.Empty, idx.Index, ObjectKind.None, uint.MaxValue);
 
         var kind = (ObjectKind)actor->ObjectKind;
         switch (kind)
@@ -391,7 +392,7 @@ public partial class ActorManager
     /// <summary>
     /// Obtain the current companion ID for an object by its actor and owner.
     /// </summary>
-    private unsafe uint GetCompanionId(FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* actor,
+    private unsafe NpcId GetCompanionId(FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* actor,
         Character* owner)
     {
         return (ObjectKind)actor->ObjectKind switch
@@ -411,25 +412,26 @@ public partial class ActorManager
     public unsafe ActorIdentifier FromObject(GameObject? actor, bool allowPlayerNpc, bool check, bool withoutIndex)
         => FromObject(actor, out _, allowPlayerNpc, check, withoutIndex);
 
-    public ActorIdentifier CreateIndividual(IdentifierType type, ByteString name, ushort homeWorld, ObjectKind kind, uint dataId)
+    /// <summary> value can be WorldId, ScreenActor, ObjectIndex or RetainerType. </summary>
+    public ActorIdentifier CreateIndividual(IdentifierType type, ByteString name, ushort value, ObjectKind kind, NpcId dataId)
         => type switch
         {
-            IdentifierType.Player    => CreatePlayer(name, homeWorld),
-            IdentifierType.Retainer  => CreateRetainer(name, (ActorIdentifier.RetainerType)homeWorld),
-            IdentifierType.Owned     => CreateOwned(name, homeWorld, kind, dataId),
-            IdentifierType.Special   => CreateSpecial((ScreenActor)homeWorld),
-            IdentifierType.Npc       => CreateNpc(kind, dataId, homeWorld),
-            IdentifierType.UnkObject => CreateIndividualUnchecked(IdentifierType.UnkObject, name, homeWorld, ObjectKind.None, 0),
+            IdentifierType.Player    => CreatePlayer(name, value),
+            IdentifierType.Retainer  => CreateRetainer(name, (ActorIdentifier.RetainerType)value),
+            IdentifierType.Owned     => CreateOwned(name, value, kind, dataId),
+            IdentifierType.Special   => CreateSpecial((ScreenActor)value),
+            IdentifierType.Npc       => CreateNpc(kind, dataId, value),
+            IdentifierType.UnkObject => CreateIndividualUnchecked(IdentifierType.UnkObject, name, value, ObjectKind.None, 0),
             _                        => ActorIdentifier.Invalid,
         };
 
     /// <summary>
     /// Only use this if you are sure the input is valid.
     /// </summary>
-    public ActorIdentifier CreateIndividualUnchecked(IdentifierType type, ByteString name, ushort homeWorld, ObjectKind kind, uint dataId)
-        => new(type, kind, homeWorld, dataId, name);
+    public ActorIdentifier CreateIndividualUnchecked(IdentifierType type, ByteString name, ushort value, ObjectKind kind, NpcId dataId)
+        => new(type, kind, (ObjectIndex)value, dataId, name);
 
-    public ActorIdentifier CreatePlayer(ByteString name, ushort homeWorld)
+    public ActorIdentifier CreatePlayer(ByteString name, WorldId homeWorld)
     {
         if (!VerifyWorld(homeWorld) || !VerifyPlayerName(name.Span))
             return ActorIdentifier.Invalid;
@@ -442,7 +444,7 @@ public partial class ActorManager
         if (!VerifyRetainerName(name.Span))
             return ActorIdentifier.Invalid;
 
-        return new ActorIdentifier(IdentifierType.Retainer, ObjectKind.Retainer, (ushort)type, 0, name);
+        return new ActorIdentifier(IdentifierType.Retainer, ObjectKind.Retainer, type, 0, name);
     }
 
     public ActorIdentifier CreateSpecial(ScreenActor actor)
@@ -450,10 +452,13 @@ public partial class ActorManager
         if (!VerifySpecial(actor))
             return ActorIdentifier.Invalid;
 
-        return new ActorIdentifier(IdentifierType.Special, ObjectKind.Player, (ushort)actor, 0, ByteString.Empty);
+        return new ActorIdentifier(IdentifierType.Special, ObjectKind.Player, (ObjectIndex)(uint)actor, 0, ByteString.Empty);
     }
 
-    public ActorIdentifier CreateNpc(ObjectKind kind, uint data, ushort index = ushort.MaxValue)
+    public ActorIdentifier CreateNpc(ObjectKind kind, NpcId data)
+        => CreateNpc(kind, data, ObjectIndex.AnyIndex);
+
+    public ActorIdentifier CreateNpc(ObjectKind kind, NpcId data, ObjectIndex index)
     {
         if (!VerifyIndex(index) || !VerifyNpcData(kind, data))
             return ActorIdentifier.Invalid;
@@ -461,7 +466,7 @@ public partial class ActorManager
         return new ActorIdentifier(IdentifierType.Npc, kind, index, data, ByteString.Empty);
     }
 
-    public ActorIdentifier CreateOwned(ByteString ownerName, ushort homeWorld, ObjectKind kind, uint dataId)
+    public ActorIdentifier CreateOwned(ByteString ownerName, WorldId homeWorld, ObjectKind kind, NpcId dataId)
     {
         if (!VerifyWorld(homeWorld) || !VerifyPlayerName(ownerName.Span) || !VerifyOwnedData(kind, dataId))
             return ActorIdentifier.Invalid;
@@ -568,46 +573,47 @@ public partial class ActorManager
     }
 
     /// <summary> Checks if the world is a valid public world or ushort.MaxValue (any world). </summary>
-    public bool VerifyWorld(ushort worldId)
-        => worldId == ushort.MaxValue || Data.Worlds.ContainsKey(worldId);
+    public bool VerifyWorld(WorldId worldId)
+        => worldId == WorldId.AnyWorld || Data.Worlds.ContainsKey(worldId.Id);
 
     /// <summary> Verify that the enum value is a specific actor and return the name if it is. </summary>
     public static bool VerifySpecial(ScreenActor actor)
         => actor is >= ScreenActor.CharacterScreen and <= ScreenActor.Card8;
 
     /// <summary> Verify that the object index is a valid index for an NPC. </summary>
-    public bool VerifyIndex(ushort index)
+    public bool VerifyIndex(ObjectIndex index)
     {
-        return index switch
-        {
-            ushort.MaxValue             => true,
-            < 200                       => index % 2 == 0,
-            > (ushort)ScreenActor.Card8 => index < _objects.Length,
-            _                           => false,
-        };
+        if (index == ObjectIndex.AnyIndex)
+            return true;
+        if (index < ObjectIndex.GPosePlayer)
+            return (index.Index & 1) == 0;
+        if (index > ObjectIndex.Card8)
+            return index.Index < _objects.Length;
+
+        return false;
     }
 
     /// <summary> Verify that the object kind is a valid owned object, and the corresponding data Id. </summary>
-    public bool VerifyOwnedData(ObjectKind kind, uint dataId)
+    public bool VerifyOwnedData(ObjectKind kind, NpcId dataId)
     {
         return kind switch
         {
-            ObjectKind.MountType => Data.Mounts.ContainsKey(dataId),
-            ObjectKind.Companion => Data.Companions.ContainsKey(dataId),
-            ObjectKind.Ornament  => Data.Ornaments.ContainsKey(dataId),
-            ObjectKind.BattleNpc => Data.BNpcs.ContainsKey(dataId),
+            ObjectKind.MountType => Data.Mounts.ContainsKey(dataId.Id),
+            ObjectKind.Companion => Data.Companions.ContainsKey(dataId.Id),
+            ObjectKind.Ornament  => Data.Ornaments.ContainsKey(dataId.Id),
+            ObjectKind.BattleNpc => Data.BNpcs.ContainsKey(dataId.Id),
             _                    => false,
         };
     }
 
-    public bool VerifyNpcData(ObjectKind kind, uint dataId)
+    public bool VerifyNpcData(ObjectKind kind, NpcId dataId)
         => kind switch
         {
-            ObjectKind.MountType => Data.Mounts.ContainsKey(dataId),
-            ObjectKind.Companion => Data.Companions.ContainsKey(dataId),
-            ObjectKind.Ornament  => Data.Ornaments.ContainsKey(dataId),
-            ObjectKind.BattleNpc => Data.BNpcs.ContainsKey(dataId),
-            ObjectKind.EventNpc  => Data.ENpcs.ContainsKey(dataId),
+            ObjectKind.MountType => Data.Mounts.ContainsKey(dataId.Id),
+            ObjectKind.Companion => Data.Companions.ContainsKey(dataId.Id),
+            ObjectKind.Ornament  => Data.Ornaments.ContainsKey(dataId.Id),
+            ObjectKind.BattleNpc => Data.BNpcs.ContainsKey(dataId.Id),
+            ObjectKind.EventNpc  => Data.ENpcs.ContainsKey(dataId.Id),
             _                    => false,
         };
 }

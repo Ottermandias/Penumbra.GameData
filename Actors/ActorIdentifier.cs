@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Newtonsoft.Json.Linq;
+using Penumbra.GameData.Structs;
 using Penumbra.String;
 
 namespace Penumbra.GameData.Actors;
@@ -13,7 +13,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
 {
     public static ActorManager? Manager;
 
-    public static readonly ActorIdentifier Invalid = new(IdentifierType.Invalid, 0, 0, 0, ByteString.Empty);
+    public static readonly ActorIdentifier Invalid = new(IdentifierType.Invalid, 0, WorldId.AnyWorld, 0, ByteString.Empty);
 
     public enum RetainerType : ushort
     {
@@ -25,11 +25,10 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
     // @formatter:off
     [FieldOffset( 0 )] public readonly IdentifierType Type;       // All
     [FieldOffset( 1 )] public readonly ObjectKind     Kind;       // Npc, Owned
-    [FieldOffset( 2 )] public readonly ushort         HomeWorld;  // Player, Owned
-    [FieldOffset( 2 )] public readonly ushort         Index;      // NPC
+    [FieldOffset( 2 )] public readonly WorldId        HomeWorld;  // Player, Owned
+    [FieldOffset( 2 )] public readonly ObjectIndex    Index;      // NPC, Special
     [FieldOffset( 2 )] public readonly RetainerType   Retainer;   // Retainer
-    [FieldOffset( 2 )] public readonly ScreenActor    Special;    // Special
-    [FieldOffset( 4 )] public readonly uint           DataId;     // Owned, NPC
+    [FieldOffset( 4 )] public readonly NpcId          DataId;     // Owned, NPC
     [FieldOffset( 8 )] public readonly ByteString     PlayerName; // Player, Owned
     // @formatter:on
 
@@ -47,7 +46,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
             IdentifierType.Retainer => (Retainer == other.Retainer || Retainer == RetainerType.Both || other.Retainer == RetainerType.Both)
              && PlayerName.EqualsCi(other.PlayerName),
             IdentifierType.Owned => HomeWorld == other.HomeWorld && PlayerName.EqualsCi(other.PlayerName) && Manager.DataIdEquals(this, other),
-            IdentifierType.Special => Special == other.Special,
+            IdentifierType.Special => Index == other.Index,
             IdentifierType.Npc => Manager.DataIdEquals(this, other)
              && (Index == other.Index || Index == ushort.MaxValue || other.Index == ushort.MaxValue),
             IdentifierType.UnkObject => PlayerName.EqualsCi(other.PlayerName) && Index == other.Index,
@@ -104,7 +103,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                         _                      => " (Retainer)",
                     }}",
                 IdentifierType.Owned   => $"{PlayerName}s {Kind.ToName()} {DataId} ({HomeWorld})",
-                IdentifierType.Special => Special.ToName(),
+                IdentifierType.Special => ((ScreenActor) Index.Index).ToName(),
                 IdentifierType.Npc =>
                     Index == ushort.MaxValue
                         ? $"{Kind.ToName()} #{DataId}"
@@ -124,18 +123,41 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
             IdentifierType.Player    => HashCode.Combine(IdentifierType.Player,    PlayerName, HomeWorld),
             IdentifierType.Retainer  => HashCode.Combine(IdentifierType.Player,    PlayerName),
             IdentifierType.Owned     => HashCode.Combine(IdentifierType.Owned,     Kind, PlayerName, HomeWorld, DataId),
-            IdentifierType.Special   => HashCode.Combine(IdentifierType.Special,   Special),
+            IdentifierType.Special   => HashCode.Combine(IdentifierType.Special,   Index),
             IdentifierType.Npc       => HashCode.Combine(IdentifierType.Npc,       Kind,       DataId),
             IdentifierType.UnkObject => HashCode.Combine(IdentifierType.UnkObject, PlayerName, Index),
             _                        => 0,
         };
 
-    internal ActorIdentifier(IdentifierType type, ObjectKind kind, ushort index, uint data, ByteString playerName)
+    internal ActorIdentifier(IdentifierType type, ObjectKind kind, ObjectIndex index, NpcId data, ByteString playerName)
     {
         Type       = type;
         Kind       = kind;
-        Special    = (ScreenActor)index;
-        HomeWorld  = Index = index;
+        Retainer   = RetainerType.Both;
+        HomeWorld  = WorldId.AnyWorld;
+        Index      = index;
+        DataId     = data;
+        PlayerName = playerName;
+    }
+
+    internal ActorIdentifier(IdentifierType type, ObjectKind kind, WorldId worldId, NpcId data, ByteString playerName)
+    {
+        Type       = type;
+        Kind       = kind;
+        Retainer   = RetainerType.Both;
+        Index      = ObjectIndex.AnyIndex;
+        HomeWorld  = worldId;
+        DataId     = data;
+        PlayerName = playerName;
+    }
+
+    internal ActorIdentifier(IdentifierType type, ObjectKind kind, RetainerType retainerType, NpcId data, ByteString playerName)
+    {
+        Type       = type;
+        Kind       = kind;
+        Index      = ObjectIndex.AnyIndex;
+        HomeWorld  = WorldId.AnyWorld;
+        Retainer   = retainerType;
         DataId     = data;
         PlayerName = playerName;
     }
@@ -147,7 +169,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         {
             case IdentifierType.Player:
                 ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(HomeWorld),  HomeWorld);
+                ret.Add(nameof(HomeWorld),  HomeWorld.Id);
                 return ret;
             case IdentifierType.Retainer:
                 ret.Add(nameof(PlayerName), PlayerName.ToString());
@@ -155,22 +177,22 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                 return ret;
             case IdentifierType.Owned:
                 ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(HomeWorld),  HomeWorld);
+                ret.Add(nameof(HomeWorld),  HomeWorld.Id);
                 ret.Add(nameof(Kind),       Kind.ToString());
-                ret.Add(nameof(DataId),     DataId);
+                ret.Add(nameof(DataId),     DataId.Id);
                 return ret;
             case IdentifierType.Special:
-                ret.Add(nameof(Special), Special.ToString());
+                ret.Add("Special", ((ScreenActor) Index.Index).ToString());
                 return ret;
             case IdentifierType.Npc:
                 ret.Add(nameof(Kind), Kind.ToString());
                 if (Index != ushort.MaxValue)
-                    ret.Add(nameof(Index), Index);
-                ret.Add(nameof(DataId), DataId);
+                    ret.Add(nameof(Index), Index.Index);
+                ret.Add(nameof(DataId), DataId.Id);
                 return ret;
             case IdentifierType.UnkObject:
                 ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(Index),      Index);
+                ret.Add(nameof(Index),      Index.Index);
                 return ret;
         }
 
@@ -201,8 +223,8 @@ public static class ActorManagerExtensions
             _                    => new Dictionary<uint, string>(),
         };
 
-        return dict.TryGetValue(lhs.DataId, out var lhsName)
-         && dict.TryGetValue(rhs.DataId,    out var rhsName)
+        return dict.TryGetValue(lhs.DataId.Id, out var lhsName)
+         && dict.TryGetValue(rhs.DataId.Id,    out var rhsName)
          && lhsName.Equals(rhsName, StringComparison.OrdinalIgnoreCase);
     }
 
