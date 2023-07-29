@@ -331,8 +331,10 @@ public readonly record struct ItemId(uint Id) : IComparisonOperators<ItemId, Ite
 [JsonConverter(typeof(Converter))]
 public readonly record struct CustomItemId(ulong Id) : IComparisonOperators<CustomItemId, CustomItemId, bool>
 {
+    private const ulong CustomFlag = 1ul << 48;
+
     public bool IsItem
-        => Id < uint.MaxValue / 2;
+        => Id < CustomFlag;
 
     public ItemId Item
         => IsItem ? (ItemId)Id : 0;
@@ -341,7 +343,7 @@ public readonly record struct CustomItemId(ulong Id) : IComparisonOperators<Cust
         => IsItem ? (0, 0, 0, FullEquipType.Unknown) : ((SetId)Id, (WeaponType)(Id >> 16), (Variant)(Id >> 32), (FullEquipType)(Id >> 40));
 
     public CustomItemId(SetId model, WeaponType weaponType, Variant variant, FullEquipType type)
-        : this(model.Id | ((ulong)weaponType.Id << 16) | ((ulong)variant.Id << 32) | ((ulong)type << 40) | (1ul << 48))
+        : this(model.Id | ((ulong)weaponType.Id << 16) | ((ulong)variant.Id << 32) | ((ulong)type << 40) | CustomFlag)
     { }
 
     public static implicit operator CustomItemId(ItemId id)
