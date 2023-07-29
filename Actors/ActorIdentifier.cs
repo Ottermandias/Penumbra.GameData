@@ -35,6 +35,9 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
     public ActorIdentifier CreatePermanent()
         => new(Type, Kind, Index, DataId, PlayerName.IsEmpty || PlayerName.IsOwned ? PlayerName : PlayerName.Clone());
 
+    public ScreenActor Special
+        => (ScreenActor)Index.Index;
+
     public bool Equals(ActorIdentifier other)
     {
         if (Type != other.Type)
@@ -103,7 +106,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                         _                      => " (Retainer)",
                     }}",
                 IdentifierType.Owned   => $"{PlayerName}s {Kind.ToName()} {DataId} ({HomeWorld})",
-                IdentifierType.Special => ((ScreenActor) Index.Index).ToName(),
+                IdentifierType.Special => ((ScreenActor)Index.Index).ToName(),
                 IdentifierType.Npc =>
                     Index == ushort.MaxValue
                         ? $"{Kind.ToName()} #{DataId}"
@@ -182,7 +185,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                 ret.Add(nameof(DataId),     DataId.Id);
                 return ret;
             case IdentifierType.Special:
-                ret.Add("Special", ((ScreenActor) Index.Index).ToString());
+                ret.Add("Special", ((ScreenActor)Index.Index).ToString());
                 return ret;
             case IdentifierType.Npc:
                 ret.Add(nameof(Kind), Kind.ToString());
