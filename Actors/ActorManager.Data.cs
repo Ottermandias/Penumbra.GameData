@@ -241,11 +241,7 @@ public sealed partial class ActorManager : IDisposable
         if (agent->Data == null)
             return true;
 
-        // TODO use CharacterArray when fixed in CS.
-        var     data          = (byte*) agent->Data;
-        var     characterData = (AgentBannerInterface.Storage.CharacterData*)(data + 0x20);
-        var     characterPtr  = characterData + idx;
-        ref var character     = ref *characterPtr;
+        ref var character = ref agent->Data->CharacterArraySpan[idx];
 
         var name = new ByteString(character.Name1.StringPtr);
         id = CreatePlayer(name, (WorldId)character.WorldId);
