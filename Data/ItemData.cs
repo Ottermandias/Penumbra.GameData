@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Dalamud;
-using Dalamud.Data;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -19,7 +19,7 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
     private readonly IReadOnlyDictionary<uint, PseudoEquipItem>    _gauntlets;
     private readonly IReadOnlyList<IReadOnlyList<PseudoEquipItem>> _byType;
 
-    private static IReadOnlyList<IReadOnlyList<PseudoEquipItem>> CreateItems(DataManager dataManager, ClientLanguage language)
+    private static IReadOnlyList<IReadOnlyList<PseudoEquipItem>> CreateItems(IDataManager dataManager, ClientLanguage language)
     {
         var tmp = Enum.GetValues<FullEquipType>().Select(_ => new List<EquipItem>(1024)).ToArray();
 
@@ -97,7 +97,7 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
         return dict;
     }
 
-    public ItemData(DalamudPluginInterface pluginInterface, DataManager dataManager, ClientLanguage language)
+    public ItemData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language)
         : base(pluginInterface, language, 4)
     {
         _byType                  = TryCatchData("ItemList",     () => CreateItems(dataManager, language));

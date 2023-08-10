@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Dalamud;
-using Dalamud.Data;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -15,13 +15,13 @@ public static class GameData
     /// <summary>
     /// Obtain an object identifier that can link a game path to game objects that use it, using your client language.
     /// </summary>
-    public static IObjectIdentifier GetIdentifier(DalamudPluginInterface pluginInterface, DataManager dataManager, ItemData itemData)
+    public static IObjectIdentifier GetIdentifier(DalamudPluginInterface pluginInterface, IDataManager dataManager, ItemData itemData)
         => new ObjectIdentification(pluginInterface, dataManager, itemData, dataManager.Language);
 
     /// <summary>
     /// Obtain an object identifier that can link a game path to game objects that use it using the given language.
     /// </summary>
-    public static IObjectIdentifier GetIdentifier(DalamudPluginInterface pluginInterface, DataManager dataManager, ItemData itemData,
+    public static IObjectIdentifier GetIdentifier(DalamudPluginInterface pluginInterface, IDataManager dataManager, ItemData itemData,
         ClientLanguage language)
         => new ObjectIdentification(pluginInterface, dataManager, itemData, language);
 

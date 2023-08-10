@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Linq;
 using Dalamud;
-using Dalamud.Data;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Structs;
@@ -16,7 +16,7 @@ public sealed class HumanModelList : DataSharer
 
     private readonly BitArray _humanModels;
 
-    public HumanModelList(DalamudPluginInterface pluginInterface, DataManager gameData)
+    public HumanModelList(DalamudPluginInterface pluginInterface, IDataManager gameData)
         : base(pluginInterface, ClientLanguage.English, CurrentVersion)
     {
         _humanModels = TryCatchData(Tag, () => GetValidHumanModels(gameData));
@@ -36,7 +36,7 @@ public sealed class HumanModelList : DataSharer
     /// <summary>
     /// Go through all ModelChara rows and return a bitfield of those that resolve to human models.
     /// </summary>
-    private static BitArray GetValidHumanModels(DataManager gameData)
+    private static BitArray GetValidHumanModels(IDataManager gameData)
     {
         var sheet = gameData.GetExcelSheet<ModelChara>()!;
         var ret   = new BitArray((int)sheet.RowCount, false);

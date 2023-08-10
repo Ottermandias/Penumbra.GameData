@@ -4,11 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using Dalamud;
-using Dalamud.Data;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.Gui;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
@@ -47,7 +44,7 @@ public sealed partial class ActorManager : IDisposable
         /// <summary> Valid ENPC names in title case by ENPC id. </summary>
         public IReadOnlyDictionary<uint, string> ENpcs { get; }
 
-        public ActorManagerData(DalamudPluginInterface pluginInterface, DataManager gameData, ClientLanguage language)
+        public ActorManagerData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language)
             : base(pluginInterface, language, 3)
         {
             var worldTask      = TryCatchDataAsync("Worlds",     CreateWorldData(gameData));
@@ -115,21 +112,21 @@ public sealed partial class ActorManager : IDisposable
             DisposeTag("ENpcs");
         }
 
-        private Action<Dictionary<ushort, string>> CreateWorldData(DataManager gameData)
+        private Action<Dictionary<ushort, string>> CreateWorldData(IDataManager gameData)
             => d =>
             {
                 foreach (var w in gameData.GetExcelSheet<World>(Language)!.Where(w => w.IsPublic && !w.Name.RawData.IsEmpty))
                     d.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
             };
 
-        private Action<Dictionary<uint, string>> CreateMountData(DataManager gameData)
+        private Action<Dictionary<uint, string>> CreateMountData(IDataManager gameData)
             => d =>
             {
                 foreach (var m in gameData.GetExcelSheet<Mount>(Language)!.Where(m => m.Singular.RawData.Length > 0 && m.Order >= 0))
                     d.TryAdd(m.RowId, ToTitleCaseExtended(m.Singular, m.Article));
             };
 
-        private Action<Dictionary<uint, string>> CreateCompanionData(DataManager gameData)
+        private Action<Dictionary<uint, string>> CreateCompanionData(IDataManager gameData)
             => d =>
             {
                 foreach (var c in gameData.GetExcelSheet<Companion>(Language)!.Where(c
@@ -137,21 +134,21 @@ public sealed partial class ActorManager : IDisposable
                     d.TryAdd(c.RowId, ToTitleCaseExtended(c.Singular, c.Article));
             };
 
-        private Action<Dictionary<uint, string>> CreateOrnamentData(DataManager gameData)
+        private Action<Dictionary<uint, string>> CreateOrnamentData(IDataManager gameData)
             => d =>
             {
                 foreach (var o in gameData.GetExcelSheet<Ornament>(Language)!.Where(o => o.Singular.RawData.Length > 0))
                     d.TryAdd(o.RowId, ToTitleCaseExtended(o.Singular, o.Article));
             };
 
-        private Action<Dictionary<uint, string>> CreateBNpcData(DataManager gameData)
+        private Action<Dictionary<uint, string>> CreateBNpcData(IDataManager gameData)
             => d =>
             {
                 foreach (var n in gameData.GetExcelSheet<BNpcName>(Language)!.Where(n => n.Singular.RawData.Length > 0))
                     d.TryAdd(n.RowId, ToTitleCaseExtended(n.Singular, n.Article));
             };
 
-        private Action<Dictionary<uint, string>> CreateENpcData(DataManager gameData)
+        private Action<Dictionary<uint, string>> CreateENpcData(IDataManager gameData)
             => d =>
             {
                 foreach (var n in gameData.GetExcelSheet<ENpcResident>(Language)!.Where(e => e.Singular.RawData.Length > 0))
@@ -184,15 +181,13 @@ public sealed partial class ActorManager : IDisposable
 
     public readonly ActorManagerData Data;
 
-    public ActorManager(DalamudPluginInterface pluginInterface, ObjectTable objects, ClientState state, Dalamud.Game.Framework framework,
-        DataManager gameData, GameGui gameGui,
-        Func<ushort, short> toParentIdx)
+    public ActorManager(DalamudPluginInterface pluginInterface, IObjectTable objects, IClientState state, Dalamud.Game.Framework framework,
+        IDataManager gameData, IGameGui gameGui, Func<ushort, short> toParentIdx)
         : this(pluginInterface, objects, state, framework, gameData, gameGui, gameData.Language, toParentIdx)
     { }
 
-    public ActorManager(DalamudPluginInterface pluginInterface, ObjectTable objects, ClientState state, Dalamud.Game.Framework framework,
-        DataManager gameData, GameGui gameGui,
-        ClientLanguage language, Func<ushort, short> toParentIdx)
+    public ActorManager(DalamudPluginInterface pluginInterface, IObjectTable objects, IClientState state, Dalamud.Game.Framework framework,
+        IDataManager gameData, IGameGui gameGui, ClientLanguage language, Func<ushort, short> toParentIdx)
     {
         _framework   = framework;
         _objects     = objects;
@@ -366,9 +361,9 @@ public sealed partial class ActorManager : IDisposable
         => Dispose();
 
     private readonly Dalamud.Game.Framework _framework;
-    private readonly ObjectTable            _objects;
-    private readonly ClientState            _clientState;
-    private readonly GameGui                _gameGui;
+    private readonly IObjectTable           _objects;
+    private readonly IClientState           _clientState;
+    private readonly IGameGui               _gameGui;
 
     private readonly Func<ushort, short> _toParentIdx;
 

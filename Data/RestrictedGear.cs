@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dalamud;
-using Dalamud.Data;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
@@ -29,7 +29,7 @@ public sealed class RestrictedGear : DataSharer
     public readonly IReadOnlyDictionary<uint, uint> MaleToFemale;
     public readonly IReadOnlyDictionary<uint, uint> FemaleToMale;
 
-    public RestrictedGear(DalamudPluginInterface pi, ClientLanguage language, DataManager gameData)
+    public RestrictedGear(DalamudPluginInterface pi, ClientLanguage language, IDataManager gameData)
         : base(pi, language, 2)
     {
         _items                                      = gameData.GetExcelSheet<Item>()!;

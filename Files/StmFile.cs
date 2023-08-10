@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using Dalamud.Data;
+using Dalamud.Plugin.Services;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files;
@@ -92,7 +92,7 @@ public partial class StmFile
     /// <summary>
     /// Try to read and parse the default STM file given by Lumina.
     /// </summary>
-    public StmFile(DataManager gameData)
+    public StmFile(IDataManager gameData)
         : this(gameData.GetFile(Path)?.Data ?? Array.Empty<byte>())
     { }
 }

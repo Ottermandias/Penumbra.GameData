@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Dalamud;
-using Dalamud.Data;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
@@ -13,7 +13,7 @@ public sealed class StainData : DataSharer, IReadOnlyDictionary<StainId, Stain>
 {
     public readonly IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> Data;
 
-    public StainData(DalamudPluginInterface pluginInterface, DataManager dataManager, ClientLanguage language)
+    public StainData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language)
         : base(pluginInterface, language, 2)
     {
         Data = TryCatchData("Stains", () => CreateStainData(dataManager));
@@ -22,7 +22,7 @@ public sealed class StainData : DataSharer, IReadOnlyDictionary<StainId, Stain>
     protected override void DisposeInternal()
         => DisposeTag("Stains");
 
-    private IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> CreateStainData(DataManager dataManager)
+    private IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> CreateStainData(IDataManager dataManager)
     {
         var stainSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Stain>(Language)!;
         return stainSheet.Where(s => s.Color != 0 && s.Name.RawData.Length > 0)

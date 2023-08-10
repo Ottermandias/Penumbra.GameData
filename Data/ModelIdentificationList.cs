@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Dalamud;
-using Dalamud.Data;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Structs;
@@ -12,7 +12,7 @@ internal sealed class ModelIdentificationList : KeyList<ModelChara>
 {
     private const string Tag = "ModelIdentification";
 
-    public ModelIdentificationList(DalamudPluginInterface pi, ClientLanguage language, DataManager gameData)
+    public ModelIdentificationList(DalamudPluginInterface pi, ClientLanguage language, IDataManager gameData)
         : base(pi, Tag, language, ObjectIdentification.IdentificationVersion, CreateModelList(gameData, language))
     { }
 
@@ -47,6 +47,6 @@ internal sealed class ModelIdentificationList : KeyList<ModelChara>
     protected override int ValueKeySelector(ModelChara data)
         => (int)data.RowId;
 
-    private static IEnumerable<ModelChara> CreateModelList(DataManager gameData, ClientLanguage language)
+    private static IEnumerable<ModelChara> CreateModelList(IDataManager gameData, ClientLanguage language)
         => gameData.GetExcelSheet<ModelChara>(language)!;
 }

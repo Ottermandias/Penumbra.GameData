@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using Dalamud;
-using Dalamud.Data;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -10,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Penumbra.GameData.Actors;
@@ -32,7 +32,7 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
     private readonly WeaponIdentificationList    _weapons;
     private readonly ModelIdentificationList     _modelIdentifierToModelChara;
 
-    public ObjectIdentification(DalamudPluginInterface pluginInterface, DataManager dataManager, ItemData itemData, ClientLanguage language)
+    public ObjectIdentification(DalamudPluginInterface pluginInterface, IDataManager dataManager, ItemData itemData, ClientLanguage language)
         : base(pluginInterface, language, IdentificationVersion)
     {
         _actorData = new ActorManager.ActorManagerData(pluginInterface, dataManager, language);
@@ -99,7 +99,7 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
         DisposeTag("ModelObjects");
     }
 
-    private IReadOnlyDictionary<string, IReadOnlyList<Action>> CreateActionList(DataManager gameData)
+    private IReadOnlyDictionary<string, IReadOnlyList<Action>> CreateActionList(IDataManager gameData)
     {
         var sheet   = gameData.GetExcelSheet<Action>(Language)!;
         var storage = new ConcurrentDictionary<string, ConcurrentBag<Action>>();
@@ -260,7 +260,7 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
     }
 
     private IReadOnlyList<IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>> CreateModelObjects(ActorManager.ActorManagerData actors,
-        DataManager gameData, ClientLanguage language)
+        IDataManager gameData, ClientLanguage language)
     {
         var modelSheet = gameData.GetExcelSheet<ModelChara>(language)!;
         var ret        = new List<ConcurrentBag<(string Name, ObjectKind Kind, uint Id)>>((int)modelSheet.RowCount);
