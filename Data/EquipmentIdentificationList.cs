@@ -68,6 +68,9 @@ internal sealed class EquipmentIdentificationList : KeyList<PseudoEquipItem>
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)9212, (WeaponType)0, 12, FullEquipType.Body,  "Ancient Robes (Lahabrea)"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)9212, (WeaponType)0, 01, FullEquipType.Legs,  "Ancient Legs"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)9212, (WeaponType)0, 01, FullEquipType.Feet,  "Ancient Shoes"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head,  "Long Wedding Veil"),
+
+            (PseudoEquipItem)EquipItem.FromIds(0, 40672, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head,  "Veil of Eternal Innocence (Long)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 40673, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head,  "Veil of Eternal Passion (Long)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 40674, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head,  "Veil of Eternal Devotion (Long)"),
         };
 }
