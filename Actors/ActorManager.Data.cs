@@ -45,7 +45,7 @@ public sealed partial class ActorManager : IDisposable
         public IReadOnlyDictionary<uint, string> ENpcs { get; }
 
         public ActorManagerData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language)
-            : base(pluginInterface, language, 3)
+            : base(pluginInterface, language, 4)
         {
             var worldTask      = TryCatchDataAsync("Worlds",     CreateWorldData(gameData));
             var mountsTask     = TryCatchDataAsync("Mounts",     CreateMountData(gameData));
@@ -122,8 +122,27 @@ public sealed partial class ActorManager : IDisposable
         private Action<Dictionary<uint, string>> CreateMountData(IDataManager gameData)
             => d =>
             {
-                foreach (var m in gameData.GetExcelSheet<Mount>(Language)!.Where(m => m.Singular.RawData.Length > 0 && m.Order >= 0))
-                    d.TryAdd(m.RowId, ToTitleCaseExtended(m.Singular, m.Article));
+                d.TryAdd(119, "Falcon (Porter)");
+                d.TryAdd(295, "Hippo Cart (Quest)");
+                d.TryAdd(296, "Hippo Cart (Quest)");
+                d.TryAdd(298, "Miw Miisv (Quest)");
+                d.TryAdd(309, "Moon-hopper (Quest)");
+                foreach (var m in gameData.GetExcelSheet<Mount>(Language)!)
+                {
+                    if (m.Singular.RawData.Length > 0 && m.Order >= 0)
+                    {
+                        d.TryAdd(m.RowId, ToTitleCaseExtended(m.Singular, m.Article));
+                    }
+                    else if (m.Unknown18.RawData.Length > 0)
+                    {
+                        var whistle = m.Unknown18.ToDalamudString().ToString();
+                        whistle = whistle.Replace("SE_Bt_Etc_", string.Empty)
+                            .Replace("Mount_",  string.Empty)
+                            .Replace("_call",   string.Empty)
+                            .Replace("Whistle", string.Empty);
+                        d.TryAdd(m.RowId, $"? {whistle} #{m.RowId}");
+                    }
+                }
             };
 
         private Action<Dictionary<uint, string>> CreateCompanionData(IDataManager gameData)
