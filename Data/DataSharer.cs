@@ -59,14 +59,15 @@ public abstract class DataSharer : IDisposable
     protected Task<T> TryCatchDataAsync<T>(string tag, Action<T> fill) where T : class, new()
     {
         tag = GetVersionedTag(tag, Language, Version);
-        if (PluginInterface.TryGetData<T>(tag, out var data))
-            return Task.FromResult(data);
-
-        T ret = new();
+        T   ret  = new();
+        var ret2 = PluginInterface.GetOrCreateData(tag, () => ret);
+        if (!ReferenceEquals(ret, ret2))
+            return Task.FromResult(ret2);
+        
         return Task.Run(() =>
         {
-            fill(ret);
-            return ret;
+            fill(ret2);
+            return ret2;
         });
     }
 
