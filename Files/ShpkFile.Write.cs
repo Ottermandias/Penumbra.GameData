@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Penumbra.GameData.Files;
 
@@ -13,6 +15,9 @@ public partial class ShpkFile
         using var stream  = new MemoryStream();
         using var blobs   = new MemoryStream();
         var       strings = new StringPool(ReadOnlySpan<byte>.Empty);
+        var       aliases = new Dictionary<uint, uint>(NodeSelectors);
+        foreach (var node in Nodes)
+            aliases.Remove(node.Selector);
         using (var w = new BinaryWriter(stream))
         {
             w.Write(ShPkMagic);
@@ -38,7 +43,7 @@ public partial class ShpkFile
             w.Write((uint)SceneKeys.Length);
             w.Write((uint)MaterialKeys.Length);
             w.Write((uint)Nodes.Length);
-            w.Write((uint)Items.Length);
+            w.Write((uint)aliases.Count);
 
             WriteShaderArray(w, VertexShaders, blobs, strings);
             WriteShaderArray(w, PixelShaders,  blobs, strings);
@@ -84,7 +89,7 @@ public partial class ShpkFile
                  || node.SubViewKeys.Length != SubViewKeys.Length)
                     throw new InvalidDataException();
 
-                w.Write(node.Id);
+                w.Write(node.Selector);
                 w.Write(node.Passes.Length);
                 w.Write(node.PassIndices);
                 foreach (var key in node.SystemKeys)
@@ -103,10 +108,10 @@ public partial class ShpkFile
                 }
             }
 
-            foreach (var item in Items)
+            foreach (var alias in aliases)
             {
-                w.Write(item.Id);
-                w.Write(item.Node);
+                w.Write(alias.Key);
+                w.Write(alias.Value);
             }
 
             w.Write(AdditionalData);

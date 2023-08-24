@@ -13,24 +13,30 @@ public partial class ShpkFile : IWritable
     private const uint Dx9Magic  = 0x00395844u; // bytes of DX9\0
     private const uint Dx11Magic = 0x31315844u; // bytes of DX11
 
-    public const uint MaterialParamsConstantId = 0x64D12851u;
+    public const uint MaterialParamsConstantId = 0x64D12851u; // g_MaterialParameter is a cbuffer filled from the ad hoc section of the mtrl
+    public const uint TableSamplerId           = 0x2005679Fu; // g_SamplerTable is a texture filled from the mtrl's color set
 
-    public uint            Version;
-    public DxVersion       DirectXVersion;
-    public Shader[]        VertexShaders;
-    public Shader[]        PixelShaders;
-    public uint            MaterialParamsSize;
-    public MaterialParam[] MaterialParams;
-    public Resource[]      Constants;
-    public Resource[]      Samplers;
-    public Resource[]      Uavs;
-    public Key[]           SystemKeys;
-    public Key[]           SceneKeys;
-    public Key[]           MaterialKeys;
-    public Key[]           SubViewKeys;
-    public Node[]          Nodes;
-    public Item[]          Items;
-    public byte[]          AdditionalData;
+    public const uint SelectorMultiplier        = 31;
+    public const uint SelectorInverseMultiplier = 3186588639; // 31 * 3186588639 = 23 << 32 + 1, iow they're modular inverses
+
+    public readonly bool Disassembled;
+
+    public uint                   Version;
+    public DxVersion              DirectXVersion;
+    public Shader[]               VertexShaders;
+    public Shader[]               PixelShaders;
+    public uint                   MaterialParamsSize;
+    public MaterialParam[]        MaterialParams;
+    public Resource[]             Constants;
+    public Resource[]             Samplers;
+    public Resource[]             Uavs;
+    public Key[]                  SystemKeys;
+    public Key[]                  SceneKeys;
+    public Key[]                  MaterialKeys;
+    public Key[]                  SubViewKeys;
+    public Node[]                 Nodes;
+    public Dictionary<uint, uint> NodeSelectors;
+    public byte[]                 AdditionalData;
 
     public  bool Valid { get; private set; }
     private bool _changed;
@@ -65,14 +71,18 @@ public partial class ShpkFile : IWritable
     public Key? GetMaterialKeyById(uint id)
         => MaterialKeys.FirstOrNull(k => k.Id == id);
 
-    public Node? GetNodeById(uint id)
-        => Nodes.FirstOrNull(n => n.Id == id);
+    public Node? GetNodeBySelector(uint selector)
+    {
+        if (NodeSelectors.TryGetValue(selector, out var index) && index < Nodes.Length)
+            return Nodes[index];
 
-    public Item? GetItemById(uint id)
-        => Items.FirstOrNull(i => i.Id == id);
+        return null;
+    }
 
     public ShpkFile(byte[] data, bool disassemble = false)
     {
+        Disassembled = disassemble;
+
         using var stream = new MemoryStream(data);
         using var r      = new BinaryReader(stream);
 
@@ -102,7 +112,7 @@ public partial class ShpkFile : IWritable
         var sceneKeyCount      = r.ReadUInt32();
         var materialKeyCount   = r.ReadUInt32();
         var nodeCount          = r.ReadUInt32();
-        var itemCount          = r.ReadUInt32();
+        var nodeAliasCount     = r.ReadUInt32();
 
         var blobs   = new ReadOnlySpan<byte>(data, (int)blobsOffset, (int)(stringsOffset - blobsOffset));
         var strings = new StringPool(new ReadOnlySpan<byte>(data, (int)stringsOffset, (int)(data.Length - stringsOffset)));
@@ -142,7 +152,12 @@ public partial class ShpkFile : IWritable
         };
 
         Nodes = ReadNodeArray(r, (int)nodeCount, SystemKeys.Length, SceneKeys.Length, MaterialKeys.Length, SubViewKeys.Length);
-        Items = r.ReadStructuresAsArray<Item>((int)itemCount);
+
+        NodeSelectors = new(Nodes.Length + (int)nodeAliasCount);
+        for (var i = 0; i < Nodes.Length; ++i)
+            NodeSelectors.TryAdd(Nodes[i].Selector, (uint)i);
+        foreach (var alias in r.ReadStructuresAsArray<NodeAlias>((int)nodeAliasCount))
+            NodeSelectors.TryAdd(alias.Selector, alias.Node);
 
         AdditionalData = r.ReadBytes((int)(blobsOffset - r.BaseStream.Position)); // This should be empty, but just in case.
 
@@ -286,7 +301,10 @@ public partial class ShpkFile : IWritable
         static void CopyValues(Key[] keys, HashSet<uint>[] valueSets)
         {
             for (var i = 0; i < keys.Length; ++i)
+            {
                 keys[i].Values = valueSets[i].ToArray();
+                Array.Sort(keys[i].Values);
+            }
         }
 
         var systemKeyValues   = InitializeValueSet(SystemKeys);
@@ -305,6 +323,75 @@ public partial class ShpkFile : IWritable
         CopyValues(SceneKeys,    sceneKeyValues);
         CopyValues(MaterialKeys, materialKeyValues);
         CopyValues(SubViewKeys,  subViewKeyValues);
+    }
+
+    public static uint BuildSelector(Span<uint> systemKeys, Span<uint> sceneKeys, Span<uint> materialKeys, Span<uint> subViewKeys)
+        => BuildSelector(BuildSelector(systemKeys), BuildSelector(sceneKeys), BuildSelector(materialKeys), BuildSelector(subViewKeys));
+
+    public static uint BuildSelector(uint systemKeySelector, uint sceneKeySelector, uint materialKeySelector, uint subViewKeySelector)
+    {
+        Span<uint> parts = stackalloc uint[4];
+        parts[0] = systemKeySelector;
+        parts[1] = sceneKeySelector;
+        parts[2] = materialKeySelector;
+        parts[3] = subViewKeySelector;
+        return BuildSelector(parts);
+    }
+
+    public static uint BuildSelector(Span<uint> keys)
+    {
+        unchecked
+        {
+            var selector = 0u;
+            var multiplier = 1u;
+            foreach (var key in keys)
+            {
+                selector += key * multiplier;
+                multiplier *= SelectorMultiplier;
+            }
+
+            return selector;
+        }
+    }
+
+    public static uint BuildSelector(IEnumerable<uint> keys)
+    {
+        unchecked
+        {
+            var selector = 0u;
+            var multiplier = 1u;
+            foreach (var key in keys)
+            {
+                selector += key * multiplier;
+                multiplier *= SelectorMultiplier;
+            }
+
+            return selector;
+        }
+    }
+
+    public static IEnumerable<uint> AllSelectors(Memory<Key> keys)
+    {
+        if (keys.Length == 0)
+        {
+            yield return 0;
+            yield break;
+        }
+        else if (keys.Length == 1)
+        {
+            foreach (var value in keys.Span[0].Values)
+                yield return value;
+        }
+        else
+        {
+            var values = keys.Span[0].Values;
+            foreach (var selector in AllSelectors(keys[1..]))
+            {
+                var multiplied = unchecked(selector * SelectorMultiplier);
+                foreach (var value in values)
+                    yield return unchecked(value + multiplied);
+            }
+        }
     }
 
     public void SetInvalid()
@@ -413,11 +500,11 @@ public partial class ShpkFile : IWritable
         var ret = new Node[count];
         for (var i = 0; i < count; ++i)
         {
-            var id        = r.ReadUInt32();
+            var selector  = r.ReadUInt32();
             var passCount = r.ReadUInt32();
             ret[i] = new Node
             {
-                Id           = id,
+                Selector     = selector,
                 PassIndices  = r.ReadBytes(16),
                 SystemKeys   = r.ReadStructuresAsArray<uint>(systemKeyCount),
                 SceneKeys    = r.ReadStructuresAsArray<uint>(sceneKeyCount),
@@ -469,7 +556,7 @@ public partial class ShpkFile : IWritable
 
     public struct Node
     {
-        public uint   Id;
+        public uint   Selector;
         public byte[] PassIndices;
         public uint[] SystemKeys;
         public uint[] SceneKeys;
@@ -478,9 +565,9 @@ public partial class ShpkFile : IWritable
         public Pass[] Passes;
     }
 
-    public struct Item
+    public struct NodeAlias // aka Item
     {
-        public uint Id;
+        public uint Selector;
         public uint Node;
     }
 }

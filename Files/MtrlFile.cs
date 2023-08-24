@@ -9,7 +9,7 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files;
 
-public partial class MtrlFile : IWritable
+public partial class MtrlFile : IWritable, ICloneable
 {
     public readonly uint Version;
 
@@ -32,38 +32,7 @@ public partial class MtrlFile : IWritable
         if (!stm.TryGetValue(dyeSet.Template, stainId, out var dyes))
             return false;
 
-        var ret = false;
-        if (dyeSet.Diffuse && ColorSets[colorSetIdx].Rows[rowIdx].Diffuse != dyes.Diffuse)
-        {
-            ColorSets[colorSetIdx].Rows[rowIdx].Diffuse = dyes.Diffuse;
-            ret                                         = true;
-        }
-
-        if (dyeSet.Specular && ColorSets[colorSetIdx].Rows[rowIdx].Specular != dyes.Specular)
-        {
-            ColorSets[colorSetIdx].Rows[rowIdx].Specular = dyes.Specular;
-            ret                                          = true;
-        }
-
-        if (dyeSet.SpecularStrength && ColorSets[colorSetIdx].Rows[rowIdx].SpecularStrength != dyes.SpecularPower)
-        {
-            ColorSets[colorSetIdx].Rows[rowIdx].SpecularStrength = dyes.SpecularPower;
-            ret                                                  = true;
-        }
-
-        if (dyeSet.Emissive && ColorSets[colorSetIdx].Rows[rowIdx].Emissive != dyes.Emissive)
-        {
-            ColorSets[colorSetIdx].Rows[rowIdx].Emissive = dyes.Emissive;
-            ret                                          = true;
-        }
-
-        if (dyeSet.Gloss && ColorSets[colorSetIdx].Rows[rowIdx].GlossStrength != dyes.Gloss)
-        {
-            ColorSets[colorSetIdx].Rows[rowIdx].GlossStrength = dyes.Gloss;
-            ret                                               = true;
-        }
-
-        return ret;
+        return ColorSets[colorSetIdx].Rows[rowIdx].ApplyDyeTemplate(dyeSet, dyes);
     }
 
     public Span<float> GetConstantValues(Constant constant)
@@ -76,11 +45,9 @@ public partial class MtrlFile : IWritable
         return ShaderPackage.ShaderValues.AsSpan().Slice(constant.ByteOffset >> 2, constant.ByteSize >> 2);
     }
 
-    public List<(Sampler?, ShpkFile.Resource?)> GetSamplersByTexture(ShpkFile? shpk)
+    public (Sampler? MtrlSampler, ShpkFile.Resource? ShpkSampler)[] GetSamplersByTexture(ShpkFile? shpk)
     {
-        var samplers = new List<(Sampler?, ShpkFile.Resource?)>();
-        for (var i = 0; i < Textures.Length; ++i)
-            samplers.Add((null, null));
+        var samplers = Array.ConvertAll<Texture, (Sampler?, ShpkFile.Resource?)>(Textures, _ => (null, null));
         foreach (var sampler in ShaderPackage.Samplers)
             samplers[sampler.TextureIndex] = (sampler, shpk?.GetSamplerById(sampler.SamplerId));
 
@@ -116,20 +83,19 @@ public partial class MtrlFile : IWritable
         for (var i = 0; i < colorSetCount; ++i)
             ColorSets[i].Name = UseOffset(strings, colorOffsets[i]);
 
-        ColorDyeSets = ColorSets.Length * ColorSet.RowArray.NumRows * ColorSet.Row.Size < dataSetSize
-            ? ColorSets.Select(c => new ColorDyeSet
-            {
-                Index = c.Index,
-                Name  = c.Name,
-            }).ToArray()
-            : Array.Empty<ColorDyeSet>();
-
         ShaderPackage.Name = UseOffset(strings, shaderPackageNameOffset);
 
         AdditionalData = r.ReadBytes(additionalDataSize);
+        var colorSetFlags = AdditionalData.Length > 0 ? AdditionalData[0] : (byte)0;
+
+        ColorDyeSets = Array.Empty<ColorDyeSet>();
+        if ((colorSetFlags & 0x08) != 0 && ColorSets.Length * ColorSet.RowArray.NumRows * ColorSet.Row.Size < dataSetSize)
+            FindOrAddColorDyeSet();
+
+        var dataSetEnd = stream.Position + dataSetSize;
         for (var i = 0; i < ColorSets.Length; ++i)
         {
-            if (stream.Position + ColorSet.RowArray.NumRows * ColorSet.Row.Size <= stream.Length)
+            if ((colorSetFlags & 0x04) != 0 && stream.Position + ColorSet.RowArray.NumRows * ColorSet.Row.Size <= dataSetEnd)
             {
                 ColorSets[i].Rows    = r.ReadStructure<ColorSet.RowArray>();
                 ColorSets[i].HasRows = true;
@@ -143,6 +109,8 @@ public partial class MtrlFile : IWritable
         for (var i = 0; i < ColorDyeSets.Length; ++i)
             ColorDyeSets[i].Rows = r.ReadStructure<ColorDyeSet.RowArray>();
 
+        stream.Seek(dataSetEnd, SeekOrigin.Begin);
+
         var shaderValueListSize = r.ReadUInt16();
         var shaderKeyCount      = r.ReadUInt16();
         var constantCount       = r.ReadUInt16();
@@ -154,6 +122,24 @@ public partial class MtrlFile : IWritable
         ShaderPackage.Samplers     = r.ReadStructuresAsArray<Sampler>(samplerCount);
         ShaderPackage.ShaderValues = r.ReadStructuresAsArray<float>(shaderValueListSize / 4);
     }
+
+    private MtrlFile(MtrlFile original)
+    {
+        Version = original.Version;
+
+        Textures       = (Texture[])original.Textures.Clone();
+        UvSets         = (UvSet[])original.UvSets.Clone();
+        ColorSets      = (ColorSet[])original.ColorSets.Clone();
+        ColorDyeSets   = (ColorDyeSet[])original.ColorDyeSets.Clone();
+        ShaderPackage  = original.ShaderPackage.Clone();
+        AdditionalData = (byte[])original.AdditionalData.Clone();
+    }
+
+    public MtrlFile Clone()
+        => new(this);
+
+    object ICloneable.Clone()
+        => new MtrlFile(this);
 
     private static Texture[] ReadTextureOffsets(BinaryReader r, int count, out ushort[] offsets)
     {
@@ -212,11 +198,16 @@ public partial class MtrlFile : IWritable
 
     public struct Texture
     {
+        public const ushort DX11Flag = 0x8000;
+
         public string Path;
         public ushort Flags;
 
         public bool DX11
-            => (Flags & 0x8000) != 0;
+        {
+            get => (Flags & DX11Flag) != 0;
+            set => Flags = value ? (ushort)(Flags | DX11Flag) : (ushort)(Flags & ~DX11Flag);
+        }
     }
 
     public struct Constant
@@ -226,7 +217,7 @@ public partial class MtrlFile : IWritable
         public ushort ByteSize;
     }
 
-    public struct ShaderPackageData
+    public struct ShaderPackageData : ICloneable
     {
         public string      Name;
         public ShaderKey[] ShaderKeys;
@@ -234,5 +225,19 @@ public partial class MtrlFile : IWritable
         public Sampler[]   Samplers;
         public float[]     ShaderValues;
         public uint        Flags;
+
+        public ShaderPackageData Clone()
+            => new()
+            {
+                Name         = Name,
+                ShaderKeys   = (ShaderKey[])ShaderKeys.Clone(),
+                Constants    = (Constant[])Constants.Clone(),
+                Samplers     = (Sampler[])Samplers.Clone(),
+                ShaderValues = (float[])ShaderValues.Clone(),
+                Flags        = Flags,
+            };
+
+        object ICloneable.Clone()
+            => Clone();
     }
 }

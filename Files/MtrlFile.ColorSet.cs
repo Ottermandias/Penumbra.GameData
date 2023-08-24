@@ -15,6 +15,18 @@ public partial class MtrlFile
 
             private fixed ushort _data[16];
 
+            public static readonly Row Default = new()
+            {
+                Diffuse          = Vector3.One,
+                Specular         = Vector3.One,
+                SpecularStrength = 1.0f,
+                Emissive         = Vector3.Zero,
+                GlossStrength    = 20.0f,
+                TileSet          = 0,
+                MaterialRepeat   = new Vector2(16.0f),
+                MaterialSkew     = Vector2.Zero,
+            };
+
             public Vector3 Diffuse
             {
                 get => new(ToFloat(0), ToFloat(1), ToFloat(2));
@@ -83,7 +95,52 @@ public partial class MtrlFile
             public ushort TileSet
             {
                 get => (ushort)(ToFloat(11) * 64f);
-                set => _data[11] = FromFloat(value / 64f);
+                set => _data[11] = FromFloat((value + 0.5f) / 64f);
+            }
+
+            public Span<Half> AsHalves()
+            {
+                fixed (ushort* ptr = _data)
+                {
+                    return new Span<Half>((Half*)ptr, 16);
+                }
+            }
+
+            public bool ApplyDyeTemplate(ColorDyeSet.Row dyeSet, StmFile.DyePack dyes)
+            {
+                var ret = false;
+
+                if (dyeSet.Diffuse && Diffuse != dyes.Diffuse)
+                {
+                    Diffuse = dyes.Diffuse;
+                    ret     = true;
+                }
+
+                if (dyeSet.Specular && Specular != dyes.Specular)
+                {
+                    Specular = dyes.Specular;
+                    ret      = true;
+                }
+
+                if (dyeSet.SpecularStrength && SpecularStrength != dyes.SpecularPower)
+                {
+                    SpecularStrength = dyes.SpecularPower;
+                    ret              = true;
+                }
+
+                if (dyeSet.Emissive && Emissive != dyes.Emissive)
+                {
+                    Emissive = dyes.Emissive;
+                    ret      = true;
+                }
+
+                if (dyeSet.Gloss && GlossStrength != dyes.Gloss)
+                {
+                    GlossStrength = dyes.Gloss;
+                    ret           = true;
+                }
+
+                return ret;
             }
 
             private float ToFloat(int idx)
@@ -123,6 +180,14 @@ public partial class MtrlFile
                 fixed (byte* ptr = _rowData)
                 {
                     return new ReadOnlySpan<byte>(ptr, NumRows * Row.Size);
+                }
+            }
+
+            public Span<Half> AsHalves()
+            {
+                fixed (byte* ptr = _rowData)
+                {
+                    return new Span<Half>((Half*)ptr, NumRows * 16);
                 }
             }
         }
