@@ -29,7 +29,7 @@ public partial class MtrlFile
 
             public Vector3 Diffuse
             {
-                get => new(ToFloat(0), ToFloat(1), ToFloat(2));
+                readonly get => new(ToFloat(0), ToFloat(1), ToFloat(2));
                 set
                 {
                     _data[0] = FromFloat(value.X);
@@ -40,7 +40,7 @@ public partial class MtrlFile
 
             public Vector3 Specular
             {
-                get => new(ToFloat(4), ToFloat(5), ToFloat(6));
+                readonly get => new(ToFloat(4), ToFloat(5), ToFloat(6));
                 set
                 {
                     _data[4] = FromFloat(value.X);
@@ -51,7 +51,7 @@ public partial class MtrlFile
 
             public Vector3 Emissive
             {
-                get => new(ToFloat(8), ToFloat(9), ToFloat(10));
+                readonly get => new(ToFloat(8), ToFloat(9), ToFloat(10));
                 set
                 {
                     _data[8]  = FromFloat(value.X);
@@ -62,7 +62,7 @@ public partial class MtrlFile
 
             public Vector2 MaterialRepeat
             {
-                get => new(ToFloat(12), ToFloat(15));
+                readonly get => new(ToFloat(12), ToFloat(15));
                 set
                 {
                     _data[12] = FromFloat(value.X);
@@ -72,7 +72,7 @@ public partial class MtrlFile
 
             public Vector2 MaterialSkew
             {
-                get => new(ToFloat(13), ToFloat(14));
+                readonly get => new(ToFloat(13), ToFloat(14));
                 set
                 {
                     _data[13] = FromFloat(value.X);
@@ -82,27 +82,27 @@ public partial class MtrlFile
 
             public float SpecularStrength
             {
-                get => ToFloat(3);
+                readonly get => ToFloat(3);
                 set => _data[3] = FromFloat(value);
             }
 
             public float GlossStrength
             {
-                get => ToFloat(7);
+                readonly get => ToFloat(7);
                 set => _data[7] = FromFloat(value);
             }
 
             public ushort TileSet
             {
-                get => (ushort)(ToFloat(11) * 64f);
+                readonly get => (ushort)(ToFloat(11) * 64f);
                 set => _data[11] = FromFloat((value + 0.5f) / 64f);
             }
 
-            public Span<Half> AsHalves()
+            public readonly Span<Half> AsHalves()
             {
                 fixed (ushort* ptr = _data)
                 {
-                    return new Span<Half>((Half*)ptr, 16);
+                    return new Span<Half>(ptr, 16);
                 }
             }
 
@@ -143,11 +143,12 @@ public partial class MtrlFile
                 return ret;
             }
 
-            private float ToFloat(int idx)
+            private readonly float ToFloat(int idx)
                 => (float)BitConverter.UInt16BitsToHalf(_data[idx]);
 
             private static ushort FromFloat(float x)
                 => BitConverter.HalfToUInt16Bits((Half)x);
+
         }
 
         public struct RowArray : IEnumerable<Row>
@@ -175,7 +176,7 @@ public partial class MtrlFile
             IEnumerator IEnumerable.GetEnumerator()
                 => GetEnumerator();
 
-            public ReadOnlySpan<byte> AsBytes()
+            public readonly ReadOnlySpan<byte> AsBytes()
             {
                 fixed (byte* ptr = _rowData)
                 {
@@ -183,7 +184,7 @@ public partial class MtrlFile
                 }
             }
 
-            public Span<Half> AsHalves()
+            public readonly Span<Half> AsHalves()
             {
                 fixed (byte* ptr = _rowData)
                 {
