@@ -13,9 +13,8 @@ public partial class MtrlFile
 
     public int FindOrAddConstant(uint id, int numFloats)
     {
-        for (var i = 0; i < ShaderPackage.Constants.Length; ++i)
-            if (ShaderPackage.Constants[i].Id == id)
-                return i;
+        if (UtilityFunctions.FindIndex(ShaderPackage.Constants, c => c.Id == id, out var idx))
+            return idx;
 
         var offset = ShaderPackage.ShaderValues.Length;
         if (offset >= 0x4000 || numFloats >= 0x4000)
@@ -44,9 +43,8 @@ public partial class MtrlFile
 
     public int FindOrAddSampler(uint id, string defaultTexture)
     {
-        for (var i = 0; i < ShaderPackage.Samplers.Length; ++i)
-            if (ShaderPackage.Samplers[i].SamplerId == id)
-                return i;
+        if (UtilityFunctions.FindIndex(ShaderPackage.Samplers, c => c.SamplerId == id, out var idx))
+            return idx;
 
         var newTextureI = Textures.Length;
         if (newTextureI >= 0x100)
@@ -79,9 +77,8 @@ public partial class MtrlFile
 
     public int FindOrAddColorSet()
     {
-        for (var i = 0; i < ColorSets.Length; ++i)
-            if (ColorSets[i].HasRows)
-                return i;
+        if (UtilityFunctions.FindIndex(ColorSets, c => c.HasRows, out var idx))
+            return idx;
 
         if (ColorSets.Length > 0)
             ColorSets[0].HasRows = true;
@@ -147,13 +144,7 @@ public partial class MtrlFile
         => ref GetOrAddColorDyeSet(out _);
 
     public int FindShaderKey(uint category)
-    {
-        for (var i = 0; i < ShaderPackage.ShaderKeys.Length; ++i)
-            if (ShaderPackage.ShaderKeys[i].Category == category)
-                return i;
-
-        return -1;
-    }
+        => UtilityFunctions.IndexOf(ShaderPackage.ShaderKeys, c => c.Category == category);
 
     public ShaderKey? GetShaderKey(uint category, out int i)
     {
@@ -166,9 +157,8 @@ public partial class MtrlFile
 
     public int FindOrAddShaderKey(uint category, uint defaultValue)
     {
-        for (var i = 0; i < ShaderPackage.ShaderKeys.Length; ++i)
-            if (ShaderPackage.ShaderKeys[i].Category == category)
-                return i;
+        if (UtilityFunctions.FindIndex(ShaderPackage.ShaderKeys, c => c.Category == category, out var idx))
+            return idx;
 
         var newI = ShaderPackage.ShaderKeys.Length;
         ShaderPackage.ShaderKeys = ShaderPackage.ShaderKeys.AddItem(new ShaderKey
@@ -226,13 +216,13 @@ public partial class MtrlFile
         var samplersByTexture = GetSamplersByTexture(null);
         for (var i = samplersByTexture.Length; i-- > 0;)
         {
-            if (samplersByTexture[i].MtrlSampler == null)
-            {
-                Textures = Textures.RemoveItems(i);
-                for (var j = 0; j < ShaderPackage.Samplers.Length; ++j)
-                    if (ShaderPackage.Samplers[j].TextureIndex > i)
-                        --ShaderPackage.Samplers[j].TextureIndex;
-            }
+            if (samplersByTexture[i].MtrlSampler != null)
+                continue;
+
+            Textures = Textures.RemoveItems(i);
+            for (var j = 0; j < ShaderPackage.Samplers.Length; ++j)
+                if (ShaderPackage.Samplers[j].TextureIndex > i)
+                    --ShaderPackage.Samplers[j].TextureIndex;
         }
 
         if (shpk == null)
