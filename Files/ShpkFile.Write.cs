@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Penumbra.GameData.Files;
 
@@ -16,8 +15,10 @@ public partial class ShpkFile
         using var blobs   = new MemoryStream();
         var       strings = new StringPool(ReadOnlySpan<byte>.Empty);
         var       aliases = new Dictionary<uint, uint>(NodeSelectors);
+
         foreach (var node in Nodes)
             aliases.Remove(node.Selector);
+
         using (var w = new BinaryWriter(stream))
         {
             w.Write(ShPkMagic);
