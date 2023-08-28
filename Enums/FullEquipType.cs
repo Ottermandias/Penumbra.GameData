@@ -416,6 +416,27 @@ public static class FullEquipTypeExtensions
             _                             => FullEquipType.Unknown,
         };
 
+    public static bool AllowsNothing(this FullEquipType type)
+        => type switch
+        {
+            FullEquipType.Head      => true,
+            FullEquipType.Body      => true,
+            FullEquipType.Hands     => true,
+            FullEquipType.Legs      => true,
+            FullEquipType.Feet      => true,
+            FullEquipType.Ears      => true,
+            FullEquipType.Neck      => true,
+            FullEquipType.Wrists    => true,
+            FullEquipType.Finger    => true,
+            FullEquipType.BowOff    => true,
+            FullEquipType.GunOff    => true,
+            FullEquipType.OrreryOff => true,
+            FullEquipType.KatanaOff => true,
+            FullEquipType.RapierOff => true,
+            FullEquipType.Shield    => true,
+            _                       => false,
+        };
+
     internal static string OffhandTypeSuffix(this FullEquipType type)
         => type switch
         {
