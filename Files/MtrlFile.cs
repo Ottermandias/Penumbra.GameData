@@ -70,9 +70,9 @@ public partial class MtrlFile : IWritable, ICloneable
         var colorSetCount           = r.ReadByte();
         var additionalDataSize      = r.ReadByte();
 
-        Textures  = ReadTextureOffsets(r, textureCount, out var textureOffsets);
-        UvSets    = ReadUvSetOffsets(r, uvSetCount, out var uvOffsets);
-        ColorSets = ReadColorSetOffsets(r, colorSetCount, out var colorOffsets);
+        Textures  = ReadTextureOffsets(ref r, textureCount, out var textureOffsets);
+        UvSets    = ReadUvSetOffsets(ref r, uvSetCount, out var uvOffsets);
+        ColorSets = ReadColorSetOffsets(ref r, colorSetCount, out var colorOffsets);
 
         var strings = r.ReadStringPool(stringTableSize);
         for (var i = 0; i < textureCount; ++i)
@@ -142,7 +142,7 @@ public partial class MtrlFile : IWritable, ICloneable
     object ICloneable.Clone()
         => new MtrlFile(this);
 
-    private static Texture[] ReadTextureOffsets(SpanBinaryReader r, int count, out ushort[] offsets)
+    private static Texture[] ReadTextureOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
     {
         var ret = new Texture[count];
         offsets = new ushort[count];
@@ -155,7 +155,7 @@ public partial class MtrlFile : IWritable, ICloneable
         return ret;
     }
 
-    private static UvSet[] ReadUvSetOffsets(SpanBinaryReader r, int count, out ushort[] offsets)
+    private static UvSet[] ReadUvSetOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
     {
         var ret = new UvSet[count];
         offsets = new ushort[count];
@@ -168,7 +168,7 @@ public partial class MtrlFile : IWritable, ICloneable
         return ret;
     }
 
-    private static ColorSet[] ReadColorSetOffsets(SpanBinaryReader r, int count, out ushort[] offsets)
+    private static ColorSet[] ReadColorSetOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
     {
         var ret = new ColorSet[count];
         offsets = new ushort[count];
