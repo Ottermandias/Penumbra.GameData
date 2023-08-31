@@ -69,11 +69,35 @@ public ref struct SpanBinaryReader
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public unsafe T ReadStructure<T>() where T : unmanaged
-        => MemoryMarshal.Read<T>(ReadBytes(sizeof(T)));
+    {
+        if (Position + sizeof(T) > Span.Length)
+            throw new EndOfStreamException();
+
+        T result;
+        fixed (byte* ptr = &Span[Position])
+        {
+            result = *(T*)ptr;
+        }
+        Position += sizeof(T);
+
+        return result;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public unsafe ReadOnlySpan<T> ReadStructures<T>(int count) where T : unmanaged
-        => MemoryMarshal.Cast<byte, T>(ReadBytes(sizeof(T) * count));
+    {
+        if (Position + sizeof(T) * count > Span.Length)
+            throw new EndOfStreamException();
+
+        ReadOnlySpan<T> result;
+        fixed (byte* ptr = &Span[Position])
+        {
+            result = new(ptr, count);
+        }
+        Position += sizeof(T) * count;
+
+        return result;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public ushort ReadUInt16()
