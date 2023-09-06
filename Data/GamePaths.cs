@@ -410,6 +410,9 @@ public static partial class GamePaths
         [GeneratedRegex(@"chara[\/]action[\/](?'key'[^\s]+?)\.tmb", RegexOptions.IgnoreCase)]
         public static partial Regex Tmb();
 
+        public static string ActionTmb(string key)
+            => $"chara/action/{key}.tmb";
+
         [GeneratedRegex(@"chara[\/]human[\/]c0101[\/]animation[\/]a0001[\/][^\s]+?[\/](?'key'[^\s]+?)\.pap", RegexOptions.IgnoreCase)]
         public static partial Regex Pap();
     }

@@ -4,9 +4,11 @@ using Dalamud;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
+using Action = Lumina.Excel.GeneratedSheets.Action;
 
 namespace Penumbra.GameData;
 
@@ -73,6 +75,9 @@ public interface IObjectIdentifier : IDisposable
 
     /// <summary> Obtain a list of Names and Object Kinds associated with a ModelChara ID. </summary>
     public IReadOnlyList<(string Name, ObjectKind Kind, uint Id)> ModelCharaNames(ModelCharaId modelId);
+
+    public IReadOnlyDictionary<string, IReadOnlyList<Action>> Actions { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Emote>>  Emotes  { get; }
 
     public int NumModelChara { get; }
 }

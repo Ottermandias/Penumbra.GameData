@@ -5,14 +5,17 @@ using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Penumbra.GameData.Actors;
+using Penumbra.GameData.Files;
 using Action = Lumina.Excel.GeneratedSheets.Action;
 using ObjectType = Penumbra.GameData.Enums.ObjectType;
 
@@ -26,7 +29,14 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
     public readonly  IReadOnlyList<IReadOnlyList<uint>>                                    BnpcNames;
     public readonly  IReadOnlyList<IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>> ModelCharaToObjects;
     public readonly  IReadOnlyDictionary<string, IReadOnlyList<Action>>                    Actions;
+    public readonly  IReadOnlyDictionary<string, IReadOnlyList<Emote>>                     Emotes;
     private readonly ActorManager.ActorManagerData                                         _actorData;
+
+    IReadOnlyDictionary<string, IReadOnlyList<Action>> IObjectIdentifier.Actions
+        => Actions;
+
+    IReadOnlyDictionary<string, IReadOnlyList<Emote>> IObjectIdentifier.Emotes
+        => Emotes;
 
     private readonly EquipmentIdentificationList _equipment;
     private readonly WeaponIdentificationList    _weapons;
@@ -39,6 +49,7 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
         _equipment = new EquipmentIdentificationList(pluginInterface, language, itemData);
         _weapons   = new WeaponIdentificationList(pluginInterface, language, itemData);
         Actions    = TryCatchData("Actions", () => CreateActionList(dataManager));
+        Emotes     = TryCatchData("Emotes",  () => CreateEmoteList(dataManager));
 
         _modelIdentifierToModelChara = new ModelIdentificationList(pluginInterface, language, dataManager);
         BnpcNames                    = TryCatchData("BNpcNames",    NpcNames.CreateNames);
@@ -50,7 +61,8 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
 
     public void Identify(IDictionary<string, object?> set, string path)
     {
-        if (path.EndsWith(".pap", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".tmb", StringComparison.OrdinalIgnoreCase))
+        var extension = Path.GetExtension(path)?.ToLowerInvariant() ?? string.Empty;
+        if (extension is ".pap" or ".tmb" or ".scd" or ".avfx")
             if (IdentifyVfx(set, path))
                 return;
 
@@ -92,6 +104,7 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
         _weapons.Dispose(PluginInterface, Language);
         _equipment.Dispose(PluginInterface, Language);
         DisposeTag("Actions");
+        DisposeTag("Emotes");
         DisposeTag("Models");
 
         _modelIdentifierToModelChara.Dispose(PluginInterface, Language);
@@ -131,7 +144,98 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
             AddAction(hitKey,   action);
         });
 
-        return storage.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Action>)kvp.Value.ToArray());
+        return storage.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Action>)kvp.Value.Distinct().ToArray());
+    }
+
+    private IReadOnlyDictionary<string, IReadOnlyList<Emote>> CreateEmoteList(IDataManager gameData)
+    {
+        var sheet   = gameData.GetExcelSheet<Emote>(Language)!;
+        var storage = new ConcurrentDictionary<string, ConcurrentBag<Emote>>();
+
+        void AddEmote(string? key, Emote emote)
+        {
+            if (key.IsNullOrEmpty())
+                return;
+
+            key = key.ToLowerInvariant();
+            if (storage.TryGetValue(key, out var emotes))
+                emotes.Add(emote);
+            else
+                storage[key] = new ConcurrentBag<Emote> { emote };
+        }
+
+        var options = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Environment.ProcessorCount,
+        };
+        var seenTmbs = new ConcurrentDictionary<string, TmbFile>();
+
+        void ProcessEmote(Emote emote)
+        {
+            var emoteTmbs = new HashSet<string>(8);
+            var tmbs      = new Queue<string>(8);
+
+            foreach (var timeline in emote.ActionTimeline.Where(t => t.Row != 0 && t.Value != null).Select(t => t.Value!))
+            {
+                var key = timeline.Key.ToDalamudString().TextValue;
+                tmbs.Enqueue(GamePaths.Vfx.ActionTmb(key));
+                AddEmote(Path.GetFileName(key) + ".pap", emote);
+            }
+
+            while (tmbs.TryDequeue(out var tmbPath))
+            {
+                if (!emoteTmbs.Add(tmbPath))
+                    continue;
+
+                AddEmote(Path.GetFileName(tmbPath), emote);
+
+                try
+                {
+                    var file = gameData.GetFile(tmbPath);
+                    if (file != null)
+                    {
+                        if (!seenTmbs.TryGetValue(tmbPath, out var tmb))
+                        {
+                            tmb = new TmbFile(file.DataSpan);
+                            seenTmbs.TryAdd(tmbPath, tmb);
+                        }
+
+                        foreach (var subfile in tmb.Paths)
+                        {
+                            AddEmote(Path.GetFileName(subfile), emote);
+                            if (Path.GetExtension(subfile) == ".tmb")
+                                tmbs.Enqueue($"chara/action/{subfile}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Warning($"Unknown Error while creating data:\n{ex}");
+                }
+            }
+        }
+
+        Parallel.ForEach(sheet.Where(n => n.Name.RawData.Length > 0), options, ProcessEmote);
+
+        var sit = sheet.GetRow(50)!;
+        AddEmote("s_pose01_loop.pap", sit);
+        AddEmote("s_pose02_loop.pap", sit);
+        AddEmote("s_pose03_loop.pap", sit);
+        AddEmote("s_pose04_loop.pap", sit);
+        AddEmote("s_pose05_loop.pap", sit);
+
+        var sitOnGround = sheet.GetRow(52)!;
+        AddEmote("j_pose01_loop.pap", sitOnGround);
+        AddEmote("j_pose02_loop.pap", sitOnGround);
+        AddEmote("j_pose03_loop.pap", sitOnGround);
+        AddEmote("j_pose04_loop.pap", sitOnGround);
+
+        var doze = sheet.GetRow(13)!;
+        AddEmote("l_pose01_loop.pap", doze);
+        AddEmote("l_pose02_loop.pap", doze);
+        AddEmote("l_pose03_loop.pap", doze);
+
+        return storage.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Emote>)kvp.Value.Distinct().ToArray());
     }
 
     private void FindEquipment(IDictionary<string, object?> set, GameObjectInfo info)
@@ -250,13 +354,25 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
 
     private bool IdentifyVfx(IDictionary<string, object?> set, string path)
     {
-        var key = GamePathParser.VfxToKey(path);
-        if (key.Length == 0 || !Actions.TryGetValue(key, out var actions) || actions.Count == 0)
-            return false;
+        var key      = GamePathParser.VfxToKey(path);
+        var fileName = Path.GetFileName(path);
+        var ret      = false;
 
-        foreach (var action in actions)
-            set[$"Action: {action.Name}"] = action;
-        return true;
+        if (key.Length > 0 && Actions.TryGetValue(key, out var actions) && actions.Count > 0)
+        {
+            foreach (var action in actions)
+                set[$"Action: {action.Name.ToDalamudString()}"] = action;
+            ret = true;
+        }
+
+        if (fileName.Length > 0 && Emotes.TryGetValue(fileName, out var emotes) && emotes.Count > 0)
+        {
+            foreach (var emote in emotes)
+                set[$"Emote: {emote.Name.ToDalamudString()}"] = emote;
+            ret = true;
+        }
+
+        return ret;
     }
 
     private IReadOnlyList<IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>> CreateModelObjects(ActorManager.ActorManagerData actors,
