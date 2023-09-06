@@ -259,7 +259,8 @@ public static partial class GamePaths
                 @"chara/accessory/a(?'id'\d{4})/texture/v(?'variant'\d{2})_c(?'race'\d{4})a\k'id'_(?'slot'[a-z]{3})(_[a-z])?_[a-z]\.tex")]
             public static partial Regex Regex();
 
-            public static string Path(SetId accessoryId, GenderRace raceCode, EquipSlot slot, Variant variant, char suffix1, char suffix2 = '\0')
+            public static string Path(SetId accessoryId, GenderRace raceCode, EquipSlot slot, Variant variant, char suffix1,
+                char suffix2 = '\0')
                 => $"chara/accessory/a{accessoryId.Id:D4}/texture/v{variant.Id:D2}_c{raceCode.ToRaceCode()}a{accessoryId.Id:D4}_{slot.ToSuffix()}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
         }
     }
@@ -298,7 +299,9 @@ public static partial class GamePaths
             public static partial Regex Regex();
 
             public static string FolderPath(GenderRace raceCode, BodySlot slot, SetId slotId, Variant variant)
-                => $"chara/human/c{raceCode.ToRaceCode()}/obj/{slot.ToSuffix()}/{slot.ToAbbreviation()}{slotId.Id:D4}/material/v{variant.Id:D4}";
+                => variant.Id == byte.MaxValue
+                    ? FolderPath(raceCode, slot, slotId)
+                    : $"chara/human/c{raceCode.ToRaceCode()}/obj/{slot.ToSuffix()}/{slot.ToAbbreviation()}{slotId.Id:D4}/material/v{variant.Id:D4}";
 
             public static string FolderPath(GenderRace raceCode, BodySlot slot, SetId slotId)
                 => $"chara/human/c{raceCode.ToRaceCode()}/obj/{slot.ToSuffix()}/{slot.ToAbbreviation()}{slotId.Id:D4}/material";
@@ -406,6 +409,9 @@ public static partial class GamePaths
     {
         [GeneratedRegex(@"chara[\/]action[\/](?'key'[^\s]+?)\.tmb", RegexOptions.IgnoreCase)]
         public static partial Regex Tmb();
+
+        public static string ActionTmb(string key)
+            => $"chara/action/{key}.tmb";
 
         [GeneratedRegex(@"chara[\/]human[\/]c0101[\/]animation[\/]a0001[\/][^\s]+?[\/](?'key'[^\s]+?)\.pap", RegexOptions.IgnoreCase)]
         public static partial Regex Pap();
