@@ -74,19 +74,19 @@ public partial class MtrlFile : IWritable, ICloneable
         UvSets    = ReadUvSetOffsets(ref r, uvSetCount, out var uvOffsets);
         ColorSets = ReadColorSetOffsets(ref r, colorSetCount, out var colorOffsets);
 
-        var strings = r.ReadStringPool(stringTableSize);
+        var strings = r.SliceFromHere(stringTableSize);
         for (var i = 0; i < textureCount; ++i)
-            Textures[i].Path = strings.GetNullTerminatedString(textureOffsets[i]);
+            Textures[i].Path = strings.ReadString(textureOffsets[i]);
 
         for (var i = 0; i < uvSetCount; ++i)
-            UvSets[i].Name = strings.GetNullTerminatedString(uvOffsets[i]);
+            UvSets[i].Name = strings.ReadString(uvOffsets[i]);
 
         for (var i = 0; i < colorSetCount; ++i)
-            ColorSets[i].Name = strings.GetNullTerminatedString(colorOffsets[i]);
+            ColorSets[i].Name = strings.ReadString(colorOffsets[i]);
 
-        ShaderPackage.Name = strings.GetNullTerminatedString(shaderPackageNameOffset);
+        ShaderPackage.Name = strings.ReadString(shaderPackageNameOffset);
 
-        AdditionalData = r.ReadBytes(additionalDataSize).ToArray();
+        AdditionalData = r.Read<byte>(additionalDataSize).ToArray();
         var colorSetFlags = AdditionalData.Length > 0 ? AdditionalData[0] : (byte)0;
 
         ColorDyeSets = Array.Empty<ColorDyeSet>();
@@ -94,12 +94,12 @@ public partial class MtrlFile : IWritable, ICloneable
             FindOrAddColorDyeSet();
 
         {
-            var dataSet = r.ReadSlice(dataSetSize);
+            var dataSet = r.SliceFromHere(dataSetSize);
             for (var i = 0; i < ColorSets.Length; ++i)
             {
                 if ((colorSetFlags & 0x04) != 0 && dataSet.Remaining >= ColorSet.RowArray.NumRows * ColorSet.Row.Size)
                 {
-                    ColorSets[i].Rows = dataSet.ReadStructure<ColorSet.RowArray>();
+                    ColorSets[i].Rows = dataSet.Read<ColorSet.RowArray>();
                     ColorSets[i].HasRows = true;
                 }
                 else
@@ -109,7 +109,7 @@ public partial class MtrlFile : IWritable, ICloneable
             }
 
             for (var i = 0; i < ColorDyeSets.Length; ++i)
-                ColorDyeSets[i].Rows = dataSet.ReadStructure<ColorDyeSet.RowArray>();
+                ColorDyeSets[i].Rows = dataSet.Read<ColorDyeSet.RowArray>();
         }
 
         var shaderValueListSize = r.ReadUInt16();
@@ -118,10 +118,10 @@ public partial class MtrlFile : IWritable, ICloneable
         var samplerCount        = r.ReadUInt16();
         ShaderPackage.Flags = r.ReadUInt32();
 
-        ShaderPackage.ShaderKeys   = r.ReadStructures<ShaderKey>(shaderKeyCount).ToArray();
-        ShaderPackage.Constants    = r.ReadStructures<Constant>(constantCount).ToArray();
-        ShaderPackage.Samplers     = r.ReadStructures<Sampler>(samplerCount).ToArray();
-        ShaderPackage.ShaderValues = r.ReadStructures<float>(shaderValueListSize / 4).ToArray();
+        ShaderPackage.ShaderKeys   = r.Read<ShaderKey>(shaderKeyCount).ToArray();
+        ShaderPackage.Constants    = r.Read<Constant>(constantCount).ToArray();
+        ShaderPackage.Samplers     = r.Read<Sampler>(samplerCount).ToArray();
+        ShaderPackage.ShaderValues = r.Read<float>(shaderValueListSize / 4).ToArray();
     }
 
     private MtrlFile(MtrlFile original)

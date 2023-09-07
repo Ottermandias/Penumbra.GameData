@@ -81,8 +81,7 @@ public partial class ShpkFile : IWritable
 
     public ShpkFile(byte[] data, bool disassemble = false)
         : this((ReadOnlySpan<byte>)data, disassemble)
-    {
-    }
+    { }
 
     public ShpkFile(ReadOnlySpan<byte> data, bool disassemble = false)
     {
@@ -119,18 +118,18 @@ public partial class ShpkFile : IWritable
         var nodeAliasCount     = r.ReadUInt32();
 
         var blobs   = data[(int)blobsOffset..(int)stringsOffset];
-        var strings = new ReadOnlyStringPool(data[(int)stringsOffset..]);
+        var strings = new SpanBinaryReader(data[(int)stringsOffset..]);
 
-        VertexShaders = ReadShaderArray(ref r, (int)vertexShaderCount, DisassembledShader.ShaderStage.Vertex, DirectXVersion, disassemble, blobs,
-            strings);
+        VertexShaders = ReadShaderArray(ref r, (int)vertexShaderCount, DisassembledShader.ShaderStage.Vertex, DirectXVersion, disassemble,
+            blobs,                             ref strings);
         PixelShaders = ReadShaderArray(ref r, (int)pixelShaderCount, DisassembledShader.ShaderStage.Pixel, DirectXVersion, disassemble, blobs,
-            strings);
+            ref strings);
 
-        MaterialParams = r.ReadStructures<MaterialParam>((int)materialParamCount).ToArray();
+        MaterialParams = r.Read<MaterialParam>((int)materialParamCount).ToArray();
 
-        Constants = ReadResourceArray(ref r, (int)constantCount, strings);
-        Samplers  = ReadResourceArray(ref r, (int)samplerCount,  strings);
-        Uavs      = ReadResourceArray(ref r, (int)uavCount,      strings);
+        Constants = ReadResourceArray(ref r, (int)constantCount, ref strings);
+        Samplers  = ReadResourceArray(ref r, (int)samplerCount,  ref strings);
+        Uavs      = ReadResourceArray(ref r, (int)uavCount,      ref strings);
 
         SystemKeys   = ReadKeyArray(ref r, (int)systemKeyCount);
         SceneKeys    = ReadKeyArray(ref r, (int)sceneKeyCount);
@@ -157,13 +156,13 @@ public partial class ShpkFile : IWritable
 
         Nodes = ReadNodeArray(ref r, (int)nodeCount, SystemKeys.Length, SceneKeys.Length, MaterialKeys.Length, SubViewKeys.Length);
 
-        NodeSelectors = new(Nodes.Length + (int)nodeAliasCount);
+        NodeSelectors = new Dictionary<uint, uint>(Nodes.Length + (int)nodeAliasCount);
         for (var i = 0; i < Nodes.Length; ++i)
             NodeSelectors.TryAdd(Nodes[i].Selector, (uint)i);
-        foreach (var alias in r.ReadStructures<NodeAlias>((int)nodeAliasCount))
+        foreach (var alias in r.Read<NodeAlias>((int)nodeAliasCount))
             NodeSelectors.TryAdd(alias.Selector, alias.Node);
 
-        AdditionalData = r.ReadBytes((int)(blobsOffset - r.Position)).ToArray(); // This should be empty, but just in case.
+        AdditionalData = r.Read<byte>((int)(blobsOffset - r.Position)).ToArray(); // This should be empty, but just in case.
 
         if (disassemble)
             UpdateUsed();
@@ -346,11 +345,11 @@ public partial class ShpkFile : IWritable
     {
         unchecked
         {
-            var selector = 0u;
+            var selector   = 0u;
             var multiplier = 1u;
             foreach (var key in keys)
             {
-                selector += key * multiplier;
+                selector   += key * multiplier;
                 multiplier *= SelectorMultiplier;
             }
 
@@ -362,11 +361,11 @@ public partial class ShpkFile : IWritable
     {
         unchecked
         {
-            var selector = 0u;
+            var selector   = 0u;
             var multiplier = 1u;
             foreach (var key in keys)
             {
-                selector += key * multiplier;
+                selector   += key * multiplier;
                 multiplier *= SelectorMultiplier;
             }
 
@@ -379,6 +378,7 @@ public partial class ShpkFile : IWritable
         if (keys.Length == 0)
         {
             yield return 0;
+
             yield break;
         }
         else if (keys.Length == 1)
@@ -420,7 +420,7 @@ public partial class ShpkFile : IWritable
         }
     }
 
-    private static Resource[] ReadResourceArray(ref SpanBinaryReader r, int count, ReadOnlyStringPool strings)
+    private static Resource[] ReadResourceArray(ref SpanBinaryReader r, int count, ref SpanBinaryReader strings)
     {
         var ret = new Resource[count];
         for (var i = 0; i < count; ++i)
@@ -431,7 +431,7 @@ public partial class ShpkFile : IWritable
             ret[i] = new Resource
             {
                 Id   = id,
-                Name = strings.GetString((int)strOffset, (int)strSize),
+                Name = strings.ReadString((int)strOffset, (int)strSize),
                 Slot = r.ReadUInt16(),
                 Size = r.ReadUInt16(),
             };
@@ -441,7 +441,7 @@ public partial class ShpkFile : IWritable
     }
 
     private static Shader[] ReadShaderArray(ref SpanBinaryReader r, int count, DisassembledShader.ShaderStage stage, DxVersion directX,
-        bool disassemble, ReadOnlySpan<byte> blobs, ReadOnlyStringPool strings)
+        bool disassemble, ReadOnlySpan<byte> blobs, ref SpanBinaryReader strings)
     {
         var extraHeaderSize = stage switch
         {
@@ -471,9 +471,9 @@ public partial class ShpkFile : IWritable
             {
                 Stage            = disassemble ? stage : DisassembledShader.ShaderStage.Unspecified,
                 DirectXVersion   = directX,
-                Constants        = ReadResourceArray(ref r, constantCount, strings),
-                Samplers         = ReadResourceArray(ref r, samplerCount,  strings),
-                Uavs             = ReadResourceArray(ref r, uavCount,      strings),
+                Constants        = ReadResourceArray(ref r, constantCount, ref strings),
+                Samplers         = ReadResourceArray(ref r, samplerCount,  ref strings),
+                Uavs             = ReadResourceArray(ref r, uavCount,      ref strings),
                 AdditionalHeader = rawBlob[..extraHeaderSize].ToArray(),
                 Blob             = rawBlob[extraHeaderSize..].ToArray(),
             };
@@ -509,12 +509,12 @@ public partial class ShpkFile : IWritable
             ret[i] = new Node
             {
                 Selector     = selector,
-                PassIndices  = r.ReadBytes(16).ToArray(),
-                SystemKeys   = r.ReadStructures<uint>(systemKeyCount).ToArray(),
-                SceneKeys    = r.ReadStructures<uint>(sceneKeyCount).ToArray(),
-                MaterialKeys = r.ReadStructures<uint>(materialKeyCount).ToArray(),
-                SubViewKeys  = r.ReadStructures<uint>(subViewKeyCount).ToArray(),
-                Passes       = r.ReadStructures<Pass>((int)passCount).ToArray(),
+                PassIndices  = r.Read<byte>(16).ToArray(),
+                SystemKeys   = r.Read<uint>(systemKeyCount).ToArray(),
+                SceneKeys    = r.Read<uint>(sceneKeyCount).ToArray(),
+                MaterialKeys = r.Read<uint>(materialKeyCount).ToArray(),
+                SubViewKeys  = r.Read<uint>(subViewKeyCount).ToArray(),
+                Passes       = r.Read<Pass>((int)passCount).ToArray(),
             };
         }
 
