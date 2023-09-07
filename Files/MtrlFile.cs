@@ -1,9 +1,7 @@
 using System;
-using System.IO;
 using System.Linq;
-using System.Text;
 using Lumina.Data.Parsing;
-using Lumina.Extensions;
+using Penumbra.GameData.Files.Utility;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files;
@@ -54,9 +52,13 @@ public partial class MtrlFile : IWritable, ICloneable
     }
 
     public MtrlFile(byte[] data)
+        : this((ReadOnlySpan<byte>)data)
     {
-        using var stream = new MemoryStream(data);
-        using var r      = new BinaryReader(stream);
+    }
+
+    public MtrlFile(ReadOnlySpan<byte> data)
+    {
+        var r = new SpanBinaryReader(data);
 
         Version = r.ReadUInt32();
         r.ReadUInt16(); // file size
@@ -68,47 +70,47 @@ public partial class MtrlFile : IWritable, ICloneable
         var colorSetCount           = r.ReadByte();
         var additionalDataSize      = r.ReadByte();
 
-        Textures  = ReadTextureOffsets(r, textureCount, out var textureOffsets);
-        UvSets    = ReadUvSetOffsets(r, uvSetCount, out var uvOffsets);
-        ColorSets = ReadColorSetOffsets(r, colorSetCount, out var colorOffsets);
+        Textures  = ReadTextureOffsets(ref r, textureCount, out var textureOffsets);
+        UvSets    = ReadUvSetOffsets(ref r, uvSetCount, out var uvOffsets);
+        ColorSets = ReadColorSetOffsets(ref r, colorSetCount, out var colorOffsets);
 
-        var strings = r.ReadBytes(stringTableSize);
+        var strings = r.SliceFromHere(stringTableSize);
         for (var i = 0; i < textureCount; ++i)
-            Textures[i].Path = UseOffset(strings, textureOffsets[i]);
+            Textures[i].Path = strings.ReadString(textureOffsets[i]);
 
         for (var i = 0; i < uvSetCount; ++i)
-            UvSets[i].Name = UseOffset(strings, uvOffsets[i]);
+            UvSets[i].Name = strings.ReadString(uvOffsets[i]);
 
         for (var i = 0; i < colorSetCount; ++i)
-            ColorSets[i].Name = UseOffset(strings, colorOffsets[i]);
+            ColorSets[i].Name = strings.ReadString(colorOffsets[i]);
 
-        ShaderPackage.Name = UseOffset(strings, shaderPackageNameOffset);
+        ShaderPackage.Name = strings.ReadString(shaderPackageNameOffset);
 
-        AdditionalData = r.ReadBytes(additionalDataSize);
+        AdditionalData = r.Read<byte>(additionalDataSize).ToArray();
         var colorSetFlags = AdditionalData.Length > 0 ? AdditionalData[0] : (byte)0;
 
         ColorDyeSets = Array.Empty<ColorDyeSet>();
         if ((colorSetFlags & 0x08) != 0 && ColorSets.Length * ColorSet.RowArray.NumRows * ColorSet.Row.Size < dataSetSize)
             FindOrAddColorDyeSet();
 
-        var dataSetEnd = stream.Position + dataSetSize;
-        for (var i = 0; i < ColorSets.Length; ++i)
         {
-            if ((colorSetFlags & 0x04) != 0 && stream.Position + ColorSet.RowArray.NumRows * ColorSet.Row.Size <= dataSetEnd)
+            var dataSet = r.SliceFromHere(dataSetSize);
+            for (var i = 0; i < ColorSets.Length; ++i)
             {
-                ColorSets[i].Rows    = r.ReadStructure<ColorSet.RowArray>();
-                ColorSets[i].HasRows = true;
+                if ((colorSetFlags & 0x04) != 0 && dataSet.Remaining >= ColorSet.RowArray.NumRows * ColorSet.Row.Size)
+                {
+                    ColorSets[i].Rows = dataSet.Read<ColorSet.RowArray>();
+                    ColorSets[i].HasRows = true;
+                }
+                else
+                {
+                    ColorSets[i].HasRows = false;
+                }
             }
-            else
-            {
-                ColorSets[i].HasRows = false;
-            }
+
+            for (var i = 0; i < ColorDyeSets.Length; ++i)
+                ColorDyeSets[i].Rows = dataSet.Read<ColorDyeSet.RowArray>();
         }
-
-        for (var i = 0; i < ColorDyeSets.Length; ++i)
-            ColorDyeSets[i].Rows = r.ReadStructure<ColorDyeSet.RowArray>();
-
-        stream.Seek(dataSetEnd, SeekOrigin.Begin);
 
         var shaderValueListSize = r.ReadUInt16();
         var shaderKeyCount      = r.ReadUInt16();
@@ -116,10 +118,10 @@ public partial class MtrlFile : IWritable, ICloneable
         var samplerCount        = r.ReadUInt16();
         ShaderPackage.Flags = r.ReadUInt32();
 
-        ShaderPackage.ShaderKeys   = r.ReadStructuresAsArray<ShaderKey>(shaderKeyCount);
-        ShaderPackage.Constants    = r.ReadStructuresAsArray<Constant>(constantCount);
-        ShaderPackage.Samplers     = r.ReadStructuresAsArray<Sampler>(samplerCount);
-        ShaderPackage.ShaderValues = r.ReadStructuresAsArray<float>(shaderValueListSize / 4);
+        ShaderPackage.ShaderKeys   = r.Read<ShaderKey>(shaderKeyCount).ToArray();
+        ShaderPackage.Constants    = r.Read<Constant>(constantCount).ToArray();
+        ShaderPackage.Samplers     = r.Read<Sampler>(samplerCount).ToArray();
+        ShaderPackage.ShaderValues = r.Read<float>(shaderValueListSize / 4).ToArray();
     }
 
     private MtrlFile(MtrlFile original)
@@ -140,7 +142,7 @@ public partial class MtrlFile : IWritable, ICloneable
     object ICloneable.Clone()
         => new MtrlFile(this);
 
-    private static Texture[] ReadTextureOffsets(BinaryReader r, int count, out ushort[] offsets)
+    private static Texture[] ReadTextureOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
     {
         var ret = new Texture[count];
         offsets = new ushort[count];
@@ -153,7 +155,7 @@ public partial class MtrlFile : IWritable, ICloneable
         return ret;
     }
 
-    private static UvSet[] ReadUvSetOffsets(BinaryReader r, int count, out ushort[] offsets)
+    private static UvSet[] ReadUvSetOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
     {
         var ret = new UvSet[count];
         offsets = new ushort[count];
@@ -166,7 +168,7 @@ public partial class MtrlFile : IWritable, ICloneable
         return ret;
     }
 
-    private static ColorSet[] ReadColorSetOffsets(BinaryReader r, int count, out ushort[] offsets)
+    private static ColorSet[] ReadColorSetOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
     {
         var ret = new ColorSet[count];
         offsets = new ushort[count];
@@ -177,13 +179,6 @@ public partial class MtrlFile : IWritable, ICloneable
         }
 
         return ret;
-    }
-
-    private static string UseOffset(ReadOnlySpan<byte> strings, ushort offset)
-    {
-        strings = strings[offset..];
-        var end = strings.IndexOf((byte)'\0');
-        return Encoding.UTF8.GetString(end == -1 ? strings : strings[..end]);
     }
 
     private bool CheckTextures()
