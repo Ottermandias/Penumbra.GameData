@@ -15,8 +15,8 @@ namespace Penumbra.GameData.Files.Utility;
 /// </remarks>
 public unsafe ref struct SpanBinaryReader
 {
-    private readonly ref byte     _start;
-    private ref          byte     _pos;
+    private readonly ref byte _start;
+    private ref          byte _pos;
 
     private SpanBinaryReader(ref byte start, int length)
     {
@@ -49,7 +49,7 @@ public unsafe ref struct SpanBinaryReader
             throw new EndOfStreamException();
 
         var ret = Unsafe.ReadUnaligned<T>(ref _pos);
-        _pos = ref Unsafe.Add(ref _pos, size);
+        _pos      =  ref Unsafe.Add(ref _pos, size);
         Remaining -= size;
         return ret;
     }
@@ -62,7 +62,7 @@ public unsafe ref struct SpanBinaryReader
             throw new EndOfStreamException();
 
         var ptr = Unsafe.AsPointer(ref _pos);
-        _pos = ref Unsafe.Add(ref _pos, size);
+        _pos      =  ref Unsafe.Add(ref _pos, size);
         Remaining -= size;
         return new ReadOnlySpan<T>(ptr, num);
     }
@@ -104,7 +104,7 @@ public unsafe ref struct SpanBinaryReader
     /// <paramref name="position"/> + <paramref name="count"/> without changing the current position.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public SpanBinaryReader SliceFrom(int position, int count)
+    public readonly SpanBinaryReader SliceFrom(int position, int count)
     {
         if (position < 0 || count < 0)
             throw new ArgumentOutOfRangeException();
@@ -128,87 +128,46 @@ public unsafe ref struct SpanBinaryReader
 
         var ret = new SpanBinaryReader(ref _pos, count);
         Remaining -= count;
-        _pos = ref Unsafe.Add(ref _pos, count);
+        _pos      =  ref Unsafe.Add(ref _pos, count);
         return ret;
     }
 
     /// <summary> Read a null-terminated byte string from a given offset based off the start. Does not increment the position. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public ReadOnlySpan<byte> ReadByteString(int offset = 0)
+    public readonly ReadOnlySpan<byte> ReadByteString(int offset = 0)
     {
         if (offset < 0)
             throw new ArgumentOutOfRangeException();
         if (Length < offset)
             throw new EndOfStreamException();
 
-        var ptr    = (byte*)Unsafe.AsPointer(ref _start) + offset;
-        var length = StringLength(ptr);
-        return new ReadOnlySpan<byte>(ptr, length);
+        var span = MemoryMarshal.CreateReadOnlySpan(ref Unsafe.Add(ref _start, offset), Length - offset);
+        var idx  = span.IndexOf<byte>(0);
+        if (idx < 0)
+            throw new EndOfStreamException();
+
+        return span[..idx];
     }
 
     /// <summary> Read a byte string of known length from a given offset based off the start. Does not increment the position. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public ReadOnlySpan<byte> ReadByteString(int offset, int length)
+    public readonly ReadOnlySpan<byte> ReadByteString(int offset, int length)
     {
         if (offset < 0 || length < 0)
             throw new ArgumentOutOfRangeException();
         if (Length < offset + length)
             throw new EndOfStreamException();
 
-        var ptr = (byte*)Unsafe.AsPointer(ref _start) + offset;
-        return new ReadOnlySpan<byte>(ptr, length);
+        return MemoryMarshal.CreateReadOnlySpan(ref Unsafe.Add(ref _start, offset), length);
     }
 
     /// <summary> Read a null-terminated byte string from a given offset based off the start and convert it to a C# string. Does not increment the position. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public string ReadString(int offset = 0)
+    public readonly string ReadString(int offset = 0)
         => Encoding.UTF8.GetString(ReadByteString(offset));
 
     /// <summary> Read a byte string of known length from a given offset based off the start and convert it to a C# string. Does not increment the position. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public string ReadString(int offset, int length)
+    public readonly string ReadString(int offset, int length)
         => Encoding.UTF8.GetString(ReadByteString(offset, length));
-
-    /// <summary> Efficient string length without resorting to intrinsics. </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private static int StringLength(byte* stringPtr)
-    {
-        const ulong highMask = 0x80808080_80808080;
-        const ulong lowMask  = 0x01010101_01010101;
-
-        // Align to ulong boundary.
-        var charPtr = stringPtr;
-        for (; ((ulong)charPtr & (sizeof(ulong) - 1ul)) != 0; ++charPtr)
-        {
-            if (*charPtr == 0)
-                return (int)(charPtr - stringPtr);
-        }
-
-        var longPtr = (ulong*)charPtr;
-        while (true)
-        {
-            var values = *longPtr++;
-            if (((values - lowMask) & ~values & highMask) != 0)
-            {
-                // Which of the bytes was zero?
-                charPtr = (byte*)(longPtr - 1);
-                if (*charPtr++ == 0)
-                    return (int)(charPtr - stringPtr - 1);
-                if (*charPtr++ == 0)
-                    return (int)(charPtr - stringPtr - 1);
-                if (*charPtr++ == 0)
-                    return (int)(charPtr - stringPtr - 1);
-                if (*charPtr++ == 0)
-                    return (int)(charPtr - stringPtr - 1);
-                if (*charPtr++ == 0)
-                    return (int)(charPtr - stringPtr - 1);
-                if (*charPtr++ == 0)
-                    return (int)(charPtr - stringPtr - 1);
-                if (*charPtr++ == 0)
-                    return (int)(charPtr - stringPtr - 1);
-                if (*charPtr == 0)
-                    return (int)(charPtr - stringPtr);
-            }
-        }
-    }
 }
