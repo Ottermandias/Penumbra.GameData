@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Newtonsoft.Json.Linq;
 using Penumbra.GameData.Structs;

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Dalamud;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin;

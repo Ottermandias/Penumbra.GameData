@@ -1,5 +1,3 @@
-using System;
-using System.ComponentModel;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;

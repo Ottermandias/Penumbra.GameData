@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-
-namespace Penumbra.GameData.Files.Utility;
+﻿namespace Penumbra.GameData.Files.Utility;
 
 public class StringPool : IDisposable
 {

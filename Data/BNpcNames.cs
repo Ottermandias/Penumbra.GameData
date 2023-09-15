@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace Penumbra.GameData.Data;
 
 public static class NpcNames

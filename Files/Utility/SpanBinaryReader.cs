@@ -1,10 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-
-namespace Penumbra.GameData.Files.Utility;
+﻿namespace Penumbra.GameData.Files.Utility;
 
 /// <summary>
 /// Equivalent to <see cref="BinaryReader"/>, but for <see cref="ReadOnlySpan{Byte}"/>.

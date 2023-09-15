@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace Penumbra.GameData.Structs;
 
 public struct GmpEntry : IEquatable<GmpEntry>

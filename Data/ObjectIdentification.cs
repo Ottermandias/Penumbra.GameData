@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Concurrent;
 using Dalamud;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Logging;
 using Dalamud.Plugin;

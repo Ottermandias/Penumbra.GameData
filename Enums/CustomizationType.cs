@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.ComponentModel;
-
 namespace Penumbra.GameData.Enums;
 
 public enum CustomizationType : byte

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using static Penumbra.GameData.Enums.GenderRace;
 
 namespace Penumbra.GameData.Enums;

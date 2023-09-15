@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace Penumbra.GameData.Enums;
 
 public enum RspAttribute : byte

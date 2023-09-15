@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Numerics;
 using Dalamud.Plugin.Services;
 using Penumbra.GameData.Structs;
 

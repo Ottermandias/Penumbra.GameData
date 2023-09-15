@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Dalamud;
 using Dalamud.Logging;
 using Dalamud.Plugin;

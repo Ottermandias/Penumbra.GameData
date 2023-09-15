@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;

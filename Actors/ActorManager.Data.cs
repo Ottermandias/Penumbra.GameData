@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;

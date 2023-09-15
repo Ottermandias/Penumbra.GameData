@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using Dalamud.Memory;
 
 namespace Penumbra.GameData.Files;
@@ -240,6 +235,7 @@ public class TmbFile
                 var (unk1, luaCount) = Parse2<uint>(ref dataPos);
                 if (unk1 != 8)
                     throw new Exception($"Lua entry is not correct: {unk1} should be 8.");
+
                 entry.ExtraSize = 8 + 12 * luaCount;
             }
 

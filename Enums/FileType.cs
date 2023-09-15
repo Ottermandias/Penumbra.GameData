@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Penumbra.GameData.Enums;
 
 public enum FileType : byte

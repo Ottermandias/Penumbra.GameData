@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
 using FFXIVClientStructs.FFXIV.Client.System.Resource;
 using Penumbra.String;
 using Penumbra.String.Functions;

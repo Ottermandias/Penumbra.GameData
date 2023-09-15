@@ -1,4 +1,3 @@
-using System.IO;
 using Penumbra.GameData.Files.Utility;
 
 namespace Penumbra.GameData.Files;

@@ -1,7 +1,3 @@
-using System;
-using System.ComponentModel;
-using System.IO;
-using System.Runtime.InteropServices;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;

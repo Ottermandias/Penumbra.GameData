@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Linq;
 using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;

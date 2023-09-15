@@ -1,4 +1,3 @@
-using System;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.Api.Enums;

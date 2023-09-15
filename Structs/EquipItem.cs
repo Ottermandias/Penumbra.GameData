@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Dalamud.Utility;
+﻿using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Enums;
 using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, byte>;

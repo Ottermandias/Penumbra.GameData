@@ -1,5 +1,3 @@
-using System;
-using System.Numerics;
 using Newtonsoft.Json;
 using Penumbra.GameData.Actors;
 using Penumbra.GameData.Enums;

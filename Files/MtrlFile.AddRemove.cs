@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Lumina.Data.Parsing;
 
 namespace Penumbra.GameData.Files;

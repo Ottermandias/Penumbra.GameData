@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Lumina.Data.Parsing;
 using Penumbra.GameData.Files.Utility;
 using Penumbra.GameData.Structs;
