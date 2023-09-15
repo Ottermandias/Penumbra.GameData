@@ -14,22 +14,50 @@ public partial class MtrlFile : IWritable, ICloneable
         => CheckTextures();
 
     public Texture[]         Textures;
-    public UvSet[]           UvSets;
-    public ColorSet[]        ColorSets;
-    public ColorDyeSet[]     ColorDyeSets;
+    public AttributeSet[]    UvSets;
+    public AttributeSet[]    ColorSets;
+    public ColorTable        Table;
+    public ColorDyeTable     DyeTable;
     public ShaderPackageData ShaderPackage;
     public byte[]            AdditionalData;
 
-    public bool ApplyDyeTemplate(StmFile stm, int colorSetIdx, int rowIdx, StainId stainId)
+    public byte TableFlags
     {
-        if (colorSetIdx < 0 || colorSetIdx >= ColorDyeSets.Length || rowIdx is < 0 or >= ColorSet.RowArray.NumRows)
+        get => AdditionalData.Length > 0 ? AdditionalData[0] : (byte)0;
+        set
+        {
+            if (AdditionalData.Length == 0)
+            {
+                if (value == 0)
+                    return;
+                AdditionalData = new byte[4];
+            }
+            AdditionalData[0] = value;
+        }
+    }
+
+    public bool HasTable
+    {
+        get => (TableFlags & 0x4) != 0;
+        set => TableFlags = (byte)(value ? (TableFlags | 0x4) : (TableFlags & ~0x4));
+    }
+
+    public bool HasDyeTable
+    {
+        get => (TableFlags & 0x8) != 0;
+        set => TableFlags = (byte)(value ? (TableFlags | 0x8) : (TableFlags & ~0x8));
+    }
+
+    public bool ApplyDyeTemplate(StmFile stm, int rowIdx, StainId stainId)
+    {
+        if (!HasDyeTable || rowIdx is < 0 or >= ColorTable.NumRows)
             return false;
 
-        var dyeSet = ColorDyeSets[colorSetIdx].Rows[rowIdx];
+        var dyeSet = DyeTable[rowIdx];
         if (!stm.TryGetValue(dyeSet.Template, stainId, out var dyes))
             return false;
 
-        return ColorSets[colorSetIdx].Rows[rowIdx].ApplyDyeTemplate(dyeSet, dyes);
+        return Table[rowIdx].ApplyDyeTemplate(dyeSet, dyes);
     }
 
     public Span<float> GetConstantValues(Constant constant)
@@ -71,8 +99,8 @@ public partial class MtrlFile : IWritable, ICloneable
         var additionalDataSize      = r.ReadByte();
 
         Textures  = ReadTextureOffsets(ref r, textureCount, out var textureOffsets);
-        UvSets    = ReadUvSetOffsets(ref r, uvSetCount, out var uvOffsets);
-        ColorSets = ReadColorSetOffsets(ref r, colorSetCount, out var colorOffsets);
+        UvSets    = ReadAttributeSetOffsets(ref r, uvSetCount, out var uvOffsets);
+        ColorSets = ReadAttributeSetOffsets(ref r, colorSetCount, out var colorOffsets);
 
         var strings = r.SliceFromHere(stringTableSize);
         for (var i = 0; i < textureCount; ++i)
@@ -87,29 +115,13 @@ public partial class MtrlFile : IWritable, ICloneable
         ShaderPackage.Name = strings.ReadString(shaderPackageNameOffset);
 
         AdditionalData = r.Read<byte>(additionalDataSize).ToArray();
-        var colorSetFlags = AdditionalData.Length > 0 ? AdditionalData[0] : (byte)0;
-
-        ColorDyeSets = Array.Empty<ColorDyeSet>();
-        if ((colorSetFlags & 0x08) != 0 && ColorSets.Length * ColorSet.RowArray.NumRows * ColorSet.Row.Size < dataSetSize)
-            FindOrAddColorDyeSet();
 
         {
             var dataSet = r.SliceFromHere(dataSetSize);
-            for (var i = 0; i < ColorSets.Length; ++i)
-            {
-                if ((colorSetFlags & 0x04) != 0 && dataSet.Remaining >= ColorSet.RowArray.NumRows * ColorSet.Row.Size)
-                {
-                    ColorSets[i].Rows = dataSet.Read<ColorSet.RowArray>();
-                    ColorSets[i].HasRows = true;
-                }
-                else
-                {
-                    ColorSets[i].HasRows = false;
-                }
-            }
-
-            for (var i = 0; i < ColorDyeSets.Length; ++i)
-                ColorDyeSets[i].Rows = dataSet.Read<ColorDyeSet.RowArray>();
+            if (HasTable && dataSet.Remaining >= ColorTable.NumRows * ColorTable.Row.Size)
+                Table = dataSet.Read<ColorTable>();
+            if (HasDyeTable && dataSet.Remaining >= ColorDyeTable.NumRows * ColorDyeTable.Row.Size)
+                DyeTable = dataSet.Read<ColorDyeTable>();
         }
 
         var shaderValueListSize = r.ReadUInt16();
@@ -129,9 +141,10 @@ public partial class MtrlFile : IWritable, ICloneable
         Version = original.Version;
 
         Textures       = (Texture[])original.Textures.Clone();
-        UvSets         = (UvSet[])original.UvSets.Clone();
-        ColorSets      = (ColorSet[])original.ColorSets.Clone();
-        ColorDyeSets   = (ColorDyeSet[])original.ColorDyeSets.Clone();
+        UvSets         = (AttributeSet[])original.UvSets.Clone();
+        ColorSets      = (AttributeSet[])original.ColorSets.Clone();
+        Table          = original.Table;
+        DyeTable       = original.DyeTable;
         ShaderPackage  = original.ShaderPackage.Clone();
         AdditionalData = (byte[])original.AdditionalData.Clone();
     }
@@ -155,22 +168,9 @@ public partial class MtrlFile : IWritable, ICloneable
         return ret;
     }
 
-    private static UvSet[] ReadUvSetOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
+    private static AttributeSet[] ReadAttributeSetOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
     {
-        var ret = new UvSet[count];
-        offsets = new ushort[count];
-        for (var i = 0; i < count; ++i)
-        {
-            offsets[i]   = r.ReadUInt16();
-            ret[i].Index = r.ReadUInt16();
-        }
-
-        return ret;
-    }
-
-    private static ColorSet[] ReadColorSetOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
-    {
-        var ret = new ColorSet[count];
+        var ret = new AttributeSet[count];
         offsets = new ushort[count];
         for (var i = 0; i < count; ++i)
         {
@@ -184,7 +184,7 @@ public partial class MtrlFile : IWritable, ICloneable
     private bool CheckTextures()
         => Textures.All(texture => texture.Path.Contains('/'));
 
-    public struct UvSet
+    public struct AttributeSet
     {
         public string Name;
         public ushort Index;

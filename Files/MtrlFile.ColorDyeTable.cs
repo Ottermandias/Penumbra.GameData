@@ -6,10 +6,12 @@ namespace Penumbra.GameData.Files;
 
 public partial class MtrlFile
 {
-    public unsafe struct ColorDyeSet
+    public unsafe struct ColorDyeTable : IEnumerable<ColorDyeTable.Row>
     {
         public struct Row
         {
+            public const int Size = 2;
+
             private ushort _data;
 
             public ushort Template
@@ -49,42 +51,35 @@ public partial class MtrlFile
             }
         }
 
-        public struct RowArray : IEnumerable<Row>
+        public const  int    NumRows = 16;
+        private fixed ushort _rowData[NumRows];
+
+        public ref Row this[int i]
         {
-            public const  int    NumRows = 16;
-            private fixed ushort _rowData[NumRows];
-
-            public ref Row this[int i]
-            {
-                get
-                {
-                    fixed (ushort* ptr = _rowData)
-                    {
-                        return ref ((Row*)ptr)[i];
-                    }
-                }
-            }
-
-            public IEnumerator<Row> GetEnumerator()
-            {
-                for (var i = 0; i < NumRows; ++i)
-                    yield return this[i];
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-                => GetEnumerator();
-
-            public ReadOnlySpan<byte> AsBytes()
+            get
             {
                 fixed (ushort* ptr = _rowData)
                 {
-                    return new ReadOnlySpan<byte>(ptr, NumRows * sizeof(ushort));
+                    return ref ((Row*)ptr)[i];
                 }
             }
         }
 
-        public RowArray Rows;
-        public string   Name;
-        public ushort   Index;
+        public IEnumerator<Row> GetEnumerator()
+        {
+            for (var i = 0; i < NumRows; ++i)
+                yield return this[i];
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
+
+        public ReadOnlySpan<byte> AsBytes()
+        {
+            fixed (ushort* ptr = _rowData)
+            {
+                return new ReadOnlySpan<byte>(ptr, NumRows * sizeof(ushort));
+            }
+        }
     }
 }

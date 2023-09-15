@@ -14,7 +14,7 @@ public partial class ShpkFile
 
         using var stream  = new MemoryStream();
         using var blobs   = new MemoryStream();
-        var       strings = new StringPool();
+        using var strings = new StringPool();
         var       aliases = new Dictionary<uint, uint>(NodeSelectors);
 
         foreach (var node in Nodes)

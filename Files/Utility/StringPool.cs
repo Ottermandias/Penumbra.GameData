@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 
 namespace Penumbra.GameData.Files.Utility;
-public class StringPool
+public class StringPool : IDisposable
 {
     public readonly MemoryStream Data;
     public readonly List<int>    StartingOffsets;
@@ -37,6 +37,9 @@ public class StringPool
         else
             Data.WriteByte(0);
     }
+
+    public void Dispose()
+        => Data.Dispose();
 
     public ReadOnlySpan<byte> AsSpan()
         => Data.GetBuffer().AsSpan()[..(int)Data.Length];

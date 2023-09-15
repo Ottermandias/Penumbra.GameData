@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Lumina.Data.Parsing;
 
 namespace Penumbra.GameData.Files;
@@ -75,74 +74,6 @@ public partial class MtrlFile
     public ref Sampler GetOrAddSampler(uint id, string defaultTexture)
         => ref GetOrAddSampler(id, defaultTexture, out _);
 
-    public int FindOrAddColorSet()
-    {
-        if (UtilityFunctions.FindIndex(ColorSets, c => c.HasRows, out var idx))
-            return idx;
-
-        if (ColorSets.Length > 0)
-            ColorSets[0].HasRows = true;
-        else
-        {
-            ColorSets = new[]
-            {
-                new ColorSet
-                {
-                    Name    = "colorSet1",
-                    Index   = 0,
-                    HasRows = true,
-                },
-            };
-        }
-
-        ref var rows = ref ColorSets[0].Rows;
-        for (var i = 0; i < ColorSet.RowArray.NumRows; ++i)
-            rows[i] = ColorSet.Row.Default;
-
-        if (AdditionalData.Length < 4)
-            AdditionalData = AdditionalData.AddItem((byte)0, 4 - AdditionalData.Length);
-        AdditionalData[0] |= 0x04;
-
-        return 0;
-    }
-
-    public ref ColorSet GetOrAddColorSet(out int i)
-    {
-        i = FindOrAddColorSet();
-        return ref ColorSets[i];
-    }
-
-    public ref ColorSet GetOrAddColorSet()
-        => ref GetOrAddColorSet(out _);
-
-    public int FindOrAddColorDyeSet()
-    {
-        var i = FindOrAddColorSet();
-        if (i < ColorDyeSets.Length)
-            return i;
-
-        ColorDyeSets = ColorSets.Select(c => new ColorDyeSet
-        {
-            Index = c.Index,
-            Name  = c.Name,
-        }).ToArray();
-
-        if (AdditionalData.Length < 4)
-            AdditionalData = AdditionalData.AddItem((byte)0, 4 - AdditionalData.Length);
-        AdditionalData[0] |= 0x08;
-
-        return i;
-    }
-
-    public ref ColorDyeSet GetOrAddColorDyeSet(out int i)
-    {
-        i = FindOrAddColorDyeSet();
-        return ref ColorDyeSets[i];
-    }
-
-    public ref ColorDyeSet GetOrAddColorDyeSet()
-        => ref GetOrAddColorDyeSet(out _);
-
     public int FindShaderKey(uint category)
         => UtilityFunctions.IndexOf(ShaderPackage.ShaderKeys, c => c.Category == category);
 
@@ -179,7 +110,7 @@ public partial class MtrlFile
     public ref ShaderKey GetOrAddShaderKey(uint category, uint defaultValue)
         => ref GetOrAddShaderKey(category, defaultValue, out _);
 
-    public void GarbageCollect(ShpkFile? shpk, IReadOnlySet<uint> keepSamplers, bool keepColorDyeSet)
+    public void GarbageCollect(ShpkFile? shpk, IReadOnlySet<uint> keepSamplers)
     {
         static bool ShallKeepConstant(MtrlFile mtrl, ShpkFile shpk, Constant constant)
         {
@@ -195,19 +126,10 @@ public partial class MtrlFile
         }
 
         if (!keepSamplers.Contains(ShpkFile.TableSamplerId))
-        {
-            for (var i = 0; i < ColorSets.Length; i++)
-                ColorSets[i].HasRows = false;
-            ColorDyeSets = Array.Empty<ColorDyeSet>();
-            if (AdditionalData.Length > 0)
-                AdditionalData[0] &= unchecked((byte)~0x0C);
-        }
-        else if (!keepColorDyeSet)
-        {
-            ColorDyeSets = Array.Empty<ColorDyeSet>();
-            if (AdditionalData.Length > 0)
-                AdditionalData[0] &= unchecked((byte)~0x08);
-        }
+            HasTable = false;
+
+        if (!HasTable)
+            HasDyeTable = false;
 
         for (var i = ShaderPackage.Samplers.Length; i-- > 0;)
             if (!keepSamplers.Contains(ShaderPackage.Samplers[i].SamplerId))

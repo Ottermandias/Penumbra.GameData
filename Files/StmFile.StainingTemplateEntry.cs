@@ -17,7 +17,7 @@ public partial class StmFile
         /// </summary>
         public const int NumElements = 128;
 
-        // ColorSet row information for each stain.
+        // ColorTable row information for each stain.
         public readonly IReadOnlyList<(Half R, Half G, Half B)> DiffuseEntries;
         public readonly IReadOnlyList<(Half R, Half G, Half B)> SpecularEntries;
         public readonly IReadOnlyList<(Half R, Half G, Half B)> EmissiveEntries;
