@@ -183,5 +183,11 @@ public partial class MtrlFile
                 return new Span<Half>((Half*)ptr, NumRows * 16);
             }
         }
+
+        public void SetDefault()
+        {
+            for (var i = 0; i < NumRows; ++i)
+                this[i] = Row.Default;
+        }
     }
 }

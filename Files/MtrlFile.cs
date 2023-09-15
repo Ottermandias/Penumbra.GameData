@@ -19,7 +19,7 @@ public partial class MtrlFile : IWritable, ICloneable
     public ShaderPackageData ShaderPackage;
     public byte[]            AdditionalData;
 
-    public byte TableFlags
+    private byte TableFlags
     {
         get => AdditionalData.Length > 0 ? AdditionalData[0] : (byte)0;
         set
@@ -119,6 +119,8 @@ public partial class MtrlFile : IWritable, ICloneable
             var dataSet = r.SliceFromHere(dataSetSize);
             if (HasTable && dataSet.Remaining >= ColorTable.NumRows * ColorTable.Row.Size)
                 Table = dataSet.Read<ColorTable>();
+            else
+                Table.SetDefault();
             if (HasDyeTable && dataSet.Remaining >= ColorDyeTable.NumRows * ColorDyeTable.Row.Size)
                 DyeTable = dataSet.Read<ColorDyeTable>();
         }
