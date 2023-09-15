@@ -148,7 +148,6 @@ public partial class MtrlFile
 
             private static ushort FromFloat(float x)
                 => BitConverter.HalfToUInt16Bits((Half)x);
-
         }
 
         public const  int  NumRows = 16;

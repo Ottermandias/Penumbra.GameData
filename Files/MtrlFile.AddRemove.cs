@@ -18,6 +18,7 @@ public partial class MtrlFile
         var offset = ShaderPackage.ShaderValues.Length;
         if (offset >= 0x4000 || numFloats >= 0x4000)
             throw new InvalidOperationException("Constant capacity exceeded");
+
         ShaderPackage.ShaderValues = ShaderPackage.ShaderValues.AddItem(0.0f, numFloats);
 
         var newI = ShaderPackage.Constants.Length;
@@ -48,6 +49,7 @@ public partial class MtrlFile
         var newTextureI = Textures.Length;
         if (newTextureI >= 0x100)
             throw new InvalidOperationException("Sampler capacity exceeded");
+
         Textures = Textures.AddItem(new Texture
         {
             Path  = defaultTexture.Length > 0 ? defaultTexture : DummyTexturePath,
@@ -80,7 +82,7 @@ public partial class MtrlFile
     public ShaderKey? GetShaderKey(uint category, out int i)
     {
         i = FindShaderKey(category);
-        return (i >= 0) ? ShaderPackage.ShaderKeys[i] : null;
+        return i >= 0 ? ShaderPackage.ShaderKeys[i] : null;
     }
 
     public ShaderKey? GetShaderKey(uint category)
@@ -116,12 +118,17 @@ public partial class MtrlFile
         {
             if ((constant.ByteOffset & 0x3) != 0 || (constant.ByteSize & 0x3) != 0)
                 return true;
+
             var shpkParam = shpk.GetMaterialParamById(constant.Id);
             if (!shpkParam.HasValue)
                 return false;
+
             foreach (var value in mtrl.GetConstantValues(constant))
+            {
                 if (value != 0.0f)
                     return true;
+            }
+
             return false;
         }
 
@@ -132,8 +139,10 @@ public partial class MtrlFile
             HasDyeTable = false;
 
         for (var i = ShaderPackage.Samplers.Length; i-- > 0;)
+        {
             if (!keepSamplers.Contains(ShaderPackage.Samplers[i].SamplerId))
                 ShaderPackage.Samplers = ShaderPackage.Samplers.RemoveItems(i);
+        }
 
         var samplersByTexture = GetSamplersByTexture(null);
         for (var i = samplersByTexture.Length; i-- > 0;)
@@ -143,8 +152,10 @@ public partial class MtrlFile
 
             Textures = Textures.RemoveItems(i);
             for (var j = 0; j < ShaderPackage.Samplers.Length; ++j)
+            {
                 if (ShaderPackage.Samplers[j].TextureIndex > i)
                     --ShaderPackage.Samplers[j].TextureIndex;
+            }
         }
 
         if (shpk == null)
@@ -152,7 +163,7 @@ public partial class MtrlFile
 
         for (var i = ShaderPackage.ShaderKeys.Length; i-- > 0;)
         {
-            var key = ShaderPackage.ShaderKeys[i];
+            var key     = ShaderPackage.ShaderKeys[i];
             var shpkKey = shpk.GetMaterialKeyById(key.Category);
             if (!shpkKey.HasValue || key.Value == shpkKey.Value.DefaultValue)
                 ShaderPackage.ShaderKeys = ShaderPackage.ShaderKeys.RemoveItems(i);
@@ -165,18 +176,21 @@ public partial class MtrlFile
             if (ShallKeepConstant(this, shpk, constant))
             {
                 var start = constant.ByteOffset >> 2;
-                var end = Math.Min((constant.ByteOffset + constant.ByteSize + 0x3) >> 2, ShaderPackage.ShaderValues.Length);
+                var end   = Math.Min((constant.ByteOffset + constant.ByteSize + 0x3) >> 2, ShaderPackage.ShaderValues.Length);
                 for (var j = start; j < end; j++)
                     usedValues[j] = true;
             }
             else
+            {
                 ShaderPackage.Constants = ShaderPackage.Constants.RemoveItems(i);
+            }
         }
 
         for (var i = ShaderPackage.ShaderValues.Length; i-- > 0;)
         {
             if (usedValues[i])
                 continue;
+
             var end = i + 1;
             while (i >= 0 && !usedValues[i])
                 --i;
@@ -185,8 +199,10 @@ public partial class MtrlFile
             var byteStart = (ushort)(i << 2);
             var byteShift = (ushort)((end - i) << 2);
             for (var j = 0; j < ShaderPackage.Constants.Length; ++j)
+            {
                 if (ShaderPackage.Constants[j].ByteOffset > byteStart)
                     ShaderPackage.Constants[j].ByteOffset -= byteShift;
+            }
         }
     }
 }

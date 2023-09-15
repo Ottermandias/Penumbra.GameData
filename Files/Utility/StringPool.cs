@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 
 namespace Penumbra.GameData.Files.Utility;
+
 public class StringPool : IDisposable
 {
     public readonly MemoryStream Data;
@@ -14,8 +15,8 @@ public class StringPool : IDisposable
 
     public StringPool()
     {
-        Data            = new();
-        StartingOffsets = new();
+        Data            = new MemoryStream();
+        StartingOffsets = new List<int>();
     }
 
     public StringPool(ReadOnlySpan<byte> initialData)

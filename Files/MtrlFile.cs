@@ -30,8 +30,10 @@ public partial class MtrlFile : IWritable, ICloneable
             {
                 if (value == 0)
                     return;
+
                 AdditionalData = new byte[4];
             }
+
             AdditionalData[0] = value;
         }
     }
@@ -39,13 +41,13 @@ public partial class MtrlFile : IWritable, ICloneable
     public bool HasTable
     {
         get => (TableFlags & 0x4) != 0;
-        set => TableFlags = (byte)(value ? (TableFlags | 0x4) : (TableFlags & ~0x4));
+        set => TableFlags = (byte)(value ? TableFlags | 0x4 : TableFlags & ~0x4);
     }
 
     public bool HasDyeTable
     {
         get => (TableFlags & 0x8) != 0;
-        set => TableFlags = (byte)(value ? (TableFlags | 0x8) : (TableFlags & ~0x8));
+        set => TableFlags = (byte)(value ? TableFlags | 0x8 : TableFlags & ~0x8);
     }
 
     public bool ApplyDyeTemplate(StmFile stm, int rowIdx, StainId stainId)
@@ -81,8 +83,7 @@ public partial class MtrlFile : IWritable, ICloneable
 
     public MtrlFile(byte[] data)
         : this((ReadOnlySpan<byte>)data)
-    {
-    }
+    { }
 
     public MtrlFile(ReadOnlySpan<byte> data)
     {
@@ -99,7 +100,7 @@ public partial class MtrlFile : IWritable, ICloneable
         var additionalDataSize      = r.ReadByte();
 
         Textures  = ReadTextureOffsets(ref r, textureCount, out var textureOffsets);
-        UvSets    = ReadAttributeSetOffsets(ref r, uvSetCount, out var uvOffsets);
+        UvSets    = ReadAttributeSetOffsets(ref r, uvSetCount,    out var uvOffsets);
         ColorSets = ReadAttributeSetOffsets(ref r, colorSetCount, out var colorOffsets);
 
         var strings = r.SliceFromHere(stringTableSize);
