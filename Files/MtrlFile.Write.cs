@@ -1,6 +1,5 @@
 using System.IO;
-using System.Linq;
-using System.Text;
+using Penumbra.GameData.Files.Utility;
 
 namespace Penumbra.GameData.Files;
 
@@ -8,55 +7,47 @@ public partial class MtrlFile
 {
     public byte[] Write()
     {
-        using var stream = new MemoryStream();
+        using var stream  = new MemoryStream();
+        using var strings = new StringPool();
         using (var w = new BinaryWriter(stream))
         {
             const int materialHeaderSize = 4 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1;
 
             w.BaseStream.Seek(materialHeaderSize, SeekOrigin.Begin);
-            ushort cumulativeStringOffset = 0;
             foreach (var texture in Textures)
             {
-                w.Write(cumulativeStringOffset);
+                w.Write((ushort)strings.FindOrAddString(texture.Path).Offset);
                 w.Write(texture.Flags);
-                cumulativeStringOffset += (ushort)(texture.Path.Length + 1);
             }
 
             foreach (var set in UvSets)
             {
-                w.Write(cumulativeStringOffset);
+                w.Write((ushort)strings.FindOrAddString(set.Name).Offset);
                 w.Write(set.Index);
-                cumulativeStringOffset += (ushort)(set.Name.Length + 1);
             }
 
             foreach (var set in ColorSets)
             {
-                w.Write(cumulativeStringOffset);
+                w.Write((ushort)strings.FindOrAddString(set.Name).Offset);
                 w.Write(set.Index);
-                cumulativeStringOffset += (ushort)(set.Name.Length + 1);
             }
 
-            foreach (var text in Textures.Select(t => t.Path)
-                         .Concat(UvSets.Select(c => c.Name))
-                         .Concat(ColorSets.Select(c => c.Name))
-                         .Append(ShaderPackage.Name))
-            {
-                w.Write(Encoding.UTF8.GetBytes(text));
-                w.Write((byte)'\0');
-            }
+            var shaderPackageNameOffset = (ushort)strings.FindOrAddString(ShaderPackage.Name).Offset;
+
+            strings.WriteTo(stream);
 
             w.Write(AdditionalData);
             var dataSetSize = 0;
-            foreach (var row in ColorSets.Where(c => c.HasRows).Select(c => c.Rows))
+            if (HasTable)
             {
-                var span = row.AsBytes();
+                var span = Table.AsBytes();
                 w.Write(span);
                 dataSetSize += span.Length;
             }
 
-            foreach (var row in ColorDyeSets.Select(c => c.Rows))
+            if (HasTable && HasDyeTable)
             {
-                var span = row.AsBytes();
+                var span = DyeTable.AsBytes();
                 w.Write(span);
                 dataSetSize += span.Length;
             }
@@ -92,19 +83,19 @@ public partial class MtrlFile
             foreach (var value in ShaderPackage.ShaderValues)
                 w.Write(value);
 
-            WriteHeader(w, (ushort)w.BaseStream.Position, dataSetSize, cumulativeStringOffset);
+            WriteHeader(w, (ushort)w.BaseStream.Position, dataSetSize, (ushort)strings.Length, shaderPackageNameOffset);
         }
 
         return stream.ToArray();
     }
 
-    private void WriteHeader(BinaryWriter w, ushort fileSize, int dataSetSize, ushort shaderPackageNameOffset)
+    private void WriteHeader(BinaryWriter w, ushort fileSize, int dataSetSize, ushort stringPoolLength, ushort shaderPackageNameOffset)
     {
         w.BaseStream.Seek(0, SeekOrigin.Begin);
         w.Write(Version);
         w.Write(fileSize);
         w.Write((ushort)dataSetSize);
-        w.Write((ushort)(shaderPackageNameOffset + ShaderPackage.Name.Length + 1));
+        w.Write(stringPoolLength);
         w.Write(shaderPackageNameOffset);
         w.Write((byte)Textures.Length);
         w.Write((byte)UvSets.Length);
