@@ -1,5 +1,3 @@
-
-
 // ReSharper disable ShiftExpressionZeroLeftOperand
 
 namespace Penumbra.GameData.Files;
