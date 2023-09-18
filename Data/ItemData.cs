@@ -139,7 +139,7 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
         => TryGetValue(key, out var ret) ? ret : throw new IndexOutOfRangeException();
 
     public IEnumerable<(ItemId, EquipItem)> AllItems(bool main)
-        => (main ? _mainItems : _offItems).Select(i => ((ItemId) i.Key, (EquipItem)i.Value));
+        => (main ? _mainItems : _offItems).Select(i => ((ItemId)i.Key, (EquipItem)i.Value));
 
     public int TotalItemCount(bool main)
         => main ? _mainItems.Count : _offItems.Count;

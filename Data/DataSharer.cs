@@ -61,7 +61,7 @@ public abstract class DataSharer : IDisposable
         var ret2 = PluginInterface.GetOrCreateData(tag, () => ret);
         if (!ReferenceEquals(ret, ret2))
             return Task.FromResult(ret2);
-        
+
         return Task.Run(() =>
         {
             fill(ret2);

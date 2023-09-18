@@ -55,6 +55,7 @@ internal sealed class EquipmentIdentificationList : KeyList<PseudoEquipItem>
     private static IEnumerable<PseudoEquipItem> CustomList
         => new[]
         {
+            // @formatter:off
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)8100, (WeaponType)0, 01, FullEquipType.Body,  "Reaper Shroud"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)9041, (WeaponType)0, 01, FullEquipType.Head,  "Cid's Bandana (9041)"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)9041, (WeaponType)0, 01, FullEquipType.Body,  "Cid's Body (9041)"),
@@ -66,9 +67,9 @@ internal sealed class EquipmentIdentificationList : KeyList<PseudoEquipItem>
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)9212, (WeaponType)0, 12, FullEquipType.Body,  "Ancient Robes (Lahabrea)"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)9212, (WeaponType)0, 01, FullEquipType.Legs,  "Ancient Legs"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (SetId)9212, (WeaponType)0, 01, FullEquipType.Feet,  "Ancient Shoes"),
-
-            (PseudoEquipItem)EquipItem.FromIds(0, 40672, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head,  "Veil of Eternal Innocence (Long)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 40673, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head,  "Veil of Eternal Passion (Long)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 40674, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head,  "Veil of Eternal Devotion (Long)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 40672, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head, "Veil of Eternal Innocence (Long)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 40673, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head, "Veil of Eternal Passion (Long)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 40674, (SetId)0199, (WeaponType)0, 01, FullEquipType.Head, "Veil of Eternal Devotion (Long)"),
+            // @formatter:on
         };
 }
