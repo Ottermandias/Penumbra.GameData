@@ -381,6 +381,9 @@ public sealed partial class ActorManager : IDisposable
 
     private readonly Func<ushort, short> _toParentIdx;
 
+    public short ToCutsceneParent(ushort index)
+        => _toParentIdx(index);
+
     [Signature(Sigs.InspectTitleId, ScanType = ScanType.StaticAddress)]
     private static unsafe ushort* _inspectTitleId = null!;
 
