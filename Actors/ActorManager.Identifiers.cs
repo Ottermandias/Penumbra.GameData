@@ -587,7 +587,7 @@ public partial class ActorManager
         if (index > ObjectIndex.Card8)
             return index.Index < _objects.Length;
 
-        return false;
+        return index < ObjectIndex.CharacterScreen;
     }
 
     /// <summary> Verify that the object kind is a valid owned object, and the corresponding data Id. </summary>
