@@ -1,5 +1,6 @@
 ﻿using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
+using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, byte>;
 
@@ -97,6 +98,8 @@ public readonly struct EquipItem
         FullEquipType equipType = FullEquipType.Unknown, string? name = null)
     {
         name ??= $"Unknown ({modelId}-{(type.Id != 0 ? $"{type}-" : string.Empty)}{variant})";
+        if (equipType is FullEquipType.Unknown && type.Id != 0)
+            equipType = ItemData.ConvertWeaponId(modelId);
         var fullId = itemId.Id is 0
             ? new CustomItemId(modelId, type, variant, equipType)
             : (CustomItemId)itemId;
@@ -107,6 +110,9 @@ public readonly struct EquipItem
     public static EquipItem FromId(CustomItemId id)
     {
         var (setId, weaponType, variant, equipType) = id.Split;
+        if (equipType == FullEquipType.Unknown && weaponType.Id != 0)
+            equipType = ItemData.ConvertWeaponId(setId);
+
         return new EquipItem($"Unknown ({setId}-{(weaponType.Id != 0 ? $"{weaponType}-" : string.Empty)}{variant})", id, 0, setId, weaponType,
             variant, equipType);
     }
