@@ -49,7 +49,7 @@ public sealed class RestrictedGear : DataSharer
     {
         var quad = armor.Set.Id | ((uint)armor.Variant.Id << 16);
         // Check racial gear, this does not need slots.
-        if (RaceGenderGroup.Contains(quad))
+        if (RaceGenderGroup.Contains(quad) && slot.IsEquipment())
         {
             var idx   = ((int)race - 1) * 2 + (gender is Gender.Female or Gender.FemaleNpc ? 1 : 0);
             var value = RaceGenderGroup[idx];
