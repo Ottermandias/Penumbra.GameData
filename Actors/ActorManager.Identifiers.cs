@@ -242,6 +242,7 @@ public partial class ActorManager
             case "npc":
                 type             = IdentifierType.Npc;
                 (kind, objectId) = ParseNpc(split[1]);
+                worldId          = WorldId.AnyWorld;
                 break;
             case "o":
             case "owned":
