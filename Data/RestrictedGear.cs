@@ -116,6 +116,10 @@ public sealed class RestrictedGear : DataSharer
         var unhandled = 0;
         foreach (var item in _items.Where(i => i.EquipRestriction == 2))
         {
+            // Skip Scion Chronocler's Ringbands as they are not actually restricted.
+            if (item.RowId == 13700)
+                continue;
+
             if (m2f.ContainsKey((uint)item.ModelMain | ((uint)((EquipSlot)item.EquipSlotCategory.Row).ToSlot() << 24)))
                 continue;
 
@@ -363,7 +367,6 @@ public sealed class RestrictedGear : DataSharer
         AddItem(m2f, f2m, 13698, 10035, true, false); // Scion Thaumaturge's Gaskins                 -> The Emperor's New Breeches
         AddItem(m2f, f2m, 13699, 30065);              // Scion Thaumaturge's Moccasins              <-> Scion Sorceress's High Boots
         AddItem(m2f, f2m, 13327, 15942);              // Scion Chronocler's Cowl                    <-> Scion Healer's Robe
-        AddItem(m2f, f2m, 13700, 10034, true, false); // Scion Chronocler's Ringbands                -> The Emperor's New Gloves
         AddItem(m2f, f2m, 13701, 15943);              // Scion Chronocler's Tights                  <-> Scion Healer's Halftights
         AddItem(m2f, f2m, 13702, 15944);              // Scion Chronocler's Caligae                 <-> Scion Healer's Highboots
         AddItem(m2f, f2m, 14861, 13324);              // Head Engineer's Goggles                    <-> Scion Striker's Visor
