@@ -19,7 +19,7 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
 {
     public const int IdentificationVersion = 5;
 
-    public           IGamePathParser                                                       GamePathParser { get; } = new GamePathParser();
+    public           IGamePathParser                                                       GamePathParser { get; }
     public readonly  IReadOnlyList<IReadOnlyList<uint>>                                    BnpcNames;
     public readonly  IReadOnlyList<IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>> ModelCharaToObjects;
     public readonly  IReadOnlyDictionary<string, IReadOnlyList<Action>>                    Actions;
@@ -36,16 +36,18 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
     private readonly WeaponIdentificationList    _weapons;
     private readonly ModelIdentificationList     _modelIdentifierToModelChara;
 
-    public ObjectIdentification(DalamudPluginInterface pluginInterface, IDataManager dataManager, ItemData itemData, ClientLanguage language)
-        : base(pluginInterface, language, IdentificationVersion)
+    public ObjectIdentification(DalamudPluginInterface pluginInterface, IDataManager dataManager, ItemData itemData, ClientLanguage language,
+        IPluginLog log)
+        : base(pluginInterface, language, IdentificationVersion, log)
     {
-        _actorData = new ActorManager.ActorManagerData(pluginInterface, dataManager, language);
-        _equipment = new EquipmentIdentificationList(pluginInterface, language, itemData);
-        _weapons   = new WeaponIdentificationList(pluginInterface, language, itemData);
-        Actions    = TryCatchData("Actions", () => CreateActionList(dataManager));
-        Emotes     = TryCatchData("Emotes",  () => CreateEmoteList(dataManager));
+        GamePathParser = new GamePathParser(log);
+        _actorData     = new ActorManager.ActorManagerData(pluginInterface, dataManager, language, log);
+        _equipment     = new EquipmentIdentificationList(pluginInterface, language, itemData, log);
+        _weapons       = new WeaponIdentificationList(pluginInterface, language, itemData, log);
+        Actions        = TryCatchData("Actions", () => CreateActionList(dataManager));
+        Emotes         = TryCatchData("Emotes",  () => CreateEmoteList(dataManager));
 
-        _modelIdentifierToModelChara = new ModelIdentificationList(pluginInterface, language, dataManager);
+        _modelIdentifierToModelChara = new ModelIdentificationList(pluginInterface, language, dataManager, log);
         BnpcNames                    = TryCatchData("BNpcNames",    NpcNames.CreateNames);
         ModelCharaToObjects          = TryCatchData("ModelObjects", () => CreateModelObjects(_actorData, dataManager, language));
     }
@@ -204,7 +206,7 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.Warning($"Unknown Error while creating data:\n{ex}");
+                    Log.Warning($"Unknown Error while creating data:\n{ex}");
                 }
             }
         }

@@ -26,8 +26,8 @@ public sealed class RestrictedGear : DataSharer
     public readonly IReadOnlyDictionary<uint, uint> MaleToFemale;
     public readonly IReadOnlyDictionary<uint, uint> FemaleToMale;
 
-    public RestrictedGear(DalamudPluginInterface pi, ClientLanguage language, IDataManager gameData)
-        : base(pi, language, 2)
+    public RestrictedGear(DalamudPluginInterface pi, ClientLanguage language, IDataManager gameData, IPluginLog log)
+        : base(pi, language, 2, log)
     {
         _items                                      = gameData.GetExcelSheet<Item>()!;
         _categories                                 = gameData.GetExcelSheet<EquipRaceCategory>()!;
@@ -85,7 +85,7 @@ public sealed class RestrictedGear : DataSharer
     private void UnhandledRestrictedGear(IReadOnlySet<uint> rg, Dictionary<uint, uint> m2f, Dictionary<uint, uint> f2m, bool print)
     {
         if (print)
-            PluginLog.Information("#### MALE ONLY ######");
+            Log.Information("#### MALE ONLY ######");
 
         void AddEmperor(Item item, bool male, bool female)
         {
@@ -127,11 +127,11 @@ public sealed class RestrictedGear : DataSharer
             AddEmperor(item, true, false);
 
             if (print)
-                PluginLog.Information($"{item.RowId:D5} {item.Name.ToDalamudString().TextValue}");
+                Log.Information($"{item.RowId:D5} {item.Name.ToDalamudString().TextValue}");
         }
 
         if (print)
-            PluginLog.Information("#### FEMALE ONLY ####");
+            Log.Information("#### FEMALE ONLY ####");
         foreach (var item in _items.Where(i => i.EquipRestriction == 3))
         {
             if (f2m.ContainsKey((uint)item.ModelMain | ((uint)((EquipSlot)item.EquipSlotCategory.Row).ToSlot() << 24)))
@@ -141,11 +141,11 @@ public sealed class RestrictedGear : DataSharer
             AddEmperor(item, false, true);
 
             if (print)
-                PluginLog.Information($"{item.RowId:D5} {item.Name.ToDalamudString().TextValue}");
+                Log.Information($"{item.RowId:D5} {item.Name.ToDalamudString().TextValue}");
         }
 
         if (print)
-            PluginLog.Information("#### OTHER #########");
+            Log.Information("#### OTHER #########");
 
         foreach (var item in _items.Where(i => i.EquipRestriction > 3))
         {
@@ -154,12 +154,12 @@ public sealed class RestrictedGear : DataSharer
 
             ++unhandled;
             if (print)
-                PluginLog.Information(
+                Log.Information(
                     $"{item.RowId:D5} {item.Name.ToDalamudString().TextValue} RestrictionGroup {_categories.GetRow(item.EquipRestriction)!.RowId:D2}");
         }
 
         if (unhandled > 0)
-            PluginLog.Warning($"There were {unhandled} restricted items not handled and directed to Emperor's New Set.");
+            Log.Warning($"There were {unhandled} restricted items not handled and directed to Emperor's New Set.");
     }
 
     // Add a item redirection by its item - NOT MODEL - id.
@@ -176,19 +176,19 @@ public sealed class RestrictedGear : DataSharer
         var fItem = _items.GetRow(itemIdFemale);
         if (mItem == null || fItem == null)
         {
-            PluginLog.Warning($"Could not add item {itemIdMale} or {itemIdFemale} to restricted items.");
+            Log.Warning($"Could not add item {itemIdMale} or {itemIdFemale} to restricted items.");
             return;
         }
 
         if (mItem.EquipRestriction != 2 && addMale)
         {
-            PluginLog.Warning($"{mItem.Name.ToDalamudString().TextValue} is not restricted anymore.");
+            Log.Warning($"{mItem.Name.ToDalamudString().TextValue} is not restricted anymore.");
             return;
         }
 
         if (fItem.EquipRestriction != 3 && addFemale)
         {
-            PluginLog.Warning($"{fItem.Name.ToDalamudString().TextValue} is not restricted anymore.");
+            Log.Warning($"{fItem.Name.ToDalamudString().TextValue} is not restricted anymore.");
             return;
         }
 
@@ -196,13 +196,13 @@ public sealed class RestrictedGear : DataSharer
         var fSlot = ((EquipSlot)fItem.EquipSlotCategory.Row).ToSlot();
         if (!mSlot.IsAccessory() && !mSlot.IsEquipment())
         {
-            PluginLog.Warning($"{mItem.Name.ToDalamudString().TextValue} is not equippable to a known slot.");
+            Log.Warning($"{mItem.Name.ToDalamudString().TextValue} is not equippable to a known slot.");
             return;
         }
 
         if (mSlot != fSlot)
         {
-            PluginLog.Warning($"{mItem.Name.ToDalamudString().TextValue} and {fItem.Name.ToDalamudString().TextValue} are not compatible.");
+            Log.Warning($"{mItem.Name.ToDalamudString().TextValue} and {fItem.Name.ToDalamudString().TextValue} are not compatible.");
             return;
         }
 

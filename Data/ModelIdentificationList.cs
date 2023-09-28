@@ -11,8 +11,8 @@ internal sealed class ModelIdentificationList : KeyList<ModelChara>
 {
     private const string Tag = "ModelIdentification";
 
-    public ModelIdentificationList(DalamudPluginInterface pi, ClientLanguage language, IDataManager gameData)
-        : base(pi, Tag, language, ObjectIdentification.IdentificationVersion, CreateModelList(gameData, language))
+    public ModelIdentificationList(DalamudPluginInterface pi, ClientLanguage language, IDataManager gameData, IPluginLog log)
+        : base(pi, Tag, language, ObjectIdentification.IdentificationVersion, CreateModelList(gameData, language), log)
     { }
 
     public IEnumerable<ModelChara> Between(CharacterBase.ModelType type, SetId modelId, byte modelBase = 0, Variant variant = default)

@@ -1,5 +1,6 @@
 using Dalamud;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 
 namespace Penumbra.GameData.Data;
 
@@ -79,14 +80,14 @@ public abstract class KeyList<T>
     /// </summary>
     protected abstract int ValueKeySelector(T data);
 
-    protected KeyList(DalamudPluginInterface pi, string tag, ClientLanguage language, int version, IEnumerable<T> data)
+    protected KeyList(DalamudPluginInterface pi, string tag, ClientLanguage language, int version, IEnumerable<T> data, IPluginLog log)
     {
         _list = DataSharer.TryCatchData(pi, tag, language, version,
             () => data.SelectMany(d => ToKeys(d).Select(k => (k, d)))
                 .Where(p => ValidKey(p.k))
                 .OrderBy(p => p.k)
                 .ThenBy(p => ValueKeySelector(p.d))
-                .ToList());
+                .ToList(), log);
     }
 
     private class Comparer : IComparer<(ulong, T)>
