@@ -1,4 +1,5 @@
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 
@@ -6,6 +7,11 @@ namespace Penumbra.GameData.Data;
 
 public class GamePathParser : IGamePathParser
 {
+    private readonly IPluginLog _log;
+
+    public GamePathParser(IPluginLog log)
+        => _log = log;
+
     /// <summary> Obtain basic information about a file path. </summary>
     public GameObjectInfo GetFileInfo(string path)
     {
@@ -36,7 +42,7 @@ public class GamePathParser : IGamePathParser
         }
         catch (Exception e)
         {
-            PluginLog.Error($"Could not parse {path}:\n{e}");
+            _log.Error($"Could not parse {path}:\n{e}");
         }
 
         return new GameObjectInfo

@@ -1,5 +1,6 @@
 using Dalamud;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, byte>;
@@ -10,8 +11,8 @@ internal sealed class EquipmentIdentificationList : KeyList<PseudoEquipItem>
 {
     private const string Tag = "EquipmentIdentification";
 
-    public EquipmentIdentificationList(DalamudPluginInterface pi, ClientLanguage language, ItemData data)
-        : base(pi, Tag, language, ObjectIdentification.IdentificationVersion, CreateEquipmentList(data))
+    public EquipmentIdentificationList(DalamudPluginInterface pi, ClientLanguage language, ItemData data, IPluginLog log)
+        : base(pi, Tag, language, ObjectIdentification.IdentificationVersion, CreateEquipmentList(data), log)
     { }
 
     public IEnumerable<EquipItem> Between(SetId modelId, EquipSlot slot = EquipSlot.Unknown, Variant variant = default)

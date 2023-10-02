@@ -93,8 +93,8 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
         return dict;
     }
 
-    public ItemData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language)
-        : base(pluginInterface, language, 4)
+    public ItemData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language, IPluginLog log)
+        : base(pluginInterface, language, 4, log)
     {
         _byType                  = TryCatchData("ItemList",     () => CreateItems(dataManager, language));
         (_mainItems, _gauntlets) = TryCatchData("ItemDictMain", () => CreateMainItems(_byType));

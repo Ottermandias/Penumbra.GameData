@@ -39,8 +39,8 @@ public sealed partial class ActorManager : IDisposable
         /// <summary> Valid ENPC names in title case by ENPC id. </summary>
         public IReadOnlyDictionary<uint, string> ENpcs { get; }
 
-        public ActorManagerData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language)
-            : base(pluginInterface, language, 4)
+        public ActorManagerData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language, IPluginLog log)
+            : base(pluginInterface, language, 4, log)
         {
             var worldTask      = TryCatchDataAsync("Worlds",     CreateWorldData(gameData));
             var mountsTask     = TryCatchDataAsync("Mounts",     CreateMountData(gameData));
@@ -195,24 +195,24 @@ public sealed partial class ActorManager : IDisposable
 
     public readonly ActorManagerData Data;
 
-    public ActorManager(DalamudPluginInterface pluginInterface, IObjectTable objects, IClientState state, Dalamud.Game.Framework framework,
-        IDataManager gameData, IGameGui gameGui, Func<ushort, short> toParentIdx)
-        : this(pluginInterface, objects, state, framework, gameData, gameGui, gameData.Language, toParentIdx)
+    public ActorManager(DalamudPluginInterface pluginInterface, IObjectTable objects, IClientState state, IFramework framework,
+        IGameInteropProvider interop, IDataManager gameData, IGameGui gameGui, Func<ushort, short> toParentIdx, IPluginLog log)
+        : this(pluginInterface, objects, state, framework, interop, gameData, gameGui, gameData.Language, toParentIdx, log)
     { }
 
-    public ActorManager(DalamudPluginInterface pluginInterface, IObjectTable objects, IClientState state, Dalamud.Game.Framework framework,
-        IDataManager gameData, IGameGui gameGui, ClientLanguage language, Func<ushort, short> toParentIdx)
+    public ActorManager(DalamudPluginInterface pluginInterface, IObjectTable objects, IClientState state, IFramework framework,
+        IGameInteropProvider interop, IDataManager gameData, IGameGui gameGui, ClientLanguage language, Func<ushort, short> toParentIdx, IPluginLog log)
     {
         _framework   = framework;
         _objects     = objects;
         _gameGui     = gameGui;
         _clientState = state;
         _toParentIdx = toParentIdx;
-        Data         = new ActorManagerData(pluginInterface, gameData, language);
+        Data         = new ActorManagerData(pluginInterface, gameData, language, log);
 
         ActorIdentifier.Manager = this;
 
-        SignatureHelper.Initialise(this);
+        interop.InitializeFromAttributes(this);
     }
 
     public unsafe ActorIdentifier GetCurrentPlayer()
@@ -374,10 +374,10 @@ public sealed partial class ActorManager : IDisposable
     ~ActorManager()
         => Dispose();
 
-    private readonly Dalamud.Game.Framework _framework;
-    private readonly IObjectTable           _objects;
-    private readonly IClientState           _clientState;
-    private readonly IGameGui               _gameGui;
+    private readonly IFramework   _framework;
+    private readonly IObjectTable _objects;
+    private readonly IClientState _clientState;
+    private readonly IGameGui     _gameGui;
 
     private readonly Func<ushort, short> _toParentIdx;
 

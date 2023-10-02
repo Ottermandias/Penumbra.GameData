@@ -9,8 +9,8 @@ public sealed class StainData : DataSharer, IReadOnlyDictionary<StainId, Stain>
 {
     public readonly IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> Data;
 
-    public StainData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language)
-        : base(pluginInterface, language, 2)
+    public StainData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language, IPluginLog log)
+        : base(pluginInterface, language, 2, log)
     {
         Data = TryCatchData("Stains", () => CreateStainData(dataManager));
     }

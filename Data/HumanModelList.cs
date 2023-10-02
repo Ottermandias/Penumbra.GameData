@@ -14,8 +14,8 @@ public sealed class HumanModelList : DataSharer
 
     private readonly BitArray _humanModels;
 
-    public HumanModelList(DalamudPluginInterface pluginInterface, IDataManager gameData)
-        : base(pluginInterface, ClientLanguage.English, CurrentVersion)
+    public HumanModelList(DalamudPluginInterface pluginInterface, IDataManager gameData, IPluginLog log)
+        : base(pluginInterface, ClientLanguage.English, CurrentVersion, log)
     {
         _humanModels = TryCatchData(Tag, () => GetValidHumanModels(gameData));
     }

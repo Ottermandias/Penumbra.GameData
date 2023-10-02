@@ -1,6 +1,6 @@
 using Dalamud;
-using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 
 namespace Penumbra.GameData.Data;
 
@@ -11,15 +11,17 @@ namespace Penumbra.GameData.Data;
 public abstract class DataSharer : IDisposable
 {
     protected readonly DalamudPluginInterface PluginInterface;
+    protected readonly IPluginLog             Log;
     protected readonly int                    Version;
     protected readonly ClientLanguage         Language;
     private            bool                   _disposed;
 
-    protected DataSharer(DalamudPluginInterface pluginInterface, ClientLanguage language, int version)
+    protected DataSharer(DalamudPluginInterface pluginInterface, ClientLanguage language, int version, IPluginLog log)
     {
         PluginInterface = pluginInterface;
         Language        = language;
         Version         = version;
+        Log             = log;
     }
 
     protected virtual void DisposeInternal()
@@ -49,7 +51,7 @@ public abstract class DataSharer : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error($"Error creating shared data for {tag}:\n{ex}");
+            Log.Error($"Error creating shared data for {tag}:\n{ex}");
             return func();
         }
     }
@@ -72,7 +74,7 @@ public abstract class DataSharer : IDisposable
     public static void DisposeTag(DalamudPluginInterface pi, string tag, ClientLanguage language, int version)
         => pi.RelinquishData(GetVersionedTag(tag, language, version));
 
-    public static T TryCatchData<T>(DalamudPluginInterface pi, string tag, ClientLanguage language, int version, Func<T> func)
+    public static T TryCatchData<T>(DalamudPluginInterface pi, string tag, ClientLanguage language, int version, Func<T> func, IPluginLog log)
         where T : class
     {
         try
@@ -81,7 +83,7 @@ public abstract class DataSharer : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error($"Error creating shared actor data for {tag}:\n{ex}");
+            log.Error($"Error creating shared actor data for {tag}:\n{ex}");
             return func();
         }
     }
