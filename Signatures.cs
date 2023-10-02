@@ -50,7 +50,6 @@ public static class Sigs
     public const string SetupVisor        = "48 8B ?? 53 55 57 48 83 ?? ?? 48 8B";
     public const string RspSetupCharacter = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 88 54 24 ?? 57 41 56";
     public const string ChangeCustomize   = "E8 ?? ?? ?? ?? 41 0F B6 C5 66 41 89 86";
-    public const string CalculateHeight   = "E8 ?? ?? ?? ?? F3 0F 59 C7 48 8B CE";
 
     // PathResolver.PathState
     public const string HumanVTable = "48 8D 05 ?? ?? ?? ?? 48 89 03 48 B8 ?? ?? ?? ?? ?? ?? ?? ?? 89 8B";

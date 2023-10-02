@@ -419,6 +419,46 @@ public readonly record struct WorldId(ushort Id)
 }
 
 [JsonConverter(typeof(Converter))]
+public readonly record struct JobGroupId(byte Id)
+{
+    public static implicit operator JobGroupId(byte id)
+        => new(id);
+
+    public override string ToString()
+        => Id.ToString();
+
+    private class Converter : JsonConverter<JobGroupId>
+    {
+        public override void WriteJson(JsonWriter writer, JobGroupId value, JsonSerializer serializer)
+            => serializer.Serialize(writer, value.Id);
+
+        public override JobGroupId ReadJson(JsonReader reader, Type objectType, JobGroupId existingValue, bool hasExistingValue,
+            JsonSerializer serializer)
+            => serializer.Deserialize<byte>(reader);
+    }
+}
+
+[JsonConverter(typeof(Converter))]
+public readonly record struct CharacterLevel(byte Value)
+{
+    public static implicit operator CharacterLevel(byte value)
+        => new(value);
+
+    public override string ToString()
+        => Value.ToString();
+
+    private class Converter : JsonConverter<CharacterLevel>
+    {
+        public override void WriteJson(JsonWriter writer, CharacterLevel value, JsonSerializer serializer)
+            => serializer.Serialize(writer, value.Value);
+
+        public override CharacterLevel ReadJson(JsonReader reader, Type objectType, CharacterLevel existingValue, bool hasExistingValue,
+            JsonSerializer serializer)
+            => serializer.Deserialize<byte>(reader);
+    }
+}
+
+[JsonConverter(typeof(Converter))]
 public readonly record struct ObjectIndex(ushort Index) : IComparisonOperators<ObjectIndex, ObjectIndex, bool>
 {
     public static readonly ObjectIndex AnyIndex        = new(ushort.MaxValue);

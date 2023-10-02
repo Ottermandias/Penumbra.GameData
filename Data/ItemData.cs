@@ -4,7 +4,7 @@ using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
-using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, byte>;
+using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, uint>;
 
 namespace Penumbra.GameData.Data;
 
@@ -33,9 +33,10 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
                     if (type is FullEquipType.Fists && item.ModelSub < 0x100000000)
                     {
                         tmp[(int)FullEquipType.Hands].Add(new EquipItem(mh.Name + " (Gauntlets)", mh.Id, mh.IconId, (SetId)item.ModelSub, 0,
-                            (byte)(item.ModelSub >> 16), FullEquipType.Hands));
+                            (byte)(item.ModelSub >> 16), FullEquipType.Hands, mh.Flags, mh.Level, mh.JobRestrictions));
                         tmp[(int)FullEquipType.FistsOff].Add(new EquipItem(mh.Name + FullEquipType.FistsOff.OffhandTypeSuffix(), mh.Id,
-                            mh.IconId, (SetId)(mh.ModelId.Id + 50), mh.WeaponType, mh.Variant, FullEquipType.FistsOff));
+                            mh.IconId, (SetId)(mh.ModelId.Id + 50), mh.WeaponType, mh.Variant, FullEquipType.FistsOff, mh.Flags, mh.Level,
+                            mh.JobRestrictions));
                     }
                     else
                     {
@@ -75,8 +76,8 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
         }
 
         dict.TrimExcess();
-        return new Tuple<IReadOnlyDictionary<uint, (string, ulong, ushort, ushort, ushort, byte, byte)>,
-            IReadOnlyDictionary<uint, (string, ulong, ushort, ushort, ushort, byte, byte)>>(dict, gauntlets);
+        return new Tuple<IReadOnlyDictionary<uint, (string, ulong, ushort, ushort, ushort, byte, uint)>,
+            IReadOnlyDictionary<uint, (string, ulong, ushort, ushort, ushort, byte, uint)>>(dict, gauntlets);
     }
 
     private static IReadOnlyDictionary<uint, PseudoEquipItem> CreateOffItems(IReadOnlyList<IReadOnlyList<PseudoEquipItem>> items)
@@ -94,7 +95,7 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
     }
 
     public ItemData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language, IPluginLog log)
-        : base(pluginInterface, language, 4, log)
+        : base(pluginInterface, language, 5, log)
     {
         _byType                  = TryCatchData("ItemList",     () => CreateItems(dataManager, language));
         (_mainItems, _gauntlets) = TryCatchData("ItemDictMain", () => CreateMainItems(_byType));

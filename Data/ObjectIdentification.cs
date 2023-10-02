@@ -3,7 +3,6 @@ using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -17,7 +16,7 @@ namespace Penumbra.GameData.Data;
 
 internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
 {
-    public const int IdentificationVersion = 5;
+    public const int IdentificationVersion = 6;
 
     public           IGamePathParser                                                       GamePathParser { get; }
     public readonly  IReadOnlyList<IReadOnlyList<uint>>                                    BnpcNames;
