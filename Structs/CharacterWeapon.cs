@@ -67,4 +67,7 @@ public struct CharacterWeapon : IEquatable<CharacterWeapon>
 
     public static bool operator !=(CharacterWeapon left, CharacterWeapon right)
         => left.Value != right.Value;
+
+    public static CharacterWeapon Int(int set, int type, int variant)
+        => new((SetId)set, (WeaponType)type, (Variant)variant, 0);
 }
