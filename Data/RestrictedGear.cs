@@ -335,8 +335,6 @@ public sealed class RestrictedGear : DataSharer
         AddItem(m2f, f2m, 28602, 28607);              // Eastern Lord Errant's Wristbands           <-> Eastern Lady Errant's Gloves
         AddItem(m2f, f2m, 28603, 28608);              // Eastern Lord Errant's Trousers             <-> Eastern Lady Errant's Skirt
         AddItem(m2f, f2m, 28604, 28609);              // Eastern Lord Errant's Shoes                <-> Eastern Lady Errant's Boots
-        AddItem(m2f, f2m, 36336, 36337);              // Omega-M Attire                             <-> Omega-F Attire
-        AddItem(m2f, f2m, 36338, 36339);              // Omega-M Ear Cuffs                          <-> Omega-F Earrings
         AddItem(m2f, f2m, 37442, 37447);              // Makai Vanguard's Monocle                   <-> Makai Vanbreaker's Ribbon
         AddItem(m2f, f2m, 37443, 37448);              // Makai Vanguard's Battlegarb                <-> Makai Vanbreaker's Battledress
         AddItem(m2f, f2m, 37444, 37449);              // Makai Vanguard's Fingerless Gloves         <-> Makai Vanbreaker's Fingerless Gloves
