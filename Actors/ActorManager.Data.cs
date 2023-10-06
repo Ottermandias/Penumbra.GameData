@@ -39,7 +39,7 @@ public sealed partial class ActorManager : IDisposable
         /// <summary> Valid ENPC names in title case by ENPC id. </summary>
         public IReadOnlyDictionary<uint, string> ENpcs { get; }
 
-        public ActorManagerData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language, IPluginLog log)
+        private ActorManagerData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language, IPluginLog log)
             : base(pluginInterface, language, 4, log)
         {
             var worldTask      = TryCatchDataAsync("Worlds",     CreateWorldData(gameData));
@@ -191,6 +191,12 @@ public sealed partial class ActorManager : IDisposable
 
             return string.Intern(sb.ToString());
         }
+
+        internal static ActorManagerData GetData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language,
+            IPluginLog log)
+            => _globalData ??= new ActorManagerData(pluginInterface, gameData, language, log);
+
+        private static ActorManagerData? _globalData;
     }
 
     public readonly ActorManagerData Data;
@@ -201,14 +207,15 @@ public sealed partial class ActorManager : IDisposable
     { }
 
     public ActorManager(DalamudPluginInterface pluginInterface, IObjectTable objects, IClientState state, IFramework framework,
-        IGameInteropProvider interop, IDataManager gameData, IGameGui gameGui, ClientLanguage language, Func<ushort, short> toParentIdx, IPluginLog log)
+        IGameInteropProvider interop, IDataManager gameData, IGameGui gameGui, ClientLanguage language, Func<ushort, short> toParentIdx,
+        IPluginLog log)
     {
         _framework   = framework;
         _objects     = objects;
         _gameGui     = gameGui;
         _clientState = state;
         _toParentIdx = toParentIdx;
-        Data         = new ActorManagerData(pluginInterface, gameData, language, log);
+        Data         = ActorManagerData.GetData(pluginInterface, gameData, language, log);
 
         ActorIdentifier.Manager = this;
 
