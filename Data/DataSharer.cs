@@ -47,11 +47,12 @@ public abstract class DataSharer : IDisposable
     {
         try
         {
+            Log.Debug($"[DataShare] Creating or obtaining shared data for {tag} synchronously.");
             return PluginInterface.GetOrCreateData(GetVersionedTag(tag, Language, Version), func);
         }
         catch (Exception ex)
         {
-            Log.Error($"Error creating shared data for {tag}:\n{ex}");
+            Log.Error($"[DataShare] Error creating shared data for {tag}:\n{ex}");
             return func();
         }
     }
@@ -62,8 +63,12 @@ public abstract class DataSharer : IDisposable
         T   ret  = new();
         var ret2 = PluginInterface.GetOrCreateData(tag, () => ret);
         if (!ReferenceEquals(ret, ret2))
+        {
+            Log.Debug($"[DataShare] Obtaining existing shared data for {tag} asynchronously.");
             return Task.FromResult(ret2);
+        }
 
+        Log.Debug($"[DataShare] Creating shared data for {tag} asynchronously.");
         return Task.Run(() =>
         {
             fill(ret2);
@@ -79,11 +84,12 @@ public abstract class DataSharer : IDisposable
     {
         try
         {
+            log.Debug($"[DataShare] Creating or obtaining shared data for {tag} synchronously.");
             return pi.GetOrCreateData(GetVersionedTag(tag, language, version), func);
         }
         catch (Exception ex)
         {
-            log.Error($"Error creating shared actor data for {tag}:\n{ex}");
+            log.Error($"[DataShare] Error creating shared actor data for {tag}:\n{ex}");
             return func();
         }
     }

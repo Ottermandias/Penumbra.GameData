@@ -14,6 +14,7 @@ using Penumbra.GameData.Structs;
 using Penumbra.String;
 using Character = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
+using Task = System.Threading.Tasks.Task;
 
 namespace Penumbra.GameData.Actors;
 
@@ -42,6 +43,7 @@ public sealed partial class ActorManager : IDisposable
         private ActorManagerData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language, IPluginLog log)
             : base(pluginInterface, language, 4, log)
         {
+            log.Debug("[ActorData] Creating ActorManagerData started.");
             var worldTask      = TryCatchDataAsync("Worlds",     CreateWorldData(gameData));
             var mountsTask     = TryCatchDataAsync("Mounts",     CreateMountData(gameData));
             var companionsTask = TryCatchDataAsync("Companions", CreateCompanionData(gameData));
@@ -49,12 +51,14 @@ public sealed partial class ActorManager : IDisposable
             var bNpcsTask      = TryCatchDataAsync("BNpcs",      CreateBNpcData(gameData));
             var eNpcsTask      = TryCatchDataAsync("ENpcs",      CreateENpcData(gameData));
 
+            Task.WaitAll(worldTask, mountsTask, companionsTask, ornamentsTask, bNpcsTask, eNpcsTask);
             Worlds     = worldTask.Result;
             Mounts     = mountsTask.Result;
             Companions = companionsTask.Result;
             Ornaments  = ornamentsTask.Result;
             BNpcs      = bNpcsTask.Result;
             ENpcs      = eNpcsTask.Result;
+            log.Debug("[ActorData] Creating ActorManagerData finished.");
         }
 
         /// <summary>
@@ -110,13 +114,16 @@ public sealed partial class ActorManager : IDisposable
         private Action<Dictionary<ushort, string>> CreateWorldData(IDataManager gameData)
             => d =>
             {
+                Log.Debug("[ActorData] Filling World Data...");
                 foreach (var w in gameData.GetExcelSheet<World>(Language)!.Where(w => w.IsPublic && !w.Name.RawData.IsEmpty))
                     d.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
+                Log.Debug($"[ActorData] Collected {d.Count} Worlds.");
             };
 
         private Action<Dictionary<uint, string>> CreateMountData(IDataManager gameData)
             => d =>
             {
+                Log.Debug("[ActorData] Filling Mount Data...");
                 d.TryAdd(119, "Falcon (Porter)");
                 d.TryAdd(295, "Hippo Cart (Quest)");
                 d.TryAdd(296, "Hippo Cart (Quest)");
@@ -138,35 +145,44 @@ public sealed partial class ActorManager : IDisposable
                         d.TryAdd(m.RowId, $"? {whistle} #{m.RowId}");
                     }
                 }
+                Log.Debug($"[ActorData] Collected {d.Count} Mounts.");
             };
 
         private Action<Dictionary<uint, string>> CreateCompanionData(IDataManager gameData)
             => d =>
             {
+                Log.Debug("[ActorData] Filling Companion Data...");
                 foreach (var c in gameData.GetExcelSheet<Companion>(Language)!.Where(c
                              => c.Singular.RawData.Length > 0 && c.Order < ushort.MaxValue))
                     d.TryAdd(c.RowId, ToTitleCaseExtended(c.Singular, c.Article));
+                Log.Debug($"[ActorData] Collected {d.Count} Companions.");
             };
 
         private Action<Dictionary<uint, string>> CreateOrnamentData(IDataManager gameData)
             => d =>
             {
+                Log.Debug("[ActorData] Filling Ornament Data...");
                 foreach (var o in gameData.GetExcelSheet<Ornament>(Language)!.Where(o => o.Singular.RawData.Length > 0))
                     d.TryAdd(o.RowId, ToTitleCaseExtended(o.Singular, o.Article));
+                Log.Debug($"[ActorData] Collected {d.Count} Ornaments.");
             };
 
         private Action<Dictionary<uint, string>> CreateBNpcData(IDataManager gameData)
             => d =>
             {
+                Log.Debug("[ActorData] Filling BNPC Data...");
                 foreach (var n in gameData.GetExcelSheet<BNpcName>(Language)!.Where(n => n.Singular.RawData.Length > 0))
                     d.TryAdd(n.RowId, ToTitleCaseExtended(n.Singular, n.Article));
+                Log.Debug($"[ActorData] Collected {d.Count} BNPCs.");
             };
 
         private Action<Dictionary<uint, string>> CreateENpcData(IDataManager gameData)
             => d =>
             {
+                Log.Debug("[ActorData] Filling ENPC Data...");
                 foreach (var n in gameData.GetExcelSheet<ENpcResident>(Language)!.Where(e => e.Singular.RawData.Length > 0))
                     d.TryAdd(n.RowId, ToTitleCaseExtended(n.Singular, n.Article));
+                Log.Debug($"[ActorData] Collected {d.Count} ENPCs.");
             };
 
         private static string ToTitleCaseExtended(SeString s, sbyte article)
