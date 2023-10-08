@@ -40,18 +40,18 @@ public sealed partial class ActorManager : IDisposable
         /// <summary> Valid ENPC names in title case by ENPC id. </summary>
         public IReadOnlyDictionary<uint, string> ENpcs { get; }
 
-        private ActorManagerData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language, IPluginLog log)
-            : base(pluginInterface, language, 4, log)
+        public ActorManagerData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language, IPluginLog log)
+            : base(pluginInterface, language, 5, log)
         {
             log.Debug("[ActorData] Creating ActorManagerData started.");
-            var worldTask      = TryCatchDataAsync("Worlds",     CreateWorldData(gameData));
-            var mountsTask     = TryCatchDataAsync("Mounts",     CreateMountData(gameData));
-            var companionsTask = TryCatchDataAsync("Companions", CreateCompanionData(gameData));
-            var ornamentsTask  = TryCatchDataAsync("Ornaments",  CreateOrnamentData(gameData));
-            var bNpcsTask      = TryCatchDataAsync("BNpcs",      CreateBNpcData(gameData));
-            var eNpcsTask      = TryCatchDataAsync("ENpcs",      CreateENpcData(gameData));
 
-            Task.WaitAll(worldTask, mountsTask, companionsTask, ornamentsTask, bNpcsTask, eNpcsTask);
+            var worldTask      = TryCatchData("Worlds",     () => CreateWorldData(gameData));
+            var mountsTask     = TryCatchData("Mounts",     () => CreateMountData(gameData));
+            var companionsTask = TryCatchData("Companions", () => CreateCompanionData(gameData));
+            var ornamentsTask  = TryCatchData("Ornaments",  () => CreateOrnamentData(gameData));
+            var bNpcsTask      = TryCatchData("BNpcs",      () => CreateBNpcData(gameData));
+            var eNpcsTask      = TryCatchData("ENpcs",      () => CreateENpcData(gameData));
+
             Worlds     = worldTask.Result;
             Mounts     = mountsTask.Result;
             Companions = companionsTask.Result;
@@ -111,29 +111,32 @@ public sealed partial class ActorManager : IDisposable
             DisposeTag("ENpcs");
         }
 
-        private Action<Dictionary<ushort, string>> CreateWorldData(IDataManager gameData)
-            => d =>
+        private Task<IReadOnlyDictionary<ushort, string>> CreateWorldData(IDataManager gameData)
+            => Task.Run(() =>
             {
-                Log.Debug("[ActorData] Filling World Data...");
+                var dict = new Dictionary<ushort, string>();
+                Log.Debug("[ActorData] Collecting World data...");
                 foreach (var w in gameData.GetExcelSheet<World>(Language)!.Where(w => w.IsPublic && !w.Name.RawData.IsEmpty))
-                    d.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
-                Log.Debug($"[ActorData] Collected {d.Count} Worlds.");
-            };
+                    dict.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
+                Log.Debug($"[ActorData] Collected {dict.Count} Worlds.");
+                return (IReadOnlyDictionary<ushort, string>)dict;
+            });
 
-        private Action<Dictionary<uint, string>> CreateMountData(IDataManager gameData)
-            => d =>
+        private Task<IReadOnlyDictionary<uint, string>> CreateMountData(IDataManager gameData)
+            => Task.Run(() =>
             {
-                Log.Debug("[ActorData] Filling Mount Data...");
-                d.TryAdd(119, "Falcon (Porter)");
-                d.TryAdd(295, "Hippo Cart (Quest)");
-                d.TryAdd(296, "Hippo Cart (Quest)");
-                d.TryAdd(298, "Miw Miisv (Quest)");
-                d.TryAdd(309, "Moon-hopper (Quest)");
+                var dict = new Dictionary<uint, string>();
+                Log.Debug("[ActorData] Collecting Mount data...");
+                dict.TryAdd(119, "Falcon (Porter)");
+                dict.TryAdd(295, "Hippo Cart (Quest)");
+                dict.TryAdd(296, "Hippo Cart (Quest)");
+                dict.TryAdd(298, "Miw Miisv (Quest)");
+                dict.TryAdd(309, "Moon-hopper (Quest)");
                 foreach (var m in gameData.GetExcelSheet<Mount>(Language)!)
                 {
                     if (m.Singular.RawData.Length > 0 && m.Order >= 0)
                     {
-                        d.TryAdd(m.RowId, ToTitleCaseExtended(m.Singular, m.Article));
+                        dict.TryAdd(m.RowId, ToTitleCaseExtended(m.Singular, m.Article));
                     }
                     else if (m.Unknown18.RawData.Length > 0)
                     {
@@ -142,48 +145,58 @@ public sealed partial class ActorManager : IDisposable
                             .Replace("Mount_",  string.Empty)
                             .Replace("_call",   string.Empty)
                             .Replace("Whistle", string.Empty);
-                        d.TryAdd(m.RowId, $"? {whistle} #{m.RowId}");
+                        dict.TryAdd(m.RowId, $"? {whistle} #{m.RowId}");
                     }
                 }
-                Log.Debug($"[ActorData] Collected {d.Count} Mounts.");
-            };
 
-        private Action<Dictionary<uint, string>> CreateCompanionData(IDataManager gameData)
-            => d =>
+                Log.Debug($"[ActorData] Collected {dict.Count} Mounts.");
+                return (IReadOnlyDictionary<uint, string>)dict;
+            });
+
+        private Task<IReadOnlyDictionary<uint, string>> CreateCompanionData(IDataManager gameData)
+            => Task.Run(() =>
             {
-                Log.Debug("[ActorData] Filling Companion Data...");
+                var dict = new Dictionary<uint, string>();
+                Log.Debug("[ActorData] Collecting Companion data...");
                 foreach (var c in gameData.GetExcelSheet<Companion>(Language)!.Where(c
                              => c.Singular.RawData.Length > 0 && c.Order < ushort.MaxValue))
-                    d.TryAdd(c.RowId, ToTitleCaseExtended(c.Singular, c.Article));
-                Log.Debug($"[ActorData] Collected {d.Count} Companions.");
-            };
+                    dict.TryAdd(c.RowId, ToTitleCaseExtended(c.Singular, c.Article));
+                Log.Debug($"[ActorData] Collected {dict.Count} Companions.");
+                return (IReadOnlyDictionary<uint, string>)dict;
+            });
 
-        private Action<Dictionary<uint, string>> CreateOrnamentData(IDataManager gameData)
-            => d =>
+        private Task<IReadOnlyDictionary<uint, string>> CreateOrnamentData(IDataManager gameData)
+            => Task.Run(() =>
             {
-                Log.Debug("[ActorData] Filling Ornament Data...");
+                var dict = new Dictionary<uint, string>();
+                Log.Debug("[ActorData] Collecting Ornament data...");
                 foreach (var o in gameData.GetExcelSheet<Ornament>(Language)!.Where(o => o.Singular.RawData.Length > 0))
-                    d.TryAdd(o.RowId, ToTitleCaseExtended(o.Singular, o.Article));
-                Log.Debug($"[ActorData] Collected {d.Count} Ornaments.");
-            };
+                    dict.TryAdd(o.RowId, ToTitleCaseExtended(o.Singular, o.Article));
+                Log.Debug($"[ActorData] Collected {dict.Count} Ornaments.");
+                return (IReadOnlyDictionary<uint, string>)dict;
+            });
 
-        private Action<Dictionary<uint, string>> CreateBNpcData(IDataManager gameData)
-            => d =>
+        private Task<IReadOnlyDictionary<uint, string>> CreateBNpcData(IDataManager gameData)
+            => Task.Run(() =>
             {
-                Log.Debug("[ActorData] Filling BNPC Data...");
+                var dict = new Dictionary<uint, string>();
+                Log.Debug("[ActorData] Collecting BNPC data...");
                 foreach (var n in gameData.GetExcelSheet<BNpcName>(Language)!.Where(n => n.Singular.RawData.Length > 0))
-                    d.TryAdd(n.RowId, ToTitleCaseExtended(n.Singular, n.Article));
-                Log.Debug($"[ActorData] Collected {d.Count} BNPCs.");
-            };
+                    dict.TryAdd(n.RowId, ToTitleCaseExtended(n.Singular, n.Article));
+                Log.Debug($"[ActorData] Collected {dict.Count} BNPCs.");
+                return (IReadOnlyDictionary<uint, string>)dict;
+            });
 
-        private Action<Dictionary<uint, string>> CreateENpcData(IDataManager gameData)
-            => d =>
+        private Task<IReadOnlyDictionary<uint, string>> CreateENpcData(IDataManager gameData)
+            => Task.Run(() =>
             {
-                Log.Debug("[ActorData] Filling ENPC Data...");
+                var dict = new Dictionary<uint, string>();
+                Log.Debug("[ActorData] Collecting ENPC data...");
                 foreach (var n in gameData.GetExcelSheet<ENpcResident>(Language)!.Where(e => e.Singular.RawData.Length > 0))
-                    d.TryAdd(n.RowId, ToTitleCaseExtended(n.Singular, n.Article));
-                Log.Debug($"[ActorData] Collected {d.Count} ENPCs.");
-            };
+                    dict.TryAdd(n.RowId, ToTitleCaseExtended(n.Singular, n.Article));
+                Log.Debug($"[ActorData] Collected {dict.Count} ENPCs.");
+                return (IReadOnlyDictionary<uint, string>)dict;
+            });
 
         private static string ToTitleCaseExtended(SeString s, sbyte article)
         {
@@ -207,12 +220,6 @@ public sealed partial class ActorManager : IDisposable
 
             return string.Intern(sb.ToString());
         }
-
-        internal static ActorManagerData GetData(DalamudPluginInterface pluginInterface, IDataManager gameData, ClientLanguage language,
-            IPluginLog log)
-            => _globalData ??= new ActorManagerData(pluginInterface, gameData, language, log);
-
-        private static ActorManagerData? _globalData;
     }
 
     public readonly ActorManagerData Data;
@@ -231,7 +238,7 @@ public sealed partial class ActorManager : IDisposable
         _gameGui     = gameGui;
         _clientState = state;
         _toParentIdx = toParentIdx;
-        Data         = ActorManagerData.GetData(pluginInterface, gameData, language, log);
+        Data         = new ActorManagerData(pluginInterface, gameData, language, log);
 
         ActorIdentifier.Manager = this;
 

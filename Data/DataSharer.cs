@@ -47,7 +47,7 @@ public abstract class DataSharer : IDisposable
     {
         try
         {
-            Log.Debug($"[DataShare] Creating or obtaining shared data for {tag} synchronously.");
+            Log.Debug($"[DataShare] Creating or obtaining shared data for {tag}.");
             return PluginInterface.GetOrCreateData(GetVersionedTag(tag, Language, Version), func);
         }
         catch (Exception ex)
@@ -55,25 +55,6 @@ public abstract class DataSharer : IDisposable
             Log.Error($"[DataShare] Error creating shared data for {tag}:\n{ex}");
             return func();
         }
-    }
-
-    protected Task<T> TryCatchDataAsync<T>(string tag, Action<T> fill) where T : class, new()
-    {
-        tag = GetVersionedTag(tag, Language, Version);
-        T   ret  = new();
-        var ret2 = PluginInterface.GetOrCreateData(tag, () => ret);
-        if (!ReferenceEquals(ret, ret2))
-        {
-            Log.Debug($"[DataShare] Obtaining existing shared data for {tag} asynchronously.");
-            return Task.FromResult(ret2);
-        }
-
-        Log.Debug($"[DataShare] Creating shared data for {tag} asynchronously.");
-        return Task.Run(() =>
-        {
-            fill(ret2);
-            return ret2;
-        });
     }
 
     public static void DisposeTag(DalamudPluginInterface pi, string tag, ClientLanguage language, int version)
@@ -84,7 +65,7 @@ public abstract class DataSharer : IDisposable
     {
         try
         {
-            log.Debug($"[DataShare] Creating or obtaining shared data for {tag} synchronously.");
+            log.Debug($"[DataShare] Creating or obtaining shared data for {tag}.");
             return pi.GetOrCreateData(GetVersionedTag(tag, language, version), func);
         }
         catch (Exception ex)

@@ -40,7 +40,7 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
         : base(pluginInterface, language, IdentificationVersion, log)
     {
         GamePathParser = new GamePathParser(log);
-        _actorData     = ActorManager.ActorManagerData.GetData(pluginInterface, dataManager, language, log);
+        _actorData     = new ActorManager.ActorManagerData(pluginInterface, dataManager, language, log);
         _equipment     = new EquipmentIdentificationList(pluginInterface, language, itemData, log);
         _weapons       = new WeaponIdentificationList(pluginInterface, language, itemData, log);
         Actions        = TryCatchData("Actions", () => CreateActionList(dataManager));
