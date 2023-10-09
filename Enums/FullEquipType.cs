@@ -73,6 +73,9 @@ public enum FullEquipType : byte
 
 public static class FullEquipTypeExtensions
 {
+    public const int NumWeaponTypes  = 50;
+    public const int WeaponTypesOffset = 10;
+
     internal static FullEquipType ToEquipType(this Item item)
     {
         var slot   = (EquipSlot)item.EquipSlotCategory.Row;
