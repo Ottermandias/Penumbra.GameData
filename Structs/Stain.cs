@@ -1,3 +1,4 @@
+using Dalamud.Interface;
 using Dalamud.Utility;
 
 namespace Penumbra.GameData.Structs;
@@ -22,8 +23,14 @@ public readonly struct Stain
     public byte B
         => (byte)((RgbaColor >> 16) & 0xFF);
 
-    public byte Intensity
-        => (byte)((1 + R + G + B) / 3);
+    public float Intensity
+    {
+        get
+        {
+            var vec = ColorHelpers.RgbaUintToVector4(RgbaColor);
+            return 2 * vec.X * vec.X + 7 * vec.Y * vec.Y + vec.Z * vec.Z;
+        }
+    }
 
     // R and B need to be shuffled and Alpha set to max.
     private static uint SeColorToRgba(uint color)

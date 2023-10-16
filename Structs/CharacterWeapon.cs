@@ -1,7 +1,7 @@
 namespace Penumbra.GameData.Structs;
 
 [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 7)]
-public struct CharacterWeapon : IEquatable<CharacterWeapon>
+public struct CharacterWeapon : IEquatable<CharacterWeapon>, IComparable<CharacterWeapon>
 {
     [FieldOffset(0)]
     public SetId Set;
@@ -23,6 +23,9 @@ public struct CharacterWeapon : IEquatable<CharacterWeapon>
 
     public override readonly string ToString()
         => $"{Set},{Type},{Variant},{Stain}";
+
+    private readonly ulong CompareValue
+        => ((ulong)Set.Id << 48) | ((ulong)Type.Id << 32) | ((ulong)Variant.Id << 16) | (ulong)Stain.Id;
 
     public CharacterWeapon(SetId set, WeaponType type, Variant variant, StainId stain)
     {
@@ -61,6 +64,9 @@ public struct CharacterWeapon : IEquatable<CharacterWeapon>
 
     public override readonly int GetHashCode()
         => Value.GetHashCode();
+
+    public readonly int CompareTo(CharacterWeapon rhs)
+        => CompareValue.CompareTo(rhs.CompareValue);
 
     public static bool operator ==(CharacterWeapon left, CharacterWeapon right)
         => left.Value == right.Value;
