@@ -85,6 +85,18 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
             ? Array.Empty<BnpcNameId>()
             : new TransformList<uint, BnpcNameId>(BnpcNames[(int)bNpcId.Id], i => (BnpcNameId)i);
 
+    public IReadOnlyList<BnpcId> GetBnpcsFromName(BnpcNameId bNpcNameId)
+    {
+        var list = new List<BnpcId>(8);
+        foreach (var (names, bnpcId) in BnpcNames.Select((nameList, idx) => (nameList, new BnpcId((uint)idx))))
+        {
+            if (names.Contains(bNpcNameId.Id))
+                list.Add(bnpcId);
+        }
+
+        return list;
+    }
+
     public IReadOnlyList<(string Name, ObjectKind Kind, uint Id)> ModelCharaNames(ModelCharaId modelId)
         => modelId.Id >= ModelCharaToObjects.Count
             ? Array.Empty<(string Name, ObjectKind Kind, uint Id)>()
@@ -414,8 +426,7 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
 
         var options = new ParallelOptions()
         {
-            MaxDegreeOfParallelism = Math.Max(1, 1),
-            //MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount / 2),
+            MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount / 2),
         };
 
         Parallel.ForEach(gameData.GetExcelSheet<BNpcBase>(language)!.Where(b => b.RowId < BnpcNames.Count), options, bNpc =>

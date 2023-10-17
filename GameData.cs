@@ -68,6 +68,9 @@ public interface IObjectIdentifier : IDisposable
     /// <summary> Obtain a list of BNPC Name Ids associated with a BNPC Id. </summary>
     public IReadOnlyList<BnpcNameId> GetBnpcNames(BnpcId bNpcId);
 
+    /// <summary> Obtain a list of BNPC Ids associated with a BNPC Name Id. </summary>
+    public IReadOnlyList<BnpcId> GetBnpcsFromName(BnpcNameId bNpcNameId);
+
     /// <summary> Obtain the name for an NPC. </summary>
     public string Name(ObjectKind kind, NpcId id);
 
