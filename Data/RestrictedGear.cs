@@ -1,5 +1,4 @@
 using Dalamud;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -116,8 +115,8 @@ public sealed class RestrictedGear : DataSharer
         var unhandled = 0;
         foreach (var item in _items.Where(i => i.EquipRestriction == 2))
         {
-            // Skip Scion Chronocler's Ringbands as they are not actually restricted.
-            if (item.RowId == 13700)
+            // Skip Scion Chronocler's Ringbands and Scion Thaumaturge's Moccasins as they are not actually restricted.
+            if (item.RowId is 13700 or 13699)
                 continue;
 
             if (m2f.ContainsKey((uint)item.ModelMain | ((uint)((EquipSlot)item.EquipSlotCategory.Row).ToSlot() << 24)))
@@ -363,7 +362,7 @@ public sealed class RestrictedGear : DataSharer
         AddItem(m2f, f2m, 13696, 30062);              // Scion Thaumaturge's Monocle                <-> Scion Sorceress's Robe
         AddItem(m2f, f2m, 13697, 30064);              // Scion Thaumaturge's Gauntlets              <-> Scion Sorceress's Shadowtalons
         AddItem(m2f, f2m, 13698, 10035, true, false); // Scion Thaumaturge's Gaskins                 -> The Emperor's New Breeches
-        AddItem(m2f, f2m, 13699, 30065);              // Scion Thaumaturge's Moccasins              <-> Scion Sorceress's High Boots
+        AddItem(m2f, f2m, 13699, 30065, false);       // Scion Thaumaturge's Moccasins              <-  Scion Sorceress's High Boots
         AddItem(m2f, f2m, 13327, 15942);              // Scion Chronocler's Cowl                    <-> Scion Healer's Robe
         AddItem(m2f, f2m, 13701, 15943);              // Scion Chronocler's Tights                  <-> Scion Healer's Halftights
         AddItem(m2f, f2m, 13702, 15944);              // Scion Chronocler's Caligae                 <-> Scion Healer's Highboots
