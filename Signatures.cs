@@ -34,13 +34,7 @@ public static class Sigs
     public const string ScheduleClipUpdate         = "40 53 55 56 57 41 56 48 81 EC ?? ?? ?? ?? 48 8B F9";
 
     // PathResolver.DrawObjectState
-    public const string CharacterBaseCreate = "E8 ?? ?? ?? ?? 48 85 C0 0F 84 ?? ?? ?? ?? F3 0F 11 70";
-
-    public const string CharacterBaseDestructor =
-        "E8 ?? ?? ?? ?? 40 F6 C7 01 74 3A 40 F6 C7 04 75 27 48 85 DB 74 2F 48 8B 05 ?? ?? ?? ?? 48 8B D3 48 8B 48 30";
-
     public const string EnableDraw   = "E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 33 45 33 C0";
-    public const string WeaponReload = "E8 ?? ?? ?? ?? 33 DB BF";
 
     // PathResolver.Meta
     public const string UpdateModel       = "48 8B ?? 56 48 83 ?? ?? ?? B9";
