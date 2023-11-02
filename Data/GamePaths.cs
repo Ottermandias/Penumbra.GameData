@@ -157,6 +157,18 @@ public static partial class GamePaths
         }
     }
 
+
+    public static partial class Human
+    {
+        public static partial class Decal
+        {
+            public const string LegacyDecalPath = "chara/common/texture/decal_equip/_stigma.tex";
+
+            public static string FaceDecalPath(byte decalId)
+                => $"chara/common/texture/decal_face/_decal_{decalId}.tex";
+        }
+    }
+
     public static partial class Equipment
     {
         public static partial class Imc
@@ -420,5 +432,12 @@ public static partial class GamePaths
     {
         public static string ShpkPath(string name)
             => $"shader/sm5/shpk/{name}";
+    }
+
+    public static partial class Tex
+    {
+        public const string DummyPath = "common/graphics/texture/dummy.tex";
+
+        public const string TransparentPath = "chara/common/texture/transparent.tex";
     }
 }

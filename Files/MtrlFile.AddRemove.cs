@@ -1,10 +1,11 @@
 using Lumina.Data.Parsing;
+using Penumbra.GameData.Data;
 
 namespace Penumbra.GameData.Files;
 
 public partial class MtrlFile
 {
-    public const string DummyTexturePath    = "common/graphics/texture/dummy.tex";
+    public const string DummyTexturePath    = GamePaths.Tex.DummyPath;
     public const uint   DefaultSamplerFlags = 0x000F8340u;
 
     public int FindOrAddConstant(uint id, int numFloats)
