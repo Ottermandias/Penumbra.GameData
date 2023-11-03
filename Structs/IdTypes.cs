@@ -459,7 +459,7 @@ public readonly record struct CharacterLevel(byte Value)
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct ObjectIndex(ushort Index) : IComparisonOperators<ObjectIndex, ObjectIndex, bool>
+public readonly record struct ObjectIndex(ushort Index) : IComparisonOperators<ObjectIndex, ObjectIndex, bool>, IComparable<ObjectIndex>
 {
     public static readonly ObjectIndex AnyIndex        = new(ushort.MaxValue);
     public static readonly ObjectIndex CutsceneStart   = new((ushort)ScreenActor.CutsceneStart);
@@ -475,6 +475,9 @@ public readonly record struct ObjectIndex(ushort Index) : IComparisonOperators<O
 
     public static implicit operator ObjectIndex(ushort index)
         => new(index);
+
+    public int CompareTo(ObjectIndex other)
+        => Index.CompareTo(other.Index);
 
     public override string ToString()
         => Index.ToString();
