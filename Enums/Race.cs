@@ -338,6 +338,22 @@ public static class RaceEnumExtensions
         };
     }
 
+    public static GenderRace Fallback(this GenderRace raceCode)
+    {
+        var female = (((ushort)raceCode / 100) & 1) == 0;
+        var child  = (ushort)raceCode % 10 == 4;
+        return raceCode switch
+        {
+            MidlanderMaleNpc | MidlanderFemale                   => MidlanderMale,
+            RoegadynMaleNpc | HrothgarMale                       => RoegadynMale,
+            LalafellMaleNpc | LalafellFemale | LalafellFemaleNpc => LalafellMale,
+            AuRaMaleNpc | AuRaFemaleNpc                          => AuRaMale,
+            _ when child                                         => MidlanderMaleNpc,
+            _ when female                                        => MidlanderFemale,
+            _                                                    => MidlanderMale,
+        };
+    }
+
     public static GenderRace[] Dependencies(this GenderRace raceCode)
         => DependencyList.TryGetValue(raceCode, out var dep) ? dep : Array.Empty<GenderRace>();
 
