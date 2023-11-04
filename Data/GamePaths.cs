@@ -289,6 +289,12 @@ public static partial class GamePaths
             public static string Path(GenderRace raceCode, string slot, SetId slotId)
                 => $"chara/human/c{raceCode.ToRaceCode()}/skeleton/{slot}/{slot[0]}{slotId.Id:D4}/skl_c{raceCode.ToRaceCode()}{slot[0]}{slotId.Id:D4}.sklb";
         }
+
+        public static partial class Skp
+        {
+            public static string Path(GenderRace raceCode, string slot, SetId slotId)
+                => $"chara/human/c{raceCode.ToRaceCode()}/skeleton/{slot}/{slot[0]}{slotId.Id:D4}/skl_c{raceCode.ToRaceCode()}{slot[0]}{slotId.Id:D4}.skp";
+        }
     }
 
     public static partial class Character
