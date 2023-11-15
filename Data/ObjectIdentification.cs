@@ -247,7 +247,8 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
 
     private void FindEquipment(IDictionary<string, object?> set, GameObjectInfo info)
     {
-        var items = _equipment.Between(info.PrimaryId, info.EquipSlot, info.Variant);
+        var slot  = info.EquipSlot is EquipSlot.LFinger ? EquipSlot.RFinger : info.EquipSlot;
+        var items = _equipment.Between(info.PrimaryId, slot, info.Variant);
         foreach (var item in items)
             set[item.Name] = item;
     }
