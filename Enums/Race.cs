@@ -338,55 +338,35 @@ public static class RaceEnumExtensions
         };
     }
 
-    public static GenderRace[] Dependencies(this GenderRace raceCode)
-        => DependencyList.TryGetValue(raceCode, out var dep) ? dep : Array.Empty<GenderRace>();
+    public static GenderRace Fallback(this GenderRace raceCode)
+    {
+        var female = (((ushort)raceCode / 100) & 1) == 0;
+        var child  = (ushort)raceCode % 10 == 4;
+        return raceCode switch
+        {
+            MidlanderMaleNpc or MidlanderFemale                    => MidlanderMale,
+            RoegadynMaleNpc or HrothgarMale                        => RoegadynMale,
+            LalafellMaleNpc or LalafellFemale or LalafellFemaleNpc => LalafellMale,
+            AuRaMaleNpc or AuRaFemaleNpc                           => AuRaMale,
+            _ when child                                           => MidlanderMaleNpc,
+            _ when female                                          => MidlanderFemale,
+            _                                                      => MidlanderMale,
+        };
+    }
+
+    public static IEnumerable<GenderRace> Dependencies(this GenderRace raceCode)
+    {
+        var currentRace = raceCode;
+        while (currentRace != MidlanderMale)
+        {
+            yield return currentRace;
+            currentRace = currentRace.Fallback();
+        }
+        yield return MidlanderMale;
+    }
 
     public static IEnumerable<GenderRace> OnlyDependencies(this GenderRace raceCode)
-        => DependencyList.TryGetValue(raceCode, out var dep) ? dep.Skip(1) : Array.Empty<GenderRace>();
-
-    private static readonly Dictionary<GenderRace, GenderRace[]> DependencyList = new()
-    {
-        // @formatter:off
-        [MidlanderMale]       = new[]{ MidlanderMale                                                                                                                                       },
-        [HighlanderMale]      = new[]{ HighlanderMale,      MidlanderMale                                                                                                                  },
-        [ElezenMale]          = new[]{ ElezenMale,          MidlanderMale                                                                                                                  },
-        [MiqoteMale]          = new[]{ MiqoteMale,          MidlanderMale                                                                                                                  },
-        [RoegadynMale]        = new[]{ RoegadynMale,        MidlanderMale                                                                                                                  },
-        [LalafellMale]        = new[]{ LalafellMale,        MidlanderMale                                                                                                                  },
-        [AuRaMale]            = new[]{ AuRaMale,            MidlanderMale                                                                                                                  },
-        [HrothgarMale]        = new[]{ HrothgarMale,        RoegadynMale,       MidlanderMale                                                                                              },
-        [VieraMale]           = new[]{ VieraMale,           MidlanderMale                                                                                                                  },
-        [MidlanderFemale]     = new[]{ MidlanderFemale,     MidlanderMale                                                                                                                  },
-        [HighlanderFemale]    = new[]{ HighlanderFemale,    MidlanderFemale,    MidlanderMale                                                                                              },
-        [ElezenFemale]        = new[]{ ElezenFemale,        MidlanderFemale,    MidlanderMale                                                                                              },
-        [MiqoteFemale]        = new[]{ MiqoteFemale,        MidlanderFemale,    MidlanderMale                                                                                              },
-        [RoegadynFemale]      = new[]{ RoegadynFemale,      MidlanderFemale,    MidlanderMale                                                                                              },
-        [LalafellFemale]      = new[]{ LalafellFemale,      LalafellMale,       MidlanderMale                                                                                              },
-        [AuRaFemale]          = new[]{ AuRaFemale,          MidlanderFemale,    MidlanderMale                                                                                              },
-        [HrothgarFemale]      = new[]{ HrothgarFemale,      RoegadynFemale,     MidlanderFemale,    MidlanderMale                                                                          },
-        [VieraFemale]         = new[]{ VieraFemale,         MidlanderFemale,    MidlanderMale                                                                                              },
-        [MidlanderMaleNpc]    = new[]{ MidlanderMaleNpc,    MidlanderMale                                                                                                                  },
-        [HighlanderMaleNpc]   = new[]{ HighlanderMaleNpc,   HighlanderMale,     MidlanderMaleNpc,   MidlanderMale                                                                          },
-        [ElezenMaleNpc]       = new[]{ ElezenMaleNpc,       ElezenMale,         MidlanderMaleNpc,   MidlanderMale                                                                          },
-        [MiqoteMaleNpc]       = new[]{ MiqoteMaleNpc,       MiqoteMale,         MidlanderMaleNpc,   MidlanderMale                                                                          },
-        [RoegadynMaleNpc]     = new[]{ RoegadynMaleNpc,     RoegadynMale,       MidlanderMaleNpc,   MidlanderMale                                                                          },
-        [LalafellMaleNpc]     = new[]{ LalafellMaleNpc,     LalafellMale,       MidlanderMaleNpc,   MidlanderMale                                                                          },
-        [AuRaMaleNpc]         = new[]{ AuRaMaleNpc,         AuRaMale,           MidlanderMaleNpc,   MidlanderMale                                                                          },
-        [HrothgarMaleNpc]     = new[]{ HrothgarMaleNpc,     HrothgarMale,       RoegadynMaleNpc,    RoegadynMale,     MidlanderMaleNpc,  MidlanderMale                                     },
-        [VieraMaleNpc]        = new[]{ VieraMaleNpc,        VieraMale,          MidlanderMaleNpc,   MidlanderMale                                                                          },
-        [MidlanderFemaleNpc]  = new[]{ MidlanderFemaleNpc,  MidlanderFemale,    MidlanderMaleNpc,   MidlanderMale                                                                          },
-        [HighlanderFemaleNpc] = new[]{ HighlanderFemaleNpc, HighlanderFemale,   MidlanderFemaleNpc, MidlanderFemale,  MidlanderMaleNpc,   MidlanderMale                                    },
-        [ElezenFemaleNpc]     = new[]{ ElezenFemaleNpc,     ElezenFemale,       MidlanderFemaleNpc, MidlanderFemale,  MidlanderMaleNpc,   MidlanderMale                                    },
-        [MiqoteFemaleNpc]     = new[]{ MiqoteFemaleNpc,     MiqoteFemale,       MidlanderFemaleNpc, MidlanderFemale,  MidlanderMaleNpc,   MidlanderMale                                    },
-        [RoegadynFemaleNpc]   = new[]{ RoegadynFemaleNpc,   RoegadynFemale,     MidlanderFemaleNpc, MidlanderFemale,  MidlanderMaleNpc,   MidlanderMale                                    },
-        [LalafellFemaleNpc]   = new[]{ LalafellFemaleNpc,   LalafellFemale,     LalafellMaleNpc,    LalafellMale,     MidlanderMaleNpc,   MidlanderMale                                    },
-        [AuRaFemaleNpc]       = new[]{ AuRaFemaleNpc,       AuRaFemale,         MidlanderFemaleNpc, MidlanderFemale,  MidlanderMaleNpc,   MidlanderMale                                    },
-        [HrothgarFemaleNpc]   = new[]{ HrothgarFemaleNpc,   HrothgarFemale,     RoegadynFemaleNpc,  RoegadynFemale,   MidlanderFemaleNpc, MidlanderFemale, MidlanderMaleNpc, MidlanderMale },
-        [VieraFemaleNpc]      = new[]{ VieraFemaleNpc,      VieraFemale,        MidlanderFemaleNpc, MidlanderFemale,  MidlanderMaleNpc,   MidlanderMale                                    },
-        [UnknownMaleNpc]      = new[]{ UnknownMaleNpc,      MidlanderMaleNpc,   MidlanderMale                                                                                              },
-        [UnknownFemaleNpc]    = new[]{ UnknownFemaleNpc,    MidlanderFemaleNpc, MidlanderFemale,    MidlanderMaleNpc, MidlanderMale                                                        },
-        // @formatter:on
-    };
+        => raceCode.Fallback().Dependencies();
 }
 
 public static partial class Names
