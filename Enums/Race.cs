@@ -344,13 +344,13 @@ public static class RaceEnumExtensions
         var child  = (ushort)raceCode % 10 == 4;
         return raceCode switch
         {
-            MidlanderMaleNpc | MidlanderFemale                   => MidlanderMale,
-            RoegadynMaleNpc | HrothgarMale                       => RoegadynMale,
-            LalafellMaleNpc | LalafellFemale | LalafellFemaleNpc => LalafellMale,
-            AuRaMaleNpc | AuRaFemaleNpc                          => AuRaMale,
-            _ when child                                         => MidlanderMaleNpc,
-            _ when female                                        => MidlanderFemale,
-            _                                                    => MidlanderMale,
+            MidlanderMaleNpc or MidlanderFemale                    => MidlanderMale,
+            RoegadynMaleNpc or HrothgarMale                        => RoegadynMale,
+            LalafellMaleNpc or LalafellFemale or LalafellFemaleNpc => LalafellMale,
+            AuRaMaleNpc or AuRaFemaleNpc                           => AuRaMale,
+            _ when child                                           => MidlanderMaleNpc,
+            _ when female                                          => MidlanderFemale,
+            _                                                      => MidlanderMale,
         };
     }
 
