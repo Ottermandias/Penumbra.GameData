@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Enums;
@@ -159,23 +160,33 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
         var sheet   = gameData.GetExcelSheet<Emote>(Language)!;
         var storage = new ConcurrentDictionary<string, ConcurrentBag<Emote>>();
 
-        void AddEmote(string? key, Emote emote)
-        {
-            if (key.IsNullOrEmpty())
-                return;
-
-            key = key.ToLowerInvariant();
-            if (storage.TryGetValue(key, out var emotes))
-                emotes.Add(emote);
-            else
-                storage[key] = new ConcurrentBag<Emote> { emote };
-        }
-
         var options = new ParallelOptions
         {
             MaxDegreeOfParallelism = Environment.ProcessorCount,
         };
         var seenTmbs = new ConcurrentDictionary<string, TmbFile>();
+
+        Parallel.ForEach(sheet.Where(n => n.Name.RawData.Length > 0), options, ProcessEmote);
+
+        var sit = sheet.GetRow(50)!;
+        AddEmote("s_pose01_loop.pap", sit);
+        AddEmote("s_pose02_loop.pap", sit);
+        AddEmote("s_pose03_loop.pap", sit);
+        AddEmote("s_pose04_loop.pap", sit);
+        AddEmote("s_pose05_loop.pap", sit);
+
+        var sitOnGround = sheet.GetRow(52)!;
+        AddEmote("j_pose01_loop.pap", sitOnGround);
+        AddEmote("j_pose02_loop.pap", sitOnGround);
+        AddEmote("j_pose03_loop.pap", sitOnGround);
+        AddEmote("j_pose04_loop.pap", sitOnGround);
+
+        var doze = sheet.GetRow(13)!;
+        AddEmote("l_pose01_loop.pap", doze);
+        AddEmote("l_pose02_loop.pap", doze);
+        AddEmote("l_pose03_loop.pap", doze);
+
+        return storage.ToFrozenDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Emote>)kvp.Value.Distinct().ToArray());
 
         void ProcessEmote(Emote emote)
         {
@@ -222,27 +233,17 @@ internal sealed class ObjectIdentification : DataSharer, IObjectIdentifier
             }
         }
 
-        Parallel.ForEach(sheet.Where(n => n.Name.RawData.Length > 0), options, ProcessEmote);
+        void AddEmote(string? key, Emote emote)
+        {
+            if (key.IsNullOrEmpty())
+                return;
 
-        var sit = sheet.GetRow(50)!;
-        AddEmote("s_pose01_loop.pap", sit);
-        AddEmote("s_pose02_loop.pap", sit);
-        AddEmote("s_pose03_loop.pap", sit);
-        AddEmote("s_pose04_loop.pap", sit);
-        AddEmote("s_pose05_loop.pap", sit);
-
-        var sitOnGround = sheet.GetRow(52)!;
-        AddEmote("j_pose01_loop.pap", sitOnGround);
-        AddEmote("j_pose02_loop.pap", sitOnGround);
-        AddEmote("j_pose03_loop.pap", sitOnGround);
-        AddEmote("j_pose04_loop.pap", sitOnGround);
-
-        var doze = sheet.GetRow(13)!;
-        AddEmote("l_pose01_loop.pap", doze);
-        AddEmote("l_pose02_loop.pap", doze);
-        AddEmote("l_pose03_loop.pap", doze);
-
-        return storage.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Emote>)kvp.Value.Distinct().ToArray());
+            key = key.ToLowerInvariant();
+            if (storage.TryGetValue(key, out var emotes))
+                emotes.Add(emote);
+            else
+                storage[key] = new ConcurrentBag<Emote> { emote };
+        }
     }
 
     private void FindEquipment(IDictionary<string, object?> set, GameObjectInfo info)

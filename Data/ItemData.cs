@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -66,7 +67,6 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
             dict.TryAdd((uint)fistWeapon.Item2, fistWeapon);
 
         var gauntlets = items[(int)FullEquipType.Hands].Where(g => dict.ContainsKey((uint)g.Item2)).ToDictionary(g => (uint)g.Item2, g => g);
-        gauntlets.TrimExcess();
 
         foreach (var type in Enum.GetValues<FullEquipType>().Where(v => !FullEquipTypeExtensions.OffhandTypes.Contains(v)))
         {
@@ -75,9 +75,8 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
                 dict.TryAdd((uint)item.Item2, item);
         }
 
-        dict.TrimExcess();
         return new Tuple<IReadOnlyDictionary<uint, (string, ulong, ushort, ushort, ushort, byte, uint)>,
-            IReadOnlyDictionary<uint, (string, ulong, ushort, ushort, ushort, byte, uint)>>(dict, gauntlets);
+            IReadOnlyDictionary<uint, (string, ulong, ushort, ushort, ushort, byte, uint)>>(dict.ToFrozenDictionary(), gauntlets.ToFrozenDictionary());
     }
 
     private static IReadOnlyDictionary<uint, PseudoEquipItem> CreateOffItems(IReadOnlyList<IReadOnlyList<PseudoEquipItem>> items)
@@ -90,8 +89,7 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
                 dict.TryAdd((uint)item.Item2, item);
         }
 
-        dict.TrimExcess();
-        return dict;
+        return dict.ToFrozenDictionary();
     }
 
     public ItemData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language, IPluginLog log)
@@ -101,11 +99,6 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
         (_mainItems, _gauntlets) = TryCatchData("ItemDictMain", () => CreateMainItems(_byType));
         _offItems                = TryCatchData("ItemDictOff",  () => CreateOffItems(_byType));
     }
-
-    private static readonly IReadOnlyDictionary<SetId, FullEquipType> WeaponTypes = new Dictionary<SetId, FullEquipType>
-    {
-        [101] = FullEquipType.Fists,
-    };
 
     protected override void DisposeInternal()
     {

@@ -172,10 +172,7 @@ public partial class ActorManager
 
             var split3 = allowIndex
                 ? split2[1].Split('@', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                : new[]
-                {
-                    split2[1],
-                };
+                : [ split2[1], ];
 
             WorldId GetIndex()
             {
@@ -243,10 +240,7 @@ public partial class ActorManager
             {
                 var type = IdentifierType.Player;
                 var (playerName, worldId) = ParsePlayer(split[1]);
-                return new[]
-                {
-                    CreateIndividualUnchecked(type, playerName, worldId.Id, 0, 0),
-                };
+                return [ CreateIndividualUnchecked(type, playerName, worldId.Id, 0, 0) ];
             }
             case "r":
             case "retainer":
@@ -257,10 +251,7 @@ public partial class ActorManager
                 if (!ByteString.FromString(split[1], out var playerName))
                     throw new IdentifierParseError($"The retainer string {split[1]} contains invalid symbols.");
 
-                return new[]
-                {
-                    CreateIndividualUnchecked(type, playerName, 0, 0, 0),
-                };
+                return [ CreateIndividualUnchecked(type, playerName, 0, 0, 0) ] ;
             }
             case "n":
             case "npc":
