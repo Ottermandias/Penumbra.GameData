@@ -1,9 +1,10 @@
+using System.Collections.Frozen;
 using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
-using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -119,7 +120,7 @@ public sealed partial class ActorManager : IDisposable
                 foreach (var w in gameData.GetExcelSheet<World>(Language)!.Where(w => w.IsPublic && !w.Name.RawData.IsEmpty))
                     dict.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
                 Log.Debug($"[ActorData] Collected {dict.Count} Worlds.");
-                return (IReadOnlyDictionary<ushort, string>)dict;
+                return (IReadOnlyDictionary<ushort, string>)dict.ToFrozenDictionary();
             });
 
         private Task<IReadOnlyDictionary<uint, string>> CreateMountData(IDataManager gameData)
@@ -150,7 +151,7 @@ public sealed partial class ActorManager : IDisposable
                 }
 
                 Log.Debug($"[ActorData] Collected {dict.Count} Mounts.");
-                return (IReadOnlyDictionary<uint, string>)dict;
+                return (IReadOnlyDictionary<uint, string>)dict.ToFrozenDictionary();
             });
 
         private Task<IReadOnlyDictionary<uint, string>> CreateCompanionData(IDataManager gameData)
@@ -162,7 +163,7 @@ public sealed partial class ActorManager : IDisposable
                              => c.Singular.RawData.Length > 0 && c.Order < ushort.MaxValue))
                     dict.TryAdd(c.RowId, ToTitleCaseExtended(c.Singular, c.Article));
                 Log.Debug($"[ActorData] Collected {dict.Count} Companions.");
-                return (IReadOnlyDictionary<uint, string>)dict;
+                return (IReadOnlyDictionary<uint, string>)dict.ToFrozenDictionary();
             });
 
         private Task<IReadOnlyDictionary<uint, string>> CreateOrnamentData(IDataManager gameData)
@@ -173,7 +174,7 @@ public sealed partial class ActorManager : IDisposable
                 foreach (var o in gameData.GetExcelSheet<Ornament>(Language)!.Where(o => o.Singular.RawData.Length > 0))
                     dict.TryAdd(o.RowId, ToTitleCaseExtended(o.Singular, o.Article));
                 Log.Debug($"[ActorData] Collected {dict.Count} Ornaments.");
-                return (IReadOnlyDictionary<uint, string>)dict;
+                return (IReadOnlyDictionary<uint, string>)dict.ToFrozenDictionary();
             });
 
         private Task<IReadOnlyDictionary<uint, string>> CreateBNpcData(IDataManager gameData)
@@ -184,7 +185,7 @@ public sealed partial class ActorManager : IDisposable
                 foreach (var n in gameData.GetExcelSheet<BNpcName>(Language)!.Where(n => n.Singular.RawData.Length > 0))
                     dict.TryAdd(n.RowId, ToTitleCaseExtended(n.Singular, n.Article));
                 Log.Debug($"[ActorData] Collected {dict.Count} BNPCs.");
-                return (IReadOnlyDictionary<uint, string>)dict;
+                return (IReadOnlyDictionary<uint, string>)dict.ToFrozenDictionary();
             });
 
         private Task<IReadOnlyDictionary<uint, string>> CreateENpcData(IDataManager gameData)
@@ -195,7 +196,7 @@ public sealed partial class ActorManager : IDisposable
                 foreach (var n in gameData.GetExcelSheet<ENpcResident>(Language)!.Where(e => e.Singular.RawData.Length > 0))
                     dict.TryAdd(n.RowId, ToTitleCaseExtended(n.Singular, n.Article));
                 Log.Debug($"[ActorData] Collected {dict.Count} ENPCs.");
-                return (IReadOnlyDictionary<uint, string>)dict;
+                return (IReadOnlyDictionary<uint, string>)dict.ToFrozenDictionary();
             });
 
         private static string ToTitleCaseExtended(SeString s, sbyte article)
@@ -256,11 +257,10 @@ public sealed partial class ActorManager : IDisposable
 
     public ActorIdentifier GetInspectPlayer()
     {
-        var addon = _gameGui.GetAddonByName("CharacterInspect", 1);
-        if (addon == IntPtr.Zero)
-            return ActorIdentifier.Invalid;
-
-        return CreatePlayer(InspectName, InspectWorldId);
+        var addon = _gameGui.GetAddonByName("CharacterInspect");
+        return addon == IntPtr.Zero 
+            ? ActorIdentifier.Invalid 
+            : CreatePlayer(InspectName, InspectWorldId);
     }
 
     public unsafe bool ResolvePartyBannerPlayer(ScreenActor type, out ActorIdentifier id)
@@ -311,14 +311,6 @@ public sealed partial class ActorManager : IDisposable
 
     private unsafe ActorIdentifier SearchPlayersCustomize(Character* gameObject)
     {
-        static bool Compare(Character* a, Character* b)
-        {
-            var data1  = (CustomizeData*)a->DrawData.CustomizeData.Data;
-            var data2  = (CustomizeData*)b->DrawData.CustomizeData.Data;
-            var equals = CustomizeData.ScreenActorEquals(data1, data2);
-            return equals;
-        }
-
         for (var i = 0; i < ObjectIndex.CutsceneStart.Index; i += 2)
         {
             var obj = (GameObject*)_objects.GetObjectAddress(i);
@@ -329,6 +321,14 @@ public sealed partial class ActorManager : IDisposable
         }
 
         return ActorIdentifier.Invalid;
+
+        static bool Compare(Character* a, Character* b)
+        {
+            var data1  = (CustomizeData*)a->DrawData.CustomizeData.Data;
+            var data2  = (CustomizeData*)b->DrawData.CustomizeData.Data;
+            var equals = CustomizeData.ScreenActorEquals(data1, data2);
+            return equals;
+        }
     }
 
     public unsafe bool ResolveMahjongPlayer(ScreenActor type, out ActorIdentifier id)
@@ -390,13 +390,14 @@ public sealed partial class ActorManager : IDisposable
 
     public ActorIdentifier GetGlamourPlayer()
     {
-        var addon = _gameGui.GetAddonByName("MiragePrismMiragePlate", 1);
+        var addon = _gameGui.GetAddonByName("MiragePrismMiragePlate");
         return addon == IntPtr.Zero ? ActorIdentifier.Invalid : GetCurrentPlayer();
     }
 
     public void Dispose()
     {
         Data.Dispose();
+        GC.SuppressFinalize(this);
         if (ActorIdentifier.Manager == this)
             ActorIdentifier.Manager = null;
     }
@@ -414,22 +415,13 @@ public sealed partial class ActorManager : IDisposable
     public short ToCutsceneParent(ushort index)
         => _toParentIdx(index);
 
-    [Signature(Sigs.InspectTitleId, ScanType = ScanType.StaticAddress)]
-    private static unsafe ushort* _inspectTitleId = null!;
-
-    [Signature(Sigs.InspectWorldId, ScanType = ScanType.StaticAddress)]
-    private static unsafe ushort* _inspectWorldId = null!;
-
-    private static unsafe ushort InspectTitleId
-        => *_inspectTitleId;
-
     private static unsafe ByteString InspectName
-        => new((byte*)(_inspectWorldId + 1));
+        => new(UIState.Instance()->Inspect.Name);
 
     private static unsafe ushort InspectWorldId
-        => *_inspectWorldId;
+        => (ushort) UIState.Instance()->Inspect.WorldId;
 
-    public static readonly IReadOnlySet<EnpcId> MannequinIds = new HashSet<EnpcId>()
+    public static readonly IReadOnlySet<EnpcId> MannequinIds = new EnpcId[]
     {
         1026228u,
         1026229u,
@@ -447,5 +439,5 @@ public sealed partial class ActorManager : IDisposable
         1033659u,
         1007137u,
         // TODO: Female Hrothgar
-    };
+    }.ToFrozenSet();
 }
