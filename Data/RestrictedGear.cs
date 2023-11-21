@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -75,7 +76,7 @@ public sealed class RestrictedGear : DataSharer
         var rg  = RaceGenderGroup.Where(c => c is not 0 and not uint.MaxValue).ToHashSet();
         AddKnown(m2f, f2m);
         UnhandledRestrictedGear(rg, m2f, f2m, false); // Set this to true to create a print of unassigned gear on launch.
-        return new Tuple<IReadOnlySet<uint>, IReadOnlyDictionary<uint, uint>, IReadOnlyDictionary<uint, uint>>(rg, m2f, f2m);
+        return new Tuple<IReadOnlySet<uint>, IReadOnlyDictionary<uint, uint>, IReadOnlyDictionary<uint, uint>>(rg.ToFrozenSet(), m2f.ToFrozenDictionary(), f2m.ToFrozenDictionary());
     }
 
 

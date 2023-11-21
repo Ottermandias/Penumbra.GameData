@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -22,7 +23,7 @@ public sealed class StainData : DataSharer, IReadOnlyDictionary<StainId, Stain>
     {
         var stainSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Stain>(Language)!;
         return stainSheet.Where(s => s.Color != 0 && s.Name.RawData.Length > 0)
-            .ToDictionary(s => (byte)s.RowId, s =>
+            .ToFrozenDictionary(s => (byte)s.RowId, s =>
             {
                 var stain = new Stain(s);
                 return (stain.Name, stain.RgbaColor, stain.Gloss);
