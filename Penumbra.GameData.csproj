@@ -35,8 +35,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Penumbra.Api\Penumbra.Api.csproj" />
-      <ProjectReference Include="..\Penumbra.String\Penumbra.String.csproj" />
+        <ProjectReference Include="..\Penumbra.Api\Penumbra.Api.csproj" />
+        <ProjectReference Include="..\Penumbra.String\Penumbra.String.csproj" />
+        <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -58,6 +59,14 @@
         </Reference>
         <Reference Include="Newtonsoft.Json">
             <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="ImGui.NET">
+            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="ImGuiScene">
+            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

@@ -1,38 +1,30 @@
 namespace Penumbra.GameData.Structs;
 
 [StructLayout(LayoutKind.Explicit, Pack = 1)]
-public struct CharacterArmor : IEquatable<CharacterArmor>
+public struct CharacterArmor(SetId set, Variant variant, StainId stain) : IEquatable<CharacterArmor>
 {
     public const int Size = 4;
 
     [FieldOffset(0)]
-    public readonly uint Value;
+    public readonly uint Value = 0;
 
     [FieldOffset(0)]
-    public SetId Set;
+    public SetId Set = set;
 
     [FieldOffset(2)]
-    public Variant Variant;
+    public Variant Variant = variant;
 
     [FieldOffset(3)]
-    public StainId Stain;
+    public StainId Stain = stain;
 
-    public CharacterArmor(SetId set, Variant variant, StainId stain)
-    {
-        Value   = 0;
-        Set     = set;
-        Variant = variant;
-        Stain   = stain;
-    }
-
-    public readonly CharacterArmor With(StainId stain)
-        => new(Set, Variant, stain);
+    public readonly CharacterArmor With(StainId stainId)
+        => new(Set, Variant, stainId);
 
     public readonly CharacterWeapon ToWeapon(WeaponType type)
         => new(Set, type, Variant, Stain);
 
-    public readonly CharacterWeapon ToWeapon(WeaponType type, StainId stain)
-        => new(Set, type, Variant, stain);
+    public readonly CharacterWeapon ToWeapon(WeaponType type, StainId stainId)
+        => new(Set, type, Variant, stainId);
 
     public override readonly string ToString()
         => $"{Set},{Variant},{Stain}";

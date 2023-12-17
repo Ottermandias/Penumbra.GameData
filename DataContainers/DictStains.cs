@@ -1,26 +1,18 @@
-using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Penumbra.GameData.Data;
+using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
-namespace Penumbra.GameData.Data;
+namespace Penumbra.GameData.DataContainers;
 
-public sealed class StainData : DataSharer, IReadOnlyDictionary<StainId, Stain>
+public sealed class DictStains(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager gameData)
+    : DataSharer<IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)>>(pluginInterface, log, "Stains", gameData.Language, 3,
+        () => CreateStainData(gameData)), IReadOnlyDictionary<StainId, Stain>
 {
-    public readonly IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> Data;
-
-    public StainData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language, IPluginLog log)
-        : base(pluginInterface, language, 2, log)
+    private static IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> CreateStainData(IDataManager dataManager)
     {
-        Data = TryCatchData("Stains", () => CreateStainData(dataManager));
-    }
-
-    protected override void DisposeInternal()
-        => DisposeTag("Stains");
-
-    private IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> CreateStainData(IDataManager dataManager)
-    {
-        var stainSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Stain>(Language)!;
+        var stainSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Stain>(dataManager.Language)!;
         return stainSheet.Where(s => s.Color != 0 && s.Name.RawData.Length > 0)
             .ToDictionary(s => (byte)s.RowId, s =>
             {
@@ -30,7 +22,7 @@ public sealed class StainData : DataSharer, IReadOnlyDictionary<StainId, Stain>
     }
 
     public IEnumerator<KeyValuePair<StainId, Stain>> GetEnumerator()
-        => Data.Select(kvp
+        => Value.Select(kvp
                 => new KeyValuePair<StainId, Stain>(new StainId(kvp.Key), new Stain(kvp.Value.Name, kvp.Value.Dye, kvp.Key, kvp.Value.Gloss)))
             .GetEnumerator();
 
@@ -38,14 +30,14 @@ public sealed class StainData : DataSharer, IReadOnlyDictionary<StainId, Stain>
         => GetEnumerator();
 
     public int Count
-        => Data.Count;
+        => Value.Count;
 
     public bool ContainsKey(StainId key)
-        => Data.ContainsKey(key.Id);
+        => Value.ContainsKey(key.Id);
 
     public bool TryGetValue(StainId key, out Stain value)
     {
-        if (!Data.TryGetValue(key.Id, out var data))
+        if (!Value.TryGetValue(key.Id, out var data))
         {
             value = default;
             return false;
@@ -59,8 +51,14 @@ public sealed class StainData : DataSharer, IReadOnlyDictionary<StainId, Stain>
         => TryGetValue(key, out var data) ? data : throw new ArgumentOutOfRangeException(nameof(key));
 
     public IEnumerable<StainId> Keys
-        => Data.Keys.Select(k => new StainId(k));
+        => Value.Keys.Select(k => new StainId(k));
 
     public IEnumerable<Stain> Values
-        => Data.Select(kvp => new Stain(kvp.Value.Name, kvp.Value.Dye, kvp.Key, kvp.Value.Gloss));
+        => Value.Select(kvp => new Stain(kvp.Value.Name, kvp.Value.Dye, kvp.Key, kvp.Value.Gloss));
+
+    public override long ComputeMemory()
+        => DataUtility.DictionaryMemory(24, Count);
+
+    public override int ComputeTotalCount()
+        => Count;
 }

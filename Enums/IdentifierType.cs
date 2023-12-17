@@ -1,4 +1,4 @@
-namespace Penumbra.GameData.Actors;
+namespace Penumbra.GameData.Enums;
 
 public enum IdentifierType : byte
 {

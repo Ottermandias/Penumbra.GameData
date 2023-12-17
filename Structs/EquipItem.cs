@@ -1,8 +1,9 @@
-﻿using Dalamud.Utility;
+﻿global using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, uint>;
+using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
-using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, uint>;
+
 
 namespace Penumbra.GameData.Structs;
 
@@ -163,4 +164,19 @@ public readonly struct EquipItem
 
     private static (FullEquipType, ItemFlags, CharacterLevel, JobGroupId) SplitInt(uint data)
         => ((FullEquipType)(data & 0xFF), (ItemFlags)((data >> 8) & 0xFF), (CharacterLevel)((data >> 16) & 0xFF), (JobGroupId)(data >> 24));
+}
+
+internal readonly struct EquipItemList(IReadOnlyList<PseudoEquipItem> items) : IReadOnlyList<EquipItem>
+{
+    public IEnumerator<EquipItem> GetEnumerator()
+        => items.Select(i => (EquipItem)i).GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
+
+    public int Count
+        => items.Count;
+
+    public EquipItem this[int index]
+        => items[index];
 }

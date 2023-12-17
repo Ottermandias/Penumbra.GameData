@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Penumbra.GameData.Actors;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;
@@ -25,60 +24,60 @@ public readonly record struct ModelCharaId(uint Id)
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct BnpcId(uint Id)
+public readonly record struct BNpcId(uint Id)
 {
-    public static implicit operator BnpcId(uint id)
+    public static implicit operator BNpcId(uint id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    private class Converter : JsonConverter<BnpcId>
+    private class Converter : JsonConverter<BNpcId>
     {
-        public override void WriteJson(JsonWriter writer, BnpcId value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, BNpcId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override BnpcId ReadJson(JsonReader reader, Type objectType, BnpcId existingValue, bool hasExistingValue,
+        public override BNpcId ReadJson(JsonReader reader, Type objectType, BNpcId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<uint>(reader);
     }
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct EnpcId(uint Id)
+public readonly record struct ENpcId(uint Id)
 {
-    public static implicit operator EnpcId(uint id)
+    public static implicit operator ENpcId(uint id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    private class Converter : JsonConverter<EnpcId>
+    private class Converter : JsonConverter<ENpcId>
     {
-        public override void WriteJson(JsonWriter writer, EnpcId value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, ENpcId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override EnpcId ReadJson(JsonReader reader, Type objectType, EnpcId existingValue, bool hasExistingValue,
+        public override ENpcId ReadJson(JsonReader reader, Type objectType, ENpcId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<uint>(reader);
     }
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct BnpcNameId(uint Id)
+public readonly record struct BNpcNameId(uint Id)
 {
-    public static implicit operator BnpcNameId(uint id)
+    public static implicit operator BNpcNameId(uint id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    private class Converter : JsonConverter<BnpcNameId>
+    private class Converter : JsonConverter<BNpcNameId>
     {
-        public override void WriteJson(JsonWriter writer, BnpcNameId value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, BNpcNameId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override BnpcNameId ReadJson(JsonReader reader, Type objectType, BnpcNameId existingValue, bool hasExistingValue,
+        public override BNpcNameId ReadJson(JsonReader reader, Type objectType, BNpcNameId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<uint>(reader);
     }
@@ -150,10 +149,10 @@ public readonly record struct NpcId(uint Id)
     public static implicit operator NpcId(uint id)
         => new(id);
 
-    public static implicit operator NpcId(EnpcId id)
+    public static implicit operator NpcId(ENpcId id)
         => new(id.Id);
 
-    public static implicit operator NpcId(BnpcNameId id)
+    public static implicit operator NpcId(BNpcNameId id)
         => new(id.Id);
 
     public static implicit operator NpcId(MountId id)
@@ -165,10 +164,10 @@ public readonly record struct NpcId(uint Id)
     public static implicit operator NpcId(OrnamentId id)
         => new(id.Id);
 
-    public EnpcId EnpcId
+    public ENpcId ENpcId
         => new(Id);
 
-    public BnpcNameId BnpcNameId
+    public BNpcNameId BNpcNameId
         => new(Id);
 
     public MountId MountId

@@ -1,17 +1,11 @@
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
 
-public class GamePathParser : IGamePathParser
+public class GamePathParser(IPluginLog log)
 {
-    private readonly IPluginLog _log;
-
-    public GamePathParser(IPluginLog log)
-        => _log = log;
-
     /// <summary> Obtain basic information about a file path. </summary>
     public GameObjectInfo GetFileInfo(string path)
     {
@@ -42,7 +36,7 @@ public class GamePathParser : IGamePathParser
         }
         catch (Exception e)
         {
-            _log.Error($"Could not parse {path}:\n{e}");
+            log.Error($"Could not parse {path}:\n{e}");
         }
 
         return new GameObjectInfo
@@ -133,30 +127,8 @@ public class GamePathParser : IGamePathParser
 
     private (FileType, ObjectType, Match?) ParseGamePath(string path)
     {
-        if (!Names.ExtensionToFileType.TryGetValue(Path.GetExtension(path), out var fileType))
-            fileType = FileType.Unknown;
-
+        var fileType   = Names.ExtensionToFileType.GetValueOrDefault(Path.GetExtension(path), FileType.Unknown);
         var objectType = PathToObjectType(path);
-
-        static Match TestCharacterTextures(string path)
-        {
-            var regexes = new Regex[]
-            {
-                GamePaths.Character.Tex.Regex(),
-                GamePaths.Character.Tex.FolderRegex(),
-                GamePaths.Character.Tex.SkinRegex(),
-                GamePaths.Character.Tex.CatchlightRegex(),
-                GamePaths.Character.Tex.DecalRegex(),
-            };
-            foreach (var regex in regexes)
-            {
-                var match = regex.Match(path);
-                if (match.Success)
-                    return match;
-            }
-
-            return Match.Empty;
-        }
 
         var match = (fileType, objectType) switch
         {
@@ -190,6 +162,26 @@ public class GamePathParser : IGamePathParser
         };
 
         return (fileType, objectType, match.Success ? match : null);
+
+        static Match TestCharacterTextures(string path)
+        {
+            Regex[] regexes =
+            [
+                GamePaths.Character.Tex.Regex(),
+                GamePaths.Character.Tex.FolderRegex(),
+                GamePaths.Character.Tex.SkinRegex(),
+                GamePaths.Character.Tex.CatchlightRegex(),
+                GamePaths.Character.Tex.DecalRegex(),
+            ];
+            foreach (var regex in regexes)
+            {
+                var match = regex.Match(path);
+                if (match.Success)
+                    return match;
+            }
+
+            return Match.Empty;
+        }
     }
 
     private static GameObjectInfo HandleEquipment(FileType fileType, GroupCollection groups)

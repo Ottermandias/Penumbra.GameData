@@ -1,5 +1,6 @@
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Files.Utility;
+using DisassembledShader = Penumbra.GameData.Interop.DisassembledShader;
 
 namespace Penumbra.GameData.Files;
 

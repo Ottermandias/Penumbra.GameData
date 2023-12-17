@@ -1,5 +1,5 @@
 using Dalamud.Game.ClientState.Objects.Enums;
-using Newtonsoft.Json.Linq;
+using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using Penumbra.String;
 
@@ -8,8 +8,6 @@ namespace Penumbra.GameData.Actors;
 [StructLayout(LayoutKind.Explicit)]
 public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
 {
-    public static ActorManager? Manager;
-
     public static readonly ActorIdentifier Invalid = new(IdentifierType.Invalid, 0, WorldId.AnyWorld, 0, ByteString.Empty);
 
     public enum RetainerType : ushort
@@ -45,9 +43,11 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
             IdentifierType.Player => HomeWorld == other.HomeWorld && PlayerName.EqualsCi(other.PlayerName),
             IdentifierType.Retainer => (Retainer == other.Retainer || Retainer == RetainerType.Both || other.Retainer == RetainerType.Both)
              && PlayerName.EqualsCi(other.PlayerName),
-            IdentifierType.Owned => HomeWorld == other.HomeWorld && PlayerName.EqualsCi(other.PlayerName) && Manager.DataIdEquals(this, other),
+            IdentifierType.Owned => HomeWorld == other.HomeWorld
+             && PlayerName.EqualsCi(other.PlayerName)
+             && ActorIdentifierExtensions.Manager.DataIdEquals(this, other),
             IdentifierType.Special => Index == other.Index,
-            IdentifierType.Npc => Manager.DataIdEquals(this, other)
+            IdentifierType.Npc => ActorIdentifierExtensions.Manager.DataIdEquals(this, other)
              && (Index == other.Index || Index == ushort.MaxValue || other.Index == ushort.MaxValue),
             IdentifierType.UnkObject => PlayerName.EqualsCi(other.PlayerName) && Index == other.Index,
             _                        => false,
@@ -91,7 +91,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
     }
 
     public override string ToString()
-        => Manager?.ToString(this)
+        => ActorIdentifierExtensions.Manager?.ToString(this)
          ?? Type switch
             {
                 IdentifierType.Player => $"{PlayerName} ({HomeWorld})",
@@ -115,7 +115,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
             };
 
     public string ToName()
-        => Manager?.ToName(this) ?? "Unknown Object";
+        => ActorIdentifierExtensions.Manager?.ToName(this) ?? "Unknown Object";
 
     public override int GetHashCode()
         => Type switch
@@ -161,108 +161,4 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         DataId     = data;
         PlayerName = playerName;
     }
-
-    public JObject ToJson()
-    {
-        var ret = new JObject { { nameof(Type), Type.ToString() } };
-        switch (Type)
-        {
-            case IdentifierType.Player:
-                ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(HomeWorld),  HomeWorld.Id);
-                return ret;
-            case IdentifierType.Retainer:
-                ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(Retainer),   Retainer.ToString());
-                return ret;
-            case IdentifierType.Owned:
-                ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(HomeWorld),  HomeWorld.Id);
-                ret.Add(nameof(Kind),       Kind.ToString());
-                ret.Add(nameof(DataId),     DataId.Id);
-                return ret;
-            case IdentifierType.Special:
-                ret.Add("Special", ((ScreenActor)Index.Index).ToString());
-                return ret;
-            case IdentifierType.Npc:
-                ret.Add(nameof(Kind), Kind.ToString());
-                if (Index != ushort.MaxValue)
-                    ret.Add(nameof(Index), Index.Index);
-                ret.Add(nameof(DataId), DataId.Id);
-                return ret;
-            case IdentifierType.UnkObject:
-                ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(Index),      Index.Index);
-                return ret;
-        }
-
-        return ret;
-    }
-}
-
-public static class ActorManagerExtensions
-{
-    public static bool DataIdEquals(this ActorManager? manager, ActorIdentifier lhs, ActorIdentifier rhs)
-    {
-        if (lhs.Kind != rhs.Kind)
-            return false;
-
-        if (lhs.DataId == rhs.DataId)
-            return true;
-
-        if (manager == null)
-            return lhs.Kind == rhs.Kind && lhs.DataId == rhs.DataId || lhs.DataId == uint.MaxValue || rhs.DataId == uint.MaxValue;
-
-        var dict = lhs.Kind switch
-        {
-            ObjectKind.MountType => manager.Data.Mounts,
-            ObjectKind.Companion => manager.Data.Companions,
-            ObjectKind.Ornament  => manager.Data.Ornaments,
-            ObjectKind.BattleNpc => manager.Data.BNpcs,
-            ObjectKind.EventNpc  => manager.Data.ENpcs,
-            _                    => new Dictionary<uint, string>(),
-        };
-
-        return dict.TryGetValue(lhs.DataId.Id, out var lhsName)
-         && dict.TryGetValue(rhs.DataId.Id,    out var rhsName)
-         && lhsName.Equals(rhsName, StringComparison.OrdinalIgnoreCase);
-    }
-
-    public static string ToName(this ObjectKind kind)
-        => kind switch
-        {
-            ObjectKind.None      => "Unknown",
-            ObjectKind.BattleNpc => "Battle NPC",
-            ObjectKind.EventNpc  => "Event NPC",
-            ObjectKind.MountType => "Mount",
-            ObjectKind.Companion => "Companion",
-            ObjectKind.Ornament  => "Accessory",
-            _                    => kind.ToString(),
-        };
-
-    public static string ToName(this IdentifierType type)
-        => type switch
-        {
-            IdentifierType.Player    => "Player",
-            IdentifierType.Retainer  => "Retainer (Bell)",
-            IdentifierType.Owned     => "Owned NPC",
-            IdentifierType.Special   => "Special Actor",
-            IdentifierType.Npc       => "NPC",
-            IdentifierType.UnkObject => "Unknown Object",
-            _                        => "Invalid",
-        };
-
-    /// <summary>
-    /// Fixed names for special actors.
-    /// </summary>
-    public static string ToName(this ScreenActor actor)
-        => actor switch
-        {
-            ScreenActor.CharacterScreen => "Character Screen Actor",
-            ScreenActor.ExamineScreen   => "Examine Screen Actor",
-            ScreenActor.FittingRoom     => "Fitting Room Actor",
-            ScreenActor.DyePreview      => "Dye Preview Actor",
-            ScreenActor.Portrait        => "Portrait Actor",
-            _                           => "Invalid",
-        };
 }
