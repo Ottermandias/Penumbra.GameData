@@ -10,13 +10,31 @@ using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace Penumbra.GameData.Actors;
 
+/// <summary> Creation of ActorIdentifiers. </summary>
 public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework, NameDicts _data, CutsceneResolver _toParentIdx)
 {
-    public class IdentifierParseError(string reason) : Exception(reason);
-
+    /// <summary> Expose the _toParentIdx function for convenience. </summary>
+    /// <returns> The parent index for a cutscene object or -1 if no parent exists. </returns>
     public short ToCutsceneParent(ushort index)
         => _toParentIdx.Invoke(index);
 
+    /// <summary> Used in construction from user strings. </summary>
+    public class IdentifierParseError(string reason) : Exception(reason);
+
+    /// <summary> Convert a string into a list of ActorIdentifiers. </summary>
+    /// <param name="userString"> The input string. </param>
+    /// <param name="allowIndex"> Whether the conversion allows and respects game object indices. </param>
+    /// <returns> All matching actor identifiers. </returns>
+    /// <exception cref="IdentifierParseError"> Any failure to convert throws an exception with the failure reason. </exception>
+    /// <remarks>
+    /// Valid formats are:
+    /// <list type="bullet">
+    ///     <item><code>p|[Player Name]@{World Name}</code> players of name from world, world is optional</item>
+    ///     <item><code>r|[Retainer Name]</code> retainers</item>
+    ///     <item><code>n|[NPC Type]:[NPC Name]@{Object Index}</code> NPCs of type MCAEB and a given name, at an optional index which may be disallowed.</item>
+    ///     <item><code>o|[NPC Type]:[NPC Name]|[Player Name]@{World Name}</code> Owned NPCs.</item>
+    /// </list>
+    /// </remarks>
     public ActorIdentifier[] FromUserString(string userString, bool allowIndex)
     {
         if (userString.Length == 0)
@@ -25,94 +43,6 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         var split = userString.Split('|', 3, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         if (split.Length < 2)
             throw new IdentifierParseError($"The identifier string {userString} does not contain a type and a value.");
-
-        (ByteString, WorldId) ParsePlayer(string player)
-        {
-            var parts = player.Split('@', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            if (!VerifyPlayerName(parts[0]))
-                throw new IdentifierParseError($"{parts[0]} is not a valid player name.");
-            if (!ByteString.FromString(parts[0], out var p))
-                throw new IdentifierParseError($"The player string {parts[0]} contains invalid symbols.");
-
-            var world = parts.Length == 2
-                ? _data.ToWorldId(parts[1])
-                : ushort.MaxValue;
-
-            if (!VerifyWorld(world))
-                throw new IdentifierParseError($"{parts[1]} is not a valid world name.");
-
-            return (p, world);
-        }
-
-        (ObjectKind, NpcId[], WorldId) ParseNpc(string npc)
-        {
-            var indexString = allowIndex ? "@<Index>" : string.Empty;
-            var split2      = npc.Split(':', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            if (split2.Length != 2)
-                throw new IdentifierParseError($"NPCs need to be specified by '[Object Type]:[NPC Name]{indexString}'.");
-
-            var split3 = allowIndex
-                ? split2[1].Split('@', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                : [split2[1]];
-
-            WorldId GetIndex()
-            {
-                var idx = WorldId.AnyWorld;
-                if (split3.Length != 2)
-                    return idx;
-
-                if (ushort.TryParse(split3[1], out var intIdx) && intIdx < _objects.Length)
-                    idx = intIdx;
-                else
-                    throw new IdentifierParseError($"Could not parse index {split3[1]} to valid Index.");
-
-                return idx;
-            }
-
-            static bool FindDataId(string name, NameDictionary data, out NpcId[] dataIds)
-            {
-                dataIds = data.Where(kvp => kvp.Value.Equals(name, StringComparison.OrdinalIgnoreCase)).Select(kvp => kvp.Key).ToArray();
-                return dataIds.Length > 0;
-            }
-
-            switch (split2[0].ToLowerInvariant())
-            {
-                case "m":
-                case "mount":
-                    return FindDataId(split3[0], _data.Mounts, out var id)
-                        ? (ObjectKind.MountType, id, GetIndex())
-                        : throw new IdentifierParseError($"Could not identify a Mount named {split2[1]}.");
-                case "c":
-                case "companion":
-                case "minion":
-                case "mini":
-                    return FindDataId(split3[0], _data.Companions, out id)
-                        ? (ObjectKind.Companion, id, GetIndex())
-                        : throw new IdentifierParseError($"Could not identify a Minion named {split2[1]}.");
-                case "a":
-                case "o":
-                case "accessory":
-                case "ornament":
-                    return FindDataId(split3[0], _data.Ornaments, out id)
-                        ? (ObjectKind.Ornament, id, GetIndex())
-                        : throw new IdentifierParseError($"Could not identify an Accessory named {split2[1]}.");
-                case "e":
-                case "enpc":
-                case "eventnpc":
-                case "event npc":
-                    return FindDataId(split3[0], _data.ENpcs, out id)
-                        ? (ObjectKind.EventNpc, id, GetIndex())
-                        : throw new IdentifierParseError($"Could not identify an Event NPC named {split2[1]}.");
-                case "b":
-                case "bnpc":
-                case "battlenpc":
-                case "battle npc":
-                    return FindDataId(split3[0], _data.BNpcs, out id)
-                        ? (ObjectKind.BattleNpc, id, GetIndex())
-                        : throw new IdentifierParseError($"Could not identify a Battle NPC named {split2[1]}.");
-                default: throw new IdentifierParseError($"The argument {split2[0]} is not a valid NPC Type.");
-            }
-        }
 
         switch (split[0].ToLowerInvariant())
         {
@@ -135,7 +65,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             case "n":
             case "npc":
             {
-                var (kind, objectIds, worldId) = ParseNpc(split[1]);
+                var (kind, objectIds, worldId) = ParseNpc(split[1], allowIndex);
                 return objectIds.Select(i => CreateIndividualUnchecked(IdentifierType.Npc, ByteString.Empty, worldId.Id, kind, i)).ToArray();
             }
             case "o":
@@ -145,7 +75,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
                     throw new IdentifierParseError(
                         "Owned NPCs need a NPC and a player, separated by '|', but only one was provided.");
 
-                var (kind, objectIds, _)  = ParseNpc(split[1]);
+                var (kind, objectIds, _)  = ParseNpc(split[1], allowIndex);
                 var (playerName, worldId) = ParsePlayer(split[2]);
                 return objectIds.Select(i => CreateIndividualUnchecked(IdentifierType.Owned, playerName, worldId.Id, kind, i)).ToArray();
             }
@@ -155,9 +85,13 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         }
     }
 
-    /// <summary>
-    /// Compute an ActorIdentifier from a GameObject. If check is true, the values are checked for validity.
-    /// </summary>
+    /// <summary> Compute an ActorIdentifier from a GameObject. </summary>
+    /// <param name="actor"> The game object. Can be null. </param>
+    /// <param name="owner"> A returned owner if the game object has an owner. </param>
+    /// <param name="allowPlayerNpc"> Allow to treat npcs as players in certain cases for Anamnesis compatibility.</param>
+    /// <param name="check"> Check obtained data for validity. </param>
+    /// <param name="withoutIndex"> Skip the game object index for unowned NPCs. </param>
+    /// <returns> An actor identifier for that object. </returns>
     public unsafe ActorIdentifier FromObject(GameObject* actor, out GameObject* owner, bool allowPlayerNpc, bool check, bool withoutIndex)
     {
         owner = null;
@@ -183,16 +117,23 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         };
     }
 
-    public unsafe ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.GameObject? actor, out GameObject* owner,
-        bool allowPlayerNpc, bool check, bool withoutIndex)
-        => FromObject((GameObject*)(actor?.Address ?? IntPtr.Zero), out owner, allowPlayerNpc,
-            check,                                                  withoutIndex);
+    /// <inheritdoc cref="FromObject(GameObject*,out GameObject*,bool,bool,bool)"/>
+    public unsafe ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.GameObject? actor,
+        out GameObject* owner, bool allowPlayerNpc, bool check, bool withoutIndex)
+        => FromObject((GameObject*)(actor?.Address ?? IntPtr.Zero), out owner, allowPlayerNpc, check, withoutIndex);
 
+    /// <inheritdoc cref="FromObject(GameObject*,out GameObject*,bool,bool,bool)"/>
     public unsafe ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.GameObject? actor, bool allowPlayerNpc, bool check,
         bool withoutIndex)
         => FromObject(actor, out _, allowPlayerNpc, check, withoutIndex);
 
-    /// <summary> value can be WorldId, ScreenActor, ObjectIndex or RetainerType. </summary>
+    /// <summary> Create an individual from existing data, which is checked for correctness. </summary>
+    /// <param name="type"> The type of actor. </param>
+    /// <param name="name"> The name of the actor for players, retainers and owned objects. </param>
+    /// <param name="value"> WorldId, ScreenActor, ObjectIndex or RetainerType. </param>
+    /// <param name="kind"> The object kind for NPCs. </param>
+    /// <param name="dataId"> The data id for NPCs. </param>
+    /// <returns> An identifier for that data. </returns>
     public ActorIdentifier CreateIndividual(IdentifierType type, ByteString name, ushort value, ObjectKind kind, NpcId dataId)
         => type switch
         {
@@ -205,12 +146,13 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             _                        => ActorIdentifier.Invalid,
         };
 
-    /// <summary>
-    /// Only use this if you are sure the input is valid.
-    /// </summary>
+    /// <inheritdoc cref="CreateIndividual"/>
+    /// <summary> Create an individual from existing data, which is left unchecked. </summary>
+    /// <remarks> Only use this if you are sure the data is valid. </remarks>
     public ActorIdentifier CreateIndividualUnchecked(IdentifierType type, ByteString name, ushort value, ObjectKind kind, NpcId dataId)
         => new(type, kind, (ObjectIndex)value, dataId, name);
 
+    /// <summary> Create a player from name and home world. Input is checked for correctness. </summary>
     public ActorIdentifier CreatePlayer(ByteString name, WorldId homeWorld)
     {
         if (!VerifyWorld(homeWorld) || !VerifyPlayerName(name.Span))
@@ -219,6 +161,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         return new ActorIdentifier(IdentifierType.Player, ObjectKind.Player, homeWorld, 0, name);
     }
 
+    /// <summary> Create a retainer from name and retainer type. Input is checked for correctness. </summary>
     public ActorIdentifier CreateRetainer(ByteString name, ActorIdentifier.RetainerType type)
     {
         if (!VerifyRetainerName(name.Span))
@@ -227,6 +170,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         return new ActorIdentifier(IdentifierType.Retainer, ObjectKind.Retainer, type, 0, name);
     }
 
+    /// <summary> Create a special actor identifier from special input. Input is checked for correctness. </summary>
     public ActorIdentifier CreateSpecial(ScreenActor actor)
     {
         if (!VerifySpecial(actor))
@@ -235,9 +179,11 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         return new ActorIdentifier(IdentifierType.Special, ObjectKind.Player, (ObjectIndex)(uint)actor, 0, ByteString.Empty);
     }
 
+    /// <summary> Create an NPC from kind and id. Input is checked for correctness. </summary>
     public ActorIdentifier CreateNpc(ObjectKind kind, NpcId data)
         => CreateNpc(kind, data, ObjectIndex.AnyIndex);
 
+    /// <summary> Create an NPC from kind, id and index. Input is checked for correctness. </summary>
     public ActorIdentifier CreateNpc(ObjectKind kind, NpcId data, ObjectIndex index)
     {
         if (!VerifyIndex(index) || !VerifyNpcData(kind, data))
@@ -246,6 +192,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         return new ActorIdentifier(IdentifierType.Npc, kind, index, data, ByteString.Empty);
     }
 
+    /// <summary> Create an owned NPC from kind and id and the owners name and home world. Input is checked for correctness. </summary>
     public ActorIdentifier CreateOwned(ByteString ownerName, WorldId homeWorld, ObjectKind kind, NpcId dataId)
     {
         if (!VerifyWorld(homeWorld) || !VerifyPlayerName(ownerName.Span) || !VerifyOwnedData(kind, dataId))
@@ -294,6 +241,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
     public static bool VerifyRetainerName(ReadOnlySpan<char> name)
         => CheckNamePart(name, 3, 20);
 
+    /// <summary> Checks a single part of a name. </summary>
     private static bool CheckNamePart(ReadOnlySpan<char> part, int minLength, int maxLength)
     {
         // Each name part at least 2 and at most 15 characters for players, and at least 3 and at most 20 characters for retainers.
@@ -324,6 +272,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         return true;
     }
 
+    /// <summary> Checks a single part of a name. </summary>
     private static bool CheckNamePart(ReadOnlySpan<byte> part, int minLength, int maxLength)
     {
         // Each name part at least 2 and at most 15 characters for players, and at least 3 and at most 20 characters for retainers.
@@ -375,7 +324,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         return index < ObjectIndex.CharacterScreen;
     }
 
-    /// <summary> Verify that the object kind is a valid owned object, and the corresponding data Id. </summary>
+    /// <summary> Verify that the object kind is a valid owned object, and the corresponding data ID. </summary>
     public bool VerifyOwnedData(ObjectKind kind, NpcId dataId)
     {
         return kind switch
@@ -388,6 +337,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         };
     }
 
+    /// <summary> Verify that the data ID is valid for the object kind. </summary>
     public bool VerifyNpcData(ObjectKind kind, NpcId dataId)
         => kind switch
         {
@@ -403,6 +353,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
 
     #region FromObjectHelpers
 
+    /// <summary> Create a player from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private unsafe ActorIdentifier CreatePlayerFromObject(GameObject* actor, bool check)
     {
@@ -413,6 +364,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             : CreateIndividualUnchecked(IdentifierType.Player, name, homeWorld, ObjectKind.None, uint.MaxValue);
     }
 
+    /// <summary> Create a battle npc from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private unsafe ActorIdentifier CreateBNpcFromObject(GameObject* actor, out GameObject* owner, bool check, bool allowPlayerNpc,
         bool withoutIndex)
@@ -454,6 +406,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             : CreateIndividualUnchecked(IdentifierType.Npc, ByteString.Empty, index, ObjectKind.BattleNpc, nameId);
     }
 
+    /// <summary> Create an event npc from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private unsafe ActorIdentifier CreateENpcFromObject(GameObject* actor, bool check, bool withoutIndex)
     {
@@ -485,6 +438,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             : CreateIndividualUnchecked(IdentifierType.Npc, ByteString.Empty, index, ObjectKind.EventNpc, dataId);
     }
 
+    /// <summary> Create a companion npc from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private unsafe ActorIdentifier CreateCompanionFromObject(GameObject* actor, out GameObject* owner, ObjectKind kind, bool check)
     {
@@ -501,6 +455,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             : CreateIndividualUnchecked(IdentifierType.Owned, name, homeWorld, kind, dataId);
     }
 
+    /// <summary> Create a retainer from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private unsafe ActorIdentifier CreateRetainerFromObject(GameObject* actor, bool check)
     {
@@ -511,6 +466,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
                 uint.MaxValue);
     }
 
+    /// <summary> Create an unknown object. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private unsafe ActorIdentifier CreateUnkFromObject(GameObject* actor, bool withoutIndex)
     {
@@ -521,10 +477,8 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
 
     #endregion
 
-    /// <summary>
-    /// Obtain the current companion ID for an object by its actor and owner.
-    /// </summary>
-    private unsafe NpcId GetCompanionId(GameObject* actor,
+    /// <summary> Obtain the current companion ID for an object by its actor and owner. </summary>
+    private static unsafe NpcId GetCompanionId(GameObject* actor,
         Character* owner)
     {
         return (ObjectKind)actor->ObjectKind switch
@@ -536,6 +490,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         };
     }
 
+    /// <summary> Handle owned cutscene actors. </summary>
     private unsafe GameObject* HandleCutscene(GameObject* main)
     {
         if (main == null)
@@ -550,7 +505,8 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             : main;
     }
 
-    public static readonly IReadOnlySet<ENpcId> MannequinIds = new HashSet<ENpcId>
+    /// <summary> The existing IDs that correspond to mannequins. </summary>
+    private static readonly IReadOnlySet<ENpcId> MannequinIds = new HashSet<ENpcId> // TODO: frozen set.
     {
         1026228u,
         1026229u,
@@ -569,4 +525,76 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         1007137u,
         // TODO: Female Hrothgar
     };
+
+    /// <summary> Parse a user string for player identifier data. </summary>
+    private (ByteString, WorldId) ParsePlayer(string player)
+    {
+        var parts = player.Split('@', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (!VerifyPlayerName(parts[0]))
+            throw new IdentifierParseError($"{parts[0]} is not a valid player name.");
+        if (!ByteString.FromString(parts[0], out var p))
+            throw new IdentifierParseError($"The player string {parts[0]} contains invalid symbols.");
+
+        var world = parts.Length == 2
+            ? _data.ToWorldId(parts[1])
+            : ushort.MaxValue;
+
+        if (!VerifyWorld(world))
+            throw new IdentifierParseError($"{parts[1]} is not a valid world name.");
+
+        return (p, world);
+    }
+
+    /// <summary> Parse a user string for npc identifier data. </summary>
+    private (ObjectKind, NpcId[], WorldId) ParseNpc(string npc, bool allowIndex)
+    {
+        var indexString = allowIndex ? "@<Index>" : string.Empty;
+        var split2      = npc.Split(':', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (split2.Length != 2)
+            throw new IdentifierParseError($"NPCs need to be specified by '[Object Type]:[NPC Name]{indexString}'.");
+
+        var split3 = allowIndex
+            ? split2[1].Split('@', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            : [split2[1]];
+
+        return split2[0].ToLowerInvariant() switch
+        {
+            "m" or "mount" => FindDataId(split3[0], _data.Mounts, out var id)
+                ? (ObjectKind.MountType, mountId: id, GetIndex())
+                : throw new IdentifierParseError($"Could not identify a Mount named {split2[1]}."),
+            "c" or "companion" or "minion" or "mini" => FindDataId(split3[0], _data.Companions, out var id)
+                ? (ObjectKind.Companion, cId: id, GetIndex())
+                : throw new IdentifierParseError($"Could not identify a Minion named {split2[1]}."),
+            "a" or "o" or "accessory" or "ornament" => FindDataId(split3[0], _data.Ornaments, out var id)
+                ? (ObjectKind.Ornament, id, GetIndex())
+                : throw new IdentifierParseError($"Could not identify an Accessory named {split2[1]}."),
+            "e" or "enpc" or "eventnpc" or "event npc" => FindDataId(split3[0], _data.ENpcs, out var id)
+                ? (ObjectKind.EventNpc, id, GetIndex())
+                : throw new IdentifierParseError($"Could not identify an Event NPC named {split2[1]}."),
+            "b" or "bnpc" or "battlenpc" or "battle npc" => FindDataId(split3[0], _data.BNpcs, out var id)
+                ? (ObjectKind.BattleNpc, id, GetIndex())
+                : throw new IdentifierParseError($"Could not identify a Battle NPC named {split2[1]}."),
+            _ => throw new IdentifierParseError($"The argument {split2[0]} is not a valid NPC Type."),
+        };
+
+        WorldId GetIndex()
+        {
+            var idx = WorldId.AnyWorld;
+            if (split3.Length != 2)
+                return idx;
+
+            if (ushort.TryParse(split3[1], out var intIdx) && intIdx < _objects.Length)
+                idx = intIdx;
+            else
+                throw new IdentifierParseError($"Could not parse index {split3[1]} to valid Index.");
+
+            return idx;
+        }
+
+        static bool FindDataId(string name, NameDictionary data, out NpcId[] dataIds)
+        {
+            dataIds = data.Where(kvp => kvp.Value.Equals(name, StringComparison.OrdinalIgnoreCase)).Select(kvp => kvp.Key).ToArray();
+            return dataIds.Length > 0;
+        }
+    }
 }

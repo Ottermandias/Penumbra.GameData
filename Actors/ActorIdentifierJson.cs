@@ -5,8 +5,10 @@ using Penumbra.String;
 
 namespace Penumbra.GameData.Actors;
 
+/// <summary> Extension methods to convert an actor identifier to and from JSON. </summary>
 public static class ActorIdentifierJson
 {
+    /// <summary> Write an actor identifier to a new JObject. </summary>
     public static JObject ToJson(this ActorIdentifier identifier)
     {
         var ret = new JObject { { nameof(identifier.Type), identifier.Type.ToString() } };

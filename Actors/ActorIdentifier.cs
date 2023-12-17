@@ -5,11 +5,14 @@ using Penumbra.String;
 
 namespace Penumbra.GameData.Actors;
 
+/// <summary> A unique identifier for any kind of useful game actor. </summary>
 [StructLayout(LayoutKind.Explicit)]
 public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
 {
+    /// <summary> Invalid actors return this. </summary>
     public static readonly ActorIdentifier Invalid = new(IdentifierType.Invalid, 0, WorldId.AnyWorld, 0, ByteString.Empty);
 
+    /// <summary> Retainers can be Bell-spawned or Mannequins, or both. </summary>
     public enum RetainerType : ushort
     {
         Both      = 0,
@@ -27,12 +30,15 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
     [FieldOffset( 8 )] public readonly ByteString     PlayerName; // Player, Owned
     // @formatter:on
 
+    /// <summary> Create a copy that ensures that the byte string in the identifier is owned. </summary>
     public ActorIdentifier CreatePermanent()
         => new(Type, Kind, Index, DataId, PlayerName.IsEmpty || PlayerName.IsOwned ? PlayerName : PlayerName.Clone());
 
+    /// <summary> Obtain the index as ScreenActor. </summary>
     public ScreenActor Special
         => (ScreenActor)Index.Index;
 
+    /// <summary> Compare two ActorIdentifiers for equality. </summary>
     public bool Equals(ActorIdentifier other)
     {
         if (Type != other.Type)
@@ -54,6 +60,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         };
     }
 
+    /// <inheritdoc/>
     public override bool Equals(object? obj)
         => obj is ActorIdentifier other && Equals(other);
 
@@ -63,9 +70,12 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
     public static bool operator !=(ActorIdentifier lhs, ActorIdentifier rhs)
         => !lhs.Equals(rhs);
 
+    /// <summary> Identifiers for unknown objects are not valid. </summary>
     public bool IsValid
         => Type is not (IdentifierType.UnkObject or IdentifierType.Invalid);
 
+    /// <summary> Obtain an incognito name from an identifier, meaning that player names are reduced to initials. </summary>
+    /// <param name="name"> If the full string was already constructed, use this instead of calling ToString again. </param>
     public string Incognito(string? name)
     {
         name ??= ToString();
@@ -86,10 +96,12 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                 var parts = name.Split(' ', 2);
                 return $"{parts[0][0]}. {parts[1]}";
             }
-            default: return name;
         }
+        return name;
     }
 
+    /// <summary> Convert an identifier to a human-readable string. </summary>
+    /// <remarks> This uses the statically set actor manager if it is available, to obtain even better names. </remarks>
     public override string ToString()
         => ActorIdentifierExtensions.Manager?.ToString(this)
          ?? Type switch
@@ -114,9 +126,12 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                 _ => "Invalid",
             };
 
+    /// <summary> Obtain only the name of the actor identified. </summary>
+    /// <remarks> This uses the statically set actor manager if it is available to obtain the name. </remarks>
     public string ToName()
         => ActorIdentifierExtensions.Manager?.ToName(this) ?? "Unknown Object";
 
+    /// <inheritdoc/>
     public override int GetHashCode()
         => Type switch
         {
@@ -129,6 +144,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
             _                        => 0,
         };
 
+    /// <summary> Constructor using an index. </summary>
     internal ActorIdentifier(IdentifierType type, ObjectKind kind, ObjectIndex index, NpcId data, ByteString playerName)
     {
         Type       = type;
@@ -140,6 +156,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         PlayerName = playerName;
     }
 
+    /// <summary> Constructor using a world id. </summary>
     internal ActorIdentifier(IdentifierType type, ObjectKind kind, WorldId worldId, NpcId data, ByteString playerName)
     {
         Type       = type;
@@ -151,6 +168,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         PlayerName = playerName;
     }
 
+    /// <summary> Constructor using a retainer type. </summary>
     internal ActorIdentifier(IdentifierType type, ObjectKind kind, RetainerType retainerType, NpcId data, ByteString playerName)
     {
         Type       = type;

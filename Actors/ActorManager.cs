@@ -5,17 +5,22 @@ using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Actors;
 
+/// <summary> A delegate to resolve a cutscene copy of a character to its owner. </summary>
 public delegate short CutsceneResolver(ushort index);
 
+/// <summary> Manage transformation, generation and conversion of actor identifiers. </summary>
 public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncService
 {
+    /// <summary> The names used for NPC types. </summary>
     public readonly  NameDicts     Data;
     private readonly ActorResolver _resolver;
     private readonly IClientState  _clientState;
 
+    /// <summary> Waits for the NameDicts to be ready. </summary>
     public Task Awaiter
         => Data.Awaiter;
 
+    /// <summary> Unsets the static manager if it is set to this manager. </summary>
     public void Dispose()
     {
         if (ActorIdentifierExtensions.Manager == this)
@@ -33,33 +38,39 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
         Data                              =   data;
         _clientState                      =   clientState;
         _resolver                         =   new ActorResolver(gameGui, objects, clientState);
+        // Set the static manager if it is unset.
         ActorIdentifierExtensions.Manager ??= this;
     }
 
+    /// <inheritdoc cref="ActorResolver.GetCurrentPlayer"/>
     public ActorIdentifier GetCurrentPlayer()
         => _resolver.GetCurrentPlayer(this);
 
+    /// <inheritdoc cref="ActorResolver.GetInspectPlayer"/>
     public ActorIdentifier GetInspectPlayer()
         => _resolver.GetInspectPlayer(this);
 
+    /// <inheritdoc cref="ActorResolver.ResolvePartyBannerPlayer"/>
     public bool ResolvePartyBannerPlayer(ScreenActor type, out ActorIdentifier id)
         => _resolver.ResolvePartyBannerPlayer(this, type, out id);
 
+    /// <inheritdoc cref="ActorResolver.ResolveMahjongPlayer"/>
     public bool ResolveMahjongPlayer(ScreenActor type, out ActorIdentifier id)
         => _resolver.ResolveMahjongPlayer(this, type, out id);
 
+    /// <inheritdoc cref="ActorResolver.ResolvePvPBannerPlayer"/>
     public bool ResolvePvPBannerPlayer(ScreenActor type, out ActorIdentifier id)
         => _resolver.ResolvePvPBannerPlayer(this, type, out id);
 
+    /// <inheritdoc cref="ActorResolver.GetCardPlayer"/>
     public ActorIdentifier GetCardPlayer()
         => _resolver.GetCardPlayer(this);
 
+    /// <inheritdoc cref="ActorResolver.GetGlamourPlayer"/>
     public ActorIdentifier GetGlamourPlayer()
         => _resolver.GetGlamourPlayer(this);
 
-    /// <summary>
-    /// Use stored data to convert an ActorIdentifier to a string.
-    /// </summary>
+    /// <summary> Use stored data to convert an ActorIdentifier to a string with more accurate data. </summary>
     public string ToString(ActorIdentifier id)
     {
         return id.Type switch
@@ -88,9 +99,7 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
         };
     }
 
-    /// <summary>
-    /// Use stored data to convert an ActorIdentifier to a name only.
-    /// </summary>
+    /// <summary> Use stored data to convert an ActorIdentifier to a name only. </summary>
     public string ToName(ActorIdentifier id)
     {
         return id.Type switch

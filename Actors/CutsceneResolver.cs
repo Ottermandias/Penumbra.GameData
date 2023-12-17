@@ -1,3 +1,0 @@
-namespace Penumbra.GameData.Actors;
-
-

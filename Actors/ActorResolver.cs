@@ -13,8 +13,10 @@ using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace Penumbra.GameData.Actors;
 
+/// <summary> Handles resolving specific situations and actors to actor identifiers. </summary>
 internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _objects, IClientState _clientState)
 {
+    /// <summary> Obtain an identifier for the current player. </summary>
     public ActorIdentifier GetCurrentPlayer(ActorIdentifierFactory factory)
     {
         var address = (Character*)_objects.GetObjectAddress(0);
@@ -24,14 +26,20 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
                 ObjectKind.None,                               uint.MaxValue);
     }
 
+    /// <summary> Obtain an identifier for the currently inspected player. </summary>
     public ActorIdentifier GetInspectPlayer(ActorIdentifierFactory factory)
     {
-        var addon = _gameGui.GetAddonByName("CharacterInspect", 1);
+        var addon = _gameGui.GetAddonByName("CharacterInspect");
         return addon == IntPtr.Zero 
             ? ActorIdentifier.Invalid 
             : factory.CreatePlayer(InspectName, InspectWorldId);
     }
 
+    /// <summary> Obtain an identifier for player banner actors. </summary>
+    /// <param name="factory"></param>
+    /// <param name="type"> The screen actor to check. </param>
+    /// <param name="id"> The returned identifier. </param>
+    /// <returns> Whether a party banner is open, regardless of the actors' existence. </returns>
     public bool ResolvePartyBannerPlayer(ActorIdentifierFactory factory, ScreenActor type, out ActorIdentifier id)
     {
         id = ActorIdentifier.Invalid;
@@ -56,6 +64,11 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
         return true;
     }
 
+    /// <summary> Obtain an identifier for mahjong portrait actors. </summary>
+    /// <param name="factory"></param>
+    /// <param name="type"> The screen actor to check. </param>
+    /// <param name="id"> The returned identifier. </param>
+    /// <returns> Whether mahjong is open. </returns>
     public bool ResolveMahjongPlayer(ActorIdentifierFactory factory, ScreenActor type, out ActorIdentifier id)
     {
         id = ActorIdentifier.Invalid;
@@ -77,6 +90,11 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
         return true;
     }
 
+    /// <summary> Obtain an identifier for pvp banner actors. </summary>
+    /// <param name="factory"></param>
+    /// <param name="type"> The screen actor to check. </param>
+    /// <param name="id"> The returned identifier. </param>
+    /// <returns> Whether a pvp banner is open, regardless of the actors' existence. </returns>
     public bool ResolvePvPBannerPlayer(ActorIdentifierFactory factory, ScreenActor type, out ActorIdentifier id)
     {
         id = ActorIdentifier.Invalid;
@@ -103,6 +121,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
         return true;
     }
 
+    /// <summary> Obtain an identifier for the current card if it is open. </summary>
     public ActorIdentifier GetCardPlayer(ActorIdentifierFactory factory)
     {
         var agent = AgentCharaCard.Instance();
@@ -113,21 +132,22 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
         return factory.CreatePlayer(new ByteString(agent->Data->Name.StringPtr), worldId);
     }
 
+    /// <summary> Obtain an identifier for glamour interface if it is open. </summary>
     public ActorIdentifier GetGlamourPlayer(ActorIdentifierFactory factory)
     {
-        var addon = _gameGui.GetAddonByName("MiragePrismMiragePlate", 1);
+        var addon = _gameGui.GetAddonByName("MiragePrismMiragePlate");
         return addon == IntPtr.Zero ? ActorIdentifier.Invalid : GetCurrentPlayer(factory);
     }
 
+    /// <summary> The home world of the currently inspected player. </summary>
     private static ushort InspectWorldId
         => (ushort)UIState.Instance()->Inspect.WorldId;
 
-    private static ushort InspectTitleId
-        => UIState.Instance()->Inspect.TitleId;
-
+    /// <summary> The name of the currently inspected player. </summary>
     private static ByteString InspectName
         => new(UIState.Instance()->Inspect.Name);
 
+    /// <summary> Check if a screen actor at a given index has the same customizations (up to height) as the given character, and return an identifier for the potential owner. </summary>
     private bool SearchPlayerCustomize(ActorIdentifierFactory factory, Character* character, ObjectIndex idx, out ActorIdentifier id)
     {
         var other = (Character*)_objects.GetObjectAddress(idx.Index);
@@ -143,6 +163,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
         return true;
     }
 
+    /// <summary> Check if one of the three indices has the same customizations. Used for Mahjong Banners. </summary>
     private ActorIdentifier SearchPlayersCustomize(ActorIdentifierFactory factory, Character* gameObject, ObjectIndex idx1, ObjectIndex idx2, ObjectIndex idx3)
         => SearchPlayerCustomize(factory,  gameObject, idx1, out var ret)
          || SearchPlayerCustomize(factory, gameObject, idx2, out ret)
@@ -150,6 +171,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
                 ? ret
                 : ActorIdentifier.Invalid;
 
+    /// <summary> Check if a cutscene actor has the same customizations. Used for PvP Banners. </summary>
     private ActorIdentifier SearchPlayersCustomize(ActorIdentifierFactory factory, Character* gameObject)
     {
         for (var i = 0; i < ObjectIndex.CutsceneStart.Index; i += 2)
