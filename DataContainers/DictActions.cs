@@ -1,12 +1,13 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
+using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Action = Lumina.Excel.GeneratedSheets.Action;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class DictActions(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager data)
+public sealed class DictActions(DalamudPluginInterface pluginInterface, Logger log, IDataManager data)
     : DictLuminaName<Action>(pluginInterface, log, "Actions", data.Language, 7, () => CreateActionList(data))
 {
     /// <summary> This is too much effort to do accurately. </summary>

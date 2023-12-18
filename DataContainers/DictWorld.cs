@@ -2,13 +2,14 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class DictWorld(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager gameData)
+public sealed class DictWorld(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<ushort, string>>(pluginInterface, log, "Worlds", gameData.Language, 6, () => CreateWorldData(gameData)),
         IReadOnlyDictionary<WorldId, string>
 {

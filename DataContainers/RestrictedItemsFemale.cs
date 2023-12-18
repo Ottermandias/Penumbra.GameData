@@ -1,6 +1,7 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -9,7 +10,7 @@ using Race = Penumbra.GameData.Enums.Race;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class RestrictedItemsFemale(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager gameData)
+public sealed class RestrictedItemsFemale(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<uint, uint>>(pluginInterface, log, "GenderRestrictedItemsFemale", gameData.Language, 1,
         () => CreateItems(log, gameData))
 {
@@ -24,7 +25,7 @@ public sealed class RestrictedItemsFemale(DalamudPluginInterface pluginInterface
         return (false, armor);
     }
 
-    private static IReadOnlyDictionary<uint, uint> CreateItems(IPluginLog log, IDataManager gameData)
+    private static IReadOnlyDictionary<uint, uint> CreateItems(Logger log, IDataManager gameData)
     {
         var ret = new Dictionary<uint, uint>();
         var items = gameData.GetExcelSheet<Item>()!;

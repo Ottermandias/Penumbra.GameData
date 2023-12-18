@@ -1,6 +1,6 @@
 using Dalamud;
 using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
+using OtterGui.Log;
 
 namespace Penumbra.GameData.DataContainers.Bases;
 
@@ -67,14 +67,14 @@ public abstract class KeyList<T> : DataSharer<List<(ulong Key, T Data)>>
         return (minIdx, maxIdx);
     }
 
-    protected KeyList(DalamudPluginInterface pi, IPluginLog log, string name, ClientLanguage language, int version, Func<IEnumerable<T>> data,
+    protected KeyList(DalamudPluginInterface pi, Logger log, string name, ClientLanguage language, int version, Func<IEnumerable<T>> data,
         Func<T, IEnumerable<ulong>> toKeys, Func<ulong, bool> validKey, Func<T, int> valueKeySelector, Task? continuation = null)
         : base(pi, log, name, language, version,
             () => data().SelectMany(d => toKeys(d).Select(k => (k, d))).Where(p => validKey(p.k)).OrderBy(p => p.k)
                 .ThenBy(p => valueKeySelector(p.d)).ToList(), continuation)
     { }
 
-    protected KeyList(DalamudPluginInterface pi, IPluginLog log, string name, ClientLanguage language, int version, Func<IEnumerable<T>> data,
+    protected KeyList(DalamudPluginInterface pi, Logger log, string name, ClientLanguage language, int version, Func<IEnumerable<T>> data,
         Func<T, ulong> toKey, Func<ulong, bool> validKey, Func<T, int> valueKeySelector, Task? continuation = null)
         : base(pi, log, name, language, version,
             () => data().Select(d => (toKey(d), d)).Where(p => validKey(p.Item1)).OrderBy(p => p.Item1)

@@ -1,5 +1,6 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Structs;
 
@@ -7,7 +8,7 @@ namespace Penumbra.GameData.DataContainers.Bases;
 
 public abstract class NameDictionary(
     DalamudPluginInterface pluginInterface,
-    IPluginLog log,
+    Logger log,
     IDataManager gameData,
     string name,
     int version,

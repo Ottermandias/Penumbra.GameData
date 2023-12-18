@@ -1,6 +1,6 @@
 using Dalamud;
 using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Structs;
 
@@ -8,7 +8,7 @@ namespace Penumbra.GameData.DataContainers.Bases;
 
 public abstract class ItemDictionary(
     DalamudPluginInterface pluginInterface,
-    IPluginLog log,
+    Logger log,
     string name,
     ClientLanguage language,
     int version,

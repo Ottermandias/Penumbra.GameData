@@ -1,12 +1,13 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class DictStains(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager gameData)
+public sealed class DictStains(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)>>(pluginInterface, log, "Stains", gameData.Language, 3,
         () => CreateStainData(gameData)), IReadOnlyDictionary<StainId, Stain>
 {

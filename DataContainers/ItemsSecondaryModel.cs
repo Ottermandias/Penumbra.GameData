@@ -1,11 +1,12 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class ItemsSecondaryModel(DalamudPluginInterface pi, IPluginLog log, IDataManager gameData, ItemsByType items)
+public sealed class ItemsSecondaryModel(DalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
     : ItemDictionary(pi, log, "ItemDictSecondary", gameData.Language, 1, () => CreateOffhands(items), items.Awaiter)
 {
     private static IReadOnlyDictionary<uint, PseudoEquipItem> CreateOffhands(ItemsByType items)

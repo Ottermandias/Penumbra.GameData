@@ -2,12 +2,13 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class HumanModelList(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager gameData)
+public sealed class HumanModelList(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<Tuple<BitArray, int>>(pluginInterface, log, "HumanModels", gameData.Language, 3, () => GetValidHumanModels(gameData))
 {
     public bool IsHuman(ModelCharaId modelId)

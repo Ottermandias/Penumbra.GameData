@@ -1,13 +1,14 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class DictOrnament(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager gameData)
+public sealed class DictOrnament(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : NameDictionary(pluginInterface, log, gameData, "Ornaments", 6, () => CreateOrnamentData(gameData))
 {
     private static IReadOnlyDictionary<uint, string> CreateOrnamentData(IDataManager gameData)

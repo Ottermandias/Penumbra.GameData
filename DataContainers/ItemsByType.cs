@@ -1,13 +1,14 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class ItemsByType(DalamudPluginInterface pi, IPluginLog log, IDataManager dataManager)
+public sealed class ItemsByType(DalamudPluginInterface pi, Logger log, IDataManager dataManager)
     : DataSharer<IReadOnlyList<IReadOnlyList<PseudoEquipItem>>>(pi, log, "ItemsByType", dataManager.Language, 1,
             () => CreateItems(dataManager)),
         IReadOnlyDictionary<FullEquipType, IReadOnlyList<EquipItem>>

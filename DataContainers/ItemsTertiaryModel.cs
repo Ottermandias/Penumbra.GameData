@@ -1,5 +1,6 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 
@@ -8,7 +9,7 @@ namespace Penumbra.GameData.DataContainers;
 /// <summary> Currently only used by fist weapon gauntlets for fist weapons in range 1601-1650. </summary>
 public sealed class ItemsTertiaryModel(
     DalamudPluginInterface pi,
-    IPluginLog log,
+    Logger log,
     IDataManager gameData,
     ItemsByType items,
     ItemsSecondaryModel itemsSecondaries)

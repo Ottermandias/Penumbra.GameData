@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
@@ -11,7 +12,7 @@ namespace Penumbra.GameData.DataContainers;
 
 public sealed class DictModelChara(
     DalamudPluginInterface pluginInterface,
-    IPluginLog log,
+    Logger log,
     IDataManager gameData,
     DictBNpcNames bNpcNames,
     NameDicts nameDicts)

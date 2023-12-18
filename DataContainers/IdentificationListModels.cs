@@ -3,12 +3,13 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class IdentificationListModels(DalamudPluginInterface pi, IDataManager gameData, IPluginLog log)
+public sealed class IdentificationListModels(DalamudPluginInterface pi, IDataManager gameData, Logger log)
     : KeyList<ModelChara>(pi, log, "ModelIdentification", gameData.Language, 7, () => CreateModelList(gameData), ToKey, ValidKey, ValueKeySelector)
 {
     public IEnumerable<ModelChara> Between(CharacterBase.ModelType type, SetId modelId, byte modelBase = 0, Variant variant = default)

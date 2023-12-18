@@ -2,16 +2,17 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Files;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class DictEmotes(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager data)
+public sealed class DictEmotes(DalamudPluginInterface pluginInterface, Logger log, IDataManager data)
     : DictLuminaName<Emote>(pluginInterface, log, "Emotes", data.Language, 7, () => CreateEmoteList(log, data))
 {
-    private static IReadOnlyDictionary<string, IReadOnlyList<Emote>> CreateEmoteList(IPluginLog log, IDataManager gameData)
+    private static IReadOnlyDictionary<string, IReadOnlyList<Emote>> CreateEmoteList(Logger log, IDataManager gameData)
     {
         var sheet   = gameData.GetExcelSheet<Emote>(gameData.Language)!;
         var storage = new ConcurrentDictionary<string, ConcurrentBag<Emote>>();

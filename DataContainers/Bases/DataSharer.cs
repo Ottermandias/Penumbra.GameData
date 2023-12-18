@@ -1,12 +1,19 @@
 using System.Threading;
 using Dalamud;
 using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
+using OtterGui.Log;
 using OtterGui.Services;
 
 namespace Penumbra.GameData.DataContainers.Bases;
 
-public abstract class DataSharer<T>(DalamudPluginInterface pluginInterface, IPluginLog log, string name, ClientLanguage language, int version)
+/// <summary> A service interacting with the Dalamud Data Share. </summary>
+/// <typeparam name="T"> The type to be constructed in the Data Share. This can only contain types that Dalamud itself knows. </typeparam>
+/// <param name="pluginInterface"> The plugin interface. </param>
+/// <param name="log"> A logger. </param>
+/// <param name="name"></param>
+/// <param name="language"></param>
+/// <param name="version"></param>
+public abstract class DataSharer<T>(DalamudPluginInterface pluginInterface, Logger log, string name, ClientLanguage language, int version)
     : IDisposable, IAsyncDataContainer
 {
     private            T?        _value;
@@ -18,7 +25,7 @@ public abstract class DataSharer<T>(DalamudPluginInterface pluginInterface, IPlu
     public bool Finished
         => _value != null;
 
-    protected DataSharer(DalamudPluginInterface pluginInterface, IPluginLog log, string name, ClientLanguage language, int version,
+    protected DataSharer(DalamudPluginInterface pluginInterface, Logger log, string name, ClientLanguage language, int version,
         Func<T> factory, Task? continuation = null)
         : this(pluginInterface, log, name, language, version)
         => (Task, _timer) = CreateTask(factory, continuation);

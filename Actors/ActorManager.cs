@@ -1,6 +1,6 @@
 using Dalamud.Plugin.Services;
+using OtterGui.Services;
 using Penumbra.GameData.Data;
-using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Actors;

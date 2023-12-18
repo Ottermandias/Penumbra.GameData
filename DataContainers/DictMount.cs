@@ -2,13 +2,14 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class DictMount(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager gameData)
+public sealed class DictMount(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : NameDictionary(pluginInterface, log, gameData, "Mounts", 6, () => CreateMountData(gameData))
 {
     private static IReadOnlyDictionary<uint, string> CreateMountData(IDataManager gameData)

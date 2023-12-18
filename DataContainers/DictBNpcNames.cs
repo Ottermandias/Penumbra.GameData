@@ -1,14 +1,14 @@
 using Dalamud;
 using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
 using OtterGui;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class DictBNpcNames(DalamudPluginInterface pluginInterface, IPluginLog log)
+public sealed class DictBNpcNames(DalamudPluginInterface pluginInterface, Logger log)
     : DataSharer<IReadOnlyList<IReadOnlyList<uint>>>(pluginInterface, log, "BNpcNameDict", ClientLanguage.English, 1, NpcNames.CreateNames),
         IReadOnlyDictionary<BNpcId, IReadOnlyList<BNpcNameId>>
 {

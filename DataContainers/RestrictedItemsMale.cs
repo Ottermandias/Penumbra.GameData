@@ -3,6 +3,7 @@ using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -11,7 +12,7 @@ using Race = Penumbra.GameData.Enums.Race;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class RestrictedItemsMale(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager gameData)
+public sealed class RestrictedItemsMale(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<uint, uint>>(pluginInterface, log, "GenderRestrictedItemsMale", gameData.Language, 1,
         () => CreateItems(log, gameData))
 {
@@ -27,7 +28,7 @@ public sealed class RestrictedItemsMale(DalamudPluginInterface pluginInterface, 
         return (false, armor);
     }
 
-    private static IReadOnlyDictionary<uint, uint> CreateItems(IPluginLog log, IDataManager gameData)
+    private static IReadOnlyDictionary<uint, uint> CreateItems(Logger log, IDataManager gameData)
     {
         var ret   = new Dictionary<uint, uint>();
         var items = gameData.GetExcelSheet<Item>()!;
@@ -46,7 +47,7 @@ public sealed class RestrictedItemsMale(DalamudPluginInterface pluginInterface, 
 
 public static class GenderRestrictedItems
 {
-    internal static void AddUnknownItems(Dictionary<uint, uint> dict, ExcelSheet<Item> items, IPluginLog log, byte restriction)
+    internal static void AddUnknownItems(Dictionary<uint, uint> dict, ExcelSheet<Item> items, Logger log, byte restriction)
     {
         var unhandled = 0;
         foreach (var item in items.Where(i => i.EquipRestriction == restriction))
@@ -96,15 +97,15 @@ public static class GenderRestrictedItems
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    internal static void AddItemFemale(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, IPluginLog log)
+    internal static void AddItemFemale(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, Logger log)
         => AddItem(dict, pair, items, log, 2);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    internal static void AddItemMale(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, IPluginLog log)
+    internal static void AddItemMale(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, Logger log)
         => AddItem(dict, pair, items, log, 1);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private static void AddItem(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, IPluginLog log, byte direction)
+    private static void AddItem(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, Logger log, byte direction)
     {
         if ((pair.Add & direction) == 0)
             return;

@@ -1,11 +1,11 @@
-using Dalamud.Plugin.Services;
+using OtterGui.Log;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
 
 /// <summary> Wrapper class to parse paths to game files for what they affect. </summary>
-public class GamePathParser(IPluginLog log)
+public class GamePathParser(Logger log)
 {
     /// <summary> Obtain basic information about a file path. </summary>
     public GameObjectInfo GetFileInfo(string path)

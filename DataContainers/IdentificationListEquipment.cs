@@ -1,12 +1,13 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class IdentificationListEquipment(DalamudPluginInterface pi, IPluginLog log, IDataManager gameData, ItemsByType items)
+public sealed class IdentificationListEquipment(DalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
     : KeyList<PseudoEquipItem>(pi, log, "EquipmentIdentification", gameData.Language, 7, () => CreateEquipmentList(items), ToKey, ValidKey,
         ValueKeySelector, items.Awaiter)
 {

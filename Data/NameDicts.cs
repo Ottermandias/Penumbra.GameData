@@ -1,6 +1,6 @@
 using Dalamud.Game.ClientState.Objects.Enums;
+using OtterGui.Services;
 using Penumbra.GameData.DataContainers;
-using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;

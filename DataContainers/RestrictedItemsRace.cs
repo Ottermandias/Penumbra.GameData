@@ -2,6 +2,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -9,10 +10,10 @@ using Race = Penumbra.GameData.Enums.Race;
 
 namespace Penumbra.GameData.DataContainers;
 
-public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager gameData)
+public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlySet<uint>>(pluginInterface, log, "RacialRestrictedItems", gameData.Language, 1, () => CreateItems(log, gameData))
 {
-    private static IReadOnlySet<uint> CreateItems(IPluginLog log, IDataManager gameData)
+    private static IReadOnlySet<uint> CreateItems(Logger log, IDataManager gameData)
     {
         var ret = RaceGenderGroup.Where(c => c is not 0 and not uint.MaxValue).ToHashSet();
 
