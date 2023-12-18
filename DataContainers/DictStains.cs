@@ -7,13 +7,16 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
+/// <summary> A dictionary that maps StainIds to Stains. </summary>
 public sealed class DictStains(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)>>(pluginInterface, log, "Stains", gameData.Language, 3,
         () => CreateStainData(gameData)), IReadOnlyDictionary<StainId, Stain>
 {
+    /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> CreateStainData(IDataManager dataManager)
     {
         var stainSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Stain>(dataManager.Language)!;
+        // TODO: FrozenDictionary
         return stainSheet.Where(s => s.Color != 0 && s.Name.RawData.Length > 0)
             .ToDictionary(s => (byte)s.RowId, s =>
             {
@@ -22,20 +25,25 @@ public sealed class DictStains(DalamudPluginInterface pluginInterface, Logger lo
             });
     }
 
+    /// <inheritdoc/>
     public IEnumerator<KeyValuePair<StainId, Stain>> GetEnumerator()
         => Value.Select(kvp
                 => new KeyValuePair<StainId, Stain>(new StainId(kvp.Key), new Stain(kvp.Value.Name, kvp.Value.Dye, kvp.Key, kvp.Value.Gloss)))
             .GetEnumerator();
 
+    /// <inheritdoc/>
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
 
+    /// <inheritdoc/>
     public int Count
         => Value.Count;
 
+    /// <inheritdoc/>
     public bool ContainsKey(StainId key)
         => Value.ContainsKey(key.Id);
 
+    /// <inheritdoc/>
     public bool TryGetValue(StainId key, out Stain value)
     {
         if (!Value.TryGetValue(key.Id, out var data))
@@ -48,18 +56,23 @@ public sealed class DictStains(DalamudPluginInterface pluginInterface, Logger lo
         return true;
     }
 
+    /// <inheritdoc/>
     public Stain this[StainId key]
         => TryGetValue(key, out var data) ? data : throw new ArgumentOutOfRangeException(nameof(key));
 
+    /// <inheritdoc/>
     public IEnumerable<StainId> Keys
         => Value.Keys.Select(k => new StainId(k));
 
+    /// <inheritdoc/>
     public IEnumerable<Stain> Values
         => Value.Select(kvp => new Stain(kvp.Value.Name, kvp.Value.Dye, kvp.Key, kvp.Value.Gloss));
 
-    public override long ComputeMemory()
+    /// <inheritdoc/>
+    protected override long ComputeMemory()
         => DataUtility.DictionaryMemory(24, Count);
 
-    public override int ComputeTotalCount()
+    /// <inheritdoc/>
+    protected override int ComputeTotalCount()
         => Count;
 }

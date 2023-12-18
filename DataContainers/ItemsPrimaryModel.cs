@@ -6,9 +6,11 @@ using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.DataContainers;
 
+/// <summary> A dictionary mapping ItemIds to all primary model items. This requires ItemsByType to be finished. </summary>
 public sealed class ItemsPrimaryModel(DalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
     : ItemDictionary(pi, log, "ItemDictPrimary", gameData.Language, 1, () => CreateMainItems(items), items.Awaiter)
 {
+    /// <summary> Create data by taking only the primary models for all items. </summary>
     private static IReadOnlyDictionary<uint, PseudoEquipItem> CreateMainItems(ItemsByType items)
     {
         var dict = new Dictionary<uint, PseudoEquipItem>(1024 * 4);
@@ -19,6 +21,7 @@ public sealed class ItemsPrimaryModel(DalamudPluginInterface pi, Logger log, IDa
                 dict.TryAdd((uint)item.Item2, item);
         }
 
+        // TODO: FrozenDictionary.
         dict.TrimExcess();
         return dict;
     }

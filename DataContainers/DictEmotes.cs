@@ -9,9 +9,11 @@ using Penumbra.GameData.Files;
 
 namespace Penumbra.GameData.DataContainers;
 
+/// <summary> A dictionary mapping certain path keys to emote identities. </summary>
 public sealed class DictEmotes(DalamudPluginInterface pluginInterface, Logger log, IDataManager data)
     : DictLuminaName<Emote>(pluginInterface, log, "Emotes", data.Language, 7, () => CreateEmoteList(log, data))
 {
+    /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<string, IReadOnlyList<Emote>> CreateEmoteList(Logger log, IDataManager gameData)
     {
         var sheet   = gameData.GetExcelSheet<Emote>(gameData.Language)!;
@@ -21,10 +23,13 @@ public sealed class DictEmotes(DalamudPluginInterface pluginInterface, Logger lo
         {
             MaxDegreeOfParallelism = Environment.ProcessorCount,
         };
+
+        // Do not parse tmbs multiple times.
         var seenTmbs = new ConcurrentDictionary<string, TmbFile>();
 
         Parallel.ForEach(sheet.Where(n => n.Name.RawData.Length > 0), options, ProcessEmote);
 
+        // Add some specific emotes by known keys.
         var sit = sheet.GetRow(50)!;
         AddEmote("s_pose01_loop.pap", sit);
         AddEmote("s_pose02_loop.pap", sit);
@@ -43,13 +48,16 @@ public sealed class DictEmotes(DalamudPluginInterface pluginInterface, Logger lo
         AddEmote("l_pose02_loop.pap", doze);
         AddEmote("l_pose03_loop.pap", doze);
 
+        // TODO: FrozenDictionary
         return storage.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Emote>)kvp.Value.Distinct().ToArray());
 
+        // Process a single emote.
         void ProcessEmote(Emote emote)
         {
             var emoteTmbs = new HashSet<string>(8);
             var tmbs      = new Queue<string>(8);
 
+            // Queue all timelines.
             foreach (var timeline in emote.ActionTimeline.Where(t => t.Row != 0 && t.Value != null).Select(t => t.Value!))
             {
                 var key = timeline.Key.ToDalamudString().TextValue;
@@ -57,6 +65,7 @@ public sealed class DictEmotes(DalamudPluginInterface pluginInterface, Logger lo
                 AddEmote(Path.GetFileName(key) + ".pap", emote);
             }
 
+            // Read all TMBs.
             while (tmbs.TryDequeue(out var tmbPath))
             {
                 if (!emoteTmbs.Add(tmbPath))
@@ -66,6 +75,7 @@ public sealed class DictEmotes(DalamudPluginInterface pluginInterface, Logger lo
 
                 try
                 {
+                    // Try to parse or retrieve the tmb and add its parsed data.
                     var file = gameData.GetFile(tmbPath);
                     if (file != null)
                     {
@@ -90,6 +100,7 @@ public sealed class DictEmotes(DalamudPluginInterface pluginInterface, Logger lo
             }
         }
 
+        // Actually add a parsed emote and key to the dictionary.
         void AddEmote(string? key, Emote emote)
         {
             if (key.IsNullOrEmpty())

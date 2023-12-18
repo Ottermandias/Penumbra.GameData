@@ -7,10 +7,16 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
+/// <summary> A list to efficiently identify equipment pieces. This requires ItemsByType to be finished. </summary>
 public sealed class IdentificationListEquipment(DalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
     : KeyList<PseudoEquipItem>(pi, log, "EquipmentIdentification", gameData.Language, 7, () => CreateEquipmentList(items), ToKey, ValidKey,
         ValueKeySelector, items.Awaiter)
 {
+    /// <summary> Find all items affected by the given set of input data. </summary>
+    /// <param name="modelId"> The primary ID of the piece. </param>
+    /// <param name="slot"> The slot. If Unknown, check all slots. </param>
+    /// <param name="variant"> The variant. If 0, check all variants. </param>
+    /// <returns></returns>
     public IEnumerable<EquipItem> Between(SetId modelId, EquipSlot slot = EquipSlot.Unknown, Variant variant = default)
     {
         if (slot == EquipSlot.Unknown)
@@ -21,21 +27,27 @@ public sealed class IdentificationListEquipment(DalamudPluginInterface pi, Logge
         return Between(ToKey(modelId, slot, variant), ToKey(modelId, slot, variant)).Select(e => (EquipItem)e);
     }
 
+    /// <summary> Convert a set of data to its key representation. </summary>
     public static ulong ToKey(SetId modelId, EquipSlot slot, Variant variant)
         => ((ulong)modelId.Id << 32) | ((ulong)slot << 16) | variant.Id;
 
+    /// <summary> Turn a specific item to its key representation. </summary>
     public static ulong ToKey(EquipItem i)
         => ToKey(i.ModelId, i.Type.ToSlot(), i.Variant);
 
+    /// <summary> Turn a pseudo equip item to its key representation. </summary>
     private static ulong ToKey(PseudoEquipItem i)
         => ToKey((EquipItem)i);
 
+    /// <summary> All non-zero keys are valid. </summary>
     private static bool ValidKey(ulong key)
         => key != 0;
 
+    /// <summary> Order by an items full ItemId after the keys. </summary>
     private static int ValueKeySelector(PseudoEquipItem data)
         => (int)data.Item2;
 
+    /// <summary> Create the key list of all equipment pieces, including the custom defined ones without actual item representation.  </summary>
     private static IEnumerable<PseudoEquipItem> CreateEquipmentList(ItemsByType items)
     {
         return items.Where(kvp => kvp.Key.IsEquipment() || kvp.Key.IsAccessory())
@@ -44,6 +56,7 @@ public sealed class IdentificationListEquipment(DalamudPluginInterface pi, Logge
             .Concat(CustomList);
     }
 
+    /// <summary> Custom items without actual items in the game data. </summary>
     private static IEnumerable<PseudoEquipItem> CustomList
         => new[]
         {
@@ -65,6 +78,7 @@ public sealed class IdentificationListEquipment(DalamudPluginInterface pi, Logge
             // @formatter:on
         };
 
-    public override long ComputeMemory()
+    /// <inheritdoc/>
+    protected override long ComputeMemory()
         => 24 + Value.Count * 40;
 }

@@ -10,9 +10,11 @@ using Race = Penumbra.GameData.Enums.Race;
 
 namespace Penumbra.GameData.DataContainers;
 
+/// <summary> A set of items restricted to specific races. </summary>
 public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlySet<uint>>(pluginInterface, log, "RacialRestrictedItems", gameData.Language, 1, () => CreateItems(log, gameData))
 {
+    /// <summary> Create the data and also warn for unknown restrictions. </summary>
     private static IReadOnlySet<uint> CreateItems(Logger log, IDataManager gameData)
     {
         var ret = RaceGenderGroup.Where(c => c is not 0 and not uint.MaxValue).ToHashSet();
@@ -28,13 +30,15 @@ public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, 
                 $"{item.RowId:D5} {item.Name.ToDalamudString().TextValue} has unknown restriction group {categories.GetRow(item.EquipRestriction)!.RowId:D2}.");
         }
 
+        // TODO: FrozenSet
         return ret;
     }
 
+    /// <summary> Check if the item is restricted to a different race than your characters. </summary>
     internal (bool Replaced, CharacterArmor Armor) Resolve(CharacterArmor armor, Race race, Gender gender)
     {
-        var quad = armor.Set.Id | (uint)armor.Variant.Id << 16;
-        if (!RaceGenderGroup.Contains(quad))
+        var quad = armor.Set.Id | ((uint)armor.Variant.Id << 16);
+        if (!Value.Contains(quad))
             return (false, armor);
 
         var idx = ((int)race - 1) * 2 + (gender is Gender.Female or Gender.FemaleNpc ? 1 : 0);
@@ -42,14 +46,13 @@ public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, 
         return (value != quad, new CharacterArmor((ushort)value, (byte)(value >> 16), armor.Stain));
     }
 
-    public int Count
+    /// <inheritdoc/>
+    protected override long ComputeMemory()
+        => Value.Count * 16 + 32;
+
+    /// <inheritdoc/>
+    protected override int ComputeTotalCount()
         => Value.Count;
-
-    public override long ComputeMemory()
-        => Count * 16 + 32;
-
-    public override int ComputeTotalCount()
-        => Count;
 
 
     /// <summary>

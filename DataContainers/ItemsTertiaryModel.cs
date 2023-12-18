@@ -6,7 +6,7 @@ using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.DataContainers;
 
-/// <summary> Currently only used by fist weapon gauntlets for fist weapons in range 1601-1650. </summary>
+/// <summary> A dictionary mapping ItemIds to all primary model items. Currently only used by fist weapon gauntlets for fist weapons in range 1601-1650. This requires secondary models to be finished. </summary>
 public sealed class ItemsTertiaryModel(
     DalamudPluginInterface pi,
     Logger log,
@@ -16,6 +16,7 @@ public sealed class ItemsTertiaryModel(
     : ItemDictionary(pi, log, "ItemDictTertiary", gameData.Language, 1, () => CreateGauntlets(items, itemsSecondaries),
         itemsSecondaries.Awaiter)
 {
+    /// <summary> Create data by taking only the tertiary models for all items. </summary>
     private static IReadOnlyDictionary<uint, PseudoEquipItem> CreateGauntlets(ItemsByType items,
         ItemsSecondaryModel itemsSecondaries)
     {

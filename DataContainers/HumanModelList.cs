@@ -8,21 +8,23 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
+/// <summary> A set of data about which ModelCharaIds represent human models. </summary>
 public sealed class HumanModelList(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<Tuple<BitArray, int>>(pluginInterface, log, "HumanModels", gameData.Language, 3, () => GetValidHumanModels(gameData))
 {
+    /// <summary> Whether the given ID represents a human model. </summary>
     public bool IsHuman(ModelCharaId modelId)
         => modelId.Id < Count && Value.Item1[(int)modelId.Id];
 
+    /// <summary> The number of ModelCharaIds in total. </summary>
     public int Count
         => Value.Item1.Count;
 
+    /// <summary> The number of human ModelCharaIds. </summary>
     public int HumanCount
         => Value.Item2;
 
-    /// <summary>
-    /// Go through all ModelChara rows and return a bitfield of those that resolve to human models.
-    /// </summary>
+    /// <summary> Go through all ModelChara rows and return a bitfield of those that resolve to human models. </summary>
     private static Tuple<BitArray, int> GetValidHumanModels(IDataManager gameData)
     {
         var sheet = gameData.GetExcelSheet<ModelChara>()!;
@@ -37,9 +39,11 @@ public sealed class HumanModelList(DalamudPluginInterface pluginInterface, Logge
         return new Tuple<BitArray, int>(ret, count);
     }
 
-    public override long ComputeMemory()
+    /// <inheritdoc/>
+    protected override long ComputeMemory()
         => Value.Item1.Length / 8 + 16;
 
-    public override int ComputeTotalCount()
+    /// <inheritdoc/>
+    protected override int ComputeTotalCount()
         => Count;
 }

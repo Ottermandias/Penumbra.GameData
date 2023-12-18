@@ -10,10 +10,12 @@ using Race = Penumbra.GameData.Enums.Race;
 
 namespace Penumbra.GameData.DataContainers;
 
+/// <summary> A set of items restricted to female characters. </summary>
 public sealed class RestrictedItemsFemale(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<uint, uint>>(pluginInterface, log, "GenderRestrictedItemsFemale", gameData.Language, 1,
         () => CreateItems(log, gameData))
 {
+    /// <summary> Check if the item is restricted to female characters and the character is not female. </summary>
     public (bool Replaced, CharacterArmor Armor) Resolve(CharacterArmor armor, EquipSlot slot, Race race, Gender gender)
     {
         if (gender is Gender.Female or Gender.FemaleNpc)
@@ -25,6 +27,7 @@ public sealed class RestrictedItemsFemale(DalamudPluginInterface pluginInterface
         return (false, armor);
     }
 
+    /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, uint> CreateItems(Logger log, IDataManager gameData)
     {
         var ret = new Dictionary<uint, uint>();
@@ -32,12 +35,15 @@ public sealed class RestrictedItemsFemale(DalamudPluginInterface pluginInterface
         foreach (var pair in GenderRestrictedItems.KnownItems)
             GenderRestrictedItems.AddItemFemale(ret, pair, items, log);
         GenderRestrictedItems.AddUnknownItems(ret, items, log, 3);
+        // TODO: FrozenDictionary
         return ret;
     }
 
-    public override long ComputeMemory()
+    /// <inheritdoc/>
+    protected override long ComputeMemory()
         => DataUtility.DictionaryMemory(8, Value.Count);
 
-    public override int ComputeTotalCount()
+    /// <inheritdoc/>
+    protected override int ComputeTotalCount()
         => Value.Count;
 }
