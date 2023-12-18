@@ -1,5 +1,6 @@
 namespace Penumbra.GameData.Enums;
 
+/// <summary> Special game object indices that represent specific boundaries in the object table or certain actors. </summary>
 public enum ScreenActor : ushort
 {
     CutsceneStart   = 200,

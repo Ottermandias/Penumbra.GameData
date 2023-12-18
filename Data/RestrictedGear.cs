@@ -1,5 +1,5 @@
+using OtterGui.Services;
 using Penumbra.GameData.DataContainers;
-using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 
@@ -38,5 +38,6 @@ public sealed class RestrictedGear(RestrictedItemsRace _raceSet, RestrictedItems
         return _femaleSet.Resolve(armor, slot, race, gender);
     }
 
+    /// <summary> Finished when all 3 data sets are finished. </summary>
     public Task Awaiter { get; } = Task.WhenAll(_raceSet.Awaiter, _maleSet.Awaiter, _femaleSet.Awaiter);
 }

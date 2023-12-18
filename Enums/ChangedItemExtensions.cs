@@ -6,6 +6,7 @@ namespace Penumbra.GameData.Enums;
 
 public static class ChangedItemExtensions
 {
+    /// <summary> Convert an object to a changed item type and its ID. </summary>
     public static (ChangedItemType, uint) ChangedItemToTypeAndId(object? item)
     {
         return item switch

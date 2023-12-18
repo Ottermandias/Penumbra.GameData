@@ -1,5 +1,6 @@
 namespace Penumbra.GameData.Enums;
 
+/// <summary> Weapon categories as defined by the games search criteria. </summary>
 public enum WeaponCategory : byte
 {
     Unknown = 0,

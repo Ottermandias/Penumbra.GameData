@@ -3,13 +3,14 @@ using Penumbra.GameData.Structs;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using OtterGui.Services;
 using Penumbra.GameData.Actors;
 using ObjectType = Penumbra.GameData.Enums.ObjectType;
 using Penumbra.GameData.DataContainers;
-using Penumbra.GameData.DataContainers.Bases;
 
 namespace Penumbra.GameData.Data;
 
+/// <summary> Identify items or game objects from paths or IDs. </summary>
 public sealed class ObjectIdentification(
     DictBNpcNames _bNpcNames,
     DictActions _actions,
@@ -21,9 +22,13 @@ public sealed class ObjectIdentification(
     GamePathParser _gamePathParser)
     : IAsyncService
 {
+    /// <summary> Finished when all data tasks are finished. </summary>
     public Task Awaiter { get; } = Task.WhenAll(_bNpcNames.Awaiter, _actions.Awaiter, _emotes.Awaiter, _modelCharaToObjects.Awaiter,
         _equipmentIdentification.Awaiter, _weaponIdentification.Awaiter, _modelIdentification.Awaiter);
 
+    /// <summary> Identify all affected game identities using <paramref name="path"/> and add those items to <paramref name="set"/>, </summary>
+    /// <param name="set"> The set to add identities to. </param>
+    /// <param name="path"> The path to parse and identify. </param>
     public void Identify(IDictionary<string, object?> set, string path)
     {
         var extension = Path.GetExtension(path).ToLowerInvariant();
@@ -35,6 +40,9 @@ public sealed class ObjectIdentification(
         IdentifyParsed(set, info);
     }
 
+    /// <summary> Identify all affected game identities using <paramref name="path"/> and return them. </summary>
+    /// <param name="path"> The path to parse and identify. </param>
+    /// <returns> A dictionary of affected game identities. </returns>
     public Dictionary<string, object?> Identify(string path)
     {
         Dictionary<string, object?> ret = [];
@@ -42,34 +50,20 @@ public sealed class ObjectIdentification(
         return ret;
     }
 
+    /// <summary> Identify all equipment items using the specified values. </summary>
+    /// <param name="setId"> The primary ID of the model. </param>
+    /// <param name="weaponType"> The secondary ID of the model, if any. </param>
+    /// <param name="variant"> The variant of the material. </param>
+    /// <param name="slot"> The slot the item is used in. </param>
+    /// <returns> An enumeration of all affected items. </returns>
     public IEnumerable<EquipItem> Identify(SetId setId, WeaponType weaponType, Variant variant, EquipSlot slot)
         => slot switch
         {
-            EquipSlot.MainHand => _weaponIdentification.Between(setId, weaponType, variant),
-            EquipSlot.OffHand  => _weaponIdentification.Between(setId, weaponType, variant),
+            EquipSlot.MainHand or EquipSlot.OffHand => _weaponIdentification.Between(setId, weaponType, variant),
             _                  => _equipmentIdentification.Between(setId, slot, variant),
         };
 
-    public IReadOnlyList<BNpcId> GetBNpcsFromName(BNpcNameId bNpcNameId)
-    {
-        var list = new List<BNpcId>(8);
-        foreach (var (bNpcId, names) in _bNpcNames)
-        {
-            if (names.Contains(bNpcNameId.Id))
-                list.Add(bNpcId);
-        }
-
-        return list;
-    }
-
-    public IReadOnlyList<(string Name, ObjectKind Kind, uint Id)> ModelCharaNames(ModelCharaId modelId)
-        => modelId.Id >= _modelCharaToObjects.Count
-            ? Array.Empty<(string Name, ObjectKind Kind, uint Id)>()
-            : _modelCharaToObjects[modelId];
-
-    public int NumModelChara
-        => _modelCharaToObjects.Count;
-
+    /// <summary> Find and add all equipment pieces affected by <paramref name="info"/>. </summary>
     private void FindEquipment(IDictionary<string, object?> set, GameObjectInfo info)
     {
         var slot  = info.EquipSlot is EquipSlot.LFinger ? EquipSlot.RFinger : info.EquipSlot;
@@ -78,6 +72,7 @@ public sealed class ObjectIdentification(
             set[item.Name] = item;
     }
 
+    /// <summary> Find and add all weapons affected by <paramref name="info"/>. </summary>
     private void FindWeapon(IDictionary<string, object?> set, GameObjectInfo info)
     {
         var items = _weaponIdentification.Between(info.PrimaryId, info.SecondaryId, info.Variant);
@@ -85,6 +80,7 @@ public sealed class ObjectIdentification(
             set[item.Name] = item;
     }
 
+    /// <summary> Find and add all models affected by <paramref name="info"/>. </summary>
     private void FindModel(IDictionary<string, object?> set, GameObjectInfo info)
     {
         var type = info.ObjectType.ToModelType();
@@ -100,6 +96,7 @@ public sealed class ObjectIdentification(
         }
     }
 
+    /// <summary> Identities that only count their appearances store a counter value, increment or set that. </summary>
     private static void AddCounterString(IDictionary<string, object?> set, string data)
     {
         if (set.TryGetValue(data, out var obj) && obj is int counter)
@@ -108,8 +105,10 @@ public sealed class ObjectIdentification(
             set[data] = 1;
     }
 
+    /// <summary> Identify and add a game object info. </summary>
     private void IdentifyParsed(IDictionary<string, object?> set, GameObjectInfo info)
     {
+        // Some file types are only counted.
         switch (info.FileType)
         {
             case FileType.Sound:
@@ -126,6 +125,7 @@ public sealed class ObjectIdentification(
 
         switch (info.ObjectType)
         {
+            // Some objects are only counted;
             case ObjectType.LoadingScreen:
             case ObjectType.Map:
             case ObjectType.Interface:
@@ -135,22 +135,25 @@ public sealed class ObjectIdentification(
             case ObjectType.Font:
                 AddCounterString(set, info.ObjectType.ToString());
                 break;
-            case ObjectType.DemiHuman:
-                FindModel(set, info);
-                break;
-            case ObjectType.Monster:
-                FindModel(set, info);
-                break;
+            // We can differentiate icons by ID.
             case ObjectType.Icon:
                 set[$"Icon: {info.IconId}"] = null;
                 break;
+            // Demihumans and monsters affect models
+            case ObjectType.DemiHuman:
+            case ObjectType.Monster:
+                FindModel(set, info);
+                break;
+            // Accessory and Equipment are equipment pieces.
             case ObjectType.Accessory:
             case ObjectType.Equipment:
                 FindEquipment(set, info);
                 break;
+            // Weapons are handled separately from other equipment.
             case ObjectType.Weapon:
                 FindWeapon(set, info);
                 break;
+            // Characters can have different affected options.
             case ObjectType.Character:
                 var (gender, race) = info.GenderRace.Split();
                 var raceString   = race != ModelRace.Unknown ? race.ToName() + " " : "";
@@ -185,6 +188,7 @@ public sealed class ObjectIdentification(
         }
     }
 
+    /// <summary> Identify and parse VFX identities. </summary>
     private bool IdentifyVfx(IDictionary<string, object?> set, string path)
     {
         var key      = _gamePathParser.VfxToKey(path);
@@ -208,6 +212,7 @@ public sealed class ObjectIdentification(
         return ret;
     }
 
+    /// <summary> Currently unused. </summary>
     public static unsafe ulong KeyFromCharacterBase(CharacterBase* drawObject)
     {
         var type = (*(delegate* unmanaged<CharacterBase*, uint>**)drawObject)[Offsets.DrawObjectGetModelTypeVfunc](drawObject);

@@ -1,6 +1,7 @@
 using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using OtterGui;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
@@ -50,6 +51,18 @@ public sealed class DictBNpcNames(DalamudPluginInterface pluginInterface, IPlugi
 
     public IEnumerable<IReadOnlyList<BNpcNameId>> Values
         => Value.Select(BNpcNameList.Create);
+
+    public IReadOnlyList<BNpcId> GetBNpcsFromName(BNpcNameId bNpcNameId)
+    {
+        var list = new List<BNpcId>(8);
+        foreach (var (names, bNpcId) in Value.WithIndex())
+        {
+            if (names.Contains(bNpcNameId.Id))
+                list.Add((BNpcId)(uint)bNpcId);
+        }
+
+        return list;
+    }
 
     private readonly struct BNpcNameList(IReadOnlyList<uint> items) : IReadOnlyList<BNpcNameId>
     {

@@ -3,6 +3,7 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
 
+/// <summary> Functions to create or parse game paths for certain types of files. </summary>
 public static partial class GamePaths
 {
     [GeneratedRegex(@"c(?'racecode'\d{4})")]

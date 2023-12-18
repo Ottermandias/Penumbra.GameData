@@ -1,5 +1,6 @@
 namespace Penumbra.GameData.Enums;
 
+/// <summary> Equip Slot, mostly as defined by the games EquipSlotCategory. </summary>
 public enum EquipSlot : byte
 {
     Unknown           = 0,
@@ -31,6 +32,7 @@ public enum EquipSlot : byte
 
 public static class EquipSlotExtensions
 {
+    /// <summary> Convert the integer to the EquipSlot it is used to represent in most model code. </summary>
     public static EquipSlot ToEquipSlot(this uint value)
         => value switch
         {
@@ -49,6 +51,7 @@ public static class EquipSlotExtensions
             _  => EquipSlot.Unknown,
         };
 
+    /// <summary> Convert an EquipSlot to the index it is used at in most model code. </summary>
     public static uint ToIndex(this EquipSlot slot)
         => slot switch
         {
@@ -67,6 +70,7 @@ public static class EquipSlotExtensions
             _                  => uint.MaxValue,
         };
 
+    /// <summary> Get the suffix used for a specific EquipSlot in file names. </summary>
     public static string ToSuffix(this EquipSlot value)
     {
         return value switch
@@ -85,6 +89,7 @@ public static class EquipSlotExtensions
         };
     }
 
+    /// <summary> Convert the EquipSlotCategory value to the actual inventory slot it is put in. </summary>
     public static EquipSlot ToSlot(this EquipSlot value)
     {
         return value switch
@@ -115,6 +120,7 @@ public static class EquipSlotExtensions
         };
     }
 
+    /// <summary> Translate an EquipSlotCategory into a human readable name.  </summary>
     public static string ToName(this EquipSlot value)
     {
         return value switch
@@ -145,6 +151,7 @@ public static class EquipSlotExtensions
         };
     }
 
+    /// <summary> Returns true for the 5 primary equipment slots. </summary>
     public static bool IsEquipment(this EquipSlot value)
     {
         return value switch
@@ -158,6 +165,7 @@ public static class EquipSlotExtensions
         };
     }
 
+    /// <summary> Returns true for the 5 secondary equipment slots, of which LFinger does not really exist. </summary>
     public static bool IsAccessory(this EquipSlot value)
     {
         return value switch
@@ -171,6 +179,7 @@ public static class EquipSlotExtensions
         };
     }
 
+    /// <summary> Returns true for anything worn in an actual equipment slot. </summary>
     public static bool IsEquipmentPiece(this EquipSlot value)
     {
         return value switch
@@ -197,21 +206,30 @@ public static class EquipSlotExtensions
         };
     }
 
-    public static readonly EquipSlot[] EquipmentSlots = Enum.GetValues<EquipSlot>().Where(e => e.IsEquipment()).ToArray();
-    public static readonly EquipSlot[] AccessorySlots = Enum.GetValues<EquipSlot>().Where(e => e.IsAccessory()).ToArray();
-    public static readonly EquipSlot[] EqdpSlots      = EquipmentSlots.Concat(AccessorySlots).ToArray();
+    /// <summary> A list of all primary equipment pieces. </summary>
+    public static readonly IReadOnlyList<EquipSlot> EquipmentSlots = Enum.GetValues<EquipSlot>().Where(e => e.IsEquipment()).ToArray();
 
-    public static readonly EquipSlot[] WeaponSlots =
-    {
+    /// <summary> A list of all secondary equipment pieces. </summary>
+    public static readonly IReadOnlyList<EquipSlot> AccessorySlots = Enum.GetValues<EquipSlot>().Where(e => e.IsAccessory()).ToArray();
+
+    /// <summary> A list of all primary and secondary equipment pieces. </summary>
+    public static readonly IReadOnlyList<EquipSlot> EqdpSlots = EquipmentSlots.Concat(AccessorySlots).ToArray();
+
+    /// <summary> A list of both weapon slots. </summary>
+    public static readonly IReadOnlyList<EquipSlot> WeaponSlots =
+    [
         EquipSlot.MainHand,
         EquipSlot.OffHand,
-    };
+    ];
 
+    /// <summary> A list of all equipment slots. </summary>
     public static readonly EquipSlot[] FullSlots = WeaponSlots.Concat(EqdpSlots).ToArray();
 }
 
 public static partial class Names
 {
+    /// <summary> A dictionary converting path suffices into EquipSlot. </summary>
+    // TODO: FrozenDictionary.
     public static readonly Dictionary<string, EquipSlot> SuffixToEquipSlot = new()
     {
         { EquipSlot.Head.ToSuffix(), EquipSlot.Head },

@@ -4,6 +4,7 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
 
+/// <summary> Wrapper class to parse paths to game files for what they affect. </summary>
 public class GamePathParser(IPluginLog log)
 {
     /// <summary> Obtain basic information about a file path. </summary>

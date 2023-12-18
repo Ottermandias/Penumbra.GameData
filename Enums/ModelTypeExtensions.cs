@@ -4,6 +4,7 @@ namespace Penumbra.GameData.Enums;
 
 public static class ModelTypeExtensions
 {
+    /// <summary> Obtain human-readable names for ModelType. </summary>
     public static string ToName(this CharacterBase.ModelType type)
         => type switch
         {
@@ -14,6 +15,7 @@ public static class ModelTypeExtensions
             _                                 => string.Empty,
         };
 
+    /// <summary> Convert ObjectType to ModelType. </summary>
     public static CharacterBase.ModelType ToModelType(this ObjectType type)
         => type switch
         {

@@ -3,8 +3,13 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
 
+/// <summary> Helper functions for hair material handling. </summary>
 public static class MaterialHandling
 {
+    /// <summary> Obtain the gender race code for a specific gender, race and hair combination. </summary>
+    /// <param name="actualGr"> The actors gender and race. </param>
+    /// <param name="hairId"> The actors hair ID. </param>
+    /// <returns> The gender and race combination to use for the material. </returns>
     public static GenderRace GetGameGenderRace(GenderRace actualGr, SetId hairId)
     {
         // Hrothgar do not share hairstyles.
@@ -27,6 +32,7 @@ public static class MaterialHandling
         return actualGr;
     }
 
+    /// <summary> Whether the hair is already shared globally. </summary>
     public static bool IsSpecialCase(GenderRace gr, SetId hairId)
         => gr is GenderRace.MidlanderMale or GenderRace.MidlanderFemale && hairId.Id is >= 101 and <= 200;
 }

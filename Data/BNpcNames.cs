@@ -2,7 +2,8 @@ namespace Penumbra.GameData.Data;
 
 internal static class NpcNames
 {
-    /// <summary>Generated from https://api.ffxivteamcraft.com/gubal on 2023-12-16.</summary>
+    /// <summary> Generate an outer list indexed by the BNPC ID, with the inner lists collecting all known BNPC Name IDs associated with that BNPC ID. </summary>
+    /// <remarks> Generated from https://api.ffxivteamcraft.com/gubal on 2023-12-17. </remarks>
     public static IReadOnlyList<IReadOnlyList<uint>> CreateNames()
         => new IReadOnlyList<uint>[]
         {

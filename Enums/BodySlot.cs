@@ -1,5 +1,6 @@
 namespace Penumbra.GameData.Enums;
 
+/// <summary> Body Slots as used by character model parts. </summary>
 public enum BodySlot : byte
 {
     Unknown,
@@ -7,15 +8,16 @@ public enum BodySlot : byte
     Face,
     Tail,
     Body,
-    Zear,
+    Ear,
 }
 
 public static class BodySlotEnumExtension
 {
+    /// <summary> The suffix used by game files to identify. </summary>
     public static string ToSuffix(this BodySlot value)
         => value switch
         {
-            BodySlot.Zear => "zear",
+            BodySlot.Ear  => "zear",
             BodySlot.Face => "face",
             BodySlot.Hair => "hair",
             BodySlot.Body => "body",
@@ -23,6 +25,7 @@ public static class BodySlotEnumExtension
             _             => throw new InvalidEnumArgumentException(),
         };
 
+    /// <summary> The abbreviation used by game files to prefix the secondary ID. </summary>
     public static char ToAbbreviation(this BodySlot value)
         => value switch
         {
@@ -30,10 +33,11 @@ public static class BodySlotEnumExtension
             BodySlot.Face => 'f',
             BodySlot.Tail => 't',
             BodySlot.Body => 'b',
-            BodySlot.Zear => 'z',
+            BodySlot.Ear  => 'z',
             _             => throw new InvalidEnumArgumentException(),
         };
 
+    /// <summary> Convert body slot to customization type. </summary>
     public static CustomizationType ToCustomizationType(this BodySlot value)
         => value switch
         {
@@ -41,19 +45,15 @@ public static class BodySlotEnumExtension
             BodySlot.Face => CustomizationType.Face,
             BodySlot.Tail => CustomizationType.Tail,
             BodySlot.Body => CustomizationType.Body,
-            BodySlot.Zear => CustomizationType.Zear,
+            BodySlot.Ear  => CustomizationType.Ear,
             _             => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
 }
 
 public static partial class Names
 {
-    public static readonly Dictionary<string, BodySlot> StringToBodySlot = new()
-    {
-        { BodySlot.Zear.ToSuffix(), BodySlot.Zear },
-        { BodySlot.Face.ToSuffix(), BodySlot.Face },
-        { BodySlot.Hair.ToSuffix(), BodySlot.Hair },
-        { BodySlot.Body.ToSuffix(), BodySlot.Body },
-        { BodySlot.Tail.ToSuffix(), BodySlot.Tail },
-    };
+    /// <summary> A dictionary converting path suffices into BodySlot. </summary>
+    // TODO: FrozenDictionary
+    public static readonly Dictionary<string, BodySlot> StringToBodySlot =
+        Enum.GetValues<BodySlot>().Skip(1).ToDictionary(e => e.ToSuffix(), e => e);
 }

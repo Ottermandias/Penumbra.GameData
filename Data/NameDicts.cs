@@ -5,6 +5,7 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
 
+/// <summary> A collection service for all the name dictionaries required for actor identification. </summary>
 public sealed class NameDicts(
     DictWorld _worlds,
     DictMount _mounts,
@@ -32,6 +33,7 @@ public sealed class NameDicts(
     /// <summary> Valid ENPC names in title case by ENPC id. </summary>
     public readonly DictENpc ENpcs = _eNpcs;
 
+    /// <summary> Finished when all name dictionaries are finished. </summary>
     public Task Awaiter { get; } =
         Task.WhenAll(_worlds.Awaiter, _mounts.Awaiter, _companions.Awaiter, _ornaments.Awaiter, _bNpcs.Awaiter, _eNpcs.Awaiter);
 
@@ -54,9 +56,7 @@ public sealed class NameDicts(
     public string ToName(ObjectKind kind, NpcId dataId)
         => TryGetName(kind, dataId, out var ret) ? ret : "Invalid";
 
-    /// <summary>
-    /// Convert a given ID for a certain ObjectKind to a name.
-    /// </summary>
+    /// <summary> Convert a given ID for a certain ObjectKind to a name. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public bool TryGetName(ObjectKind kind, NpcId dataId, [NotNullWhen(true)] out string? name)
     {

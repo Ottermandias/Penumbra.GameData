@@ -5,27 +5,38 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
 
+/// <summary> A service wrapper around all basic EquipItem dictionaries. </summary>
 public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, ItemsSecondaryModel _secondary, ItemsTertiaryModel _tertiary)
     : IAsyncService
 {
-    public readonly ItemsByType         ByType    = _byType;
-    public readonly ItemsPrimaryModel   Primary   = _primary;
-    public readonly ItemsSecondaryModel Secondary = _secondary;
-    public readonly ItemsTertiaryModel  Tertiary  = _tertiary;
+    /// <summary> Item lists ordered by type. </summary>
+    public readonly ItemsByType ByType = _byType;
 
+    /// <summary> Primary models of all items. </summary>
+    public readonly ItemsPrimaryModel Primary = _primary;
+
+    /// <summary> Secondary models of all items. </summary>
+    public readonly ItemsSecondaryModel Secondary = _secondary;
+
+    /// <summary> Tertiary models of all items. Currently only gloves for certain fist weapons. </summary>
+    public readonly ItemsTertiaryModel Tertiary = _tertiary;
+
+    /// <summary> Finished when all item dictionaries are finished. </summary>
     public Task Awaiter { get; } = Task.WhenAll(_byType.Awaiter, _primary.Awaiter, _secondary.Awaiter, _tertiary.Awaiter);
 
-    private static readonly IReadOnlyDictionary<SetId, FullEquipType> WeaponTypes = new Dictionary<SetId, FullEquipType>
-    {
-        [101] = FullEquipType.Fists,
-    };
-
+    /// <summary> The total number of items. </summary>
     public int Count
         => ByType.TotalCount;
 
+    /// <summary> Iterate through all primary or secondary items. </summary>
     public IEnumerable<(ItemId, EquipItem)> AllItems(bool main)
         => (main ? (ItemDictionary)Primary : Secondary).Select(i => ((ItemId)i.Key, i.Value));
 
+    /// <summary> Try to obtain an item by ID and Slot. </summary>
+    /// <param name="key"> The Item ID to search. </param>
+    /// <param name="slot"> The slot, used for secondary or tertiary disambiguation. </param>
+    /// <param name="value"> The returned item if found. </param>
+    /// <returns> Whether an item was found. </returns>
     public bool TryGetValue(ItemId key, EquipSlot slot, out EquipItem value)
     {
         var dict = slot is EquipSlot.OffHand ? (ItemDictionary)Secondary : Primary;
@@ -39,9 +50,10 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         return false;
     }
 
-
+    /// <summary> A table to convert weapon primary IDs to a full equip type. </summary>
+    /// <remarks> Conversion is [Primary ID]/100 = index, [Primary ID]%100 greater than offset: second type, else first type. </remarks>
     private static readonly (FullEquipType Main, FullEquipType Off, short Offset)[] WeaponIdTable =
-    {
+    [
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Shield, FullEquipType.Unknown, 100),
         (FullEquipType.Sword, FullEquipType.Unknown, 100),
@@ -115,8 +127,9 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         (FullEquipType.Pickaxe, FullEquipType.Sledgehammer, 50),
         (FullEquipType.Hatchet, FullEquipType.GardenScythe, 50),
         (FullEquipType.FishingRod, FullEquipType.Gig, 50),
-    };
+    ];
 
+    /// <summary> Convert a primary weapon ID to its equip type. </summary>
     public static FullEquipType ConvertWeaponId(SetId id)
     {
         var quotient = Math.DivRem(id.Id - 1, 100, out var remainder);

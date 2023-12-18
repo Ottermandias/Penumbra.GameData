@@ -2,6 +2,7 @@ using static Penumbra.GameData.Enums.GenderRace;
 
 namespace Penumbra.GameData.Enums;
 
+/// <summary> Available character races for players. </summary>
 public enum Race : byte
 {
     Unknown,
@@ -15,6 +16,7 @@ public enum Race : byte
     Viera,
 }
 
+/// <summary> Available character genders. </summary>
 public enum Gender : byte
 {
     Unknown,
@@ -24,6 +26,7 @@ public enum Gender : byte
     FemaleNpc,
 }
 
+/// <summary> Available model races, which includes Highlanders as a separate model base to Midlanders. </summary>
 public enum ModelRace : byte
 {
     Unknown,
@@ -38,6 +41,7 @@ public enum ModelRace : byte
     Viera,
 }
 
+/// <summary> Available sub-races or clans for player characters. </summary>
 public enum SubRace : byte
 {
     Unknown,
@@ -59,7 +63,7 @@ public enum SubRace : byte
     Veena,
 }
 
-// The combined gender-race-npc numerical code as used by the game.
+/// <summary> The combined gender-race-npc numerical code as used by the game. </summary>
 public enum GenderRace : ushort
 {
     Unknown             = 0,
@@ -105,9 +109,9 @@ public enum GenderRace : ushort
 
 public static class RaceEnumExtensions
 {
+    /// <summary> Convert a ModelRace to a Race, i.e. Midlander and Highlander to Hyur. </summary>
     public static Race ToRace(this ModelRace race)
-    {
-        return race switch
+        => race switch
         {
             ModelRace.Unknown    => Race.Unknown,
             ModelRace.Midlander  => Race.Hyur,
@@ -119,13 +123,12 @@ public static class RaceEnumExtensions
             ModelRace.AuRa       => Race.AuRa,
             ModelRace.Hrothgar   => Race.Hrothgar,
             ModelRace.Viera      => Race.Viera,
-            _                    => throw new ArgumentOutOfRangeException(nameof(race), race, null),
+            _                    => Race.Unknown,
         };
-    }
 
+    /// <summary> Convert a clan to its race. </summary>
     public static Race ToRace(this SubRace subRace)
-    {
-        return subRace switch
+        => subRace switch
         {
             SubRace.Unknown         => Race.Unknown,
             SubRace.Midlander       => Race.Hyur,
@@ -144,13 +147,12 @@ public static class RaceEnumExtensions
             SubRace.Lost            => Race.Hrothgar,
             SubRace.Rava            => Race.Viera,
             SubRace.Veena           => Race.Viera,
-            _                       => throw new ArgumentOutOfRangeException(nameof(subRace), subRace, null),
+            _                       => Race.Unknown,
         };
-    }
 
+    /// <summary> Obtain a human-readable name for a ModelRace. </summary>
     public static string ToName(this ModelRace modelRace)
-    {
-        return modelRace switch
+        => modelRace switch
         {
             ModelRace.Midlander  => SubRace.Midlander.ToName(),
             ModelRace.Highlander => SubRace.Highlander.ToName(),
@@ -163,11 +165,10 @@ public static class RaceEnumExtensions
             ModelRace.Viera      => Race.Viera.ToName(),
             _                    => Race.Unknown.ToName(),
         };
-    }
 
+    /// <summary> Obtain a human-readable name for Race. </summary>
     public static string ToName(this Race race)
-    {
-        return race switch
+        => race switch
         {
             Race.Hyur     => "Hyur",
             Race.Elezen   => "Elezen",
@@ -179,11 +180,10 @@ public static class RaceEnumExtensions
             Race.Viera    => "Viera",
             _             => "Unknown",
         };
-    }
 
+    /// <summary> Obtain a human-readable name for Gender. </summary>
     public static string ToName(this Gender gender)
-    {
-        return gender switch
+        => gender switch
         {
             Gender.Male      => "Male",
             Gender.Female    => "Female",
@@ -191,11 +191,10 @@ public static class RaceEnumExtensions
             Gender.FemaleNpc => "Female (NPC)",
             _                => "Unknown",
         };
-    }
 
+    /// <summary> Obtain a human-readable name for SubRace. </summary>
     public static string ToName(this SubRace subRace)
-    {
-        return subRace switch
+        => subRace switch
         {
             SubRace.Midlander       => "Midlander",
             SubRace.Highlander      => "Highlander",
@@ -215,33 +214,36 @@ public static class RaceEnumExtensions
             SubRace.Veena           => "Veena",
             _                       => "Unknown",
         };
-    }
 
+    /// <summary> Obtain abbreviated names for SubRace. </summary>
     public static string ToShortName(this SubRace subRace)
-    {
-        return subRace switch
+        => subRace switch
         {
             SubRace.SeekerOfTheSun  => "Sunseeker",
             SubRace.KeeperOfTheMoon => "Moonkeeper",
             _                       => subRace.ToName(),
         };
-    }
 
+    /// <summary> Check if a clan and race agree. </summary>
     public static bool FitsRace(this SubRace subRace, Race race)
         => subRace.ToRace() == race;
 
+    /// <summary> Reduce render and model race to a single byte. </summary>
     public static byte ToByte(this Gender gender, ModelRace modelRace)
         => (byte)((int)gender | ((int)modelRace << 3));
 
+    /// <inheritdoc cref="ToByte(Gender,ModelRace)"/>
     public static byte ToByte(this ModelRace modelRace, Gender gender)
         => gender.ToByte(modelRace);
 
+    /// <summary> Reduce a combined GenderRace to a single byte instead of two. </summary>
     public static byte ToByte(this GenderRace value)
     {
         var (gender, race) = value.Split();
         return gender.ToByte(race);
     }
 
+    /// <summary> Split a combined GenderRace into its corresponding Gender and ModelRace. </summary>
     public static (Gender, ModelRace) Split(this GenderRace value)
     {
         return value switch
@@ -285,16 +287,17 @@ public static class RaceEnumExtensions
             VieraFemaleNpc      => (Gender.FemaleNpc, ModelRace.Viera),
             UnknownMaleNpc      => (Gender.MaleNpc, ModelRace.Unknown),
             UnknownFemaleNpc    => (Gender.FemaleNpc, ModelRace.Unknown),
-            _                   => throw new InvalidEnumArgumentException(),
+            _                   => (Gender.Unknown, ModelRace.Unknown),
         };
     }
 
+    /// <summary> Check if a GenderRace code is valid. </summary>
     public static bool IsValid(this GenderRace value)
         => value != Unknown && Enum.IsDefined(typeof(GenderRace), value);
 
+    /// <summary> Obtain the padded race code as used in file paths for a combined GenderRace. </summary>
     public static string ToRaceCode(this GenderRace value)
-    {
-        return value switch
+        => value switch
         {
             MidlanderMale       => "0101",
             MidlanderMaleNpc    => "0104",
@@ -336,8 +339,8 @@ public static class RaceEnumExtensions
             UnknownFemaleNpc    => "9204",
             _                   => string.Empty,
         };
-    }
 
+    /// <summary> Obtain the fallback model for a combined gender and race. </summary>
     public static GenderRace Fallback(this GenderRace raceCode)
     {
         var female = (((ushort)raceCode / 100) & 1) == 0;
@@ -354,6 +357,7 @@ public static class RaceEnumExtensions
         };
     }
 
+    /// <summary> Enumerate all fallbacks for a given combined gender and race in order of the dependency tree upwards. </summary>
     public static IEnumerable<GenderRace> Dependencies(this GenderRace raceCode)
     {
         var currentRace = raceCode;
@@ -365,15 +369,16 @@ public static class RaceEnumExtensions
         yield return MidlanderMale;
     }
 
+    /// <summary> Enumerate all fallbacks for a given combined gender and race in order of the dependency tree upwards, but skip . </summary>
     public static IEnumerable<GenderRace> OnlyDependencies(this GenderRace raceCode)
-        => raceCode.Fallback().Dependencies();
+        => raceCode.Dependencies().Skip(1);
 }
 
 public static partial class Names
 {
+    /// <summary> Convert a given padded race code from a file path to its combined GenderRace. </summary>
     public static GenderRace GenderRaceFromCode(string code)
-    {
-        return code switch
+        => code switch
         {
             "0101" => MidlanderMale,
             "0104" => MidlanderMaleNpc,
@@ -415,8 +420,8 @@ public static partial class Names
             "9204" => UnknownFemaleNpc,
             _      => Unknown,
         };
-    }
 
+    /// <summary> Obtain a combined GenderRace code from a reduced single byte. </summary>
     public static GenderRace GenderRaceFromByte(byte value)
     {
         var gender = (Gender)(value & 0b111);
@@ -424,6 +429,7 @@ public static partial class Names
         return CombinedRace(gender, race);
     }
 
+    /// <summary> Combine a Gender and a ModelRace to a combined GenderRace. </summary>
     public static GenderRace CombinedRace(Gender gender, ModelRace modelRace)
     {
         return gender switch

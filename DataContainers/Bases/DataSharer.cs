@@ -2,24 +2,9 @@ using System.Threading;
 using Dalamud;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using OtterGui.Services;
 
 namespace Penumbra.GameData.DataContainers.Bases;
-
-public interface IDataContainer
-{
-    public long   Time       { get; }
-    public long   Memory     { get; }
-    public string Name       { get; }
-    public int    TotalCount { get; }
-}
-
-public interface IAsyncService
-{
-    public Task Awaiter { get; }
-}
-
-public interface IAsyncDataContainer : IDataContainer, IAsyncService
-{ }
 
 public abstract class DataSharer<T>(DalamudPluginInterface pluginInterface, IPluginLog log, string name, ClientLanguage language, int version)
     : IDisposable, IAsyncDataContainer
