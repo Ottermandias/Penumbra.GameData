@@ -39,11 +39,11 @@ public sealed class ItemsByType(DalamudPluginInterface pi, Logger log, IDataMana
                 // and compute the actual secondary model from the primary.
                 if (type is FullEquipType.Fists && item.ModelSub < 0x100000000)
                 {
-                    tmp[(int)FullEquipType.Hands].Add(new EquipItem(mh.Name + " (Gauntlets)", mh.Id, mh.IconId, (SetId)item.ModelSub, 0,
+                    tmp[(int)FullEquipType.Hands].Add(new EquipItem(mh.Name + " (Gauntlets)", mh.Id, mh.IconId, (PrimaryId)item.ModelSub, 0,
                         (byte)(item.ModelSub >> 16), FullEquipType.Hands, mh.Flags, mh.Level, mh.JobRestrictions));
 
                     tmp[(int)FullEquipType.FistsOff].Add(new EquipItem(mh.Name + FullEquipType.FistsOff.OffhandTypeSuffix(), mh.Id,
-                        mh.IconId, (SetId)(mh.ModelId.Id + 50), mh.WeaponType, mh.Variant, FullEquipType.FistsOff, mh.Flags, mh.Level,
+                        mh.IconId, (PrimaryId)(mh.ModelId.Id + 50), mh.SecondaryId, mh.Variant, FullEquipType.FistsOff, mh.Flags, mh.Level,
                         mh.JobRestrictions));
                 }
                 else

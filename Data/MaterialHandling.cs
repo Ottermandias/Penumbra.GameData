@@ -10,7 +10,7 @@ public static class MaterialHandling
     /// <param name="actualGr"> The actors gender and race. </param>
     /// <param name="hairId"> The actors hair ID. </param>
     /// <returns> The gender and race combination to use for the material. </returns>
-    public static GenderRace GetGameGenderRace(GenderRace actualGr, SetId hairId)
+    public static GenderRace GetGameGenderRace(GenderRace actualGr, PrimaryId hairId)
     {
         // Hrothgar do not share hairstyles.
         if (actualGr is GenderRace.HrothgarFemale or GenderRace.HrothgarMale)
@@ -33,6 +33,6 @@ public static class MaterialHandling
     }
 
     /// <summary> Whether the hair is already shared globally. </summary>
-    public static bool IsSpecialCase(GenderRace gr, SetId hairId)
+    public static bool IsSpecialCase(GenderRace gr, PrimaryId hairId)
         => gr is GenderRace.MidlanderMale or GenderRace.MidlanderFemale && hairId.Id is >= 101 and <= 200;
 }

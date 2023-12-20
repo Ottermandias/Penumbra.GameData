@@ -19,7 +19,7 @@ public sealed class IdentificationListModels(DalamudPluginInterface pi, IDataMan
     /// <param name="modelBase"> The base parameter of the model. If 0, check all bases. </param>
     /// <param name="variant"> The variant. If 0, check all variants. </param>
     /// <returns> A list of all affected ModelChara. </returns>
-    public IEnumerable<ModelChara> Between(CharacterBase.ModelType type, SetId modelId, byte modelBase = 0, Variant variant = default)
+    public IEnumerable<ModelChara> Between(CharacterBase.ModelType type, PrimaryId modelId, byte modelBase = 0, Variant variant = default)
     {
         if (modelBase == 0)
             return Between(ToKey(type, modelId, 0, 0), ToKey(type, modelId, 0xFF, 0xFF));
@@ -30,7 +30,7 @@ public sealed class IdentificationListModels(DalamudPluginInterface pi, IDataMan
     }
 
     /// <summary> Convert the input data to a key. </summary>
-    public static ulong ToKey(CharacterBase.ModelType type, SetId model, byte modelBase, Variant variant)
+    public static ulong ToKey(CharacterBase.ModelType type, PrimaryId model, byte modelBase, Variant variant)
         => ((ulong)type << 32) | ((ulong)model.Id << 16) | ((ulong)modelBase << 8) | variant.Id;
 
     /// <summary> Convert a ModelChara to a key. </summary>

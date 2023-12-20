@@ -12,8 +12,8 @@ public sealed class IdentificationListWeapons(DalamudPluginInterface pi, Logger 
     : KeyList<PseudoEquipItem>(pi, log, "WeaponIdentification", gameData.Language, 7, () => CreateWeaponList(data), ToKey, ValidKey, ValueKeySelector,
         data.Awaiter)
 {
-    /// <inheritdoc cref="Between(SetId, WeaponType, Variant)"/>
-    public IEnumerable<EquipItem> Between(SetId modelId)
+    /// <inheritdoc cref="Between(PrimaryId, SecondaryId, Variant)"/>
+    public IEnumerable<EquipItem> Between(PrimaryId modelId)
         => Between(ToKey(modelId, 0, 0), ToKey(modelId, 0xFFFF, 0xFF)).Select(e => (EquipItem)e);
 
     /// <summary> Find all items affected by the given set of input data. </summary>
@@ -21,7 +21,7 @@ public sealed class IdentificationListWeapons(DalamudPluginInterface pi, Logger 
     /// <param name="type"> The secondary ID of the weapon. </param>
     /// <param name="variant"> The variant. If 0, check all variants. </param>
     /// <returns> A list of all affected EquipItems. </returns>
-    public IEnumerable<EquipItem> Between(SetId modelId, WeaponType type, Variant variant = default)
+    public IEnumerable<EquipItem> Between(PrimaryId modelId, SecondaryId type, Variant variant = default)
     {
         if (type == 0)
             return Between(ToKey(modelId, 0, 0), ToKey(modelId, 0xFFFF, 0xFF)).Select(e => (EquipItem)e);
@@ -31,13 +31,13 @@ public sealed class IdentificationListWeapons(DalamudPluginInterface pi, Logger 
         return Between(ToKey(modelId, type, variant), ToKey(modelId, type, variant)).Select(e => (EquipItem)e);
     }
 
-    /// <inheritdoc cref="IdentificationListEquipment.ToKey(SetId, EquipSlot, Variant)"/>
-    public static ulong ToKey(SetId modelId, WeaponType type, Variant variant)
+    /// <inheritdoc cref="IdentificationListEquipment.ToKey(PrimaryId, EquipSlot, Variant)"/>
+    public static ulong ToKey(PrimaryId modelId, SecondaryId type, Variant variant)
         => (ulong)modelId.Id << 32 | (ulong)type.Id << 16 | variant.Id;
 
     /// <inheritdoc cref="IdentificationListEquipment.ToKey(EquipItem)"/>
     public static ulong ToKey(EquipItem i)
-        => ToKey(i.ModelId, i.WeaponType, i.Variant);
+        => ToKey(i.ModelId, i.SecondaryId, i.Variant);
 
     /// <inheritdoc cref="IdentificationListEquipment.ToKey(PseudoEquipItem)"/>
     private static ulong ToKey(PseudoEquipItem data)

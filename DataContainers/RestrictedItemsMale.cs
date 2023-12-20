@@ -36,6 +36,7 @@ public sealed class RestrictedItemsMale(DalamudPluginInterface pluginInterface, 
         foreach (var pair in GenderRestrictedItems.KnownItems)
             GenderRestrictedItems.AddItemMale(ret, pair, items, log);
         GenderRestrictedItems.AddUnknownItems(ret, items, log, 2);
+        // TODO: FrozenDictionary
         return ret;
     }
 

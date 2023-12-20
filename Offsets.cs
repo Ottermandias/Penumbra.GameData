@@ -1,5 +1,6 @@
 namespace Penumbra.GameData;
 
+/// <summary> Offsets in game data in use by Penumbra. </summary>
 public static class Offsets
 {
     // ActorManager.Data

@@ -6,7 +6,7 @@ using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.DataContainers;
 
-/// <summary> A dictionary mapping ItemIds to all secondary model items (offhands). </summary>
+/// <summary> A dictionary mapping ItemIds to all secondary model items (offhands). This requires ItemsByType to be finished. </summary>
 public sealed class ItemsSecondaryModel(DalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
     : ItemDictionary(pi, log, "ItemDictSecondary", gameData.Language, 1, () => CreateOffhands(items), items.Awaiter)
 {

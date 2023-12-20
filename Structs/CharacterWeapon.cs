@@ -1,70 +1,74 @@
 namespace Penumbra.GameData.Structs;
 
+/// <summary> A packed struct representing the model data for a piece of armor or accessory. </summary>
+/// <param name="class"> The primary ID. </param>
+/// <param name="set"> The secondary ID. </param>
+/// <param name="variant"> The variant. </param>
+/// <param name="stain"> The Stain ID. </param>
 [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 7)]
-public struct CharacterWeapon : IEquatable<CharacterWeapon>, IComparable<CharacterWeapon>
+public struct CharacterWeapon(PrimaryId @class, SecondaryId set, Variant variant, StainId stain)
+    : IEquatable<CharacterWeapon>, IComparable<CharacterWeapon>
 {
     [FieldOffset(0)]
-    public SetId Set;
+    public PrimaryId Class = @class;
 
     [FieldOffset(2)]
-    public WeaponType Type;
+    public SecondaryId Set = set;
 
     [FieldOffset(4)]
-    public Variant Variant;
+    public Variant Variant = variant;
 
     [FieldOffset(5)]
     private readonly byte _padding = 0;
 
     [FieldOffset(6)]
-    public StainId Stain;
+    public StainId Stain = stain;
 
+    /// <summary> The data as a single value. </summary>
     public readonly ulong Value
-        => (ulong)Set.Id | ((ulong)Type.Id << 16) | ((ulong)Variant.Id << 32) | ((ulong)Stain.Id << 48);
+        => (ulong)Class.Id | ((ulong)Set.Id << 16) | ((ulong)Variant.Id << 32) | ((ulong)Stain.Id << 48);
 
+    /// <inheritdoc/>
     public override readonly string ToString()
-        => $"{Set},{Type},{Variant},{Stain}";
+        => $"{Class},{Set},{Variant},{Stain}";
 
+    /// <summary> Compare in inverse order. </summary>
     private readonly ulong CompareValue
-        => ((ulong)Set.Id << 48) | ((ulong)Type.Id << 32) | ((ulong)Variant.Id << 16) | (ulong)Stain.Id;
+        => ((ulong)Class.Id << 48) | ((ulong)Set.Id << 32) | ((ulong)Variant.Id << 16) | (ulong)Stain.Id;
 
-    public CharacterWeapon(SetId set, WeaponType type, Variant variant, StainId stain)
-    {
-        Set      = set;
-        Type     = type;
-        Variant  = variant;
-        Stain    = stain;
-        _padding = 0;
-    }
-
+    /// <summary> Create a character weapon from a single value. </summary>
     public CharacterWeapon(ulong value)
-    {
-        Set      = (SetId)value;
-        Type     = (WeaponType)(value >> 16);
-        Variant  = (Variant)(value >> 32);
-        Stain    = (StainId)(value >> 48);
-        _padding = 0;
-    }
+        : this((PrimaryId)value, (SecondaryId)(value >> 16), (Variant)(value >> 32), (StainId)(value >> 48))
+    { }
 
-    public readonly CharacterWeapon With(StainId stain)
-        => new(Set, Type, Variant, stain);
+    /// <summary> Return the same weapon with a different stain. </summary>
+    public readonly CharacterWeapon With(StainId stainId)
+        => new(Class, Set, Variant, stainId);
 
+    /// <summary> Turn to a CharacterArmor by forgetting the secondary ID. </summary>
     public readonly CharacterArmor ToArmor()
-        => new(Set, Variant, Stain);
+        => new(Class, Variant, Stain);
 
-    public readonly CharacterArmor ToArmor(StainId stain)
-        => new(Set, Variant, stain);
+    /// <summary> Turn to a CharacterArmor by forgetting the secondary ID, with a different stain. </summary>
+    public readonly CharacterArmor ToArmor(StainId stainId)
+        => new(Class, Variant, stainId);
 
+    /// <summary> The empty CharacterWeapon. </summary>
     public static readonly CharacterWeapon Empty = new(0, 0, 0, 0);
 
+    /// <inheritdoc/>
     public readonly bool Equals(CharacterWeapon other)
         => Value == other.Value;
 
+    /// <inheritdoc/>
     public override readonly bool Equals(object? obj)
         => obj is CharacterWeapon other && Equals(other);
 
+    /// <inheritdoc/>
     public override readonly int GetHashCode()
         => Value.GetHashCode();
 
+    /// <inheritdoc/>
     public readonly int CompareTo(CharacterWeapon rhs)
         => CompareValue.CompareTo(rhs.CompareValue);
 
@@ -74,6 +78,7 @@ public struct CharacterWeapon : IEquatable<CharacterWeapon>, IComparable<Charact
     public static bool operator !=(CharacterWeapon left, CharacterWeapon right)
         => left.Value != right.Value;
 
+    /// <summary> A helper to create CharacterWeapons without casting from integers. </summary>
     public static CharacterWeapon Int(int set, int type, int variant)
-        => new((SetId)set, (WeaponType)type, (Variant)variant, 0);
+        => new((PrimaryId)set, (SecondaryId)type, (Variant)variant, 0);
 }

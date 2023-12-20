@@ -8,7 +8,6 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using Penumbra.String;
-using CustomizeData = Penumbra.GameData.Structs.CustomizeData;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace Penumbra.GameData.Actors;
@@ -152,8 +151,8 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
     {
         var other = (Character*)_objects.GetObjectAddress(idx.Index);
         if (other == null
-         || !CustomizeData.ScreenActorEquals((CustomizeData*)character->DrawData.CustomizeData.Data,
-                (CustomizeData*)other->DrawData.CustomizeData.Data))
+         || !CustomizeArray.ScreenActorEquals((CustomizeArray*)character->DrawData.CustomizeData.Data,
+                (CustomizeArray*)other->DrawData.CustomizeData.Data))
         {
             id = ActorIdentifier.Invalid;
             return false;
@@ -187,9 +186,9 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
 
         static bool Compare(Character* a, Character* b)
         {
-            var data1  = (CustomizeData*)a->DrawData.CustomizeData.Data;
-            var data2  = (CustomizeData*)b->DrawData.CustomizeData.Data;
-            var equals = CustomizeData.ScreenActorEquals(data1, data2);
+            var data1  = (CustomizeArray*)a->DrawData.CustomizeData.Data;
+            var data2  = (CustomizeArray*)b->DrawData.CustomizeData.Data;
+            var equals = CustomizeArray.ScreenActorEquals(data1, data2);
             return equals;
         }
     }

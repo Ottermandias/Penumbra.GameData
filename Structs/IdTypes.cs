@@ -194,52 +194,52 @@ public readonly record struct NpcId(uint Id)
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct WeaponType(ushort Id)
+public readonly record struct SecondaryId(ushort Id)
 {
-    public static implicit operator WeaponType(ushort id)
+    public static implicit operator SecondaryId(ushort id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    private class Converter : JsonConverter<WeaponType>
+    private class Converter : JsonConverter<SecondaryId>
     {
-        public override void WriteJson(JsonWriter writer, WeaponType value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, SecondaryId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override WeaponType ReadJson(JsonReader reader, Type objectType, WeaponType existingValue, bool hasExistingValue,
+        public override SecondaryId ReadJson(JsonReader reader, Type objectType, SecondaryId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<ushort>(reader);
     }
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct SetId(ushort Id) : IComparisonOperators<SetId, SetId, bool>
+public readonly record struct PrimaryId(ushort Id) : IComparisonOperators<PrimaryId, PrimaryId, bool>
 {
-    public static implicit operator SetId(ushort id)
+    public static implicit operator PrimaryId(ushort id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    public static bool operator >(SetId left, SetId right)
+    public static bool operator >(PrimaryId left, PrimaryId right)
         => left.Id > right.Id;
 
-    public static bool operator >=(SetId left, SetId right)
+    public static bool operator >=(PrimaryId left, PrimaryId right)
         => left.Id >= right.Id;
 
-    public static bool operator <(SetId left, SetId right)
+    public static bool operator <(PrimaryId left, PrimaryId right)
         => left.Id < right.Id;
 
-    public static bool operator <=(SetId left, SetId right)
+    public static bool operator <=(PrimaryId left, PrimaryId right)
         => left.Id <= right.Id;
 
-    private class Converter : JsonConverter<SetId>
+    private class Converter : JsonConverter<PrimaryId>
     {
-        public override void WriteJson(JsonWriter writer, SetId value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, PrimaryId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override SetId ReadJson(JsonReader reader, Type objectType, SetId existingValue, bool hasExistingValue,
+        public override PrimaryId ReadJson(JsonReader reader, Type objectType, PrimaryId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<ushort>(reader);
     }
@@ -336,11 +336,11 @@ public readonly record struct CustomItemId(ulong Id) : IComparisonOperators<Cust
     public ItemId Item
         => IsItem ? (ItemId)Id : 0;
 
-    public (SetId Model, WeaponType WeaponType, Variant Variant, FullEquipType Type) Split
-        => IsItem ? (0, 0, 0, FullEquipType.Unknown) : ((SetId)Id, (WeaponType)(Id >> 16), (Variant)(Id >> 32), (FullEquipType)(Id >> 40));
+    public (PrimaryId Model, SecondaryId WeaponType, Variant Variant, FullEquipType Type) Split
+        => IsItem ? (0, 0, 0, FullEquipType.Unknown) : ((PrimaryId)Id, (SecondaryId)(Id >> 16), (Variant)(Id >> 32), (FullEquipType)(Id >> 40));
 
-    public CustomItemId(SetId model, WeaponType weaponType, Variant variant, FullEquipType type)
-        : this(model.Id | ((ulong)weaponType.Id << 16) | ((ulong)variant.Id << 32) | ((ulong)type << 40) | CustomFlag)
+    public CustomItemId(PrimaryId model, SecondaryId secondaryId, Variant variant, FullEquipType type)
+        : this(model.Id | ((ulong)secondaryId.Id << 16) | ((ulong)variant.Id << 32) | ((ulong)type << 40) | CustomFlag)
     { }
 
     public static implicit operator CustomItemId(ItemId id)

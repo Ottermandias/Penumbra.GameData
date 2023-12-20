@@ -3,33 +3,37 @@ using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;
 
+/// <summary> A summary of what a game identity a game path represents. </summary>
 [StructLayout(LayoutKind.Explicit)]
 public struct GameObjectInfo : IComparable
 {
-    public static GameObjectInfo Equipment(FileType type, ushort setId, GenderRace gr = GenderRace.Unknown
-        , EquipSlot slot = EquipSlot.Unknown, byte variant = 0)
+    /// <summary> Equipment paths contain up to a file type, primary ID, race code, slot and variant. </summary>
+    public static GameObjectInfo Equipment(FileType type, PrimaryId primaryId, GenderRace gr = GenderRace.Unknown
+        , EquipSlot slot = EquipSlot.Unknown, Variant variant = default)
         => new()
         {
             FileType   = type,
             ObjectType = slot.IsAccessory() ? ObjectType.Accessory : ObjectType.Equipment,
-            PrimaryId  = setId,
+            PrimaryId  = primaryId,
             GenderRace = gr,
             Variant    = variant,
             EquipSlot  = slot,
         };
 
-    public static GameObjectInfo Weapon(FileType type, ushort setId, ushort weaponId, byte variant = 0)
+    /// <summary> Weapon paths contain up to a file type, primary ID, secondary ID and variant. </summary>
+    public static GameObjectInfo Weapon(FileType type, PrimaryId primaryId, SecondaryId weaponId, Variant variant = default)
         => new()
         {
             FileType    = type,
             ObjectType  = ObjectType.Weapon,
-            PrimaryId   = setId,
+            PrimaryId   = primaryId,
             SecondaryId = weaponId,
             Variant     = variant,
         };
 
-    public static GameObjectInfo Customization(FileType type, CustomizationType customizationType, ushort id = 0
-        , GenderRace gr = GenderRace.Unknown, BodySlot bodySlot = BodySlot.Unknown, byte variant = 0)
+    /// <summary> Customizations contain up to a file type, the type of customization, a primary ID, a race code, a body slot and a variant. </summary>
+    public static GameObjectInfo Customization(FileType type, CustomizationType customizationType, PrimaryId id = default
+        , GenderRace gr = GenderRace.Unknown, BodySlot bodySlot = BodySlot.Unknown, Variant variant = default)
         => new()
         {
             FileType          = type,
@@ -41,7 +45,8 @@ public struct GameObjectInfo : IComparable
             CustomizationType = customizationType,
         };
 
-    public static GameObjectInfo Monster(FileType type, ushort monsterId, ushort bodyId, byte variant = 0)
+    /// <summary> Monsters contain up to a file type, primary ID, secondary ID and variant. </summary>
+    public static GameObjectInfo Monster(FileType type, PrimaryId monsterId, SecondaryId bodyId, Variant variant = default)
         => new()
         {
             FileType    = type,
@@ -51,9 +56,9 @@ public struct GameObjectInfo : IComparable
             Variant     = variant,
         };
 
-    public static GameObjectInfo DemiHuman(FileType type, ushort demiHumanId, ushort bodyId, EquipSlot slot = EquipSlot.Unknown,
-        byte variant = 0
-    )
+    /// <summary> Demihumans contain up to a file type, primary ID, secondary ID, slot and variant. </summary>
+    public static GameObjectInfo DemiHuman(FileType type, PrimaryId demiHumanId, SecondaryId bodyId, EquipSlot slot = EquipSlot.Unknown,
+        Variant variant = default)
         => new()
         {
             FileType    = type,
@@ -64,7 +69,8 @@ public struct GameObjectInfo : IComparable
             EquipSlot   = slot,
         };
 
-    public static GameObjectInfo Map(FileType type, byte c1, byte c2, byte c3, byte c4, byte variant, byte suffix = 0)
+    /// <summary> Maps contain multiple unknown bytes, a variant and a suffix. </summary>
+    public static GameObjectInfo Map(FileType type, byte c1, byte c2, byte c3, byte c4, Variant variant, byte suffix = 0)
         => new()
         {
             FileType   = type,
@@ -77,6 +83,7 @@ public struct GameObjectInfo : IComparable
             Variant    = variant,
         };
 
+    /// <summary> Icons contain up to an ID, a high quality flag, a high resolution flag, and a language. </summary>
     public static GameObjectInfo Icon(FileType type, uint iconId, bool hq, bool hr, ClientLanguage lang = ClientLanguage.English)
         => new()
         {
@@ -88,70 +95,92 @@ public struct GameObjectInfo : IComparable
         };
 
 
+    /// <summary> The full value representing the object.
+    /// 
+    /// </summary>
     [FieldOffset(0)]
     public readonly ulong Identifier;
 
+    /// <summary> The file type. </summary>
     [FieldOffset(0)]
     public FileType FileType;
 
+    /// <summary> The object type. </summary>
     [FieldOffset(1)]
     public ObjectType ObjectType;
 
-
+    /// <summary> The primary ID. Used by Equipment, Weapon, Customization, Monster, DemiHuman. </summary>
     [FieldOffset(2)]
-    public ushort PrimaryId; // Equipment, Weapon, Customization, Monster, DemiHuman
+    public PrimaryId PrimaryId;
 
+    /// <summary> The icon ID. Used by Icons. </summary>
     [FieldOffset(2)]
-    public uint IconId; // Icon
+    public uint IconId;
 
+    /// <summary> The first unknown byte for Maps. </summary>
     [FieldOffset(2)]
-    public byte MapC1; // Map
+    public byte MapC1;
 
+    /// <summary> The second unknown byte for Maps. </summary>
     [FieldOffset(3)]
-    public byte MapC2; // Map
+    public byte MapC2;
 
+    /// <summary> The secondary ID. Used by Weapon, Monster, Demihuman. </summary>
     [FieldOffset(4)]
-    public ushort SecondaryId; // Weapon, Monster, Demihuman
+    public SecondaryId SecondaryId;
 
+    /// <summary> The third unknown byte for Maps. </summary>
     [FieldOffset(4)]
-    public byte MapC3; // Map
+    public byte MapC3;
 
+    /// <summary> The gender race code reduced to a single byte. Used by Equipment and Customization. </summary>
     [FieldOffset(4)]
-    private byte _genderRaceByte; // Equipment, Customization
+    private byte _genderRaceByte;
 
+    /// <summary> The gender race code as actual enum value. </summary>
     public GenderRace GenderRace
     {
-        get => Names.GenderRaceFromByte(_genderRaceByte);
+        readonly get => Names.GenderRaceFromByte(_genderRaceByte);
         set => _genderRaceByte = value.ToByte();
     }
 
+    /// <summary> The body slot. Used by Customization. </summary>
     [FieldOffset(5)]
-    public BodySlot BodySlot; // Customization
+    public BodySlot BodySlot;
 
+    /// <summary> The fourth unknown byte for Maps. </summary>
     [FieldOffset(5)]
-    public byte MapC4; // Map
+    public byte MapC4;
 
+    /// <summary> The variant. Used by materials and textures of Equipment, Weapon, Customization, Map, Monster, Demihuman. </summary>
     [FieldOffset(6)]
-    public byte Variant; // Equipment, Weapon, Customization, Map, Monster, Demihuman
+    public Variant Variant;
 
+    /// <summary> Icon display flags. 2 for high resolution, 1 for high quality, 3 for both. Used for Icon. </summary>
     [FieldOffset(6)]
-    public byte IconHqHr; // Icon
+    public byte IconHqHr;
 
+    /// <summary> The equip slot. Used by Equipment and Demihuman. </summary>
     [FieldOffset(7)]
-    public EquipSlot EquipSlot; // Equipment, Demihuman
+    public EquipSlot EquipSlot;
 
+    /// <summary> The customization type. Used by Customization. </summary>
     [FieldOffset(7)]
-    public CustomizationType CustomizationType; // Customization
+    public CustomizationType CustomizationType;
 
+    /// <summary> The language. Used by Icon. </summary>
     [FieldOffset(7)]
-    public ClientLanguage Language; // Icon
+    public ClientLanguage Language;
 
+    /// <summary> The map suffix. Used by Map. </summary>
     [FieldOffset(7)]
     public byte MapSuffix;
 
-    public override int GetHashCode()
+    /// <inheritdoc/>
+    public override readonly int GetHashCode()
         => Identifier.GetHashCode();
 
-    public int CompareTo(object? r)
+    /// <inheritdoc/>
+    public readonly int CompareTo(object? r)
         => Identifier.CompareTo(r);
 }

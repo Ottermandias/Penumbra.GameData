@@ -2,44 +2,51 @@ using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;
 
+/// <summary> A Racial Scaling Parameter entry controls scaling for specific attributes for a specific gender and race. </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public readonly struct RspEntry
 {
+    /// <summary> The byte size of all attributes. </summary>
     public const int ByteSize = (int)RspAttribute.NumAttributes * 4;
 
-    private readonly float[] Attributes;
+    /// <summary> The attributes. </summary>
+    private readonly float[] _attributes;
 
+    /// <summary> Copy an RSP Entry. </summary>
     public RspEntry(RspEntry copy)
-        => Attributes = (float[])copy.Attributes.Clone();
+        => _attributes = (float[])copy._attributes.Clone();
 
-    public RspEntry(byte[] bytes, int offset)
+
+    /// <summary> Read a set of entries from byte data at a given position. </summary>
+    public RspEntry(ReadOnlySpan<byte> bytes, int offset)
     {
         if (offset < 0 || offset + ByteSize > bytes.Length)
             throw new ArgumentOutOfRangeException();
 
-        Attributes = new float[(int)RspAttribute.NumAttributes];
-        using MemoryStream s  = new(bytes) { Position = offset };
-        using BinaryReader br = new(s);
+        _attributes = new float[(int)RspAttribute.NumAttributes];
         for (var i = 0; i < (int)RspAttribute.NumAttributes; ++i)
-            Attributes[i] = br.ReadSingle();
+            _attributes[i] = MemoryMarshal.Read<float>(bytes[(i * 4 + offset)..]);
     }
 
+    /// <summary> Obtain the index of an attribute. </summary>
     private static int ToIndex(RspAttribute attribute)
-        => attribute < RspAttribute.NumAttributes && attribute >= 0
+        => attribute < RspAttribute.NumAttributes
             ? (int)attribute
             : throw new InvalidEnumArgumentException();
 
+    /// <summary> Obtain the value for a given attribute. </summary>
     public float this[RspAttribute attribute]
     {
-        get => Attributes[ToIndex(attribute)];
-        set => Attributes[ToIndex(attribute)] = value;
+        get => _attributes[ToIndex(attribute)];
+        set => _attributes[ToIndex(attribute)] = value;
     }
 
+    /// <summary> Write all attributes to a block of bytes. </summary>
     public byte[] ToBytes()
     {
         using var s  = new MemoryStream(ByteSize);
         using var bw = new BinaryWriter(s);
-        foreach (var attribute in Attributes)
+        foreach (var attribute in _attributes)
             bw.Write(attribute);
 
         return s.ToArray();

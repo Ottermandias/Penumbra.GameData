@@ -1,5 +1,6 @@
 namespace Penumbra.GameData;
 
+/// <summary> Signatures in use for Penumbra. </summary>
 public static class Sigs
 {
     // ResourceLoader.Debug

@@ -2,6 +2,7 @@ using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;
 
+/// <summary> Equipment Parameter entries contain information on how a piece of equipment influences other parts of the character for a given primary ID. </summary>
 [Flags]
 public enum EqpEntry : ulong
 {
@@ -82,9 +83,11 @@ public enum EqpEntry : ulong
 
 public static class Eqp
 {
-    // cf. Client::Graphics::Scene::CharacterUtility.GetSlotEqpFlags
+    /// <summary> The default EqpEntry for otherwise unspecified gear sets. </summary>
+    /// <remarks> cf. Client::Graphics::Scene::CharacterUtility.GetSlotEqpFlags </remarks>
     public const EqpEntry DefaultEntry = (EqpEntry)0x3fe00070603f00;
 
+    /// <summary> Get the number of bytes used per slot, and the offset of those bytes in the flag. </summary>
     public static (int, int) BytesAndOffset(EquipSlot slot)
     {
         return slot switch
@@ -98,13 +101,7 @@ public static class Eqp
         };
     }
 
-    public static EqpEntry ShiftAndMask(this EqpEntry entry, EquipSlot slot)
-    {
-        var (_, offset) = BytesAndOffset(slot);
-        var mask = Mask(slot);
-        return (EqpEntry)((ulong)(entry & mask) >> (offset * 8));
-    }
-
+    /// <summary> Read an array of bytes and convert them to an EqpEntry given a slot. </summary>
     public static EqpEntry FromSlotAndBytes(EquipSlot slot, byte[] value)
     {
         EqpEntry ret = 0;
@@ -118,6 +115,7 @@ public static class Eqp
         return ret;
     }
 
+    /// <summary> Get the mask for a given slot. </summary>
     public static EqpEntry Mask(EquipSlot slot)
     {
         return slot switch
@@ -131,6 +129,7 @@ public static class Eqp
         };
     }
 
+    /// <summary> Convert an entry flag to the slot it affects. </summary>
     public static EquipSlot ToEquipSlot(this EqpEntry entry)
     {
         return entry switch
@@ -210,9 +209,9 @@ public static class Eqp
         };
     }
 
+    /// <summary> Get human-readable names for the known flags. </summary>
     public static string ToLocalName(this EqpEntry entry)
-    {
-        return entry switch
+        => entry switch
         {
             EqpEntry.BodyEnabled              => "Enabled",
             EqpEntry.BodyHideWaist            => "Hide Waist",
@@ -286,22 +285,33 @@ public static class Eqp
 
             _ => throw new InvalidEnumArgumentException(),
         };
-    }
 
-    private static EqpEntry[] GetEntriesForSlot(EquipSlot slot)
+    /// <summary> Get all flags for a given slot. </summary>
+    private static IReadOnlyList<EqpEntry> GetEntriesForSlot(EquipSlot slot)
     {
         return ((EqpEntry[])Enum.GetValues(typeof(EqpEntry)))
             .Where(e => e.ToEquipSlot() == slot)
             .ToArray();
     }
 
-    public static readonly EqpEntry[] EqpAttributesBody  = GetEntriesForSlot(EquipSlot.Body);
-    public static readonly EqpEntry[] EqpAttributesLegs  = GetEntriesForSlot(EquipSlot.Legs);
-    public static readonly EqpEntry[] EqpAttributesHands = GetEntriesForSlot(EquipSlot.Hands);
-    public static readonly EqpEntry[] EqpAttributesFeet  = GetEntriesForSlot(EquipSlot.Feet);
-    public static readonly EqpEntry[] EqpAttributesHead  = GetEntriesForSlot(EquipSlot.Head);
+    /// <summary> A list of flags affecting the body. </summary>
+    public static readonly IReadOnlyList<EqpEntry> EqpAttributesBody  = GetEntriesForSlot(EquipSlot.Body);
 
-    public static readonly IReadOnlyDictionary<EquipSlot, EqpEntry[]> EqpAttributes = new Dictionary<EquipSlot, EqpEntry[]>()
+    /// <summary> A list of flags affecting the legs. </summary>
+    public static readonly IReadOnlyList<EqpEntry> EqpAttributesLegs  = GetEntriesForSlot(EquipSlot.Legs);
+
+    /// <summary> A list of flags affecting the hands. </summary>
+    public static readonly IReadOnlyList<EqpEntry> EqpAttributesHands = GetEntriesForSlot(EquipSlot.Hands);
+
+    /// <summary> A list of flags affecting the feet. </summary>
+    public static readonly IReadOnlyList<EqpEntry> EqpAttributesFeet  = GetEntriesForSlot(EquipSlot.Feet);
+
+    /// <summary> A list of flags affecting the head. </summary>
+    public static readonly IReadOnlyList<EqpEntry> EqpAttributesHead  = GetEntriesForSlot(EquipSlot.Head);
+
+    // TODO: FrozenDictionary
+    /// <summary> A dictionary mapping slots to a list of their affected flags. </summary>
+    public static readonly IReadOnlyDictionary<EquipSlot, IReadOnlyList<EqpEntry>> EqpAttributes = new Dictionary<EquipSlot, IReadOnlyList<EqpEntry>>
     {
         [EquipSlot.Body]  = EqpAttributesBody,
         [EquipSlot.Legs]  = EqpAttributesLegs,

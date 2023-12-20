@@ -1,6 +1,5 @@
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
-using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using OtterGui.Services;
@@ -51,16 +50,16 @@ public sealed class ObjectIdentification(
     }
 
     /// <summary> Identify all equipment items using the specified values. </summary>
-    /// <param name="setId"> The primary ID of the model. </param>
-    /// <param name="weaponType"> The secondary ID of the model, if any. </param>
+    /// <param name="primaryId"> The primary ID of the model. </param>
+    /// <param name="secondaryId"> The secondary ID of the model, if any. </param>
     /// <param name="variant"> The variant of the material. </param>
     /// <param name="slot"> The slot the item is used in. </param>
     /// <returns> An enumeration of all affected items. </returns>
-    public IEnumerable<EquipItem> Identify(SetId setId, WeaponType weaponType, Variant variant, EquipSlot slot)
+    public IEnumerable<EquipItem> Identify(PrimaryId primaryId, SecondaryId secondaryId, Variant variant, EquipSlot slot)
         => slot switch
         {
-            EquipSlot.MainHand or EquipSlot.OffHand => _weaponIdentification.Between(setId, weaponType, variant),
-            _                  => _equipmentIdentification.Between(setId, slot, variant),
+            EquipSlot.MainHand or EquipSlot.OffHand => _weaponIdentification.Between(primaryId, secondaryId, variant),
+            _                  => _equipmentIdentification.Between(primaryId, slot, variant),
         };
 
     /// <summary> Find and add all equipment pieces affected by <paramref name="info"/>. </summary>
@@ -87,7 +86,7 @@ public sealed class ObjectIdentification(
         if (type is 0 or CharacterBase.ModelType.Weapon)
             return;
 
-        var models = _modelIdentification.Between(type, info.PrimaryId, (byte)info.SecondaryId, info.Variant);
+        var models = _modelIdentification.Between(type, info.PrimaryId, (byte)info.SecondaryId.Id, info.Variant);
         foreach (var model in models.Where(m => m.RowId != 0 && m.RowId < _modelCharaToObjects.Count))
         {
             var objectList = _modelCharaToObjects[model.RowId];

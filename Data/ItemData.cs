@@ -131,7 +131,7 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
     ];
 
     /// <summary> Convert a primary weapon ID to its equip type. </summary>
-    public static FullEquipType ConvertWeaponId(SetId id)
+    public static FullEquipType ConvertWeaponId(PrimaryId id)
     {
         var quotient = Math.DivRem(id.Id - 1, 100, out var remainder);
         if (quotient > WeaponIdTable.Length)
