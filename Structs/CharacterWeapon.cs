@@ -79,6 +79,6 @@ public struct CharacterWeapon(PrimaryId skeleton, SecondaryId set, Variant varia
         => left.Value != right.Value;
 
     /// <summary> A helper to create CharacterWeapons without casting from integers. </summary>
-    public static CharacterWeapon Int(int set, int type, int variant)
-        => new((PrimaryId)set, (SecondaryId)type, (Variant)variant, 0);
+    public static CharacterWeapon Int(int skeleton, int weapon, int variant)
+        => new((PrimaryId)skeleton, (SecondaryId)weapon, (Variant)variant, 0);
 }
