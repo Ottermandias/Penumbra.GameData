@@ -43,7 +43,7 @@ public sealed class ItemsByType(DalamudPluginInterface pi, Logger log, IDataMana
                         (byte)(item.ModelSub >> 16), FullEquipType.Hands, mh.Flags, mh.Level, mh.JobRestrictions));
 
                     tmp[(int)FullEquipType.FistsOff].Add(new EquipItem(mh.Name + FullEquipType.FistsOff.OffhandTypeSuffix(), mh.Id,
-                        mh.IconId, (PrimaryId)(mh.ModelId.Id + 50), mh.SecondaryId, mh.Variant, FullEquipType.FistsOff, mh.Flags, mh.Level,
+                        mh.IconId, (PrimaryId)(mh.PrimaryId.Id + 50), mh.SecondaryId, mh.Variant, FullEquipType.FistsOff, mh.Flags, mh.Level,
                         mh.JobRestrictions));
                 }
                 else

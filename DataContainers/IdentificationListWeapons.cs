@@ -37,7 +37,7 @@ public sealed class IdentificationListWeapons(DalamudPluginInterface pi, Logger 
 
     /// <inheritdoc cref="IdentificationListEquipment.ToKey(EquipItem)"/>
     public static ulong ToKey(EquipItem i)
-        => ToKey(i.ModelId, i.SecondaryId, i.Variant);
+        => ToKey(i.PrimaryId, i.SecondaryId, i.Variant);
 
     /// <inheritdoc cref="IdentificationListEquipment.ToKey(PseudoEquipItem)"/>
     private static ulong ToKey(PseudoEquipItem data)

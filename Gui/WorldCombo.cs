@@ -15,12 +15,11 @@ public sealed class WorldCombo : FilterComboCache<KeyValuePair<WorldId, string>>
     /// <summary> Create a new WorldCombo. </summary>
     /// <param name="worlds"> The dictionary of worlds. </param>
     /// <param name="log"> A logger. </param>
-    /// <param name="anyWorldValue"> The value used to represent Any World. </param>
-    public WorldCombo(DictWorld worlds, Logger log, WorldId anyWorldValue)
-        : base(worlds.OrderBy(kvp => kvp.Value).Prepend(new KeyValuePair<WorldId, string>(anyWorldValue, AnyWorldString)), log)
+    public WorldCombo(DictWorld worlds, Logger log)
+        : base(worlds.OrderBy(kvp => kvp.Value).Prepend(new KeyValuePair<WorldId, string>(WorldId.AnyWorld, AnyWorldString)), log)
     {
         // Start with the Any World entry selected.
-        CurrentSelection    = new KeyValuePair<WorldId, string>(anyWorldValue, AnyWorldString);
+        CurrentSelection    = new KeyValuePair<WorldId, string>(WorldId.AnyWorld, AnyWorldString);
         CurrentSelectionIdx = 0;
     }
 

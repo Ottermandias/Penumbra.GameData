@@ -33,7 +33,7 @@ public sealed class IdentificationListEquipment(DalamudPluginInterface pi, Logge
 
     /// <summary> Turn a specific item to its key representation. </summary>
     public static ulong ToKey(EquipItem i)
-        => ToKey(i.ModelId, i.Type.ToSlot(), i.Variant);
+        => ToKey(i.PrimaryId, i.Type.ToSlot(), i.Variant);
 
     /// <summary> Turn a pseudo equip item to its key representation. </summary>
     private static ulong ToKey(PseudoEquipItem i)

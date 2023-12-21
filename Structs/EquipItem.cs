@@ -21,34 +21,34 @@ public enum ItemFlags : byte
 public readonly struct EquipItem
 {
     /// <summary> The name of the item. </summary>
-    public readonly string         Name;
+    public readonly string Name;
 
     /// <summary> A full item ID that may not represent an item that the game knows. </summary>
-    public readonly CustomItemId   Id;
+    public readonly CustomItemId Id;
 
     /// <summary> An associated icon if it exists. </summary>
-    public readonly IconId         IconId;
+    public readonly IconId IconId;
 
     /// <summary> The primary ID of the represented model. </summary>
-    public readonly PrimaryId          ModelId;
+    public readonly PrimaryId PrimaryId;
 
     /// <summary> The secondary ID of the represented model, or 0. </summary>
-    public readonly SecondaryId     SecondaryId;
+    public readonly SecondaryId SecondaryId;
 
     /// <summary> The variant of the represented model. </summary>
-    public readonly Variant        Variant;
+    public readonly Variant Variant;
 
     /// <summary> The full type of the item, which also tells us if this is a primary, secondary or tertiary model. </summary>
-    public readonly FullEquipType  Type;
+    public readonly FullEquipType Type;
 
-    /// <summary> Miscallaneous additional information. </summary>
-    public readonly ItemFlags      Flags;
+    /// <summary> Miscellaneous additional information. </summary>
+    public readonly ItemFlags Flags;
 
     /// <summary> The level required to wear the item, if any. </summary>
     public readonly CharacterLevel Level;
 
     /// <summary> The job group required to wear the item, if any. </summary>
-    public readonly JobGroupId     JobRestrictions;
+    public readonly JobGroupId JobRestrictions;
 
     /// <summary> The actual item ID. Will return 0 for fake items. </summary>
     public ItemId ItemId
@@ -60,43 +60,44 @@ public readonly struct EquipItem
 
     /// <summary> Get the represented model as armor without stain. </summary>
     public CharacterArmor Armor()
-        => new(ModelId, Variant, 0);
+        => new(PrimaryId, Variant, 0);
 
     /// <summary> Get the represented model as armor with a specific stain. </summary>
     public CharacterArmor Armor(StainId stain)
-        => new(ModelId, Variant, stain);
+        => new(PrimaryId, Variant, stain);
 
     /// <summary> Get the represented model as weapon without stain. </summary>
     public CharacterWeapon Weapon()
-        => new(ModelId, SecondaryId, Variant, 0);
+        => new(PrimaryId, SecondaryId, Variant, 0);
 
     /// <summary> Get the represented model as weapon with a specific stain. </summary>
     public CharacterWeapon Weapon(StainId stain)
-        => new(ModelId, SecondaryId, Variant, stain);
+        => new(PrimaryId, SecondaryId, Variant, stain);
 
     /// <summary> An empty item. </summary>
     public EquipItem()
         => Name = string.Empty;
 
     /// <summary> Create an EquipItem from all data used. </summary>
-    public EquipItem(string name, CustomItemId id, IconId iconId, PrimaryId modelId, SecondaryId secondaryId, Variant variant, FullEquipType type,
+    public EquipItem(string name, CustomItemId id, IconId iconId, PrimaryId primaryId, SecondaryId secondaryId, Variant variant,
+        FullEquipType type,
         ItemFlags flags, CharacterLevel level, JobGroupId restrictions)
     {
-        Name            = string.Intern(name);
-        Id              = id;
-        IconId          = iconId;
-        ModelId         = modelId;
-        SecondaryId      = secondaryId;
-        Variant         = variant;
-        Type            = type;
-        Flags           = flags;
-        Level           = level;
-        JobRestrictions = restrictions;
+        Name                = string.Intern(name);
+        Id                  = id;
+        IconId              = iconId;
+        PrimaryId   = primaryId;
+        SecondaryId = secondaryId;
+        Variant             = variant;
+        Type                = type;
+        Flags               = flags;
+        Level               = level;
+        JobRestrictions     = restrictions;
     }
 
     /// <summary> Write the model as a string. </summary>
     public string ModelString
-        => SecondaryId == 0 ? $"{ModelId}-{Variant}" : $"{ModelId}-{SecondaryId}-{Variant}";
+        => SecondaryId == 0 ? $"{PrimaryId}-{Variant}" : $"{PrimaryId}-{SecondaryId}-{Variant}";
 
     /// <summary> Convert a PseudoEquipItem to EquipItem. </summary>
     public static implicit operator EquipItem(PseudoEquipItem it)
@@ -107,7 +108,7 @@ public readonly struct EquipItem
 
     /// <summary> Convert an EquipItem to PseudoEquipItem. </summary>
     public static explicit operator PseudoEquipItem(EquipItem it)
-        => (it.Name, it.Id.Id, it.IconId.Id, it.ModelId.Id, it.SecondaryId.Id, it.Variant.Id,
+        => (it.Name, it.Id.Id, it.IconId.Id, it.PrimaryId.Id, it.SecondaryId.Id, it.Variant.Id,
             PackBytes(it.Type, it.Flags, it.Level, it.JobRestrictions));
 
     /// <summary> Create an EquipItem from a lumina item representing armor. </summary>
