@@ -72,8 +72,7 @@ public static class EquipSlotExtensions
 
     /// <summary> Get the suffix used for a specific EquipSlot in file names. </summary>
     public static string ToSuffix(this EquipSlot value)
-    {
-        return value switch
+        => value switch
         {
             EquipSlot.Head    => "met",
             EquipSlot.Hands   => "glv",
@@ -87,12 +86,10 @@ public static class EquipSlotExtensions
             EquipSlot.Wrists  => "wrs",
             _                 => "unk",
         };
-    }
 
     /// <summary> Convert the EquipSlotCategory value to the actual inventory slot it is put in. </summary>
     public static EquipSlot ToSlot(this EquipSlot value)
-    {
-        return value switch
+        => value switch
         {
             EquipSlot.MainHand          => EquipSlot.MainHand,
             EquipSlot.OffHand           => EquipSlot.OffHand,
@@ -118,12 +115,10 @@ public static class EquipSlotExtensions
             EquipSlot.ChestHands        => EquipSlot.Body,
             _                           => EquipSlot.Unknown,
         };
-    }
 
     /// <summary> Translate an EquipSlotCategory into a human readable name.  </summary>
     public static string ToName(this EquipSlot value)
-    {
-        return value switch
+        => value switch
         {
             EquipSlot.Head              => "Head",
             EquipSlot.Hands             => "Hands",
@@ -149,7 +144,6 @@ public static class EquipSlotExtensions
             EquipSlot.All               => "Costume",
             _                           => "Unknown",
         };
-    }
 
     /// <summary> Returns true for the 5 primary equipment slots. </summary>
     public static bool IsEquipment(this EquipSlot value)
@@ -223,7 +217,7 @@ public static class EquipSlotExtensions
     ];
 
     /// <summary> A list of all equipment slots. </summary>
-    public static readonly EquipSlot[] FullSlots = WeaponSlots.Concat(EqdpSlots).ToArray();
+    public static readonly EquipSlot[] FullSlots = [.. WeaponSlots, .. EqdpSlots];
 }
 
 public static partial class Names
