@@ -418,6 +418,26 @@ public readonly record struct WorldId(ushort Id)
 }
 
 [JsonConverter(typeof(Converter))]
+public readonly record struct JobId(byte Id)
+{
+    public static implicit operator JobId(byte value)
+        => new(value);
+
+    public override string ToString()
+        => Id.ToString();
+
+    private class Converter : JsonConverter<JobId>
+    {
+        public override void WriteJson(JsonWriter writer, JobId value, JsonSerializer serializer)
+            => serializer.Serialize(writer, value.Id);
+
+        public override JobId ReadJson(JsonReader reader, Type objectType, JobId existingValue, bool hasExistingValue,
+            JsonSerializer serializer)
+            => serializer.Deserialize<byte>(reader);
+    }
+}
+
+[JsonConverter(typeof(Converter))]
 public readonly record struct JobGroupId(byte Id)
 {
     public static implicit operator JobGroupId(byte id)
@@ -503,3 +523,4 @@ public readonly record struct ObjectIndex(ushort Index) : IComparisonOperators<O
             => serializer.Deserialize<ushort>(reader);
     }
 }
+
