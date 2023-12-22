@@ -12,8 +12,8 @@ namespace Penumbra.GameData.Data;
 /// <summary> Identify items or game objects from paths or IDs. </summary>
 public sealed class ObjectIdentification(
     DictBNpcNames _bNpcNames,
-    DictActions _actions,
-    DictEmotes _emotes,
+    DictAction _actions,
+    DictEmote _emotes,
     DictModelChara _modelCharaToObjects,
     IdentificationListEquipment _equipmentIdentification,
     IdentificationListWeapons _weaponIdentification,
@@ -59,7 +59,7 @@ public sealed class ObjectIdentification(
         => slot switch
         {
             EquipSlot.MainHand or EquipSlot.OffHand => _weaponIdentification.Between(primaryId, secondaryId, variant),
-            _                  => _equipmentIdentification.Between(primaryId, slot, variant),
+            _                                       => _equipmentIdentification.Between(primaryId, slot, variant),
         };
 
     /// <summary> Find and add all equipment pieces affected by <paramref name="info"/>. </summary>
