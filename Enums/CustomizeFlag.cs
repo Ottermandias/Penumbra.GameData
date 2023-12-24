@@ -49,7 +49,7 @@ public static class CustomizeFlagExtensions
     public const CustomizeFlag All         = (CustomizeFlag)(((ulong)CustomizeFlag.FacePaintColor << 1) - 1ul);
 
     /// <summary> The bitmask of all flags we care about set. </summary>
-    public const CustomizeFlag AllRelevant = All & ~CustomizeFlag.BodyType & ~CustomizeFlag.Race;
+    public const CustomizeFlag AllRelevant = All & ~CustomizeFlag.Race;
 
     /// <summary> Changing any of these options requires a redraw of the character. </summary>
     /// <remarks> Face does not technically require a redraw, but crashes when looking at things without redrawing. </remarks>
