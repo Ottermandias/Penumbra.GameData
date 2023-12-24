@@ -15,7 +15,7 @@ public static class DataUtility
         if (article == 1)
             return string.Intern(s.ToDalamudString().ToString());
 
-        var sb = new StringBuilder(s.ToDalamudString().ToString());
+        var sb        = new StringBuilder(s.ToDalamudString().ToString());
         var lastSpace = true;
         for (var i = 0; i < sb.Length; ++i)
         {
@@ -26,7 +26,7 @@ public static class DataUtility
             else if (lastSpace)
             {
                 lastSpace = false;
-                sb[i] = char.ToUpperInvariant(sb[i]);
+                sb[i]     = char.ToUpperInvariant(sb[i]);
             }
         }
 
@@ -38,4 +38,16 @@ public static class DataUtility
     /// <param name="count"> The number of entries. </param>
     public static int DictionaryMemory(int tupleSize, int count)
         => 64 + (tupleSize + 16) * count;
+
+    /// <summary> Approximate the memory an array needs </summary>
+    /// <param name="dataSize"> The approximate size of the data. </param>
+    /// <param name="count"> The number of entries. </param>
+    public static int ArrayMemory(int dataSize, int count)
+        => 16 + dataSize * count;
+
+    /// <summary> Approximate the memory a list needs </summary>
+    /// <param name="dataSize"> The approximate size of the data. </param>
+    /// <param name="count"> The number of entries. </param>
+    public static int ListMemory(int dataSize, int count)
+        => 24 + dataSize * count;
 }
