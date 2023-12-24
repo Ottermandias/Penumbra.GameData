@@ -20,6 +20,10 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
     public Task Awaiter
         => Data.Awaiter;
 
+    /// <inheritdoc/>
+    public bool Finished
+        => Awaiter.IsCompletedSuccessfully;
+
     /// <summary> Unsets the static manager if it is set to this manager. </summary>
     public void Dispose()
     {

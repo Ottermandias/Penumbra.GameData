@@ -25,6 +25,10 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
     /// <summary> Finished when all item dictionaries are finished. </summary>
     public Task Awaiter { get; } = Task.WhenAll(_byType.Awaiter, _primary.Awaiter, _secondary.Awaiter, _tertiary.Awaiter);
 
+    /// <inheritdoc/>
+    public bool Finished
+        => Awaiter.IsCompletedSuccessfully;
+
     /// <summary> The total number of items. </summary>
     public int Count
         => ByType.TotalCount;

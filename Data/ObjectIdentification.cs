@@ -25,6 +25,10 @@ public sealed class ObjectIdentification(
     public Task Awaiter { get; } = Task.WhenAll(_bNpcNames.Awaiter, _actions.Awaiter, _emotes.Awaiter, _modelCharaToObjects.Awaiter,
         _equipmentIdentification.Awaiter, _weaponIdentification.Awaiter, _modelIdentification.Awaiter);
 
+    /// <inheritdoc/>
+    public bool Finished
+        => Awaiter.IsCompletedSuccessfully;
+
     /// <summary> Identify all affected game identities using <paramref name="path"/> and add those items to <paramref name="set"/>, </summary>
     /// <param name="set"> The set to add identities to. </param>
     /// <param name="path"> The path to parse and identify. </param>
