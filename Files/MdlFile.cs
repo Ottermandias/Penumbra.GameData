@@ -94,13 +94,15 @@ public partial class MdlFile : IWritable
         IndexBufferSize  = header.IndexBufferSize;
         VertexOffset     = header.VertexOffset;
         IndexOffset      = header.IndexOffset;
+
+        var dataOffset = FileHeaderSize + header.RuntimeSize + header.StackSize;
         for (var i = 0; i < 3; ++i)
         {
             if (VertexOffset[i] > 0)
-                VertexOffset[i] -= header.RuntimeSize;
+                VertexOffset[i] -= dataOffset;
 
             if (IndexOffset[i] > 0)
-                IndexOffset[i] -= header.RuntimeSize;
+                IndexOffset[i] -= dataOffset;
         }
 
         VertexDeclarations = new MdlStructs.VertexDeclarationStruct[header.VertexDeclarationCount];

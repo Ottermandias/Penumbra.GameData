@@ -35,19 +35,19 @@ public partial class MdlFile
         return ret;
     }
 
-    private void WriteModelFileHeader(BinaryWriter w, uint runtimeSize)
+    private void WriteModelFileHeader(BinaryWriter w, uint totalSize)
     {
         w.Write(Version);
         w.Write(StackSize);
-        w.Write(runtimeSize);
+        w.Write(totalSize - StackSize - FileHeaderSize);
         w.Write((ushort)VertexDeclarations.Length);
         w.Write((ushort)Materials.Length);
-        w.Write(VertexOffset[0] > 0 ? VertexOffset[0] + runtimeSize : 0u);
-        w.Write(VertexOffset[1] > 0 ? VertexOffset[1] + runtimeSize : 0u);
-        w.Write(VertexOffset[2] > 0 ? VertexOffset[2] + runtimeSize : 0u);
-        w.Write(IndexOffset[0] > 0 ? IndexOffset[0] + runtimeSize : 0u);
-        w.Write(IndexOffset[1] > 0 ? IndexOffset[1] + runtimeSize : 0u);
-        w.Write(IndexOffset[2] > 0 ? IndexOffset[2] + runtimeSize : 0u);
+        w.Write(VertexOffset[0] > 0 ? VertexOffset[0] + totalSize : 0u);
+        w.Write(VertexOffset[1] > 0 ? VertexOffset[1] + totalSize : 0u);
+        w.Write(VertexOffset[2] > 0 ? VertexOffset[2] + totalSize : 0u);
+        w.Write(IndexOffset[0] > 0 ? IndexOffset[0] + totalSize : 0u);
+        w.Write(IndexOffset[1] > 0 ? IndexOffset[1] + totalSize : 0u);
+        w.Write(IndexOffset[2] > 0 ? IndexOffset[2] + totalSize : 0u);
         w.Write(VertexBufferSize[0]);
         w.Write(VertexBufferSize[1]);
         w.Write(VertexBufferSize[2]);
@@ -266,13 +266,12 @@ public partial class MdlFile
             foreach (var box in BoneBoundingBoxes)
                 Write(w, box);
 
-            var totalSize   = w.BaseStream.Position;
-            var runtimeSize = (uint)(totalSize - StackSize - FileHeaderSize);
+            var totalSize = w.BaseStream.Position;
             w.Write(RemainingData);
 
             // Write header data.
             w.Seek(0, SeekOrigin.Begin);
-            WriteModelFileHeader(w, runtimeSize);
+            WriteModelFileHeader(w, (uint)totalSize);
         }
 
         return stream.ToArray();
