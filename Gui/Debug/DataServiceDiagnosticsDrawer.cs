@@ -3,7 +3,6 @@ using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using OtterGui;
 using OtterGui.Services;
-using ImGuiClip = OtterGui.ImGuiClip;
 
 namespace Penumbra.GameData.Gui.Debug;
 
@@ -57,7 +56,7 @@ public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDra
             }
             else
             {
-                ImGuiUtil.DrawTableColumn($"{c.Time / 1000}.{c.Time % 1000:D4} s");
+                ImGuiUtil.DrawTableColumn($"{c.Time / 1000}.{c.Time % 1000:D3} s");
                 ImGuiUtil.DrawTableColumn(c.TotalCount.ToString());
                 ImGuiUtil.DrawTableColumn(Functions.HumanReadableSize(c.Memory));
             }
