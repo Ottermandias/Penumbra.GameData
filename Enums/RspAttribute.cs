@@ -1,5 +1,6 @@
 namespace Penumbra.GameData.Enums;
 
+/// <summary> All available racial scaling parameters. </summary>
 public enum RspAttribute : byte
 {
     MaleMinSize,
@@ -21,9 +22,9 @@ public enum RspAttribute : byte
 
 public static class RspAttributeExtensions
 {
+    /// <summary> For which gender a certain racial scaling parameter is available. </summary>
     public static Gender ToGender(this RspAttribute attribute)
-    {
-        return attribute switch
+        => attribute switch
         {
             RspAttribute.MaleMinSize   => Gender.Male,
             RspAttribute.MaleMaxSize   => Gender.Male,
@@ -41,33 +42,10 @@ public static class RspAttributeExtensions
             RspAttribute.BustMaxZ      => Gender.Female,
             _                          => Gender.Unknown,
         };
-    }
 
-    public static string ToUngenderedString(this RspAttribute attribute)
-    {
-        return attribute switch
-        {
-            RspAttribute.MaleMinSize   => "MinSize",
-            RspAttribute.MaleMaxSize   => "MaxSize",
-            RspAttribute.MaleMinTail   => "MinTail",
-            RspAttribute.MaleMaxTail   => "MaxTail",
-            RspAttribute.FemaleMinSize => "MinSize",
-            RspAttribute.FemaleMaxSize => "MaxSize",
-            RspAttribute.FemaleMinTail => "MinTail",
-            RspAttribute.FemaleMaxTail => "MaxTail",
-            RspAttribute.BustMinX      => "BustMinX",
-            RspAttribute.BustMinY      => "BustMinY",
-            RspAttribute.BustMinZ      => "BustMinZ",
-            RspAttribute.BustMaxX      => "BustMaxX",
-            RspAttribute.BustMaxY      => "BustMaxY",
-            RspAttribute.BustMaxZ      => "BustMaxZ",
-            _                          => "",
-        };
-    }
-
+    /// <summary> Human-readable names for all racial scaling parameters. </summary>
     public static string ToFullString(this RspAttribute attribute)
-    {
-        return attribute switch
+        => attribute switch
         {
             RspAttribute.MaleMinSize   => "Male Minimum Size",
             RspAttribute.MaleMaxSize   => "Male Maximum Size",
@@ -85,5 +63,4 @@ public static class RspAttributeExtensions
             RspAttribute.FemaleMaxTail => "Female Maximum Tail Length",
             _                          => throw new InvalidEnumArgumentException(),
         };
-    }
 }

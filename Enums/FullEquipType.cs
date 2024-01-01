@@ -2,6 +2,7 @@ using Lumina.Excel.GeneratedSheets;
 
 namespace Penumbra.GameData.Enums;
 
+/// <summary> A full equipment type representing any type of equipment a character can wear. </summary>
 public enum FullEquipType : byte
 {
     Unknown,
@@ -73,9 +74,7 @@ public enum FullEquipType : byte
 
 public static class FullEquipTypeExtensions
 {
-    public const int NumWeaponTypes  = 50;
-    public const int WeaponTypesOffset = 10;
-
+    /// <summary> Obtain the FullEquipType of an item. </summary>
     internal static FullEquipType ToEquipType(this Item item)
     {
         var slot   = (EquipSlot)item.EquipSlotCategory.Row;
@@ -83,6 +82,7 @@ public static class FullEquipTypeExtensions
         return slot.ToEquipType(weapon);
     }
 
+    /// <summary> Return whether a FullEquipType is a primary weapon type. </summary>
     public static bool IsWeapon(this FullEquipType type)
         => type switch
         {
@@ -109,6 +109,7 @@ public static class FullEquipTypeExtensions
             _                        => false,
         };
 
+    /// <summary> Return whether a FullEquipType is a primary or secondary tool. </summary>
     public static bool IsTool(this FullEquipType type)
         => type switch
         {
@@ -137,6 +138,7 @@ public static class FullEquipTypeExtensions
             _                             => false,
         };
 
+    /// <summary> Return whether a FullEquipType is a piece of primary equipment. </summary>
     public static bool IsEquipment(this FullEquipType type)
         => type switch
         {
@@ -148,6 +150,7 @@ public static class FullEquipTypeExtensions
             _                   => false,
         };
 
+    /// <summary> Return whether a FullEquipType is a piece of secondary equipment. </summary>
     public static bool IsAccessory(this FullEquipType type)
         => type switch
         {
@@ -158,6 +161,7 @@ public static class FullEquipTypeExtensions
             _                    => false,
         };
 
+    /// <summary> Obtain a human-readable name for a FullEquipType. </summary>
     public static string ToName(this FullEquipType type)
         => type switch
         {
@@ -223,6 +227,7 @@ public static class FullEquipTypeExtensions
             _                             => "Unknown",
         };
 
+    /// <summary> Return the actual equipment slot a FullEquipType will be equipped to. </summary>
     public static EquipSlot ToSlot(this FullEquipType type)
         => type switch
         {
@@ -288,6 +293,10 @@ public static class FullEquipTypeExtensions
             _                             => EquipSlot.Unknown,
         };
 
+    /// <summary> Convert an EquipSlot and a weapon category to a FullEquipType. </summary>
+    /// <param name="slot"> The slot to convert. </param>
+    /// <param name="category"> The weapon category to use if the slot is mainhand or offhand. </param>
+    /// <param name="mainhand"> Whether to use the mainhand or offhand type of weapon. </param>
     public static FullEquipType ToEquipType(this EquipSlot slot, WeaponCategory category = WeaponCategory.Unknown, bool mainhand = true)
         => slot switch
         {
@@ -314,6 +323,9 @@ public static class FullEquipTypeExtensions
             _                           => FullEquipType.Unknown,
         };
 
+    /// <summary> Convert a weapon category to a FullEquipType. </summary>
+    /// <param name="category"> The category to convert. </param>
+    /// <param name="mainhand"> Whether to use the mainhand or offhand type of weapon. </param>
     public static FullEquipType ToEquipType(this WeaponCategory category, bool mainhand = true)
         => category switch
         {
@@ -373,6 +385,7 @@ public static class FullEquipTypeExtensions
             _                                        => FullEquipType.Unknown,
         };
 
+    /// <summary> Obtain the correct offhand FullEquipType for a Mainhand FullEquipType, excluding tools. </summary>
     public static FullEquipType ValidOffhand(this FullEquipType type)
         => type switch
         {
@@ -389,6 +402,7 @@ public static class FullEquipTypeExtensions
             _                     => FullEquipType.Unknown,
         };
 
+    /// <summary> Obtain the correct offhand FullEquipType for a Mainhand FullEquipType, including tools. </summary>
     public static FullEquipType Offhand(this FullEquipType type)
         => type switch
         {
@@ -416,6 +430,7 @@ public static class FullEquipTypeExtensions
             _                             => FullEquipType.Unknown,
         };
 
+    /// <summary> Whether an Offhand FullEquipType allows putting Nothing into the Offhand slot. </summary>
     public static bool AllowsNothing(this FullEquipType type)
         => type switch
         {
@@ -437,6 +452,7 @@ public static class FullEquipTypeExtensions
             _                       => false,
         };
 
+    /// <summary> The human-readable suffix for inferred offhand types. </summary>
     internal static string OffhandTypeSuffix(this FullEquipType type)
         => type switch
         {
@@ -451,21 +467,27 @@ public static class FullEquipTypeExtensions
             _                        => string.Empty,
         };
 
+    /// <summary> Whether a FullEquipType is an inferred offhand type. </summary>
     public static bool IsOffhandType(this FullEquipType type)
         => type.OffhandTypeSuffix().Length > 0;
 
+    /// <summary> A list of all weapon types. </summary>
     public static readonly IReadOnlyList<FullEquipType> WeaponTypes
         = Enum.GetValues<FullEquipType>().Where(v => v.IsWeapon()).ToArray();
 
+    /// <summary> A list of all tool types, including offhands. </summary>
     public static readonly IReadOnlyList<FullEquipType> ToolTypes
         = Enum.GetValues<FullEquipType>().Where(v => v.IsTool()).ToArray();
 
+    /// <summary> A list of all equipment types. </summary>
     public static readonly IReadOnlyList<FullEquipType> EquipmentTypes
         = Enum.GetValues<FullEquipType>().Where(v => v.IsEquipment()).ToArray();
 
+    /// <summary> A list of all accessory types. </summary>
     public static readonly IReadOnlyList<FullEquipType> AccessoryTypes
         = Enum.GetValues<FullEquipType>().Where(v => v.IsAccessory()).ToArray();
 
+    /// <summary> A list of all inferred offhand types. </summary>
     public static readonly IReadOnlyList<FullEquipType> OffhandTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.OffhandTypeSuffix().Length > 0).ToArray();
+        = Enum.GetValues<FullEquipType>().Where(IsOffhandType).ToArray();
 }

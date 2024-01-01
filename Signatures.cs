@@ -1,5 +1,6 @@
 namespace Penumbra.GameData;
 
+/// <summary> Signatures in use for Penumbra. </summary>
 public static class Sigs
 {
     // ResourceLoader.Debug
@@ -32,6 +33,11 @@ public static class Sigs
     public const string LoadCharacterVfx           = "E8 ?? ?? ?? ?? 48 8B F8 48 8D 93";
     public const string LoadAreaVfx                = "48 8B C4 53 55 56 57 41 56 48 81 EC";
     public const string ScheduleClipUpdate         = "40 53 55 56 57 41 56 48 81 EC ?? ?? ?? ?? 48 8B F9";
+    public const string UnkMountAnimation          = "48 89 5C 24 ?? 48 89 6C 24 ?? 89 54 24";
+    public const string UnkParasolAnimation        = "48 89 5C 24 ?? 48 89 74 24 ?? 89 54 24 ?? 57 48 83 EC ?? 48 8B F9";
+    public const string Dismount                   = "E8 ?? ?? ?? ?? F6 43 ?? ?? 74 ?? 48 8B CB";
+    public const string ApricotListenerSoundPlay   = "48 89 6C 24 ?? 41 54 41 56 41 57 48 81 EC";
+    public const string FootStepSound              = "44 89 44 24 ?? 89 54 24 ?? 53 55 57";
 
     // PathResolver.DrawObjectState
     public const string EnableDraw   = "E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 33 45 33 C0";
@@ -69,14 +75,17 @@ public static class Sigs
 
     // ResidentResourceManager
     public const string ResidentResourceManager = "0F 44 FE 48 8B 0D ?? ?? ?? ?? 48 85 C9 74 05";
-
     public const string LoadPlayerResources =
         "E8 ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 48 8B 48 30 48 8B 01 FF 50 10 48 85 C0 74 0A";
-
     public const string UnloadPlayerResources =
         "41 55 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 4C 8B E9 48 83 C1 08";
 
-    // ActorManager
-    public const string InspectTitleId = "0F B7 0D ?? ?? ?? ?? C7 85";
-    public const string InspectWorldId = "0F B7 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B D0";
+    // ModelResourceHandleUtility
+    public const string GetMaterialFileNameBySlot = "E8 ?? ?? ?? ?? 44 8B CD 48 89 44 24";
+
+    // Job service
+    public const string ChangeJob         = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 80 61";
+
+    // Flag Slot for Update service
+    public const string FlagSlotForUpdate = "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 8B DA 49 8B F0 48 8B F9 83 FA 0A";
 }

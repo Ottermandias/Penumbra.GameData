@@ -1,4 +1,5 @@
 using Lumina.Data.Parsing;
+using OtterGui;
 using Penumbra.GameData.Data;
 
 namespace Penumbra.GameData.Files;
@@ -75,7 +76,7 @@ public partial class MtrlFile
         => ref GetOrAddSampler(id, defaultTexture, out _);
 
     public int FindShaderKey(uint category)
-        => UtilityFunctions.IndexOf(ShaderPackage.ShaderKeys, c => c.Category == category);
+        => ShaderPackage.ShaderKeys.IndexOf(c => c.Category == category);
 
     public ShaderKey? GetShaderKey(uint category, out int i)
     {

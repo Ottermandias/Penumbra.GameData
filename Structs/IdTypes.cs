@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Penumbra.GameData.Actors;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;
@@ -25,60 +24,60 @@ public readonly record struct ModelCharaId(uint Id)
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct BnpcId(uint Id)
+public readonly record struct BNpcId(uint Id)
 {
-    public static implicit operator BnpcId(uint id)
+    public static implicit operator BNpcId(uint id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    private class Converter : JsonConverter<BnpcId>
+    private class Converter : JsonConverter<BNpcId>
     {
-        public override void WriteJson(JsonWriter writer, BnpcId value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, BNpcId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override BnpcId ReadJson(JsonReader reader, Type objectType, BnpcId existingValue, bool hasExistingValue,
+        public override BNpcId ReadJson(JsonReader reader, Type objectType, BNpcId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<uint>(reader);
     }
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct EnpcId(uint Id)
+public readonly record struct ENpcId(uint Id)
 {
-    public static implicit operator EnpcId(uint id)
+    public static implicit operator ENpcId(uint id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    private class Converter : JsonConverter<EnpcId>
+    private class Converter : JsonConverter<ENpcId>
     {
-        public override void WriteJson(JsonWriter writer, EnpcId value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, ENpcId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override EnpcId ReadJson(JsonReader reader, Type objectType, EnpcId existingValue, bool hasExistingValue,
+        public override ENpcId ReadJson(JsonReader reader, Type objectType, ENpcId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<uint>(reader);
     }
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct BnpcNameId(uint Id)
+public readonly record struct BNpcNameId(uint Id)
 {
-    public static implicit operator BnpcNameId(uint id)
+    public static implicit operator BNpcNameId(uint id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    private class Converter : JsonConverter<BnpcNameId>
+    private class Converter : JsonConverter<BNpcNameId>
     {
-        public override void WriteJson(JsonWriter writer, BnpcNameId value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, BNpcNameId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override BnpcNameId ReadJson(JsonReader reader, Type objectType, BnpcNameId existingValue, bool hasExistingValue,
+        public override BNpcNameId ReadJson(JsonReader reader, Type objectType, BNpcNameId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<uint>(reader);
     }
@@ -150,10 +149,10 @@ public readonly record struct NpcId(uint Id)
     public static implicit operator NpcId(uint id)
         => new(id);
 
-    public static implicit operator NpcId(EnpcId id)
+    public static implicit operator NpcId(ENpcId id)
         => new(id.Id);
 
-    public static implicit operator NpcId(BnpcNameId id)
+    public static implicit operator NpcId(BNpcNameId id)
         => new(id.Id);
 
     public static implicit operator NpcId(MountId id)
@@ -165,10 +164,10 @@ public readonly record struct NpcId(uint Id)
     public static implicit operator NpcId(OrnamentId id)
         => new(id.Id);
 
-    public EnpcId EnpcId
+    public ENpcId ENpcId
         => new(Id);
 
-    public BnpcNameId BnpcNameId
+    public BNpcNameId BNpcNameId
         => new(Id);
 
     public MountId MountId
@@ -195,52 +194,52 @@ public readonly record struct NpcId(uint Id)
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct WeaponType(ushort Id)
+public readonly record struct SecondaryId(ushort Id)
 {
-    public static implicit operator WeaponType(ushort id)
+    public static implicit operator SecondaryId(ushort id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    private class Converter : JsonConverter<WeaponType>
+    private class Converter : JsonConverter<SecondaryId>
     {
-        public override void WriteJson(JsonWriter writer, WeaponType value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, SecondaryId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override WeaponType ReadJson(JsonReader reader, Type objectType, WeaponType existingValue, bool hasExistingValue,
+        public override SecondaryId ReadJson(JsonReader reader, Type objectType, SecondaryId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<ushort>(reader);
     }
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct SetId(ushort Id) : IComparisonOperators<SetId, SetId, bool>
+public readonly record struct PrimaryId(ushort Id) : IComparisonOperators<PrimaryId, PrimaryId, bool>
 {
-    public static implicit operator SetId(ushort id)
+    public static implicit operator PrimaryId(ushort id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    public static bool operator >(SetId left, SetId right)
+    public static bool operator >(PrimaryId left, PrimaryId right)
         => left.Id > right.Id;
 
-    public static bool operator >=(SetId left, SetId right)
+    public static bool operator >=(PrimaryId left, PrimaryId right)
         => left.Id >= right.Id;
 
-    public static bool operator <(SetId left, SetId right)
+    public static bool operator <(PrimaryId left, PrimaryId right)
         => left.Id < right.Id;
 
-    public static bool operator <=(SetId left, SetId right)
+    public static bool operator <=(PrimaryId left, PrimaryId right)
         => left.Id <= right.Id;
 
-    private class Converter : JsonConverter<SetId>
+    private class Converter : JsonConverter<PrimaryId>
     {
-        public override void WriteJson(JsonWriter writer, SetId value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, PrimaryId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override SetId ReadJson(JsonReader reader, Type objectType, SetId existingValue, bool hasExistingValue,
+        public override PrimaryId ReadJson(JsonReader reader, Type objectType, PrimaryId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<ushort>(reader);
     }
@@ -337,11 +336,11 @@ public readonly record struct CustomItemId(ulong Id) : IComparisonOperators<Cust
     public ItemId Item
         => IsItem ? (ItemId)Id : 0;
 
-    public (SetId Model, WeaponType WeaponType, Variant Variant, FullEquipType Type) Split
-        => IsItem ? (0, 0, 0, FullEquipType.Unknown) : ((SetId)Id, (WeaponType)(Id >> 16), (Variant)(Id >> 32), (FullEquipType)(Id >> 40));
+    public (PrimaryId Model, SecondaryId WeaponType, Variant Variant, FullEquipType Type) Split
+        => IsItem ? (0, 0, 0, FullEquipType.Unknown) : ((PrimaryId)Id, (SecondaryId)(Id >> 16), (Variant)(Id >> 32), (FullEquipType)(Id >> 40));
 
-    public CustomItemId(SetId model, WeaponType weaponType, Variant variant, FullEquipType type)
-        : this(model.Id | ((ulong)weaponType.Id << 16) | ((ulong)variant.Id << 32) | ((ulong)type << 40) | CustomFlag)
+    public CustomItemId(PrimaryId model, SecondaryId secondaryId, Variant variant, FullEquipType type)
+        : this(model.Id | ((ulong)secondaryId.Id << 16) | ((ulong)variant.Id << 32) | ((ulong)type << 40) | CustomFlag)
     { }
 
     public static implicit operator CustomItemId(ItemId id)
@@ -415,6 +414,26 @@ public readonly record struct WorldId(ushort Id)
         public override WorldId ReadJson(JsonReader reader, Type objectType, WorldId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<ushort>(reader);
+    }
+}
+
+[JsonConverter(typeof(Converter))]
+public readonly record struct JobId(byte Id)
+{
+    public static implicit operator JobId(byte value)
+        => new(value);
+
+    public override string ToString()
+        => Id.ToString();
+
+    private class Converter : JsonConverter<JobId>
+    {
+        public override void WriteJson(JsonWriter writer, JobId value, JsonSerializer serializer)
+            => serializer.Serialize(writer, value.Id);
+
+        public override JobId ReadJson(JsonReader reader, Type objectType, JobId existingValue, bool hasExistingValue,
+            JsonSerializer serializer)
+            => serializer.Deserialize<byte>(reader);
     }
 }
 
@@ -504,3 +523,4 @@ public readonly record struct ObjectIndex(ushort Index) : IComparisonOperators<O
             => serializer.Deserialize<ushort>(reader);
     }
 }
+

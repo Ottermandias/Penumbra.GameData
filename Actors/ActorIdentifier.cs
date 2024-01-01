@@ -1,17 +1,18 @@
 using Dalamud.Game.ClientState.Objects.Enums;
-using Newtonsoft.Json.Linq;
+using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using Penumbra.String;
 
 namespace Penumbra.GameData.Actors;
 
+/// <summary> A unique identifier for any kind of useful game actor. </summary>
 [StructLayout(LayoutKind.Explicit)]
 public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
 {
-    public static ActorManager? Manager;
-
+    /// <summary> Invalid actors return this. </summary>
     public static readonly ActorIdentifier Invalid = new(IdentifierType.Invalid, 0, WorldId.AnyWorld, 0, ByteString.Empty);
 
+    /// <summary> Retainers can be Bell-spawned or Mannequins, or both. </summary>
     public enum RetainerType : ushort
     {
         Both      = 0,
@@ -29,12 +30,15 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
     [FieldOffset( 8 )] public readonly ByteString     PlayerName; // Player, Owned
     // @formatter:on
 
+    /// <summary> Create a copy that ensures that the byte string in the identifier is owned. </summary>
     public ActorIdentifier CreatePermanent()
         => new(Type, Kind, Index, DataId, PlayerName.IsEmpty || PlayerName.IsOwned ? PlayerName : PlayerName.Clone());
 
+    /// <summary> Obtain the index as ScreenActor. </summary>
     public ScreenActor Special
         => (ScreenActor)Index.Index;
 
+    /// <summary> Compare two ActorIdentifiers for equality. </summary>
     public bool Equals(ActorIdentifier other)
     {
         if (Type != other.Type)
@@ -45,15 +49,18 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
             IdentifierType.Player => HomeWorld == other.HomeWorld && PlayerName.EqualsCi(other.PlayerName),
             IdentifierType.Retainer => (Retainer == other.Retainer || Retainer == RetainerType.Both || other.Retainer == RetainerType.Both)
              && PlayerName.EqualsCi(other.PlayerName),
-            IdentifierType.Owned => HomeWorld == other.HomeWorld && PlayerName.EqualsCi(other.PlayerName) && Manager.DataIdEquals(this, other),
+            IdentifierType.Owned => HomeWorld == other.HomeWorld
+             && PlayerName.EqualsCi(other.PlayerName)
+             && ActorIdentifierExtensions.Manager.DataIdEquals(this, other),
             IdentifierType.Special => Index == other.Index,
-            IdentifierType.Npc => Manager.DataIdEquals(this, other)
+            IdentifierType.Npc => ActorIdentifierExtensions.Manager.DataIdEquals(this, other)
              && (Index == other.Index || Index == ushort.MaxValue || other.Index == ushort.MaxValue),
             IdentifierType.UnkObject => PlayerName.EqualsCi(other.PlayerName) && Index == other.Index,
             _                        => false,
         };
     }
 
+    /// <inheritdoc/>
     public override bool Equals(object? obj)
         => obj is ActorIdentifier other && Equals(other);
 
@@ -63,9 +70,12 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
     public static bool operator !=(ActorIdentifier lhs, ActorIdentifier rhs)
         => !lhs.Equals(rhs);
 
+    /// <summary> Identifiers for unknown objects are not valid. </summary>
     public bool IsValid
         => Type is not (IdentifierType.UnkObject or IdentifierType.Invalid);
 
+    /// <summary> Obtain an incognito name from an identifier, meaning that player names are reduced to initials. </summary>
+    /// <param name="name"> If the full string was already constructed, use this instead of calling ToString again. </param>
     public string Incognito(string? name)
     {
         name ??= ToString();
@@ -86,12 +96,14 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                 var parts = name.Split(' ', 2);
                 return $"{parts[0][0]}. {parts[1]}";
             }
-            default: return name;
         }
+        return name;
     }
 
+    /// <summary> Convert an identifier to a human-readable string. </summary>
+    /// <remarks> This uses the statically set actor manager if it is available, to obtain even better names. </remarks>
     public override string ToString()
-        => Manager?.ToString(this)
+        => ActorIdentifierExtensions.Manager?.ToString(this)
          ?? Type switch
             {
                 IdentifierType.Player => $"{PlayerName} ({HomeWorld})",
@@ -114,9 +126,12 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                 _ => "Invalid",
             };
 
+    /// <summary> Obtain only the name of the actor identified. </summary>
+    /// <remarks> This uses the statically set actor manager if it is available to obtain the name. </remarks>
     public string ToName()
-        => Manager?.ToName(this) ?? "Unknown Object";
+        => ActorIdentifierExtensions.Manager?.ToName(this) ?? "Unknown Object";
 
+    /// <inheritdoc/>
     public override int GetHashCode()
         => Type switch
         {
@@ -129,6 +144,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
             _                        => 0,
         };
 
+    /// <summary> Constructor using an index. </summary>
     internal ActorIdentifier(IdentifierType type, ObjectKind kind, ObjectIndex index, NpcId data, ByteString playerName)
     {
         Type       = type;
@@ -140,6 +156,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         PlayerName = playerName;
     }
 
+    /// <summary> Constructor using a world id. </summary>
     internal ActorIdentifier(IdentifierType type, ObjectKind kind, WorldId worldId, NpcId data, ByteString playerName)
     {
         Type       = type;
@@ -151,6 +168,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         PlayerName = playerName;
     }
 
+    /// <summary> Constructor using a retainer type. </summary>
     internal ActorIdentifier(IdentifierType type, ObjectKind kind, RetainerType retainerType, NpcId data, ByteString playerName)
     {
         Type       = type;
@@ -161,108 +179,4 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         DataId     = data;
         PlayerName = playerName;
     }
-
-    public JObject ToJson()
-    {
-        var ret = new JObject { { nameof(Type), Type.ToString() } };
-        switch (Type)
-        {
-            case IdentifierType.Player:
-                ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(HomeWorld),  HomeWorld.Id);
-                return ret;
-            case IdentifierType.Retainer:
-                ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(Retainer),   Retainer.ToString());
-                return ret;
-            case IdentifierType.Owned:
-                ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(HomeWorld),  HomeWorld.Id);
-                ret.Add(nameof(Kind),       Kind.ToString());
-                ret.Add(nameof(DataId),     DataId.Id);
-                return ret;
-            case IdentifierType.Special:
-                ret.Add("Special", ((ScreenActor)Index.Index).ToString());
-                return ret;
-            case IdentifierType.Npc:
-                ret.Add(nameof(Kind), Kind.ToString());
-                if (Index != ushort.MaxValue)
-                    ret.Add(nameof(Index), Index.Index);
-                ret.Add(nameof(DataId), DataId.Id);
-                return ret;
-            case IdentifierType.UnkObject:
-                ret.Add(nameof(PlayerName), PlayerName.ToString());
-                ret.Add(nameof(Index),      Index.Index);
-                return ret;
-        }
-
-        return ret;
-    }
-}
-
-public static class ActorManagerExtensions
-{
-    public static bool DataIdEquals(this ActorManager? manager, ActorIdentifier lhs, ActorIdentifier rhs)
-    {
-        if (lhs.Kind != rhs.Kind)
-            return false;
-
-        if (lhs.DataId == rhs.DataId)
-            return true;
-
-        if (manager == null)
-            return lhs.Kind == rhs.Kind && lhs.DataId == rhs.DataId || lhs.DataId == uint.MaxValue || rhs.DataId == uint.MaxValue;
-
-        var dict = lhs.Kind switch
-        {
-            ObjectKind.MountType => manager.Data.Mounts,
-            ObjectKind.Companion => manager.Data.Companions,
-            ObjectKind.Ornament  => manager.Data.Ornaments,
-            ObjectKind.BattleNpc => manager.Data.BNpcs,
-            ObjectKind.EventNpc  => manager.Data.ENpcs,
-            _                    => new Dictionary<uint, string>(),
-        };
-
-        return dict.TryGetValue(lhs.DataId.Id, out var lhsName)
-         && dict.TryGetValue(rhs.DataId.Id,    out var rhsName)
-         && lhsName.Equals(rhsName, StringComparison.OrdinalIgnoreCase);
-    }
-
-    public static string ToName(this ObjectKind kind)
-        => kind switch
-        {
-            ObjectKind.None      => "Unknown",
-            ObjectKind.BattleNpc => "Battle NPC",
-            ObjectKind.EventNpc  => "Event NPC",
-            ObjectKind.MountType => "Mount",
-            ObjectKind.Companion => "Companion",
-            ObjectKind.Ornament  => "Accessory",
-            _                    => kind.ToString(),
-        };
-
-    public static string ToName(this IdentifierType type)
-        => type switch
-        {
-            IdentifierType.Player    => "Player",
-            IdentifierType.Retainer  => "Retainer (Bell)",
-            IdentifierType.Owned     => "Owned NPC",
-            IdentifierType.Special   => "Special Actor",
-            IdentifierType.Npc       => "NPC",
-            IdentifierType.UnkObject => "Unknown Object",
-            _                        => "Invalid",
-        };
-
-    /// <summary>
-    /// Fixed names for special actors.
-    /// </summary>
-    public static string ToName(this ScreenActor actor)
-        => actor switch
-        {
-            ScreenActor.CharacterScreen => "Character Screen Actor",
-            ScreenActor.ExamineScreen   => "Examine Screen Actor",
-            ScreenActor.FittingRoom     => "Fitting Room Actor",
-            ScreenActor.DyePreview      => "Dye Preview Actor",
-            ScreenActor.Portrait        => "Portrait Actor",
-            _                           => "Invalid",
-        };
 }

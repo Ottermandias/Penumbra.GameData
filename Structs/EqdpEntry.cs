@@ -2,6 +2,7 @@ using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;
 
+/// <summary> Equipment Deformer Parameters contain information on which races have custom files for models and materials for a given primary ID. </summary>
 [Flags]
 public enum EqdpEntry : ushort
 {
@@ -49,6 +50,7 @@ public enum EqdpEntry : ushort
 
 public static class Eqdp
 {
+    /// <summary> Get the bit offset for a given slot. </summary>
     public static int Offset(EquipSlot slot)
         => slot switch
         {
@@ -65,6 +67,7 @@ public static class Eqdp
             _                 => throw new InvalidEnumArgumentException(),
         };
 
+    /// <summary> Get the first and second bool for a given slot from an entry. </summary>
     public static (bool, bool) ToBits(this EqdpEntry entry, EquipSlot slot)
         => slot switch
         {
@@ -81,6 +84,7 @@ public static class Eqdp
             _                 => throw new InvalidEnumArgumentException(),
         };
 
+    /// <summary> Create an entry from a slot and its two bools. </summary>
     public static EqdpEntry FromSlotAndBits(EquipSlot slot, bool bit1, bool bit2)
     {
         EqdpEntry ret    = 0;
@@ -94,6 +98,7 @@ public static class Eqdp
         return ret;
     }
 
+    /// <summary> Get the mask for a given slot. </summary>
     public static EqdpEntry Mask(EquipSlot slot)
     {
         return slot switch

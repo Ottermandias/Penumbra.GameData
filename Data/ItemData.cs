@@ -1,159 +1,47 @@
-using Dalamud;
-using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using OtterGui.Services;
+using Penumbra.GameData.DataContainers;
+using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
-using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, uint>;
 
 namespace Penumbra.GameData.Data;
 
-public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IReadOnlyList<EquipItem>>
+/// <summary> A service wrapper around all basic EquipItem dictionaries. </summary>
+public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, ItemsSecondaryModel _secondary, ItemsTertiaryModel _tertiary)
+    : IAsyncService
 {
-    private readonly IReadOnlyDictionary<uint, PseudoEquipItem>    _mainItems;
-    private readonly IReadOnlyDictionary<uint, PseudoEquipItem>    _offItems;
-    private readonly IReadOnlyDictionary<uint, PseudoEquipItem>    _gauntlets;
-    private readonly IReadOnlyList<IReadOnlyList<PseudoEquipItem>> _byType;
+    /// <summary> Item lists ordered by type. </summary>
+    public readonly ItemsByType ByType = _byType;
 
-    private static IReadOnlyList<IReadOnlyList<PseudoEquipItem>> CreateItems(IDataManager dataManager, ClientLanguage language)
-    {
-        var tmp = Enum.GetValues<FullEquipType>().Select(_ => new List<EquipItem>(1024)).ToArray();
+    /// <summary> Primary models of all items. </summary>
+    public readonly ItemsPrimaryModel Primary = _primary;
 
-        var itemSheet = dataManager.GetExcelSheet<Item>(language)!;
-        foreach (var item in itemSheet.Where(i => i.Name.RawData.Length > 1))
-        {
-            var type = item.ToEquipType();
-            if (type.IsWeapon() || type.IsTool())
-            {
-                var mh = EquipItem.FromMainhand(item);
-                if (item.ModelMain != 0)
-                    tmp[(int)type].Add(mh);
-                if (item.ModelSub != 0)
-                {
-                    if (type is FullEquipType.Fists && item.ModelSub < 0x100000000)
-                    {
-                        tmp[(int)FullEquipType.Hands].Add(new EquipItem(mh.Name + " (Gauntlets)", mh.Id, mh.IconId, (SetId)item.ModelSub, 0,
-                            (byte)(item.ModelSub >> 16), FullEquipType.Hands, mh.Flags, mh.Level, mh.JobRestrictions));
-                        tmp[(int)FullEquipType.FistsOff].Add(new EquipItem(mh.Name + FullEquipType.FistsOff.OffhandTypeSuffix(), mh.Id,
-                            mh.IconId, (SetId)(mh.ModelId.Id + 50), mh.WeaponType, mh.Variant, FullEquipType.FistsOff, mh.Flags, mh.Level,
-                            mh.JobRestrictions));
-                    }
-                    else
-                    {
-                        tmp[(int)type.ValidOffhand()].Add(EquipItem.FromOffhand(item));
-                    }
-                }
-            }
-            else if (type != FullEquipType.Unknown)
-            {
-                tmp[(int)type].Add(EquipItem.FromArmor(item));
-            }
-        }
+    /// <summary> Secondary models of all items. </summary>
+    public readonly ItemsSecondaryModel Secondary = _secondary;
 
-        var ret = new IReadOnlyList<PseudoEquipItem>[tmp.Length];
-        ret[0] = Array.Empty<PseudoEquipItem>();
-        for (var i = 1; i < tmp.Length; ++i)
-            ret[i] = tmp[i].OrderBy(item => item.Name).Select(s => (PseudoEquipItem)s).ToArray();
+    /// <summary> Tertiary models of all items. Currently only gloves for certain fist weapons. </summary>
+    public readonly ItemsTertiaryModel Tertiary = _tertiary;
 
-        return ret;
-    }
+    /// <summary> Finished when all item dictionaries are finished. </summary>
+    public Task Awaiter { get; } = Task.WhenAll(_byType.Awaiter, _primary.Awaiter, _secondary.Awaiter, _tertiary.Awaiter);
 
-    private static Tuple<IReadOnlyDictionary<uint, PseudoEquipItem>, IReadOnlyDictionary<uint, PseudoEquipItem>> CreateMainItems(
-        IReadOnlyList<IReadOnlyList<PseudoEquipItem>> items)
-    {
-        var dict = new Dictionary<uint, PseudoEquipItem>(1024 * 4);
-        foreach (var fistWeapon in items[(int)FullEquipType.Fists])
-            dict.TryAdd((uint)fistWeapon.Item2, fistWeapon);
-
-        var gauntlets = items[(int)FullEquipType.Hands].Where(g => dict.ContainsKey((uint)g.Item2)).ToDictionary(g => (uint)g.Item2, g => g);
-        gauntlets.TrimExcess();
-
-        foreach (var type in Enum.GetValues<FullEquipType>().Where(v => !FullEquipTypeExtensions.OffhandTypes.Contains(v)))
-        {
-            var list = items[(int)type];
-            foreach (var item in list)
-                dict.TryAdd((uint)item.Item2, item);
-        }
-
-        dict.TrimExcess();
-        return new Tuple<IReadOnlyDictionary<uint, (string, ulong, ushort, ushort, ushort, byte, uint)>,
-            IReadOnlyDictionary<uint, (string, ulong, ushort, ushort, ushort, byte, uint)>>(dict, gauntlets);
-    }
-
-    private static IReadOnlyDictionary<uint, PseudoEquipItem> CreateOffItems(IReadOnlyList<IReadOnlyList<PseudoEquipItem>> items)
-    {
-        var dict = new Dictionary<uint, PseudoEquipItem>(128);
-        foreach (var type in FullEquipTypeExtensions.OffhandTypes)
-        {
-            var list = items[(int)type];
-            foreach (var item in list)
-                dict.TryAdd((uint)item.Item2, item);
-        }
-
-        dict.TrimExcess();
-        return dict;
-    }
-
-    public ItemData(DalamudPluginInterface pluginInterface, IDataManager dataManager, ClientLanguage language, IPluginLog log)
-        : base(pluginInterface, language, 5, log)
-    {
-        _byType                  = TryCatchData("ItemList",     () => CreateItems(dataManager, language));
-        (_mainItems, _gauntlets) = TryCatchData("ItemDictMain", () => CreateMainItems(_byType));
-        _offItems                = TryCatchData("ItemDictOff",  () => CreateOffItems(_byType));
-    }
-
-    private static readonly IReadOnlyDictionary<SetId, FullEquipType> WeaponTypes = new Dictionary<SetId, FullEquipType>
-    {
-        [101] = FullEquipType.Fists,
-    };
-
-    protected override void DisposeInternal()
-    {
-        DisposeTag("ItemList");
-        DisposeTag("ItemDictMain");
-        DisposeTag("ItemDictOff");
-    }
-
-    public IEnumerator<KeyValuePair<FullEquipType, IReadOnlyList<EquipItem>>> GetEnumerator()
-    {
-        for (var i = 1; i < _byType.Count; ++i)
-            yield return new KeyValuePair<FullEquipType, IReadOnlyList<EquipItem>>((FullEquipType)i, new EquipItemList(_byType[i]));
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-        => GetEnumerator();
-
+    /// <summary> The total number of items. </summary>
     public int Count
-        => _byType.Count - 1;
+        => ByType.TotalCount;
 
-    public bool ContainsKey(FullEquipType key)
-        => (int)key < _byType.Count && key != FullEquipType.Unknown;
-
-    public bool TryGetValue(FullEquipType key, out IReadOnlyList<EquipItem> value)
-    {
-        if (ContainsKey(key))
-        {
-            value = new EquipItemList(_byType[(int)key]);
-            return true;
-        }
-
-        value = Array.Empty<EquipItem>();
-        return false;
-    }
-
-    public IReadOnlyList<EquipItem> this[FullEquipType key]
-        => TryGetValue(key, out var ret) ? ret : throw new IndexOutOfRangeException();
-
+    /// <summary> Iterate through all primary or secondary items. </summary>
     public IEnumerable<(ItemId, EquipItem)> AllItems(bool main)
-        => (main ? _mainItems : _offItems).Select(i => ((ItemId)i.Key, (EquipItem)i.Value));
+        => (main ? (ItemDictionary)Primary : Secondary).Select(i => ((ItemId)i.Key, i.Value));
 
-    public int TotalItemCount(bool main)
-        => main ? _mainItems.Count : _offItems.Count;
-
+    /// <summary> Try to obtain an item by ID and Slot. </summary>
+    /// <param name="key"> The Item ID to search. </param>
+    /// <param name="slot"> The slot, used for secondary or tertiary disambiguation. </param>
+    /// <param name="value"> The returned item if found. </param>
+    /// <returns> Whether an item was found. </returns>
     public bool TryGetValue(ItemId key, EquipSlot slot, out EquipItem value)
     {
-        var dict = slot is EquipSlot.OffHand ? _offItems : _mainItems;
-        if (slot is EquipSlot.Hands && _gauntlets.TryGetValue(key.Id, out var v) || dict.TryGetValue(key.Id, out v))
+        var dict = slot is EquipSlot.OffHand ? (ItemDictionary)Secondary : Primary;
+        if (slot is EquipSlot.Hands && Tertiary.TryGetValue(key.Id, out var v) || dict.TryGetValue(key.Id, out v))
         {
             value = v;
             return true;
@@ -163,34 +51,10 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
         return false;
     }
 
-    public IEnumerable<FullEquipType> Keys
-        => Enum.GetValues<FullEquipType>().Skip(1);
-
-    public IEnumerable<IReadOnlyList<EquipItem>> Values
-        => _byType.Skip(1).Select(l => (IReadOnlyList<EquipItem>)new EquipItemList(l));
-
-    private readonly struct EquipItemList : IReadOnlyList<EquipItem>
-    {
-        private readonly IReadOnlyList<PseudoEquipItem> _items;
-
-        public EquipItemList(IReadOnlyList<PseudoEquipItem> items)
-            => _items = items;
-
-        public IEnumerator<EquipItem> GetEnumerator()
-            => _items.Select(i => (EquipItem)i).GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator()
-            => GetEnumerator();
-
-        public int Count
-            => _items.Count;
-
-        public EquipItem this[int index]
-            => _items[index];
-    }
-
+    /// <summary> A table to convert weapon primary IDs to a full equip type. </summary>
+    /// <remarks> Conversion is [Primary ID]/100 = index, [Primary ID]%100 greater than offset: second type, else first type. </remarks>
     private static readonly (FullEquipType Main, FullEquipType Off, short Offset)[] WeaponIdTable =
-    {
+    [
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Shield, FullEquipType.Unknown, 100),
         (FullEquipType.Sword, FullEquipType.Unknown, 100),
@@ -264,9 +128,10 @@ public sealed class ItemData : DataSharer, IReadOnlyDictionary<FullEquipType, IR
         (FullEquipType.Pickaxe, FullEquipType.Sledgehammer, 50),
         (FullEquipType.Hatchet, FullEquipType.GardenScythe, 50),
         (FullEquipType.FishingRod, FullEquipType.Gig, 50),
-    };
+    ];
 
-    public static FullEquipType ConvertWeaponId(SetId id)
+    /// <summary> Convert a primary weapon ID to its equip type. </summary>
+    public static FullEquipType ConvertWeaponId(PrimaryId id)
     {
         var quotient = Math.DivRem(id.Id - 1, 100, out var remainder);
         if (quotient > WeaponIdTable.Length)

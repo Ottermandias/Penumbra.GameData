@@ -1,5 +1,6 @@
 namespace Penumbra.GameData.Enums;
 
+/// <summary> Types of game objects or identities. </summary>
 public enum ObjectType : byte
 {
     Unknown,
@@ -21,6 +22,7 @@ public enum ObjectType : byte
 
 public static class ObjectTypeExtensions
 {
+    /// <summary> Obtain human-readable names for ObjectType. </summary>
     public static string ToName(this ObjectType type)
         => type switch
         {
@@ -41,13 +43,13 @@ public static class ObjectTypeExtensions
             _                        => "Unknown",
         };
 
-
-    public static readonly ObjectType[] ValidImcTypes =
-    {
+    /// <summary> A list of valid object types for IMC files. </summary>
+    public static readonly IReadOnlyList<ObjectType> ValidImcTypes =
+    [
         ObjectType.Equipment,
         ObjectType.Accessory,
         ObjectType.DemiHuman,
         ObjectType.Monster,
         ObjectType.Weapon,
-    };
+    ];
 }

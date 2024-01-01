@@ -1,5 +1,6 @@
 namespace Penumbra.GameData;
 
+/// <summary> Offsets in game data in use by Penumbra. </summary>
 public static class Offsets
 {
     // ActorManager.Data
@@ -28,8 +29,4 @@ public static class Offsets
     // ObjectReloader
     public const int EnableDrawVfunc  = 16;
     public const int DisableDrawVfunc = 17;
-
-    // ResourceHandle
-    public const int ResourceHandleGetDataVfunc   = 23;
-    public const int ResourceHandleGetLengthVfunc = 17;
 }

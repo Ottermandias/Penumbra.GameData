@@ -1,11 +1,13 @@
-﻿using Dalamud.Utility;
+﻿global using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, uint>;
+using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
-using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, uint>;
+
 
 namespace Penumbra.GameData.Structs;
 
+/// <summary> Flags with useful information about an item. </summary>
 [Flags]
 public enum ItemFlags : byte
 {
@@ -14,77 +16,110 @@ public enum ItemFlags : byte
     IsCrestWorthy = 0x04,
 }
 
+/// <summary> All useful information for a single model of a single item. </summary>
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct EquipItem
 {
-    public readonly string         Name;
-    public readonly CustomItemId   Id;
-    public readonly IconId         IconId;
-    public readonly SetId          ModelId;
-    public readonly WeaponType     WeaponType;
-    public readonly Variant        Variant;
-    public readonly FullEquipType  Type;
-    public readonly ItemFlags      Flags;
-    public readonly CharacterLevel Level;
-    public readonly JobGroupId     JobRestrictions;
+    /// <summary> The name of the item. </summary>
+    public readonly string Name;
 
+    /// <summary> A full item ID that may not represent an item that the game knows. </summary>
+    public readonly CustomItemId Id;
+
+    /// <summary> An associated icon if it exists. </summary>
+    public readonly IconId IconId;
+
+    /// <summary> The primary ID of the represented model. </summary>
+    public readonly PrimaryId PrimaryId;
+
+    /// <summary> The secondary ID of the represented model, or 0. </summary>
+    public readonly SecondaryId SecondaryId;
+
+    /// <summary> The variant of the represented model. </summary>
+    public readonly Variant Variant;
+
+    /// <summary> The full type of the item, which also tells us if this is a primary, secondary or tertiary model. </summary>
+    public readonly FullEquipType Type;
+
+    /// <summary> Miscellaneous additional information. </summary>
+    public readonly ItemFlags Flags;
+
+    /// <summary> The level required to wear the item, if any. </summary>
+    public readonly CharacterLevel Level;
+
+    /// <summary> The job group required to wear the item, if any. </summary>
+    public readonly JobGroupId JobRestrictions;
+
+    /// <summary> The actual item ID. Will return 0 for fake items. </summary>
     public ItemId ItemId
         => Id.Item;
 
+    /// <summary> Whether the item is valid. </summary>
     public bool Valid
         => Type != FullEquipType.Unknown;
 
+    /// <summary> Get the represented model as armor without stain. </summary>
     public CharacterArmor Armor()
-        => new(ModelId, Variant, 0);
+        => new(PrimaryId, Variant, 0);
 
+    /// <summary> Get the represented model as armor with a specific stain. </summary>
     public CharacterArmor Armor(StainId stain)
-        => new(ModelId, Variant, stain);
+        => new(PrimaryId, Variant, stain);
 
+    /// <summary> Get the represented model as weapon without stain. </summary>
     public CharacterWeapon Weapon()
-        => new(ModelId, WeaponType, Variant, 0);
+        => new(PrimaryId, SecondaryId, Variant, 0);
 
+    /// <summary> Get the represented model as weapon with a specific stain. </summary>
     public CharacterWeapon Weapon(StainId stain)
-        => new(ModelId, WeaponType, Variant, stain);
+        => new(PrimaryId, SecondaryId, Variant, stain);
 
+    /// <summary> An empty item. </summary>
     public EquipItem()
         => Name = string.Empty;
 
-    public EquipItem(string name, CustomItemId id, IconId iconId, SetId modelId, WeaponType weaponType, Variant variant, FullEquipType type,
+    /// <summary> Create an EquipItem from all data used. </summary>
+    public EquipItem(string name, CustomItemId id, IconId iconId, PrimaryId primaryId, SecondaryId secondaryId, Variant variant,
+        FullEquipType type,
         ItemFlags flags, CharacterLevel level, JobGroupId restrictions)
     {
-        Name            = string.Intern(name);
-        Id              = id;
-        IconId          = iconId;
-        ModelId         = modelId;
-        WeaponType      = weaponType;
-        Variant         = variant;
-        Type            = type;
-        Flags           = flags;
-        Level           = level;
-        JobRestrictions = restrictions;
+        Name                = string.Intern(name);
+        Id                  = id;
+        IconId              = iconId;
+        PrimaryId   = primaryId;
+        SecondaryId = secondaryId;
+        Variant             = variant;
+        Type                = type;
+        Flags               = flags;
+        Level               = level;
+        JobRestrictions     = restrictions;
     }
 
+    /// <summary> Write the model as a string. </summary>
     public string ModelString
-        => WeaponType == 0 ? $"{ModelId}-{Variant}" : $"{ModelId}-{WeaponType}-{Variant}";
+        => SecondaryId == 0 ? $"{PrimaryId}-{Variant}" : $"{PrimaryId}-{SecondaryId}-{Variant}";
 
+    /// <summary> Convert a PseudoEquipItem to EquipItem. </summary>
     public static implicit operator EquipItem(PseudoEquipItem it)
     {
         var (type, flags, level, restrictions) = SplitInt(it.Item7);
         return new EquipItem(it.Item1, it.Item2, it.Item3, it.Item4, it.Item5, it.Item6, type, flags, level, restrictions);
     }
 
+    /// <summary> Convert an EquipItem to PseudoEquipItem. </summary>
     public static explicit operator PseudoEquipItem(EquipItem it)
-        => (it.Name, it.Id.Id, it.IconId.Id, it.ModelId.Id, it.WeaponType.Id, it.Variant.Id,
+        => (it.Name, it.Id.Id, it.IconId.Id, it.PrimaryId.Id, it.SecondaryId.Id, it.Variant.Id,
             PackBytes(it.Type, it.Flags, it.Level, it.JobRestrictions));
 
+    /// <summary> Create an EquipItem from a lumina item representing armor. </summary>
     public static EquipItem FromArmor(Item item)
     {
         var type            = item.ToEquipType();
         var name            = item.Name.ToDalamudString().TextValue;
         var id              = item.RowId;
         var icon            = item.Icon;
-        var model           = (SetId)item.ModelMain;
-        var weapon          = (WeaponType)0;
+        var model           = (PrimaryId)item.ModelMain;
+        var weapon          = (SecondaryId)0;
         var variant         = (Variant)(item.ModelMain >> 16);
         var flags           = GetFlags(item);
         var level           = item.LevelEquip;
@@ -92,19 +127,21 @@ public readonly struct EquipItem
         return new EquipItem(name, id, icon, model, weapon, variant, type, flags, level, jobRestrictions);
     }
 
+    /// <summary> Convert lumina data to misc. information. </summary>
     private static ItemFlags GetFlags(Item item)
         => (item.IsDyeable ? ItemFlags.IsDyable : 0)
           | (item.IsCrestWorthy ? ItemFlags.IsCrestWorthy : 0)
           | (item.IsUntradable ? 0 : ItemFlags.IsTradable);
 
+    /// <summary> Create an EquipItem from a lumina item representing a weapon using the primary model. </summary>
     public static EquipItem FromMainhand(Item item)
     {
         var type            = item.ToEquipType();
         var name            = item.Name.ToDalamudString().TextValue;
         var id              = item.RowId;
         var icon            = item.Icon;
-        var model           = (SetId)item.ModelMain;
-        var weapon          = (WeaponType)(item.ModelMain >> 16);
+        var model           = (PrimaryId)item.ModelMain;
+        var weapon          = (SecondaryId)(item.ModelMain >> 16);
         var variant         = (Variant)(item.ModelMain >> 32);
         var flags           = GetFlags(item);
         var level           = item.LevelEquip;
@@ -112,14 +149,15 @@ public readonly struct EquipItem
         return new EquipItem(name, id, icon, model, weapon, variant, type, flags, level, jobRestrictions);
     }
 
+    /// <summary> Create an EquipItem from a lumina item representing a weapon using the secondary model. </summary>
     public static EquipItem FromOffhand(Item item)
     {
         var type            = item.ToEquipType().ValidOffhand();
         var name            = item.Name.ToDalamudString().TextValue + type.OffhandTypeSuffix();
         var id              = item.RowId;
         var icon            = item.Icon;
-        var model           = (SetId)item.ModelSub;
-        var weapon          = (WeaponType)(item.ModelSub >> 16);
+        var model           = (PrimaryId)item.ModelSub;
+        var weapon          = (SecondaryId)(item.ModelSub >> 16);
         var variant         = (Variant)(item.ModelSub >> 32);
         var flags           = GetFlags(item);
         var level           = item.LevelEquip;
@@ -127,11 +165,13 @@ public readonly struct EquipItem
         return new EquipItem(name, id, icon, model, weapon, variant, type, flags, level, jobRestrictions);
     }
 
-    public static EquipItem FromIds(ItemId itemId, IconId iconId, SetId modelId, WeaponType type, Variant variant,
+    /// <summary> Create an EquipItem from a set of IDs. </summary>
+    public static EquipItem FromIds(ItemId itemId, IconId iconId, PrimaryId modelId, SecondaryId type, Variant variant,
         FullEquipType equipType = FullEquipType.Unknown, ItemFlags flags = 0, string? name = null)
         => FromIds(itemId, iconId, modelId, type, variant, 0, 0, equipType, flags, name);
 
-    public static EquipItem FromIds(ItemId itemId, IconId iconId, SetId modelId, WeaponType type, Variant variant,
+    /// <summary> Create an EquipItem from a set of IDs. </summary>
+    public static EquipItem FromIds(ItemId itemId, IconId iconId, PrimaryId modelId, SecondaryId type, Variant variant,
         CharacterLevel level, JobGroupId restrictions, FullEquipType equipType = FullEquipType.Unknown, ItemFlags flags = 0,
         string? name = null)
     {
@@ -145,6 +185,7 @@ public readonly struct EquipItem
     }
 
 
+    /// <summary> Create an EquipItem from a singular custom ID, if possible. </summary>
     public static EquipItem FromId(CustomItemId id)
     {
         var (setId, weaponType, variant, equipType) = id.Split;
@@ -155,12 +196,35 @@ public readonly struct EquipItem
             variant, equipType, 0, 0, 0);
     }
 
+    /// <inheritdoc/>
     public override string ToString()
         => Name;
 
+    /// <summary> Pack the miscellaneous data to a single value. </summary>
     private static uint PackBytes(FullEquipType type, ItemFlags flags, CharacterLevel level, JobGroupId restrictions)
         => (uint)type | ((uint)flags << 8) | ((uint)level.Value << 16) | ((uint)restrictions.Id << 24);
 
+    /// <summary> Split a pack of miscellaneous data into its parts. </summary>
     private static (FullEquipType, ItemFlags, CharacterLevel, JobGroupId) SplitInt(uint data)
         => ((FullEquipType)(data & 0xFF), (ItemFlags)((data >> 8) & 0xFF), (CharacterLevel)((data >> 16) & 0xFF), (JobGroupId)(data >> 24));
+}
+
+/// <summary> A list wrapping a PseudoEquipItem list to an EquipItemList. </summary>
+internal readonly struct EquipItemList(IReadOnlyList<PseudoEquipItem> items) : IReadOnlyList<EquipItem>
+{
+    /// <inheritdoc/>
+    public IEnumerator<EquipItem> GetEnumerator()
+        => items.Select(i => (EquipItem)i).GetEnumerator();
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
+
+    /// <inheritdoc/>
+    public int Count
+        => items.Count;
+
+    /// <inheritdoc/>
+    public EquipItem this[int index]
+        => items[index];
 }

@@ -1,7 +1,6 @@
-using Penumbra.GameData.Interop;
 using Penumbra.String;
 
-namespace Penumbra.GameData.Data;
+namespace Penumbra.GameData.Interop;
 
 public partial class DisassembledShader
 {

@@ -1,5 +1,6 @@
 namespace Penumbra.GameData.Enums;
 
+/// <summary> Human Customizations. </summary>
 public enum CustomizationType : byte
 {
     Unknown,
@@ -9,7 +10,7 @@ public enum CustomizationType : byte
     Iris,
     Accessory,
     Hair,
-    Zear,
+    Ear,
     DecalFace,
     DecalEquip,
     Skin,
@@ -18,9 +19,9 @@ public enum CustomizationType : byte
 
 public static class CustomizationTypeEnumExtension
 {
+    /// <summary> Convert a customization type to the suffix used by the game. </summary>
     public static string ToSuffix(this CustomizationType value)
-    {
-        return value switch
+        => value switch
         {
             CustomizationType.Body      => "top",
             CustomizationType.Face      => "fac",
@@ -28,15 +29,16 @@ public static class CustomizationTypeEnumExtension
             CustomizationType.Accessory => "acc",
             CustomizationType.Hair      => "hir",
             CustomizationType.Tail      => "til",
-            CustomizationType.Zear      => "zer",
+            CustomizationType.Ear       => "zer",
             CustomizationType.Etc       => "etc",
             _                           => throw new InvalidEnumArgumentException(),
         };
-    }
 }
 
 public static partial class Names
 {
+    /// <summary> A dictionary converting path suffices into CustomizationType. </summary>
+    // TODO: FrozenDictionary
     public static readonly Dictionary<string, CustomizationType> SuffixToCustomizationType = new()
     {
         { CustomizationType.Body.ToSuffix(), CustomizationType.Body },
@@ -45,7 +47,7 @@ public static partial class Names
         { CustomizationType.Accessory.ToSuffix(), CustomizationType.Accessory },
         { CustomizationType.Hair.ToSuffix(), CustomizationType.Hair },
         { CustomizationType.Tail.ToSuffix(), CustomizationType.Tail },
-        { CustomizationType.Zear.ToSuffix(), CustomizationType.Zear },
+        { CustomizationType.Ear.ToSuffix(), CustomizationType.Ear },
         { CustomizationType.Etc.ToSuffix(), CustomizationType.Etc },
     };
 }

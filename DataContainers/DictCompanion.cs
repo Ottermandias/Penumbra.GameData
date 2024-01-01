@@ -1,0 +1,37 @@
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
+using Lumina.Excel.GeneratedSheets;
+using OtterGui.Log;
+using Penumbra.GameData.Data;
+using Penumbra.GameData.DataContainers.Bases;
+using Penumbra.GameData.Structs;
+
+namespace Penumbra.GameData.DataContainers;
+
+/// <summary> A dictionary that matches CompanionId to names. </summary>
+public sealed class DictCompanion(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
+    : NameDictionary(pluginInterface, log, gameData, "Companions", 6, () => CreateCompanionData(gameData))
+{
+    /// <summary> Create the data. </summary>
+    private static IReadOnlyDictionary<uint, string> CreateCompanionData(IDataManager gameData)
+    {
+        var dict = new Dictionary<uint, string>();
+        foreach (var c in gameData.GetExcelSheet<Companion>(gameData.Language)!
+                     .Where(c => c.Singular.RawData.Length > 0 && c.Order < ushort.MaxValue))
+            dict.TryAdd(c.RowId, DataUtility.ToTitleCaseExtended(c.Singular, c.Article));
+        // TODO: FrozenDictionary
+        return dict;
+    }
+
+    /// <inheritdoc cref="NameDictionary.ContainsKey"/>
+    public bool ContainsKey(CompanionId key)
+        => Value.ContainsKey(key.Id);
+
+    /// <inheritdoc cref="NameDictionary.TryGetValue"/>
+    public bool TryGetValue(CompanionId key, [NotNullWhen(true)] out string? value)
+        => Value.TryGetValue(key.Id, out value);
+
+    /// <inheritdoc cref="NameDictionary.this"/>
+    public string this[CompanionId key]
+        => Value[key.Id];
+}

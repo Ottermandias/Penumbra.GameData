@@ -1,5 +1,6 @@
 namespace Penumbra.GameData.Enums;
 
+/// <summary> A grouping of files representing specific types for the game, not only used by extension. </summary>
 public enum FileType : byte
 {
     Unknown,
@@ -19,6 +20,8 @@ public enum FileType : byte
 
 public static partial class Names
 {
+    /// <summary> Dictionary to convert extensions to grouped FileType. </summary>
+    // TODO: FrozenDictionary
     public static readonly Dictionary<string, FileType> ExtensionToFileType = new()
     {
         { ".mdl", FileType.Model },
