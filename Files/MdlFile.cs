@@ -245,23 +245,25 @@ public partial class MdlFile : IWritable
     public unsafe uint StackSize
         => (uint)(VertexDeclarations.Length * NumVertices * sizeof(MdlStructs.VertexElement));
 
-    public enum VertexType {
-        Single3 = 2,
-        Single4 = 3,
-        UInt = 5,
+    public enum VertexType
+    {
+        Single3    = 2,
+        Single4    = 3,
+        UInt       = 5,
         ByteFloat4 = 8,
-        Half2 = 13,
-        Half4 = 14,
+        Half2      = 13,
+        Half4      = 14,
     }
 
-    public enum VertexUsage {
-        Position = 0,
+    public enum VertexUsage
+    {
+        Position     = 0,
         BlendWeights = 1,
         BlendIndices = 2,
-        Normal = 3,
-        UV = 4,
-        Tangent2 = 5,
-        Tangent1 = 6,
-        Color = 7,
+        Normal       = 3,
+        UV           = 4,
+        Tangent2     = 5,
+        Tangent1     = 6,
+        Color        = 7,
     }
 }
