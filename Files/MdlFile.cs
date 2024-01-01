@@ -94,13 +94,15 @@ public partial class MdlFile : IWritable
         IndexBufferSize  = header.IndexBufferSize;
         VertexOffset     = header.VertexOffset;
         IndexOffset      = header.IndexOffset;
+
+        var dataOffset = FileHeaderSize + header.RuntimeSize + header.StackSize;
         for (var i = 0; i < 3; ++i)
         {
             if (VertexOffset[i] > 0)
-                VertexOffset[i] -= header.RuntimeSize;
+                VertexOffset[i] -= dataOffset;
 
             if (IndexOffset[i] > 0)
-                IndexOffset[i] -= header.RuntimeSize;
+                IndexOffset[i] -= dataOffset;
         }
 
         VertexDeclarations = new MdlStructs.VertexDeclarationStruct[header.VertexDeclarationCount];
@@ -242,4 +244,24 @@ public partial class MdlFile : IWritable
 
     public unsafe uint StackSize
         => (uint)(VertexDeclarations.Length * NumVertices * sizeof(MdlStructs.VertexElement));
+
+    public enum VertexType {
+        Single3 = 2,
+        Single4 = 3,
+        UInt = 5,
+        ByteFloat4 = 8,
+        Half2 = 13,
+        Half4 = 14,
+    }
+
+    public enum VertexUsage {
+        Position = 0,
+        BlendWeights = 1,
+        BlendIndices = 2,
+        Normal = 3,
+        UV = 4,
+        Tangent2 = 5,
+        Tangent1 = 6,
+        Color = 7,
+    }
 }
