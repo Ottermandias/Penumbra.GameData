@@ -42,12 +42,12 @@ public partial class MdlFile
         w.Write(totalSize - StackSize - FileHeaderSize);
         w.Write((ushort)VertexDeclarations.Length);
         w.Write((ushort)Materials.Length);
-        w.Write(VertexOffset[0] > 0 ? VertexOffset[0] + totalSize : 0u);
-        w.Write(VertexOffset[1] > 0 ? VertexOffset[1] + totalSize : 0u);
-        w.Write(VertexOffset[2] > 0 ? VertexOffset[2] + totalSize : 0u);
-        w.Write(IndexOffset[0] > 0 ? IndexOffset[0] + totalSize : 0u);
-        w.Write(IndexOffset[1] > 0 ? IndexOffset[1] + totalSize : 0u);
-        w.Write(IndexOffset[2] > 0 ? IndexOffset[2] + totalSize : 0u);
+        w.Write(0 < LodCount ? VertexOffset[0] + totalSize : 0u);
+        w.Write(1 < LodCount ? VertexOffset[1] + totalSize : 0u);
+        w.Write(2 < LodCount ? VertexOffset[2] + totalSize : 0u);
+        w.Write(0 < LodCount ? IndexOffset[0] + totalSize : 0u);
+        w.Write(1 < LodCount ? IndexOffset[1] + totalSize : 0u);
+        w.Write(2 < LodCount ? IndexOffset[2] + totalSize : 0u);
         w.Write(VertexBufferSize[0]);
         w.Write(VertexBufferSize[1]);
         w.Write(VertexBufferSize[2]);
