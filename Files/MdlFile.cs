@@ -173,7 +173,17 @@ public partial class MdlFile : IWritable
         for (var i = 0; i < modelHeader.ElementIdCount; i++)
             ElementIds[i] = MdlStructs.ElementIdStruct.Read(r);
 
-        Lods = r.ReadStructuresAsArray<MdlStructs.LodStruct>(3);
+        Lods = new MdlStructs.LodStruct[3];
+        for (var i = 0; i < 3; i++)
+        {
+            var lod = r.ReadStructure<MdlStructs.LodStruct>();
+            if (i < LodCount)
+            {
+                lod.VertexDataOffset -= dataOffset;
+                lod.IndexDataOffset -= dataOffset;
+            }
+            Lods[i] = lod;
+        }
         ExtraLods = modelHeader.ExtraLodEnabled
             ? r.ReadStructuresAsArray<MdlStructs.ExtraLodStruct>(3)
             : Array.Empty<MdlStructs.ExtraLodStruct>();

@@ -1,4 +1,5 @@
 using Lumina.Data.Parsing;
+using OtterGui;
 
 namespace Penumbra.GameData.Files;
 
@@ -207,8 +208,12 @@ public partial class MdlFile
             foreach (var elementId in ElementIds)
                 Write(w, elementId);
 
-            foreach (var lod in Lods)
-                Write(w, lod);
+            // LoDs contain absolute offsets, and will need to be written after the rest of the size is known.
+            var lodPosition = (int)w.BaseStream.Position;
+            unsafe 
+            {
+                w.Seek(sizeof(MdlStructs.LodStruct) * 3, SeekOrigin.Current);
+            }
 
             if (Flags2.HasFlag(MdlStructs.ModelFlags2.ExtraLodEnabled))
                 foreach (var extraLod in ExtraLods)
@@ -266,12 +271,21 @@ public partial class MdlFile
             foreach (var box in BoneBoundingBoxes)
                 Write(w, box);
 
-            var totalSize = w.BaseStream.Position;
+            var totalSize = (uint)w.BaseStream.Position;
             w.Write(RemainingData);
 
             // Write header data.
             w.Seek(0, SeekOrigin.Begin);
-            WriteModelFileHeader(w, (uint)totalSize);
+            WriteModelFileHeader(w, totalSize);
+
+            // LoD data also includes absolute offsets, move back to their position and write out now we know how large the metadata is.
+            w.Seek(lodPosition, SeekOrigin.Begin);
+            foreach (var (lod, index) in Lods.WithIndex())
+                Write(w, lod with
+                {
+                    VertexDataOffset = index < LodCount ? lod.VertexDataOffset + totalSize : 0,
+                    IndexDataOffset = index < LodCount ? lod.IndexDataOffset + totalSize : 0,
+                });
         }
 
         return stream.ToArray();
