@@ -83,6 +83,66 @@ public partial class MdlFile : IWritable
 
     public bool Valid { get; }
 
+    public MdlFile()
+    {
+        Version = 16777221;
+        Radius = 0f;
+        ModelClipOutDistance = 0f;
+        ShadowClipOutDistance = 0f;
+        BgChangeMaterialIndex = 0;
+        BgCrestChangeMaterialIndex = 0;
+        Unknown4 = 0;
+        Unknown5 = 0;
+        Unknown6 = 0;
+        Unknown7 = 0;
+        Unknown8 = 0;
+        Unknown9 = 0;
+
+        VertexOffset = [0, 0, 0];
+        IndexOffset = [0, 0, 0];
+        
+        VertexBufferSize = [0, 0, 0];
+        IndexBufferSize = [0, 0, 0];
+        LodCount = 0;
+        EnableIndexBufferStreaming = false;
+        EnableEdgeGeometry = false;
+
+        // NOTE: The flag type doesn't have a .None entry, so setting to 0 manually.
+        Flags1 = 0;
+        Flags2 = 0;
+
+        var emptyBoundingBox = new MdlStructs.BoundingBoxStruct()
+        {
+            Min = [0f, 0f, 0f, 0f],
+            Max = [0f, 0f, 0f, 0f],
+        };
+        BoundingBoxes = emptyBoundingBox;
+        ModelBoundingBoxes = emptyBoundingBox;
+        WaterBoundingBoxes = emptyBoundingBox;
+        VerticalFogBoundingBoxes = emptyBoundingBox;
+
+        VertexDeclarations = [];
+        ElementIds = [];
+        Meshes = [];
+        BoneTables = [];
+        BoneBoundingBoxes = [];
+        SubMeshes = [];
+        ShapeMeshes = [];
+        ShapeValues = [];
+        TerrainShadowMeshes = [];
+        TerrainShadowSubMeshes = [];
+        Lods = [];
+        ExtraLods = [];
+        SubMeshBoneMap = [];
+
+        Attributes = [];
+        Bones = [];
+        Materials = [];
+        Shapes = [];
+
+        RemainingData = [];
+    }
+
     public MdlFile(byte[] data)
     {
         using var stream = new MemoryStream(data);
