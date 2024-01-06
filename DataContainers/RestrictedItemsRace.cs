@@ -19,7 +19,7 @@ public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, 
     {
         var ret = RaceGenderGroup.Where(c => c is not 0 and not uint.MaxValue).ToHashSet();
 
-        var items = gameData.GetExcelSheet<Item>()!;
+        var items      = gameData.GetExcelSheet<Item>()!;
         var categories = gameData.GetExcelSheet<EquipRaceCategory>(gameData.Language)!;
         foreach (var item in items.Where(i => i.EquipRestriction > 3))
         {
@@ -41,7 +41,7 @@ public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, 
         if (!Value.Contains(quad))
             return (false, armor);
 
-        var idx = ((int)race - 1) * 2 + (gender is Gender.Female or Gender.FemaleNpc ? 1 : 0);
+        var idx   = ((int)race - 1) * 2 + (gender is Gender.Female or Gender.FemaleNpc ? 1 : 0);
         var value = RaceGenderGroup[idx];
         return (value != quad, new CharacterArmor((ushort)value, (byte)(value >> 16), armor.Stain));
     }
@@ -60,8 +60,8 @@ public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, 
     /// but have no associated accessories or hats.
     /// </summary>
     // @Formatter:off
-    private static readonly uint[] RaceGenderGroup =
-    [
+    public static readonly IReadOnlyList<uint> RaceGenderGroup = new uint[]
+    {
         0x020054,
         0x020055,
         0x020056,
@@ -78,6 +78,6 @@ public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, 
         uint.MaxValue, // TODO: Female Hrothgar
         0x0102E8,
         0x010245,
-    ];
+    };
     // @Formatter:on
 }

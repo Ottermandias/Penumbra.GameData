@@ -37,6 +37,10 @@ public sealed class NameDicts(
     public Task Awaiter { get; } =
         Task.WhenAll(_worlds.Awaiter, _mounts.Awaiter, _companions.Awaiter, _ornaments.Awaiter, _bNpcs.Awaiter, _eNpcs.Awaiter);
 
+    /// <inheritdoc/>
+    public bool Finished
+        => Awaiter.IsCompletedSuccessfully;
+
     /// <summary> Return the world name including the Any World option. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public string ToWorldName(WorldId worldId)

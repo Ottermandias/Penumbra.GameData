@@ -23,14 +23,15 @@ public static class GenderRestrictedItems
             if (item.RowId is 13700 or 13699)
                 continue;
 
-            if (dict.ContainsKey((uint)item.ModelMain | ((uint)((EquipSlot)item.EquipSlotCategory.Row).ToSlot() << 24)))
+            var value = (uint)item.ModelMain | ((uint)((EquipSlot)item.EquipSlotCategory.Row).ToSlot() << 24);
+            if (dict.ContainsKey(value) || KnownItems.Any(restriction == 2 ? (i => i.MaleId == item.RowId) : (i => i.FemaleId == item.RowId)))
                 continue;
 
             ++unhandled;
             AddEmperor(item);
 
             log.Warning(
-                $"{item.RowId:D5} {item.Name.ToDalamudString().TextValue} has is restricted to {(restriction == 2 ? "male" : "female")} characters but is not known, redirected to Emperor.");
+                $"{item.RowId:D5} {item.Name.ToDalamudString().TextValue} is restricted to {(restriction == 2 ? "male" : "female")} characters but is not known, redirected to Emperor.");
         }
 
         if (unhandled > 0)
@@ -111,9 +112,10 @@ public static class GenderRestrictedItems
             return;
         }
 
-        var sourceId = (uint)sourceRow.ModelMain | (uint)sourceSlot << 24;
-        var targetId = (uint)targetRow.ModelMain | (uint)targetSlot << 24;
-        dict.TryAdd(sourceId, targetId);
+        var sourceId = (uint)sourceRow.ModelMain | ((uint)sourceSlot << 24);
+        var targetId = (uint)targetRow.ModelMain | ((uint)targetSlot << 24);
+        if (sourceId != targetId)
+            dict.TryAdd(sourceId, targetId);
     }
 
     /// <summary> A pair of items to redirect and the directions to redirect to. </summary>

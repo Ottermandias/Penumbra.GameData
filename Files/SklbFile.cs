@@ -7,7 +7,7 @@ public class SklbFile
     private const int SklbMagic = 0x736B6C62; // "sklb"
 
     public SklbVersion Version;
-    public byte[] Skeleton;
+    public byte[]      Skeleton;
 
     public SklbFile(byte[] data)
     {
@@ -19,11 +19,14 @@ public class SklbFile
             throw new InvalidDataException("Invalid sklb magic");
 
         Version = (SklbVersion)reader.ReadUInt32();
-  
-        var oldHeader = Version switch {
-            SklbVersion.V1100 or SklbVersion.V1110 or SklbVersion.V1200 => true,
+
+        var oldHeader = Version switch
+        {
+            SklbVersion.V1100 => true,
+            SklbVersion.V1110 => true,
+            SklbVersion.V1200 => true,
             SklbVersion.V1300 => false,
-            _ => throw new InvalidDataException($"Unknown version {Version}")
+            _                 => throw new InvalidDataException($"Unknown version {Version}"),
         };
 
         // Skeleton offset directly follows the layer offset.

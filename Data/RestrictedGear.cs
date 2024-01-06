@@ -40,4 +40,8 @@ public sealed class RestrictedGear(RestrictedItemsRace _raceSet, RestrictedItems
 
     /// <summary> Finished when all 3 data sets are finished. </summary>
     public Task Awaiter { get; } = Task.WhenAll(_raceSet.Awaiter, _maleSet.Awaiter, _femaleSet.Awaiter);
+
+    /// <inheritdoc/>
+    public bool Finished
+        => Awaiter.IsCompletedSuccessfully;
 }

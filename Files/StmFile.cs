@@ -57,7 +57,7 @@ public partial class StmFile
     }
 
     /// <summary>
-    /// Create a STM file from the given data array.
+    /// Create an STM file from the given data array.
     /// </summary>
     public StmFile(byte[] data)
     {
@@ -89,6 +89,6 @@ public partial class StmFile
     /// Try to read and parse the default STM file given by Lumina.
     /// </summary>
     public StmFile(IDataManager gameData)
-        : this(gameData.GetFile(Path)?.Data ?? Array.Empty<byte>())
+        : this(gameData.GetFile(Path)?.Data ?? [])
     { }
 }

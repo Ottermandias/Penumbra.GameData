@@ -1,11 +1,12 @@
 using OtterGui.Log;
+using OtterGui.Services;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Data;
 
 /// <summary> Wrapper class to parse paths to game files for what they affect. </summary>
-public class GamePathParser(Logger log)
+public class GamePathParser(Logger log) : IService
 {
     /// <summary> Obtain basic information about a file path. </summary>
     public GameObjectInfo GetFileInfo(string path)
