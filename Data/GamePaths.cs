@@ -115,6 +115,12 @@ public static partial class GamePaths
             public static string Path(PrimaryId weaponId, PrimaryId bodyId, Variant variant, char suffix1, char suffix2 = '\0')
                 => $"chara/weapon/w{weaponId.Id:D4}/obj/body/b{bodyId.Id:D4}/texture/v{variant.Id:D2}_w{weaponId.Id:D4}b{bodyId.Id:D4}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
         }
+
+        public static partial class Sklb
+        {
+            public static string Path(PrimaryId weaponId)
+                => $"chara/weapon/w{weaponId.Id:D4}/skeleton/base/b0001/skl_w{weaponId.Id:D4}b0001.sklb";
+        }
     }
 
     public static partial class DemiHuman
@@ -155,6 +161,12 @@ public static partial class GamePaths
 
             public static string Path(PrimaryId demiId, PrimaryId equipId, EquipSlot slot, Variant variant, char suffix1, char suffix2 = '\0')
                 => $"chara/demihuman/d{demiId.Id:D4}/obj/equipment/e{equipId.Id:D4}/texture/v{variant.Id:D2}_d{demiId.Id:D4}e{equipId.Id:D4}_{slot.ToSuffix()}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
+        }
+
+        public static partial class Sklb
+        {
+            public static string Path(PrimaryId demiHumanId)
+                => $"chara/demihuman/d{demiHumanId.Id:D4}/skeleton/base/b0001/skl_d{demiHumanId.Id:D4}b0001.sklb";
         }
     }
 
