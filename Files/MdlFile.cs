@@ -1,6 +1,8 @@
 using Lumina.Data;
 using Lumina.Data.Parsing;
 using Lumina.Extensions;
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Penumbra.GameData.Files;
 
@@ -26,7 +28,7 @@ public partial class MdlFile : IWritable
     }
 
     // Raw data to write back.
-    public uint   Version;
+    public uint   Version = 16777221;
     public float  Radius;
     public float  ModelClipOutDistance;
     public float  ShadowClipOutDistance;
@@ -40,11 +42,11 @@ public partial class MdlFile : IWritable
     public ushort Unknown9;
 
     // Offsets are stored relative to RuntimeSize instead of file start.
-    public uint[] VertexOffset;
-    public uint[] IndexOffset;
+    public uint[] VertexOffset = [0, 0, 0];
+    public uint[] IndexOffset  = [0, 0, 0];
 
-    public uint[] VertexBufferSize;
-    public uint[] IndexBufferSize;
+    public uint[] VertexBufferSize = [0, 0, 0];
+    public uint[] IndexBufferSize  = [0, 0, 0];
     public byte   LodCount;
     public bool   EnableIndexBufferStreaming;
     public bool   EnableEdgeGeometry;
@@ -53,95 +55,38 @@ public partial class MdlFile : IWritable
     public MdlStructs.ModelFlags1 Flags1;
     public MdlStructs.ModelFlags2 Flags2;
 
-    public MdlStructs.BoundingBoxStruct BoundingBoxes;
-    public MdlStructs.BoundingBoxStruct ModelBoundingBoxes;
-    public MdlStructs.BoundingBoxStruct WaterBoundingBoxes;
-    public MdlStructs.BoundingBoxStruct VerticalFogBoundingBoxes;
+    public MdlStructs.BoundingBoxStruct BoundingBoxes            = EmptyBoundingBox;
+    public MdlStructs.BoundingBoxStruct ModelBoundingBoxes       = EmptyBoundingBox;
+    public MdlStructs.BoundingBoxStruct WaterBoundingBoxes       = EmptyBoundingBox;
+    public MdlStructs.BoundingBoxStruct VerticalFogBoundingBoxes = EmptyBoundingBox;
 
-    public MdlStructs.VertexDeclarationStruct[]    VertexDeclarations;
-    public MdlStructs.ElementIdStruct[]            ElementIds;
-    public MdlStructs.MeshStruct[]                 Meshes;
-    public MdlStructs.BoneTableStruct[]            BoneTables;
-    public MdlStructs.BoundingBoxStruct[]          BoneBoundingBoxes;
-    public MdlStructs.SubmeshStruct[]              SubMeshes;
-    public MdlStructs.ShapeMeshStruct[]            ShapeMeshes;
-    public MdlStructs.ShapeValueStruct[]           ShapeValues;
-    public MdlStructs.TerrainShadowMeshStruct[]    TerrainShadowMeshes;
-    public MdlStructs.TerrainShadowSubmeshStruct[] TerrainShadowSubMeshes;
-    public MdlStructs.LodStruct[]                  Lods;
-    public MdlStructs.ExtraLodStruct[]             ExtraLods;
-    public ushort[]                                SubMeshBoneMap;
+    public MdlStructs.VertexDeclarationStruct[]    VertexDeclarations     = [];
+    public MdlStructs.ElementIdStruct[]            ElementIds             = [];
+    public MdlStructs.MeshStruct[]                 Meshes                 = [];
+    public MdlStructs.BoneTableStruct[]            BoneTables             = [];
+    public MdlStructs.BoundingBoxStruct[]          BoneBoundingBoxes      = [];
+    public MdlStructs.SubmeshStruct[]              SubMeshes              = [];
+    public MdlStructs.ShapeMeshStruct[]            ShapeMeshes            = [];
+    public MdlStructs.ShapeValueStruct[]           ShapeValues            = [];
+    public MdlStructs.TerrainShadowMeshStruct[]    TerrainShadowMeshes    = [];
+    public MdlStructs.TerrainShadowSubmeshStruct[] TerrainShadowSubMeshes = [];
+    public MdlStructs.LodStruct[]                  Lods                   = [];
+    public MdlStructs.ExtraLodStruct[]             ExtraLods              = [];
+    public ushort[]                                SubMeshBoneMap         = [];
 
     // Strings are written in order
-    public string[] Attributes;
-    public string[] Bones;
-    public string[] Materials;
-    public Shape[]  Shapes;
+    public string[] Attributes = [];
+    public string[] Bones      = [];
+    public string[] Materials  = [];
+    public Shape[]  Shapes     = [];
 
     // Raw, unparsed data.
-    public byte[] RemainingData;
+    public byte[] RemainingData = [];
 
     public bool Valid { get; }
 
     public MdlFile()
-    {
-        Version = 16777221;
-        Radius = 0f;
-        ModelClipOutDistance = 0f;
-        ShadowClipOutDistance = 0f;
-        BgChangeMaterialIndex = 0;
-        BgCrestChangeMaterialIndex = 0;
-        Unknown4 = 0;
-        Unknown5 = 0;
-        Unknown6 = 0;
-        Unknown7 = 0;
-        Unknown8 = 0;
-        Unknown9 = 0;
-
-        VertexOffset = [0, 0, 0];
-        IndexOffset = [0, 0, 0];
-        
-        VertexBufferSize = [0, 0, 0];
-        IndexBufferSize = [0, 0, 0];
-        LodCount = 0;
-        EnableIndexBufferStreaming = false;
-        EnableEdgeGeometry = false;
-
-        // NOTE: The flag type doesn't have a .None entry, so setting to 0 manually.
-        Flags1 = 0;
-        Flags2 = 0;
-
-        var emptyBoundingBox = new MdlStructs.BoundingBoxStruct()
-        {
-            Min = [0f, 0f, 0f, 0f],
-            Max = [0f, 0f, 0f, 0f],
-        };
-        BoundingBoxes = emptyBoundingBox;
-        ModelBoundingBoxes = emptyBoundingBox;
-        WaterBoundingBoxes = emptyBoundingBox;
-        VerticalFogBoundingBoxes = emptyBoundingBox;
-
-        VertexDeclarations = [];
-        ElementIds = [];
-        Meshes = [];
-        BoneTables = [];
-        BoneBoundingBoxes = [];
-        SubMeshes = [];
-        ShapeMeshes = [];
-        ShapeValues = [];
-        TerrainShadowMeshes = [];
-        TerrainShadowSubMeshes = [];
-        Lods = [];
-        ExtraLods = [];
-        SubMeshBoneMap = [];
-
-        Attributes = [];
-        Bones = [];
-        Materials = [];
-        Shapes = [];
-
-        RemainingData = [];
-    }
+    { }
 
     public MdlFile(byte[] data)
     {
@@ -159,7 +104,7 @@ public partial class MdlFile : IWritable
         for (var i = 0; i < LodCount; ++i)
         {
             VertexOffset[i] -= dataOffset;
-            IndexOffset[i] -= dataOffset;
+            IndexOffset[i]  -= dataOffset;
         }
 
         VertexDeclarations = new MdlStructs.VertexDeclarationStruct[header.VertexDeclarationCount];
@@ -180,13 +125,15 @@ public partial class MdlFile : IWritable
             if (i < LodCount)
             {
                 lod.VertexDataOffset -= dataOffset;
-                lod.IndexDataOffset -= dataOffset;
+                lod.IndexDataOffset  -= dataOffset;
             }
+
             Lods[i] = lod;
         }
+
         ExtraLods = modelHeader.ExtraLodEnabled
             ? r.ReadStructuresAsArray<MdlStructs.ExtraLodStruct>(3)
-            : Array.Empty<MdlStructs.ExtraLodStruct>();
+            : [];
 
         Meshes = new MdlStructs.MeshStruct[modelHeader.MeshCount];
         for (var i = 0; i < modelHeader.MeshCount; i++)
@@ -333,4 +280,10 @@ public partial class MdlFile : IWritable
         Tangent1     = 6,
         Color        = 7,
     }
+
+    public static MdlStructs.BoundingBoxStruct EmptyBoundingBox = new()
+    {
+        Min = [0f, 0f, 0f, 0f],
+        Max = [0f, 0f, 0f, 0f],
+    };
 }
