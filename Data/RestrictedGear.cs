@@ -25,15 +25,18 @@ public sealed class RestrictedGear(RestrictedItemsRace _raceSet, RestrictedItems
     public (bool Replaced, CharacterArmor Armor) ResolveRestricted(CharacterArmor armor, EquipSlot slot, Race race, Gender gender)
     {
         // Check racial gear, this does not need slots.
-        (var replaced, armor) = _raceSet.Resolve(armor, race, gender);
-        if (replaced)
-            return (replaced, armor);
+        if (slot.IsEquipment())
+        {
+            (var raceReplace, armor) = _raceSet.Resolve(armor, race, gender);
+            if (raceReplace)
+                return (raceReplace, armor);
+        }
 
         // Some items lead to the exact same model- and variant id just gender specified, 
         // so check for actual difference in the Replaced bool.
-        (replaced, armor) = _maleSet.Resolve(armor, slot, race, gender);
-        if (replaced)
-            return (replaced, armor);
+        (var genderReplace, armor) = _maleSet.Resolve(armor, slot, race, gender);
+        if (genderReplace)
+            return (genderReplace, armor);
 
         return _femaleSet.Resolve(armor, slot, race, gender);
     }
