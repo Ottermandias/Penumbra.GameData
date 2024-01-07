@@ -26,7 +26,8 @@ public class SklbFile
             SklbVersion.V1110 => true,
             SklbVersion.V1200 => true,
             SklbVersion.V1300 => false,
-            _                 => throw new InvalidDataException($"Unknown version {Version}"),
+            SklbVersion.V1301 => false,
+            _                 => throw new InvalidDataException($"Unknown version 0x{Version:X}"),
         };
 
         // Skeleton offset directly follows the layer offset.
@@ -54,5 +55,6 @@ public class SklbFile
         V1110 = 0x31313130, // "1110"
         V1200 = 0x31323030, // "1200"
         V1300 = 0x31333030, // "1300"
+        V1301 = 0x31333031, // "1301"
     }
 }
