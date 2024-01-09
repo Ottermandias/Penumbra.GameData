@@ -18,7 +18,7 @@ public enum ItemFlags : byte
 
 /// <summary> All useful information for a single model of a single item. </summary>
 [StructLayout(LayoutKind.Sequential)]
-public readonly struct EquipItem
+public readonly struct EquipItem : IEquatable<EquipItem>
 {
     /// <summary> The name of the item. </summary>
     public readonly string Name;
@@ -83,16 +83,16 @@ public readonly struct EquipItem
         FullEquipType type,
         ItemFlags flags, CharacterLevel level, JobGroupId restrictions)
     {
-        Name                = string.Intern(name);
-        Id                  = id;
-        IconId              = iconId;
-        PrimaryId   = primaryId;
-        SecondaryId = secondaryId;
-        Variant             = variant;
-        Type                = type;
-        Flags               = flags;
-        Level               = level;
-        JobRestrictions     = restrictions;
+        Name            = string.Intern(name);
+        Id              = id;
+        IconId          = iconId;
+        PrimaryId       = primaryId;
+        SecondaryId     = secondaryId;
+        Variant         = variant;
+        Type            = type;
+        Flags           = flags;
+        Level           = level;
+        JobRestrictions = restrictions;
     }
 
     /// <summary> Write the model as a string. </summary>
@@ -207,6 +207,15 @@ public readonly struct EquipItem
     /// <summary> Split a pack of miscellaneous data into its parts. </summary>
     private static (FullEquipType, ItemFlags, CharacterLevel, JobGroupId) SplitInt(uint data)
         => ((FullEquipType)(data & 0xFF), (ItemFlags)((data >> 8) & 0xFF), (CharacterLevel)((data >> 16) & 0xFF), (JobGroupId)(data >> 24));
+
+    public bool Equals(EquipItem other)
+        => Id == other.Id;
+
+    public override bool Equals(object? obj)
+        => obj is EquipItem other && Equals(other);
+
+    public override int GetHashCode()
+        => Id.Id.GetHashCode();
 }
 
 /// <summary> A list wrapping a PseudoEquipItem list to an EquipItemList. </summary>
