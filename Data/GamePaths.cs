@@ -6,7 +6,13 @@ namespace Penumbra.GameData.Data;
 /// <summary> Functions to create or parse game paths for certain types of files. </summary>
 public static partial class GamePaths
 {
-    [GeneratedRegex(@"c(?'racecode'\d{4})")]
+    /// <summary> We never want to capture anything not named. </summary>
+    public const RegexOptions Flags1 = RegexOptions.ExplicitCapture;
+
+    /// <summary> When possible, we want to use non-backtracking regex. Backreferences are not compatible with that though. </summary>
+    public const RegexOptions Flags2 = Flags1 | RegexOptions.NonBacktracking;
+
+    [GeneratedRegex(@"c(?'racecode'\d{4})", Flags2)]
     public static partial Regex RaceCodeParser();
 
     public static GenderRace ParseRaceCode(string path)
@@ -21,7 +27,7 @@ public static partial class GamePaths
     {
         public static partial class Imc
         {
-            [GeneratedRegex(@"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/b\k'id'\.imc")]
+            [GeneratedRegex(@"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/b\k'id'\.imc", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId monsterId, PrimaryId bodyId)
@@ -30,7 +36,7 @@ public static partial class GamePaths
 
         public static partial class Mdl
         {
-            [GeneratedRegex(@"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/model/m\k'monster'b\k'id'\.mdl")]
+            [GeneratedRegex(@"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/model/m\k'monster'b\k'id'\.mdl", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId monsterId, PrimaryId bodyId)
@@ -40,7 +46,8 @@ public static partial class GamePaths
         public static partial class Mtrl
         {
             [GeneratedRegex(
-                @"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/material/v(?'variant'\d{4})/mt_m\k'monster'b\k'id'_[a-z]+\.mtrl")]
+                @"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/material/v(?'variant'\d{4})/mt_m\k'monster'b\k'id'_[a-z]+\.mtrl",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId monsterId, PrimaryId bodyId, Variant variant, string suffix)
@@ -50,7 +57,8 @@ public static partial class GamePaths
         public static partial class Tex
         {
             [GeneratedRegex(
-                @"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/texture/v(?'variant'\d{2})_m\k'monster'b\k'id'(_[a-z])?_[a-z]\.tex")]
+                @"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/texture/v(?'variant'\d{2})_m\k'monster'b\k'id'(_[a-z])?_[a-z]\.tex",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId monsterId, PrimaryId bodyId, Variant variant, char suffix1, char suffix2 = '\0')
@@ -80,7 +88,7 @@ public static partial class GamePaths
     {
         public static partial class Imc
         {
-            [GeneratedRegex(@"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/b\k'weapon'\.imc")]
+            [GeneratedRegex(@"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/b\k'weapon'\.imc", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId weaponId, PrimaryId bodyId)
@@ -89,7 +97,7 @@ public static partial class GamePaths
 
         public static partial class Mdl
         {
-            [GeneratedRegex(@"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/model/w\k'id'b\k'weapon'\.mdl")]
+            [GeneratedRegex(@"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/model/w\k'id'b\k'weapon'\.mdl", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId weaponId, PrimaryId bodyId)
@@ -99,7 +107,8 @@ public static partial class GamePaths
         public static partial class Mtrl
         {
             [GeneratedRegex(
-                @"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/material/v(?'variant'\d{4})/mt_w\k'id'b\k'weapon'_[a-z]+\.mtrl")]
+                @"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/material/v(?'variant'\d{4})/mt_w\k'id'b\k'weapon'_[a-z]+\.mtrl",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId weaponId, PrimaryId bodyId, Variant variant, string suffix)
@@ -109,7 +118,8 @@ public static partial class GamePaths
         public static partial class Tex
         {
             [GeneratedRegex(
-                @"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/texture/v(?'variant'\d{2})_w\k'id'b\k'weapon'(_[a-z])?_[a-z]\.tex")]
+                @"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/texture/v(?'variant'\d{2})_w\k'id'b\k'weapon'(_[a-z])?_[a-z]\.tex",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId weaponId, PrimaryId bodyId, Variant variant, char suffix1, char suffix2 = '\0')
@@ -127,7 +137,7 @@ public static partial class GamePaths
     {
         public static partial class Imc
         {
-            [GeneratedRegex(@"chara/demihuman/d(?'id'\d{4})/obj/equipment/e(?'equip'\d{4})/e\k'equip'\.imc")]
+            [GeneratedRegex(@"chara/demihuman/d(?'id'\d{4})/obj/equipment/e(?'equip'\d{4})/e\k'equip'\.imc", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId demiId, PrimaryId equipId)
@@ -136,7 +146,8 @@ public static partial class GamePaths
 
         public static partial class Mdl
         {
-            [GeneratedRegex(@"chara/demihuman/d(?'id'\d{4})/obj/equipment/e(?'equip'\d{4})/model/d\k'id'e\k'equip'_(?'slot'[a-z]{3})\.mdl")]
+            [GeneratedRegex(@"chara/demihuman/d(?'id'\d{4})/obj/equipment/e(?'equip'\d{4})/model/d\k'id'e\k'equip'_(?'slot'[a-z]{3})\.mdl",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId demiId, PrimaryId equipId, EquipSlot slot)
@@ -146,7 +157,8 @@ public static partial class GamePaths
         public static partial class Mtrl
         {
             [GeneratedRegex(
-                @"chara/demihuman/d(?'id'\d{4})/obj/equipment/e(?'equip'\d{4})/material/v(?'variant'\d{4})/mt_d\k'id'e\k'equip'_(?'slot'[a-z]{3})_[a-z]+\.mtrl")]
+                @"chara/demihuman/d(?'id'\d{4})/obj/equipment/e(?'equip'\d{4})/material/v(?'variant'\d{4})/mt_d\k'id'e\k'equip'_(?'slot'[a-z]{3})_[a-z]+\.mtrl",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId demiId, PrimaryId equipId, EquipSlot slot, Variant variant, string suffix)
@@ -156,7 +168,8 @@ public static partial class GamePaths
         public static partial class Tex
         {
             [GeneratedRegex(
-                @"chara/demihuman/d(?'id'\d{4})/obj/equipment/e(?'equip'\d{4})/texture/v(?'variant'\d{2})_d\k'id'e\k'equip'_(?'slot'[a-z]{3})(_[a-z])?_[a-z]\.tex")]
+                @"chara/demihuman/d(?'id'\d{4})/obj/equipment/e(?'equip'\d{4})/texture/v(?'variant'\d{2})_d\k'id'e\k'equip'_(?'slot'[a-z]{3})(_[a-z])?_[a-z]\.tex",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId demiId, PrimaryId equipId, EquipSlot slot, Variant variant, char suffix1, char suffix2 = '\0')
@@ -186,7 +199,7 @@ public static partial class GamePaths
     {
         public static partial class Imc
         {
-            [GeneratedRegex(@"chara/equipment/e(?'id'\d{4})/e\k'id'\.imc")]
+            [GeneratedRegex(@"chara/equipment/e(?'id'\d{4})/e\k'id'\.imc", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId equipId)
@@ -195,7 +208,7 @@ public static partial class GamePaths
 
         public static partial class Mdl
         {
-            [GeneratedRegex(@"chara/equipment/e(?'id'\d{4})/model/c(?'race'\d{4})e\k'id'_(?'slot'[a-z]{3})\.mdl")]
+            [GeneratedRegex(@"chara/equipment/e(?'id'\d{4})/model/c(?'race'\d{4})e\k'id'_(?'slot'[a-z]{3})\.mdl", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId equipId, GenderRace raceCode, EquipSlot slot)
@@ -205,7 +218,7 @@ public static partial class GamePaths
         public static partial class Mtrl
         {
             [GeneratedRegex(
-                @"chara/equipment/e(?'id'\d{4})/material/v(?'variant'\d{4})/mt_c(?'race'\d{4})e\k'id'_(?'slot'[a-z]{3})_[a-z]+\.mtrl")]
+                @"chara/equipment/e(?'id'\d{4})/material/v(?'variant'\d{4})/mt_c(?'race'\d{4})e\k'id'_(?'slot'[a-z]{3})_[a-z]+\.mtrl", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId equipId, GenderRace raceCode, EquipSlot slot, Variant variant, string suffix)
@@ -218,16 +231,18 @@ public static partial class GamePaths
         public static partial class Tex
         {
             [GeneratedRegex(
-                @"chara/equipment/e(?'id'\d{4})/texture/v(?'variant'\d{2})_c(?'race'\d{4})e\k'id'_(?'slot'[a-z]{3})(_[a-z])?_[a-z]\.tex")]
+                @"chara/equipment/e(?'id'\d{4})/texture/v(?'variant'\d{2})_c(?'race'\d{4})e\k'id'_(?'slot'[a-z]{3})(_[a-z])?_[a-z]\.tex",
+                Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId equipId, GenderRace raceCode, EquipSlot slot, Variant variant, char suffix1, char suffix2 = '\0')
+            public static string Path(PrimaryId equipId, GenderRace raceCode, EquipSlot slot, Variant variant, char suffix1,
+                char suffix2 = '\0')
                 => $"chara/equipment/e{equipId.Id:D4}/texture/v{variant.Id:D2}_c{raceCode.ToRaceCode()}e{equipId.Id:D4}_{slot.ToSuffix()}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
         }
 
         public static partial class Avfx
         {
-            [GeneratedRegex(@"chara/equipment/e(?'id'\d{4})/vfx/eff/ve(?'variant'\d{4})\.avfx")]
+            [GeneratedRegex(@"chara/equipment/e(?'id'\d{4})/vfx/eff/ve(?'variant'\d{4})\.avfx", Flags2)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId equipId, byte effectId)
@@ -236,7 +251,7 @@ public static partial class GamePaths
 
         public static partial class Decal
         {
-            [GeneratedRegex(@"chara/common/texture/decal_equip/-decal_(?'decalId'\d{3})\.tex")]
+            [GeneratedRegex(@"chara/common/texture/decal_equip/-decal_(?'decalId'\d{3})\.tex", Flags2)]
             public static partial Regex Regex();
 
             public static string Path(byte decalId)
@@ -248,7 +263,7 @@ public static partial class GamePaths
     {
         public static partial class Imc
         {
-            [GeneratedRegex(@"chara/accessory/a(?'id'\d{4})/a\k'id'\.imc")]
+            [GeneratedRegex(@"chara/accessory/a(?'id'\d{4})/a\k'id'\.imc", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId accessoryId)
@@ -257,7 +272,7 @@ public static partial class GamePaths
 
         public static partial class Mdl
         {
-            [GeneratedRegex(@"chara/accessory/a(?'id'\d{4})/model/c(?'race'\d{4})a\k'id'_(?'slot'[a-z]{3})\.mdl")]
+            [GeneratedRegex(@"chara/accessory/a(?'id'\d{4})/model/c(?'race'\d{4})a\k'id'_(?'slot'[a-z]{3})\.mdl", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId accessoryId, GenderRace raceCode, EquipSlot slot)
@@ -267,7 +282,7 @@ public static partial class GamePaths
         public static partial class Mtrl
         {
             [GeneratedRegex(
-                @"chara/accessory/a(?'id'\d{4})/material/v(?'variant'\d{4})/mt_c(?'race'\d{4})a\k'id'_(?'slot'[a-z]{3})_[a-z]+\.mtrl")]
+                @"chara/accessory/a(?'id'\d{4})/material/v(?'variant'\d{4})/mt_c(?'race'\d{4})a\k'id'_(?'slot'[a-z]{3})_[a-z]+\.mtrl", Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId accessoryId, GenderRace raceCode, EquipSlot slot, Variant variant, string suffix)
@@ -280,7 +295,8 @@ public static partial class GamePaths
         public static partial class Tex
         {
             [GeneratedRegex(
-                @"chara/accessory/a(?'id'\d{4})/texture/v(?'variant'\d{2})_c(?'race'\d{4})a\k'id'_(?'slot'[a-z]{3})(_[a-z])?_[a-z]\.tex")]
+                @"chara/accessory/a(?'id'\d{4})/texture/v(?'variant'\d{2})_c(?'race'\d{4})a\k'id'_(?'slot'[a-z]{3})(_[a-z])?_[a-z]\.tex",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(PrimaryId accessoryId, GenderRace raceCode, EquipSlot slot, Variant variant, char suffix1,
@@ -315,7 +331,8 @@ public static partial class GamePaths
         public static partial class Mdl
         {
             [GeneratedRegex(
-                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/model/c\k'race'\k'typeabr'\k'id'_(?'slot'[a-z]{3})\.mdl")]
+                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/model/c\k'race'\k'typeabr'\k'id'_(?'slot'[a-z]{3})\.mdl",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(GenderRace raceCode, BodySlot slot, PrimaryId slotId, CustomizationType type)
@@ -325,7 +342,7 @@ public static partial class GamePaths
         public static partial class Mtrl
         {
             [GeneratedRegex(
-                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/material(/v(?'variant'\d{4}))?/mt_c\k'race'\k'typeabr'\k'id'(_(?'slot'[a-z]{3}))?_[a-z]+\.mtrl")]
+                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/material(/v(?'variant'\d{4}))?/mt_c\k'race'\k'typeabr'\k'id'(_(?'slot'[a-z]{3}))?_[a-z]+(?:_[^.]*)?\.mtrl", Flags1)]
             public static partial Regex Regex();
 
             public static string FolderPath(GenderRace raceCode, BodySlot slot, PrimaryId slotId, Variant variant)
@@ -388,7 +405,8 @@ public static partial class GamePaths
         public static partial class Tex
         {
             [GeneratedRegex(
-                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/texture/(?'minus'(--)?)(v(?'variant'\d{2})_)?c\k'race'\k'typeabr'\k'id'(_(?'slot'[a-z]{3}))?(_[a-z])?_[a-z]\.tex")]
+                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/texture/(?'minus'(--)?)(v(?'variant'\d{2})_)?c\k'race'\k'typeabr'\k'id'(_(?'slot'[a-z]{3}))?(_[a-z])?_[a-z]\.tex",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string Path(GenderRace raceCode, BodySlot slot, PrimaryId slotId, char suffix1, bool minus = false,
@@ -403,47 +421,47 @@ public static partial class GamePaths
                   + $"c{raceCode.ToRaceCode()}{slot.ToAbbreviation()}{slotId.Id:D4}{(type != CustomizationType.Unknown ? $"_{type.ToSuffix()}" : string.Empty)}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
 
 
-            [GeneratedRegex(@"chara/common/texture/(?'catchlight'catchlight)(.*)\.tex")]
+            [GeneratedRegex(@"chara/common/texture/(?'catchlight'catchlight)(.*)\.tex", Flags2)]
             public static partial Regex CatchlightRegex();
 
-            [GeneratedRegex(@"chara/common/texture/skin(?'skin'.*)\.tex")]
+            [GeneratedRegex(@"chara/common/texture/skin(?'skin'.*)\.tex", Flags2)]
             public static partial Regex SkinRegex();
 
-            [GeneratedRegex(@"chara/common/texture/decal_(?'location'[a-z]+)/[-_]?decal_(?'id'\d+).tex")]
+            [GeneratedRegex(@"chara/common/texture/decal_(?'location'[a-z]+)/[-_]?decal_(?'id'\d+).tex", Flags2)]
             public static partial Regex DecalRegex();
 
-            [GeneratedRegex(@"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/texture")]
+            [GeneratedRegex(@"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/texture", Flags2)]
             public static partial Regex FolderRegex();
         }
     }
 
     public static partial class Icon
     {
-        [GeneratedRegex(@"ui/icon/(?'group'\d*)(/(?'lang'[a-z]{2}))?(/(?'hq'hq))?/(?'id'\d*)(?'hr'_hr1)?\.tex")]
+        [GeneratedRegex(@"ui/icon/(?'group'\d*)(/(?'lang'[a-z]{2}))?(/(?'hq'hq))?/(?'id'\d*)(?'hr'_hr1)?\.tex", Flags2)]
         public static partial Regex Regex();
     }
 
     public static partial class Map
     {
-        [GeneratedRegex(@"ui/map/(?'id'[a-z0-9]{4})/(?'variant'\d{2})/\k'id'\k'variant'(?'suffix'[a-z])?(_[a-z])?\.tex")]
+        [GeneratedRegex(@"ui/map/(?'id'[a-z0-9]{4})/(?'variant'\d{2})/\k'id'\k'variant'(?'suffix'[a-z])?(_[a-z])?\.tex", Flags1)]
         public static partial Regex Regex();
     }
 
     public static partial class Font
     {
-        [GeneratedRegex(@"common/font/(?'fontname'.*)_(?'id'\d\d)(_lobby)?\.fdt")]
+        [GeneratedRegex(@"common/font/(?'fontname'.*)_(?'id'\d\d)(_lobby)?\.fdt", Flags2)]
         public static partial Regex Regex();
     }
 
     public static partial class Vfx
     {
-        [GeneratedRegex(@"chara[\/]action[\/](?'key'[^\s]+?)\.tmb", RegexOptions.IgnoreCase)]
+        [GeneratedRegex(@"chara[\/]action[\/](?'key'[^\s]+?)\.tmb", RegexOptions.IgnoreCase | Flags2)]
         public static partial Regex Tmb();
 
         public static string ActionTmb(string key)
             => $"chara/action/{key}.tmb";
 
-        [GeneratedRegex(@"chara[\/]human[\/]c0101[\/]animation[\/]a0001[\/][^\s]+?[\/](?'key'[^\s]+?)\.pap", RegexOptions.IgnoreCase)]
+        [GeneratedRegex(@"chara[\/]human[\/]c0101[\/]animation[\/]a0001[\/][^\s]+?[\/](?'key'[^\s]+?)\.pap", RegexOptions.IgnoreCase | Flags2)]
         public static partial Regex Pap();
     }
 
