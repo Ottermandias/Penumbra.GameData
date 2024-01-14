@@ -1,5 +1,7 @@
+using Lumina.Data.Files;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
+using MtrlFile = Penumbra.GameData.Files.MtrlFile;
 
 namespace Penumbra.GameData.Data;
 
@@ -342,7 +344,8 @@ public static partial class GamePaths
         public static partial class Mtrl
         {
             [GeneratedRegex(
-                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/material(/v(?'variant'\d{4}))?/mt_c\k'race'\k'typeabr'\k'id'(_(?'slot'[a-z]{3}))?_[a-z]+(?:_[^.]*)?\.mtrl", Flags1)]
+                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/material(/v(?'variant'\d{4}))?/mt_c\k'race'\k'typeabr'\k'id'(_(?'slot'[a-z]{3}))?_[a-z]+(?:_[^.]*)?\.mtrl",
+                Flags1)]
             public static partial Regex Regex();
 
             public static string FolderPath(GenderRace raceCode, BodySlot slot, PrimaryId slotId, Variant variant)
@@ -476,5 +479,25 @@ public static partial class GamePaths
         public const string DummyPath = "common/graphics/texture/dummy.tex";
 
         public const string TransparentPath = "chara/common/texture/transparent.tex";
+
+        /// <summary> DX11 specific textures get '--' prepended to the filename. Even if the filename already starts with '--'. </summary>
+        /// <param name="texture"> The texture struct to check. </param>
+        /// <param name="ret"> The correctly modified path. </param>
+        /// <returns> Whether the return path was manipulated. </returns>
+        public static bool HandleDx11Path(in MtrlFile.Texture texture, out string ret)
+        {
+            if (!texture.DX11)
+            {
+                ret = texture.Path;
+                return false;
+            }
+
+            var fileName       = Path.GetFileName(texture.Path.AsSpan());
+            var lastSlashIndex = texture.Path.LastIndexOf('/');
+            ret = lastSlashIndex >= 0
+                ? $"{texture.Path.AsSpan()[..lastSlashIndex]}/--{fileName}"
+                : $"--{fileName}";
+            return true;
+        }
     }
 }
