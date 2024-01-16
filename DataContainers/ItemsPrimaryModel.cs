@@ -17,8 +17,16 @@ public sealed class ItemsPrimaryModel(DalamudPluginInterface pi, Logger log, IDa
         foreach (var type in Enum.GetValues<FullEquipType>().Where(v => !FullEquipTypeExtensions.OffhandTypes.Contains(v)))
         {
             var list = items.Value[(int)type];
-            foreach (var item in list)
-                dict.TryAdd((uint)item.Item2, item);
+            if (type is FullEquipType.Hands)
+            {
+                foreach (var item in list.Where(i => !i.Item1.EndsWith(" (Gauntlets)")))
+                    dict.TryAdd((uint)item.Item2, item);
+            }
+            else
+            {
+                foreach (var item in list)
+                    dict.TryAdd((uint)item.Item2, item);
+            }
         }
 
         // TODO: FrozenDictionary.
