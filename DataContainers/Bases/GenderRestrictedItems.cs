@@ -274,7 +274,7 @@ public static class GenderRestrictedItems
         new RestrictedItemPair(13698, 10035, 1), // Scion Thaumaturge's Gaskins                 -> The Emperor's New Breeches
         new RestrictedItemPair(13699, 30065, 2), // Scion Thaumaturge's Moccasins              <-  Scion Sorceress's High Boots
         new RestrictedItemPair(13327, 15942, 3), // Scion Chronocler's Cowl                    <-> Scion Healer's Robe
-        new RestrictedItemPair(13701, 15943, 3), // Scion Chronocler's Tights                  <-> Scion Healer's Halftights
+        new RestrictedItemPair(13701, 15943, 1), // Scion Chronocler's Tights                   -> Scion Healer's Halftights
         new RestrictedItemPair(13702, 15944, 3), // Scion Chronocler's Caligae                 <-> Scion Healer's Highboots
         new RestrictedItemPair(14861, 13324, 3), // Head Engineer's Goggles                    <-> Scion Striker's Visor
         new RestrictedItemPair(14862, 13325, 3), // Head Engineer's Attire                     <-> Scion Striker's Attire
