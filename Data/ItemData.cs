@@ -109,7 +109,6 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
-        (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Saw, FullEquipType.ClawHammer, 40),
         (FullEquipType.CrossPeinHammer, FullEquipType.File, 40),
         (FullEquipType.RaisingHammer, FullEquipType.Pliers, 40),
