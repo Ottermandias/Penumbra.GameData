@@ -49,4 +49,7 @@ public enum WeaponCategory : byte
     Dancer      = 107,
     Reaper      = 108,
     Sage        = 109,
+    Pictomancer = 200, // TODO
+    Viper       = 201, // TODO
+    Beastmaster = 202, // TODO
 }

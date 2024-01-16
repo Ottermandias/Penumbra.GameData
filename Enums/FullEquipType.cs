@@ -70,6 +70,12 @@ public enum FullEquipType : byte
     Sledgehammer,  // MIN Off
     GardenScythe,  // BTN Off
     Gig,           // FSH Off
+
+    Sabre,    // VPR TODO
+    SabreOff, // VPR Off TODO
+    Brush,    // PCT
+    Palette,  // PCT Off
+    Whip,     // BMR TODO
 }
 
 public static class FullEquipTypeExtensions
@@ -106,6 +112,8 @@ public static class FullEquipTypeExtensions
             FullEquipType.Scythe     => true,
             FullEquipType.Nouliths   => true,
             FullEquipType.Shield     => true,
+            FullEquipType.Brush      => true,
+            FullEquipType.Sabre      => true,
             _                        => false,
         };
 
@@ -224,6 +232,11 @@ public static class FullEquipTypeExtensions
             FullEquipType.Sledgehammer    => "Sledgehammer",
             FullEquipType.GardenScythe    => "Garden Scythe",
             FullEquipType.Gig             => "Gig",
+            FullEquipType.Brush           => "Brush",
+            FullEquipType.Palette         => "Palette",
+            FullEquipType.Sabre           => "Sabre",
+            FullEquipType.SabreOff        => "Sabre (Offhand)",
+            FullEquipType.Whip            => "Whip",
             _                             => "Unknown",
         };
 
@@ -290,6 +303,11 @@ public static class FullEquipTypeExtensions
             FullEquipType.Sledgehammer    => EquipSlot.OffHand,
             FullEquipType.GardenScythe    => EquipSlot.OffHand,
             FullEquipType.Gig             => EquipSlot.OffHand,
+            FullEquipType.Brush           => EquipSlot.MainHand,
+            FullEquipType.Palette         => EquipSlot.OffHand,
+            FullEquipType.Sabre           => EquipSlot.MainHand,
+            FullEquipType.SabreOff        => EquipSlot.OffHand,
+            FullEquipType.Whip            => EquipSlot.MainHand,
             _                             => EquipSlot.Unknown,
         };
 
@@ -382,6 +400,11 @@ public static class FullEquipTypeExtensions
             WeaponCategory.Dancer                    => FullEquipType.GlaivesOff,
             WeaponCategory.Reaper                    => FullEquipType.Scythe,
             WeaponCategory.Sage                      => FullEquipType.Nouliths,
+            WeaponCategory.Pictomancer when mainhand => FullEquipType.Brush,
+            WeaponCategory.Pictomancer               => FullEquipType.Palette,
+            WeaponCategory.Viper when mainhand       => FullEquipType.Sabre,
+            WeaponCategory.Viper                     => FullEquipType.SabreOff,
+            WeaponCategory.Beastmaster               => FullEquipType.Whip,
             _                                        => FullEquipType.Unknown,
         };
 
@@ -399,6 +422,8 @@ public static class FullEquipTypeExtensions
             FullEquipType.Glaives => FullEquipType.GlaivesOff,
             FullEquipType.Bow     => FullEquipType.BowOff,
             FullEquipType.Katana  => FullEquipType.KatanaOff,
+            FullEquipType.Brush   => FullEquipType.Palette,
+            FullEquipType.Sabre   => FullEquipType.SabreOff,
             _                     => FullEquipType.Unknown,
         };
 
@@ -427,6 +452,8 @@ public static class FullEquipTypeExtensions
             FullEquipType.Pickaxe         => FullEquipType.Sledgehammer,
             FullEquipType.Hatchet         => FullEquipType.GardenScythe,
             FullEquipType.FishingRod      => FullEquipType.Gig,
+            FullEquipType.Brush           => FullEquipType.Palette,
+            FullEquipType.Sabre           => FullEquipType.SabreOff,
             _                             => FullEquipType.Unknown,
         };
 
@@ -449,6 +476,7 @@ public static class FullEquipTypeExtensions
             FullEquipType.KatanaOff => true,
             FullEquipType.RapierOff => true,
             FullEquipType.Shield    => true,
+            FullEquipType.Palette   => true,
             _                       => false,
         };
 
@@ -464,6 +492,8 @@ public static class FullEquipTypeExtensions
             FullEquipType.GlaivesOff => " (Offhand)",
             FullEquipType.BowOff     => " (Quiver)",
             FullEquipType.KatanaOff  => " (Sheathe)",
+            FullEquipType.SabreOff   => " (Offhand)",
+            FullEquipType.Palette    => " (Palette)",
             _                        => string.Empty,
         };
 

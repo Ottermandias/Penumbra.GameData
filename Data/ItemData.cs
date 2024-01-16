@@ -88,8 +88,9 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         (FullEquipType.Glaives, FullEquipType.GlaivesOff, 50),
         (FullEquipType.Nouliths, FullEquipType.Unknown, 100),
         (FullEquipType.Scythe, FullEquipType.Unknown, 100),
-        (FullEquipType.Unknown, FullEquipType.Unknown, 100),
-        (FullEquipType.Unknown, FullEquipType.Unknown, 100),
+        (FullEquipType.Brush, FullEquipType.Palette, 50), // TODO
+        (FullEquipType.Sabre, FullEquipType.SabreOff, 50), // TODO
+        (FullEquipType.Whip, FullEquipType.Unknown, 100), // TODO
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
@@ -178,6 +179,11 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         //     > 2650 and <= 2700 => FullEquipType.GlaivesOff,
         //     > 2700 and <= 2800 => FullEquipType.Nouliths,
         //     > 2800 and <= 2900 => FullEquipType.Scythe,
+        //     > 2900 and <= 2950 => FullEquipType.Brush,
+        //     > 2950 and <= 3000 => FullEquipType.Palette,
+        //     > 3000 and <= 3050 => FullEquipType.Sabre,
+        //     > 3050 and <= 3100 => FullEquipType.SabreOff,
+        //     > 3100 and <= 3200 => FullEquipType.Whip,
         //     > 5040 and <= 5100 => FullEquipType.ClawHammer,
         //     > 5100 and <= 5140 => FullEquipType.CrossPeinHammer,
         //     > 5140 and <= 5200 => FullEquipType.File,
