@@ -52,6 +52,12 @@ public unsafe struct CustomizeArray : IEquatable<CustomizeArray>, IReadOnlyColle
         set => Set(CustomizeIndex.Face, value);
     }
 
+    public bool Highlights
+    {
+        get => Get(CustomizeIndex.Highlights) != CustomizeValue.Zero;
+        set => Set(CustomizeIndex.Highlights, value ? CustomizeValue.Max : CustomizeValue.Zero);
+    }
+
     /// <summary> The default customize array for unspecified characters. </summary>
     public static readonly CustomizeArray Default = GenerateDefault();
 
