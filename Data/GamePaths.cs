@@ -349,7 +349,7 @@ public static partial class GamePaths
             public static partial Regex Regex();
 
             public static string FolderPath(GenderRace raceCode, BodySlot slot, PrimaryId slotId, Variant variant)
-                => variant.Id == byte.MaxValue
+                => variant.Id == 0
                     ? FolderPath(raceCode, slot, slotId)
                     : $"chara/human/c{raceCode.ToRaceCode()}/obj/{slot.ToSuffix()}/{slot.ToAbbreviation()}{slotId.Id:D4}/material/v{variant.Id:D4}";
 
