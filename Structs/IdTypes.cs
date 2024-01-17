@@ -248,6 +248,8 @@ public readonly record struct PrimaryId(ushort Id) : IComparisonOperators<Primar
 [JsonConverter(typeof(Converter))]
 public readonly record struct Variant(byte Id)
 {
+    public static readonly Variant None = new(0);
+
     public static implicit operator Variant(byte id)
         => new(id);
 

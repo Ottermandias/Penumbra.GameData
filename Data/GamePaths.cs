@@ -349,7 +349,7 @@ public static partial class GamePaths
             public static partial Regex Regex();
 
             public static string FolderPath(GenderRace raceCode, BodySlot slot, PrimaryId slotId, Variant variant)
-                => variant.Id == 0
+                => variant == Variant.None
                     ? FolderPath(raceCode, slot, slotId)
                     : $"chara/human/c{raceCode.ToRaceCode()}/obj/{slot.ToSuffix()}/{slot.ToAbbreviation()}{slotId.Id:D4}/material/v{variant.Id:D4}";
 
@@ -373,7 +373,7 @@ public static partial class GamePaths
                     case GenderRace.HrothgarFemale:
                     case GenderRace.HrothgarMaleNpc:
                     case GenderRace.HrothgarFemaleNpc:
-                        var folder = FolderPath(raceCode, BodySlot.Tail, 1, variant.Id == byte.MaxValue ? 1 : variant);
+                        var folder = FolderPath(raceCode, BodySlot.Tail, 1, variant == Variant.None ? 1 : variant);
                         actualSlotId = 1;
                         return $"{folder}{fileName}";
                     default:
@@ -384,7 +384,7 @@ public static partial class GamePaths
 
             public static string Path(GenderRace raceCode, BodySlot slot, PrimaryId slotId, string fileName,
                 out GenderRace actualGr, out PrimaryId actualSlotId)
-                => Path(raceCode, slot, slotId, fileName, out actualGr, out actualSlotId, byte.MaxValue);
+                => Path(raceCode, slot, slotId, fileName, out actualGr, out actualSlotId, Variant.None);
 
             public static string Path(GenderRace raceCode, BodySlot slot, PrimaryId slotId, string fileName,
                 out GenderRace actualGr, out PrimaryId actualSlotId, Variant variant)
@@ -414,13 +414,13 @@ public static partial class GamePaths
 
             public static string Path(GenderRace raceCode, BodySlot slot, PrimaryId slotId, char suffix1, bool minus = false,
                 CustomizationType type = CustomizationType.Unknown, char suffix2 = '\0')
-                => Path(raceCode, slot, slotId, suffix1, byte.MaxValue, minus, type, suffix2);
+                => Path(raceCode, slot, slotId, suffix1, Variant.None, minus, type, suffix2);
 
             public static string Path(GenderRace raceCode, BodySlot slot, PrimaryId slotId, char suffix1, Variant variant, bool minus = false,
                 CustomizationType type = CustomizationType.Unknown, char suffix2 = '\0')
                 => $"chara/human/c{raceCode.ToRaceCode()}/obj/{slot.ToSuffix()}/{slot.ToAbbreviation()}{slotId.Id:D4}/texture/"
                   + (minus ? "--" : string.Empty)
-                  + (variant != byte.MaxValue ? $"v{variant.Id:D2}_" : string.Empty)
+                  + (variant != Variant.None ? $"v{variant.Id:D2}_" : string.Empty)
                   + $"c{raceCode.ToRaceCode()}{slot.ToAbbreviation()}{slotId.Id:D4}{(type != CustomizationType.Unknown ? $"_{type.ToSuffix()}" : string.Empty)}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
 
 
