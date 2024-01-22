@@ -500,9 +500,8 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             return main;
 
         var parentIdx = _toParentIdx.Invoke(main->ObjectIndex);
-        return parentIdx >= 0
-            ? (GameObject*)_objects.GetObjectAddress(parentIdx)
-            : main;
+        var parent    = (GameObject*)_objects.GetObjectAddress(parentIdx);
+        return parent == null ? main : parent;
     }
 
     /// <summary> The existing IDs that correspond to mannequins. </summary>
