@@ -261,12 +261,22 @@ public partial class MdlFile : IWritable
 
     public enum VertexType
     {
-        Single3    = 2,
-        Single4    = 3,
-        UInt       = 5,
-        ByteFloat4 = 8,
-        Half2      = 13,
-        Half4      = 14,
+        Single1  = 0,
+        Single2  = 1,  
+        Single3  = 2,
+        Single4  = 3,
+        // Unk4  = 4,
+        UByte4   = 5,
+        Short2   = 6,
+        Short4   = 7,
+        NByte4   = 8,
+        NShort2  = 9,
+        NShort4  = 10,
+        // Unk11 = 11,
+        // Unk12 = 12
+        Half2    = 13,
+        Half4    = 14,
+        // Unk15 = 15
     }
 
     public enum VertexUsage
