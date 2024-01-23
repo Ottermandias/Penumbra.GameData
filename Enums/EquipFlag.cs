@@ -94,4 +94,42 @@ public static class EquipFlagExtensions
             EquipSlot.LFinger  => EquipFlag.LFinger | EquipFlag.LFingerStain,
             _                  => 0,
         };
+
+    /// <summary> Convert an equip flag back to its slot. </summary>
+    public static EquipSlot ToSlot(this EquipFlag flag)
+        => ToSlot(flag, out _);
+
+    /// <summary> Convert an equip flag back to its slot. </summary>
+    public static EquipSlot ToSlot(this EquipFlag flag, out bool stain)
+    {
+        (var ret, stain) = flag switch
+        {
+            EquipFlag.Mainhand      => (EquipSlot.MainHand, false),
+            EquipFlag.Offhand       => (EquipSlot.OffHand, false),
+            EquipFlag.Head          => (EquipSlot.Head, false),
+            EquipFlag.Body          => (EquipSlot.Body, false),
+            EquipFlag.Hands         => (EquipSlot.Hands, false),
+            EquipFlag.Legs          => (EquipSlot.Legs, false),
+            EquipFlag.Feet          => (EquipSlot.Feet, false),
+            EquipFlag.Ears          => (EquipSlot.Ears, false),
+            EquipFlag.Neck          => (EquipSlot.Neck, false),
+            EquipFlag.Wrist         => (EquipSlot.Wrists, false),
+            EquipFlag.RFinger       => (EquipSlot.RFinger, false),
+            EquipFlag.LFinger       => (EquipSlot.LFinger, false),
+            EquipFlag.MainhandStain => (EquipSlot.MainHand, true),
+            EquipFlag.OffhandStain  => (EquipSlot.OffHand, true),
+            EquipFlag.HeadStain     => (EquipSlot.Head, true),
+            EquipFlag.BodyStain     => (EquipSlot.Body, true),
+            EquipFlag.HandsStain    => (EquipSlot.Hands, true),
+            EquipFlag.LegsStain     => (EquipSlot.Legs, true),
+            EquipFlag.FeetStain     => (EquipSlot.Feet, true),
+            EquipFlag.EarsStain     => (EquipSlot.Ears, true),
+            EquipFlag.NeckStain     => (EquipSlot.Neck, true),
+            EquipFlag.WristStain    => (EquipSlot.Wrists, true),
+            EquipFlag.RFingerStain  => (EquipSlot.RFinger, true),
+            EquipFlag.LFingerStain  => (EquipSlot.LFinger, true),
+            _                       => (EquipSlot.Unknown, false),
+        };
+        return ret;
+    }
 }
