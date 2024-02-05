@@ -20,7 +20,7 @@ public sealed class NpcCombo(string label, NameDictionary names, Logger log)
             .Select(g => g.Key)
             .ToArray()))
         .OrderBy(g => g.Key, Comparer)
-        .ToList(), log)
+        .ToList(), MouseWheelType.None, log)
 {
     /// <summary> Just print the name. </summary>
     protected override string ToString((string Name, NpcId[] Ids) obj)

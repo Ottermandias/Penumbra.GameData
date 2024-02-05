@@ -16,7 +16,7 @@ public sealed class WorldCombo : FilterComboCache<KeyValuePair<WorldId, string>>
     /// <param name="worlds"> The dictionary of worlds. </param>
     /// <param name="log"> A logger. </param>
     public WorldCombo(DictWorld worlds, Logger log)
-        : base(worlds.OrderBy(kvp => kvp.Value).Prepend(new KeyValuePair<WorldId, string>(WorldId.AnyWorld, AnyWorldString)), log)
+        : base(worlds.OrderBy(kvp => kvp.Value).Prepend(new KeyValuePair<WorldId, string>(WorldId.AnyWorld, AnyWorldString)), MouseWheelType.None, log)
     {
         // Start with the Any World entry selected.
         CurrentSelection    = new KeyValuePair<WorldId, string>(WorldId.AnyWorld, AnyWorldString);
