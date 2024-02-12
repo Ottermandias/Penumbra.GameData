@@ -167,7 +167,8 @@ public sealed class ObjectIdentification(
                         set[$"Customization: {raceString}{genderString}Skin Textures"] = null;
                         break;
                     case CustomizationType.DecalFace:
-                        set[$"Customization: Face Decal {info.PrimaryId}"] = null;
+                        set[$"Customization: Face Decal {info.PrimaryId}"] =
+                            (ModelRace.Unknown, Gender.Unknown, CustomizeIndex.FacePaint, (CustomizeValue)info.PrimaryId.Id);
                         break;
                     case CustomizationType.Iris when race == ModelRace.Unknown:
                         set[$"Customization: All Eyes (Catchlight)"] = null;
@@ -182,9 +183,14 @@ public sealed class ObjectIdentification(
                          || info.CustomizationType == CustomizationType.Unknown
                                 ? "Customization: Unknown"
                                 : $"Customization: {race.ToName()} {gender.ToName()} {info.BodySlot} ({info.CustomizationType}) {info.PrimaryId}";
-                        set[customizationString] = info.CustomizationType is CustomizationType.Hair
-                            ? (race, gender, CustomizeIndex.Hairstyle, (CustomizeValue)info.PrimaryId.Id)
-                            : null;
+                        set[customizationString] = info.BodySlot switch
+                        {
+                            BodySlot.Hair => (race, gender, CustomizeIndex.Hairstyle, (CustomizeValue)info.PrimaryId.Id),
+                            BodySlot.Tail => (race, gender, CustomizeIndex.TailShape, (CustomizeValue)info.PrimaryId.Id),
+                            BodySlot.Ear  => (race, gender, CustomizeIndex.TailShape, (CustomizeValue)info.PrimaryId.Id),
+                            BodySlot.Face => (race, gender, CustomizeIndex.Face, (CustomizeValue)info.PrimaryId.Id),
+                            _             => null,
+                        };
                         break;
                     }
                 }
