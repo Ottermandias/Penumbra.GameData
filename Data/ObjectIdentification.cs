@@ -181,8 +181,10 @@ public sealed class ObjectIdentification(
                          || info.BodySlot == BodySlot.Unknown
                          || info.CustomizationType == CustomizationType.Unknown
                                 ? "Customization: Unknown"
-                                : $"Customization: {race} {gender} {info.BodySlot} ({info.CustomizationType}) {info.PrimaryId}";
-                        set[customizationString] = null;
+                                : $"Customization: {race.ToName()} {gender.ToName()} {info.BodySlot} ({info.CustomizationType}) {info.PrimaryId}";
+                        set[customizationString] = info.CustomizationType is CustomizationType.Hair
+                            ? (race, gender, CustomizeIndex.Hairstyle, (CustomizeValue)info.PrimaryId.Id)
+                            : null;
                         break;
                     }
                 }

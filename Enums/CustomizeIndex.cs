@@ -1,6 +1,4 @@
-﻿using Penumbra.GameData.Structs;
-
-namespace Penumbra.GameData.Enums;
+﻿namespace Penumbra.GameData.Enums;
 
 /// <summary> All options that can be configured for humans via the customize array. </summary>
 public enum CustomizeIndex : byte
