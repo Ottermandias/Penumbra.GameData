@@ -15,12 +15,12 @@ public static class ChangedItemExtensions
             null                      => (ChangedItemType.None, 0),
             (Item i, FullEquipType t) => (t.IsOffhandType() ? ChangedItemType.ItemOffhand : ChangedItemType.Item, i.RowId),
             Action a                  => (ChangedItemType.Action, a.RowId),
-            (Race r, Gender g, CustomizeIndex i, CustomizeValue v) => (ChangedItemType.Customization,
+            (ModelRace r, Gender g, CustomizeIndex i, CustomizeValue v) => (ChangedItemType.Customization,
                 (uint)r | ((uint)g << 8) | ((uint)i << 16) | ((uint)v.Value << 24)),
             _ => (ChangedItemType.Unknown, 0),
         };
     }
 
-    public static (Race Race, Gender Gender, CustomizeIndex Index, CustomizeValue Value) Split(uint id)
-        => ((Race)id, (Gender)(id >> 8), (CustomizeIndex)(id >> 16), (CustomizeValue)(id >> 24));
+    public static (ModelRace Race, Gender Gender, CustomizeIndex Index, CustomizeValue Value) Split(uint id)
+        => ((ModelRace)id, (Gender)(id >> 8), (CustomizeIndex)(id >> 16), (CustomizeValue)(id >> 24));
 }
