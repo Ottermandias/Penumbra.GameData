@@ -1,5 +1,9 @@
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using ImGuiNET;
+using OtterGui;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -20,6 +24,84 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
 
     /// <summary> Used in construction from user strings. </summary>
     public class IdentifierParseError(string reason) : Exception(reason);
+
+    /// <summary> Create an ImGui Tooltip for user strings. </summary>
+    public static void WriteUserStringTooltip(bool withIndex)
+    {
+        using var tt   = ImRaii.Tooltip();
+        using var font = ImRaii.PushFont(UiBuilder.MonoFont);
+        ImGui.TextUnformatted("Valid formats for an Identifier String are:");
+
+        const uint typeColor    = 0xFF40FF40;
+        const uint nameColor    = 0xFF00D0D0;
+        const uint keyColor     = 0xFFFFD060;
+        const uint npcTypeColor = 0xFFFF40FF;
+        const uint npcNameColor = 0xFF4040FF;
+        const uint indexColor   = 0xFFA0A0A0;
+
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("P", typeColor), (" | ", keyColor), ("[Player Name]@<World Name>", nameColor));
+
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("R", typeColor), (" | ", keyColor), ("[Retainer Name]", nameColor));
+
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("N", typeColor), (" | ", keyColor), ("[NPC Type]", npcTypeColor), (" : ", keyColor),
+            ("[Npc Name]", npcNameColor));
+        if (withIndex)
+        {
+            ImGui.SameLine(0, 0);
+            ImGuiUtil.DrawColoredText(("@", keyColor), ("<Object Index>", indexColor));
+        }
+
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("All [] or <> brackets are not to be included but are for placeholders, all", 0),
+            (" bright blue key symbols", keyColor), (" are relevant.", 0));
+
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("O", typeColor), (" | ", keyColor), ("[NPC Type]", npcTypeColor), (" : ", keyColor),
+            ("[Npc Name]", npcNameColor), (" | ", keyColor), ("[Player Name]@<World Name>", nameColor));
+
+        ImGui.NewLine();
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("[P]", typeColor), ("layer, ", 0), ("[R]", typeColor), ("etainer, ", 0), ("[N]", typeColor), ("PC, or ", 0),
+            ("[O]", typeColor), ("wned describe the identifier type.", 0));
+
+        ImGui.NewLine();
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("[Player Name]", nameColor), (" and ", 0), ("[Retainer Name]", nameColor),
+            (" must agree with naming rules.", 0));
+
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("<World Name>", nameColor), (" is optional (", 0), ("Any World", nameColor),
+            (" when not provided), but must be a valid world otherwise.", 0));
+
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("[NPC Type]", npcTypeColor), (" can be ", 0), ("[M]", npcTypeColor), ("ount, ", 0), ("[C]", npcTypeColor),
+            ("ompanion, ", 0), ("[A]", npcTypeColor), ("ccessory, ", 0), ("[E]", npcTypeColor), ("vent NPC, or", 0), ("[B]", npcTypeColor),
+            ("attle NPC.", 0));
+
+        ImGui.Bullet();
+        ImGui.SameLine();
+        ImGuiUtil.DrawColoredText(("[NPC Name]", npcNameColor), (" must be a valid, known NPC name for the chosen type.", 0));
+
+        if (withIndex)
+        {
+            ImGui.Bullet();
+            ImGui.SameLine();
+            ImGuiUtil.DrawColoredText(("<Object Index>", indexColor),
+                (" is optional and must be a non-negative index into the object table.", 0));
+        }
+    }
 
     /// <summary> Convert a string into a list of ActorIdentifiers. </summary>
     /// <param name="userString"> The input string. </param>

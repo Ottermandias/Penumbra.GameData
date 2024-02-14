@@ -60,6 +60,29 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
         };
     }
 
+    /// <summary> Checks if two ActorIdentifiers are equal or match each other due at least one of them being for Any World and not differing otherwise. </summary>
+    public bool Matches(ActorIdentifier other)
+    {
+        if (Type != other.Type)
+            return false;
+
+        return Type switch
+        {
+            IdentifierType.Player => (HomeWorld == other.HomeWorld || HomeWorld == WorldId.AnyWorld || other.HomeWorld == WorldId.AnyWorld)
+             && PlayerName.EqualsCi(other.PlayerName),
+            IdentifierType.Retainer => (Retainer == other.Retainer || Retainer == RetainerType.Both || other.Retainer == RetainerType.Both)
+             && PlayerName.EqualsCi(other.PlayerName),
+            IdentifierType.Owned => (HomeWorld == other.HomeWorld || HomeWorld == WorldId.AnyWorld || other.HomeWorld == WorldId.AnyWorld)
+             && PlayerName.EqualsCi(other.PlayerName)
+             && ActorIdentifierExtensions.Manager.DataIdEquals(this, other),
+            IdentifierType.Special => Index == other.Index,
+            IdentifierType.Npc => ActorIdentifierExtensions.Manager.DataIdEquals(this, other)
+             && (Index == other.Index || Index == ushort.MaxValue || other.Index == ushort.MaxValue),
+            IdentifierType.UnkObject => PlayerName.EqualsCi(other.PlayerName) && Index == other.Index,
+            _                        => false,
+        };
+    }
+
     /// <inheritdoc/>
     public override bool Equals(object? obj)
         => obj is ActorIdentifier other && Equals(other);
@@ -97,6 +120,7 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
                 return $"{parts[0][0]}. {parts[1]}";
             }
         }
+
         return name;
     }
 
