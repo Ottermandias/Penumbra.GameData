@@ -81,7 +81,7 @@ public readonly struct JobGroup
         var maxSet = 64 - BitOperations.LeadingZeroCount((ulong)_flags);
         for (var i = minSet; i < maxSet; ++i)
         {
-            if (_flags.HasFlag((JobFlag)(1 << i)))
+            if (_flags.HasFlag((JobFlag)(1ul << i)))
                 yield return (JobId)i;
         }
     }
