@@ -1,5 +1,5 @@
+using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using Lumina.Misc;
-using Penumbra.GameData.Data;
 using DisassembledShader = Penumbra.GameData.Interop.DisassembledShader;
 
 namespace Penumbra.GameData.Files;
@@ -69,6 +69,18 @@ public partial class ShpkFile
             }
         }
 
+        /// <remarks>
+        /// This is only stored for vertex shaders.
+        /// </remarks>
+        public VertexShader.Input DeclaredInputs
+            => (VertexShader.Input)(AdditionalHeader.Length >= 4 ? BitConverter.ToUInt32(AdditionalHeader, 0) : 0u);
+
+        /// <remarks>
+        /// This is only stored for Shader Model 5 (DirectX 11) vertex shaders.
+        /// </remarks>
+        public VertexShader.Input UsedInputs
+            => (VertexShader.Input)(AdditionalHeader.Length >= 8 ? BitConverter.ToUInt32(AdditionalHeader, 4) : 0u);
+
         public DisassembledShader? Disassembly
             => _disassembly;
 
@@ -94,6 +106,25 @@ public partial class ShpkFile
         {
             if (_disassembly == null)
                 throw new InvalidOperationException();
+
+            if (Stage == DisassembledShader.ShaderStage.Vertex && _disassembly.ShaderModel >= 0x0500)
+            {
+                // Shader Model 3 (DirectX 9) shaders are not handled there because we need to examine the bytecode (high effort), and we assume no one will be likely to ever want to change input signatures of SM3 vertex shaders (low value).
+                VertexShader.Input declaredInputs = 0;
+                VertexShader.Input usedInputs = 0;
+                foreach (var input in _disassembly.InputSignature)
+                {
+                    var inputFlag = input.VertexInputFlag;
+                    declaredInputs |= inputFlag;
+                    if (input.Used != 0)
+                        usedInputs |= inputFlag;
+                }
+                var header = MemoryMarshal.Cast<byte, VertexShader.Input>(AdditionalHeader.AsSpan());
+                if (header.Length >= 1)
+                    header[0] = declaredInputs;
+                if (header.Length >= 2)
+                    header[1] = usedInputs;
+            }
 
             var constants = new List<Resource>();
             var samplers  = new List<Resource>();
