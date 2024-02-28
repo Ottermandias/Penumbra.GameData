@@ -77,6 +77,7 @@ public sealed class DictJobGroup : IDataContainer, IReadOnlyDictionary<JobGroupI
     private bool JobGroupIsValid(JobGroupId id)
         => id.Id switch
         {
+            0    => false,
             < 36 => true,
             // Single jobs and big groups
             91  => true,
