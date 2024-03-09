@@ -1,4 +1,5 @@
 using Penumbra.String;
+using VertexInput = FFXIVClientStructs.FFXIV.Client.Graphics.Kernel.VertexShader.Input;
 
 namespace Penumbra.GameData.Interop;
 
@@ -57,6 +58,37 @@ public partial class DisassembledShader
         public string           SystemValue;
         public Format           Format;
         public VectorComponents Used;
+
+        public readonly VertexInput VertexInputFlag
+            => Name switch
+            {
+                "POSITION"     => Index == 0 ? VertexInput.Position : 0,
+                "BLENDWEIGHT"  => Index == 0 ? VertexInput.BlendWeight : 0,
+                "NORMAL"       => Index == 0 ? VertexInput.Normal : 0,
+                "COLOR"        => Index switch
+                {
+                    0 => VertexInput.Color0,
+                    1 => VertexInput.Color1,
+                    _ => 0,
+                },
+                "FOG"          => Index == 0 ? VertexInput.Fog : 0,
+                "PSIZE"        => Index == 0 ? VertexInput.PSize : 0,
+                "BLENDINDICES" => Index == 0 ? VertexInput.BlendIndices : 0,
+                "TEXCOORD"     => Index switch
+                {
+                    0 => VertexInput.TexCoord0,
+                    1 => VertexInput.TexCoord1,
+                    2 => VertexInput.TexCoord2,
+                    3 => VertexInput.TexCoord3,
+                    4 => VertexInput.TexCoord4,
+                    5 => VertexInput.TexCoord5,
+                    _ => 0,
+                },
+                "TANGENT"      => Index == 0 ? VertexInput.Tangent : 0,
+                "BINORMAL"     => Index == 0 ? VertexInput.Binormal : 0,
+                "DEPTH"        => Index == 0 ? VertexInput.Depth : 0,
+                _              => 0,
+            };
     }
 
     [Flags]
