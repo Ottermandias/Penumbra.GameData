@@ -83,6 +83,12 @@ public static class Sigs
     // ModelResourceHandleUtility
     public const string GetMaterialFileNameBySlot = "E8 ?? ?? ?? ?? 44 8B CD 48 89 44 24";
 
+    // ModelRenderer
+    public const string RenderManager = "48 8B 05 ?? ?? ?? ?? 48 69 D1";
+
+    // ShaderReplacementFixer
+    public const string ModelRendererOnRenderMaterial = "E8 ?? ?? ?? ?? 80 7D ?? ?? 0F B7 08";
+
     // Job service
     public const string ChangeJob         = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 80 61";
 
