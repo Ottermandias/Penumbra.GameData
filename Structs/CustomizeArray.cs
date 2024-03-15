@@ -206,6 +206,7 @@ public unsafe struct CustomizeArray : IEquatable<CustomizeArray>, IReadOnlyColle
 
 
     /// <summary> Try to load a Base64 string into this Customize array. Returns true on success. </summary>
+    [SkipLocalsInit]
     public bool LoadBase64(string base64)
     {
         var buffer = stackalloc byte[Size];
