@@ -112,7 +112,7 @@ public abstract class DataSharer<T>(DalamudPluginInterface pluginInterface, Logg
                     log.Verbose($"[{Name}] Created v{version} for {language} in {stopwatch.ElapsedMilliseconds} ms.");
                     _value = ret;
                     return ret;
-                });
+                }, TaskScheduler.Default);
             return new Tuple<Task<T>, Stopwatch>(task, stopwatch);
         }
     }
