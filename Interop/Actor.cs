@@ -123,7 +123,7 @@ public readonly unsafe struct Actor : IEquatable<Actor>
     public CustomizeArray* Customize
         => (CustomizeArray*)&AsCharacter->DrawData.CustomizeData;
 
-    internal ref CrestFlag CrestBitfield
+    public ref CrestFlag CrestBitfield
         => ref *(CrestFlag*)&AsCharacter->FreeCompanyCrestBitfield;
 
     public override string ToString()
