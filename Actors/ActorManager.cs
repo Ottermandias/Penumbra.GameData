@@ -2,6 +2,7 @@ using Dalamud.Plugin.Services;
 using OtterGui.Services;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
+using Penumbra.GameData.Interop;
 
 namespace Penumbra.GameData.Actors;
 
@@ -16,7 +17,7 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
 
     private readonly ActorResolver _resolver;
     private readonly IClientState  _clientState;
-    private          uint          _homeWorld = 0;
+    private          uint          _homeWorld;
 
 
     /// <summary> Waits for the NameDicts to be ready. </summary>
@@ -38,7 +39,7 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
 
     public ActorManager(NameDicts data,
         IFramework framework,
-        IObjectTable objects,
+        ObjectManager objects,
         IClientState clientState,
         IGameGui gameGui,
         CutsceneResolver toParentIdx)
