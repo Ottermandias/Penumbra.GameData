@@ -12,9 +12,12 @@ public delegate short CutsceneResolver(ushort index);
 public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncService
 {
     /// <summary> The names used for NPC types. </summary>
-    public readonly  NameDicts     Data;
+    public readonly NameDicts Data;
+
     private readonly ActorResolver _resolver;
     private readonly IClientState  _clientState;
+    private          uint          _homeWorld = 0;
+
 
     /// <summary> Waits for the NameDicts to be ready. </summary>
     public Task Awaiter
@@ -29,6 +32,8 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
     {
         if (ActorIdentifierExtensions.Manager == this)
             ActorIdentifierExtensions.Manager = null;
+        _clientState.Login  -= OnLogin;
+        _clientState.Logout -= OnLogout;
     }
 
     public ActorManager(NameDicts data,
@@ -39,12 +44,21 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
         CutsceneResolver toParentIdx)
         : base(objects, framework, data, toParentIdx)
     {
-        Data                              =   data;
-        _clientState                      =   clientState;
-        _resolver                         =   new ActorResolver(gameGui, objects, clientState);
+        Data         = data;
+        _clientState = clientState;
+        _resolver    = new ActorResolver(gameGui, objects, clientState);
         // Set the static manager if it is unset.
         ActorIdentifierExtensions.Manager ??= this;
+        _clientState.Login                +=  OnLogin;
+        _clientState.Logout               +=  OnLogout;
+        _homeWorld                        =   _clientState.LocalPlayer?.HomeWorld.Id ?? 0;
     }
+
+    private void OnLogin()
+        => _homeWorld = _clientState.LocalPlayer?.HomeWorld.Id ?? _homeWorld;
+
+    private void OnLogout()
+        => _homeWorld = 0;
 
     /// <inheritdoc cref="ActorResolver.GetCurrentPlayer"/>
     public ActorIdentifier GetCurrentPlayer()
@@ -79,7 +93,7 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
     {
         return id.Type switch
         {
-            IdentifierType.Player => id.HomeWorld.Id != _clientState.LocalPlayer?.HomeWorld.Id
+            IdentifierType.Player => id.HomeWorld.Id != _homeWorld
                 ? $"{id.PlayerName} ({Data.ToWorldName(id.HomeWorld)})"
                 : id.PlayerName.ToString(),
             IdentifierType.Retainer => $"{id.PlayerName}{id.Retainer switch
@@ -88,7 +102,7 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
                 ActorIdentifier.RetainerType.Mannequin => " (Mannequin)",
                 _                                      => " (Retainer)",
             }}",
-            IdentifierType.Owned => id.HomeWorld.Id != _clientState.LocalPlayer?.HomeWorld.Id
+            IdentifierType.Owned => id.HomeWorld.Id != _homeWorld
                 ? $"{id.PlayerName} ({Data.ToWorldName(id.HomeWorld)})'s {Data.ToName(id.Kind, id.DataId)}"
                 : $"{id.PlayerName}s {Data.ToName(id.Kind,                                     id.DataId)}",
             IdentifierType.Special => ((ScreenActor)id.Index.Index).ToName(),
