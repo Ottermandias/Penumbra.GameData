@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
@@ -31,13 +32,12 @@ public sealed class RestrictedItemsMale(DalamudPluginInterface pluginInterface, 
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, uint> CreateItems(Logger log, IDataManager gameData)
     {
-        var ret   = new Dictionary<uint, uint>();
+        var ret   = new Dictionary<uint, uint>(128);
         var items = gameData.GetExcelSheet<Item>()!;
         foreach (var pair in GenderRestrictedItems.KnownItems)
             GenderRestrictedItems.AddItemMale(ret, pair, items, log);
         GenderRestrictedItems.AddUnknownItems(ret, items, log, 2);
-        // TODO: FrozenDictionary
-        return ret;
+        return ret.ToFrozenDictionary();
     }
 
     /// <inheritdoc/>

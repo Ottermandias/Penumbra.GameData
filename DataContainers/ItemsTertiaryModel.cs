@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using OtterGui.Log;
@@ -24,7 +25,6 @@ public sealed class ItemsTertiaryModel(
             .Where(g => itemsSecondaries.Value
                 .ContainsKey((uint)g.Item2))
             .ToDictionary(g => (uint)g.Item2, g => g);
-        gauntlets.TrimExcess();
-        return gauntlets;
+        return gauntlets.ToFrozenDictionary();
     }
 }

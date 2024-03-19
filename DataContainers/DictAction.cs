@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -37,8 +38,7 @@ public sealed class DictAction(DalamudPluginInterface pluginInterface, Logger lo
             AddAction(hitKey,   action);
         });
 
-        // TODO: FrozenDictionary
-        return storage.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Action>)kvp.Value.Distinct().ToArray());
+        return storage.ToFrozenDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Action>)kvp.Value.Distinct().ToArray());
 
         void AddAction(string? key, Action action)
         {

@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -17,11 +18,11 @@ public sealed class DictWorld(DalamudPluginInterface pluginInterface, Logger log
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<ushort, string> CreateWorldData(IDataManager gameData)
     {
-        var dict = new Dictionary<ushort, string>();
-        foreach (var w in gameData.GetExcelSheet<World>()!.Where(w => w.IsPublic && !w.Name.RawData.IsEmpty))
+        var sheet = gameData.GetExcelSheet<World>()!;
+        var dict  = new Dictionary<ushort, string>((int)sheet.RowCount);
+        foreach (var w in sheet.Where(w => w.IsPublic && !w.Name.RawData.IsEmpty))
             dict.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
-        // TODO: FrozenDictionary
-        return dict;
+        return dict.ToFrozenDictionary();
     }
 
     /// <inheritdoc/>

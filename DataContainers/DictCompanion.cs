@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
@@ -15,12 +16,11 @@ public sealed class DictCompanion(DalamudPluginInterface pluginInterface, Logger
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateCompanionData(IDataManager gameData)
     {
-        var dict = new Dictionary<uint, string>();
-        foreach (var c in gameData.GetExcelSheet<Companion>(gameData.Language)!
-                     .Where(c => c.Singular.RawData.Length > 0 && c.Order < ushort.MaxValue))
+        var sheet = gameData.GetExcelSheet<Companion>(gameData.Language)!;
+        var dict  = new Dictionary<uint, string>((int) sheet.RowCount);
+        foreach (var c in sheet.Where(c => c.Singular.RawData.Length > 0 && c.Order < ushort.MaxValue))
             dict.TryAdd(c.RowId, DataUtility.ToTitleCaseExtended(c.Singular, c.Article));
-        // TODO: FrozenDictionary
-        return dict;
+        return dict.ToFrozenDictionary();
     }
 
     /// <inheritdoc cref="NameDictionary.ContainsKey"/>

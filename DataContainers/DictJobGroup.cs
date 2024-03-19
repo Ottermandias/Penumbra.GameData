@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
@@ -17,7 +18,7 @@ public sealed class DictJobGroup : IDataContainer, IReadOnlyDictionary<JobGroupI
         var sheet     = gameData.GetExcelSheet<ClassJobCategory>()!;
         var jobs      = gameData.GetExcelSheet<ClassJob>(ClientLanguage.English)!;
         AllJobGroups = sheet.Select(j => new JobGroup(j, jobs)).ToArray();
-        _jobGroups   = AllJobGroups.Where(g => JobGroupIsValid(g.Id)).ToDictionary(g => g.Id, g => g);
+        _jobGroups   = AllJobGroups.Where(g => JobGroupIsValid(g.Id)).ToFrozenDictionary(g => g.Id, g => g);
         Memory       = DataUtility.DictionaryMemory(32, Count) + _jobGroups.Sum(kvp => kvp.Value.Name.Length) * 2 + 24 * AllJobGroups.Count;
         Time         = stopwatch.ElapsedMilliseconds;
     }
@@ -26,7 +27,7 @@ public sealed class DictJobGroup : IDataContainer, IReadOnlyDictionary<JobGroupI
     public IReadOnlyList<JobGroup> AllJobGroups { get; }
 
     /// <summary> The jobs. </summary>
-    private readonly Dictionary<JobGroupId, JobGroup> _jobGroups;
+    private readonly IReadOnlyDictionary<JobGroupId, JobGroup> _jobGroups;
 
     /// <inheritdoc/>
     public long Time { get; }
@@ -74,7 +75,7 @@ public sealed class DictJobGroup : IDataContainer, IReadOnlyDictionary<JobGroupI
     public IEnumerable<JobGroup> Values
         => _jobGroups.Values;
 
-    private bool JobGroupIsValid(JobGroupId id)
+    private static bool JobGroupIsValid(JobGroupId id)
         => id.Id switch
         {
             0    => false,

@@ -15,7 +15,7 @@ public sealed class ItemsByType(DalamudPluginInterface pi, Logger log, IDataMana
         IReadOnlyDictionary<FullEquipType, IReadOnlyList<EquipItem>>
 {
     /// <summary> Create the data. </summary>
-    private static IReadOnlyList<IReadOnlyList<PseudoEquipItem>> CreateItems(IDataManager dataManager)
+    private static IReadOnlyList<PseudoEquipItem>[] CreateItems(IDataManager dataManager)
     {
         var tmp = Enum.GetValues<FullEquipType>().Select(_ => new List<EquipItem>(1024)).ToArray();
 
@@ -95,7 +95,7 @@ public sealed class ItemsByType(DalamudPluginInterface pi, Logger log, IDataMana
             return true;
         }
 
-        value = Array.Empty<EquipItem>();
+        value = [];
         return false;
     }
 

@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
@@ -15,12 +16,11 @@ public sealed class DictOrnament(DalamudPluginInterface pluginInterface, Logger 
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateOrnamentData(IDataManager gameData)
     {
-        var dict = new Dictionary<uint, string>();
-        foreach (var o in gameData.GetExcelSheet<Ornament>(gameData.Language)!
-                     .Where(o => o.Singular.RawData.Length > 0))
+        var sheet = gameData.GetExcelSheet<Ornament>(gameData.Language)!;
+        var dict  = new Dictionary<uint, string>((int)sheet.RowCount);
+        foreach (var o in sheet.Where(o => o.Singular.RawData.Length > 0))
             dict.TryAdd(o.RowId, DataUtility.ToTitleCaseExtended(o.Singular, o.Article));
-        // TODO: FrozenDictionary
-        return dict;
+        return dict.ToFrozenDictionary();
     }
 
     /// <inheritdoc cref="NameDictionary.ContainsKey"/>

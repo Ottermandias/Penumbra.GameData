@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
@@ -587,8 +588,8 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
     }
 
     /// <summary> The existing IDs that correspond to mannequins. </summary>
-    private static readonly IReadOnlySet<ENpcId> MannequinIds = new HashSet<ENpcId> // TODO: frozen set.
-    {
+    private static readonly IReadOnlySet<ENpcId> MannequinIds = FrozenSet.ToFrozenSet<ENpcId>( 
+    [
         1026228u,
         1026229u,
         1026986u,
@@ -605,7 +606,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         1033659u,
         1007137u,
         // TODO: Female Hrothgar
-    };
+    ]);
 
     /// <summary> Parse a user string for player identifier data. </summary>
     private (ByteString, WorldId) ParsePlayer(string player)

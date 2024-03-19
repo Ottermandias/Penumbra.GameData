@@ -28,7 +28,7 @@ public sealed class HumanModelList(DalamudPluginInterface pluginInterface, Logge
     private static Tuple<BitArray, int> GetValidHumanModels(IDataManager gameData)
     {
         var sheet = gameData.GetExcelSheet<ModelChara>()!;
-        var ret = new BitArray((int)sheet.RowCount, false);
+        var ret   = new BitArray((int)sheet.RowCount, false);
         var count = 0;
         foreach (var (_, idx) in sheet.Select((m, i) => (m, i)).Where(p => p.m.Type == (byte)CharacterBase.ModelType.Human))
         {

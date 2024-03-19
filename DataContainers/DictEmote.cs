@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -48,8 +49,7 @@ public sealed class DictEmote(DalamudPluginInterface pluginInterface, Logger log
         AddEmote("l_pose02_loop.pap", doze);
         AddEmote("l_pose03_loop.pap", doze);
 
-        // TODO: FrozenDictionary
-        return storage.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Emote>)kvp.Value.Distinct().ToArray());
+        return storage.ToFrozenDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Emote>)kvp.Value.Distinct().ToArray());
 
         // Process a single emote.
         void ProcessEmote(Emote emote)

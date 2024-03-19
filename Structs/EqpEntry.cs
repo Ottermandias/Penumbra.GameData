@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;
@@ -295,28 +296,28 @@ public static class Eqp
     }
 
     /// <summary> A list of flags affecting the body. </summary>
-    public static readonly IReadOnlyList<EqpEntry> EqpAttributesBody  = GetEntriesForSlot(EquipSlot.Body);
+    public static readonly IReadOnlyList<EqpEntry> EqpAttributesBody = GetEntriesForSlot(EquipSlot.Body);
 
     /// <summary> A list of flags affecting the legs. </summary>
-    public static readonly IReadOnlyList<EqpEntry> EqpAttributesLegs  = GetEntriesForSlot(EquipSlot.Legs);
+    public static readonly IReadOnlyList<EqpEntry> EqpAttributesLegs = GetEntriesForSlot(EquipSlot.Legs);
 
     /// <summary> A list of flags affecting the hands. </summary>
     public static readonly IReadOnlyList<EqpEntry> EqpAttributesHands = GetEntriesForSlot(EquipSlot.Hands);
 
     /// <summary> A list of flags affecting the feet. </summary>
-    public static readonly IReadOnlyList<EqpEntry> EqpAttributesFeet  = GetEntriesForSlot(EquipSlot.Feet);
+    public static readonly IReadOnlyList<EqpEntry> EqpAttributesFeet = GetEntriesForSlot(EquipSlot.Feet);
 
     /// <summary> A list of flags affecting the head. </summary>
-    public static readonly IReadOnlyList<EqpEntry> EqpAttributesHead  = GetEntriesForSlot(EquipSlot.Head);
+    public static readonly IReadOnlyList<EqpEntry> EqpAttributesHead = GetEntriesForSlot(EquipSlot.Head);
 
-    // TODO: FrozenDictionary
     /// <summary> A dictionary mapping slots to a list of their affected flags. </summary>
-    public static readonly IReadOnlyDictionary<EquipSlot, IReadOnlyList<EqpEntry>> EqpAttributes = new Dictionary<EquipSlot, IReadOnlyList<EqpEntry>>
-    {
-        [EquipSlot.Body]  = EqpAttributesBody,
-        [EquipSlot.Legs]  = EqpAttributesLegs,
-        [EquipSlot.Hands] = EqpAttributesHands,
-        [EquipSlot.Feet]  = EqpAttributesFeet,
-        [EquipSlot.Head]  = EqpAttributesHead,
-    };
+    public static readonly IReadOnlyDictionary<EquipSlot, IReadOnlyList<EqpEntry>> EqpAttributes =
+        FrozenDictionary.ToFrozenDictionary<EquipSlot, IReadOnlyList<EqpEntry>>(
+        [
+            new KeyValuePair<EquipSlot, IReadOnlyList<EqpEntry>>(EquipSlot.Body,  EqpAttributesBody),
+            new KeyValuePair<EquipSlot, IReadOnlyList<EqpEntry>>(EquipSlot.Legs,  EqpAttributesLegs),
+            new KeyValuePair<EquipSlot, IReadOnlyList<EqpEntry>>(EquipSlot.Hands, EqpAttributesHands),
+            new KeyValuePair<EquipSlot, IReadOnlyList<EqpEntry>>(EquipSlot.Feet,  EqpAttributesFeet),
+            new KeyValuePair<EquipSlot, IReadOnlyList<EqpEntry>>(EquipSlot.Head,  EqpAttributesHead),
+        ]);
 }

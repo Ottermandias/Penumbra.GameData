@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using OtterGui.Log;
@@ -13,7 +14,7 @@ public sealed class ItemsPrimaryModel(DalamudPluginInterface pi, Logger log, IDa
     /// <summary> Create data by taking only the primary models for all items. </summary>
     private static IReadOnlyDictionary<uint, PseudoEquipItem> CreateMainItems(ItemsByType items)
     {
-        var dict = new Dictionary<uint, PseudoEquipItem>(1024 * 4);
+        var dict = new Dictionary<uint, PseudoEquipItem>(1024 * 16);
         foreach (var type in Enum.GetValues<FullEquipType>().Where(v => !FullEquipTypeExtensions.OffhandTypes.Contains(v)))
         {
             var list = items.Value[(int)type];
@@ -29,8 +30,6 @@ public sealed class ItemsPrimaryModel(DalamudPluginInterface pi, Logger log, IDa
             }
         }
 
-        // TODO: FrozenDictionary.
-        dict.TrimExcess();
-        return dict;
+        return dict.ToFrozenDictionary();
     }
 }

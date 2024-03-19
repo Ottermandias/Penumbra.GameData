@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -16,14 +17,15 @@ public sealed class DictMount(DalamudPluginInterface pluginInterface, Logger log
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateMountData(IDataManager gameData)
     {
-        var dict = new Dictionary<uint, string>();
+        var sheet = gameData.GetExcelSheet<Mount>(gameData.Language)!;
+        var dict  = new Dictionary<uint, string>((int) sheet.RowCount);
         // Add some custom data.
         dict.TryAdd(119, "Falcon (Porter)");
         dict.TryAdd(295, "Hippo Cart (Quest)");
         dict.TryAdd(296, "Hippo Cart (Quest)");
         dict.TryAdd(298, "Miw Miisv (Quest)");
         dict.TryAdd(309, "Moon-hopper (Quest)");
-        foreach (var m in gameData.GetExcelSheet<Mount>(gameData.Language)!)
+        foreach (var m in sheet)
         {
             if (m.Singular.RawData.Length > 0 && m.Order >= 0)
             {
@@ -41,8 +43,7 @@ public sealed class DictMount(DalamudPluginInterface pluginInterface, Logger log
             }
         }
 
-        // TODO: FrozenDictionary
-        return dict;
+        return dict.ToFrozenDictionary();
     }
 
     /// <inheritdoc cref="NameDictionary.ContainsKey"/>
