@@ -11,7 +11,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches OrnamentId to names. </summary>
 public sealed class DictOrnament(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : NameDictionary(pluginInterface, log, gameData, "Ornaments", 6, () => CreateOrnamentData(gameData))
+    : NameDictionary(pluginInterface, log, gameData, "Ornaments", 7, () => CreateOrnamentData(gameData))
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateOrnamentData(IDataManager gameData)

@@ -9,7 +9,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A list to efficiently identify weapons. This requires ItemsByType to be finished. </summary>
 public sealed class IdentificationListWeapons(DalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType data)
-    : KeyList<PseudoEquipItem>(pi, log, "WeaponIdentification", gameData.Language, 7, () => CreateWeaponList(data), ToKey, ValidKey, ValueKeySelector,
+    : KeyList<PseudoEquipItem>(pi, log, "WeaponIdentification", gameData.Language, 8, () => CreateWeaponList(data), ToKey, ValidKey, ValueKeySelector,
         data.Awaiter)
 {
     /// <inheritdoc cref="Between(PrimaryId, SecondaryId, Variant)"/>

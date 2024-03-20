@@ -12,7 +12,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches MountId to names. </summary>
 public sealed class DictMount(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : NameDictionary(pluginInterface, log, gameData, "Mounts", 6, () => CreateMountData(gameData))
+    : NameDictionary(pluginInterface, log, gameData, "Mounts", 7, () => CreateMountData(gameData))
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateMountData(IDataManager gameData)

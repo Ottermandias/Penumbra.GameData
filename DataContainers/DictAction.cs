@@ -10,7 +10,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches action keys to their identities. </summary>
 public sealed class DictAction(DalamudPluginInterface pluginInterface, Logger log, IDataManager data)
-    : DictLuminaName<Action>(pluginInterface, log, "Actions", data.Language, 7, () => CreateActionList(data))
+    : DictLuminaName<Action>(pluginInterface, log, "Actions", data.Language, 8, () => CreateActionList(data))
 {
     /// <remarks>This is too much effort to do accurately.</remarks>>
     protected override int TypeSize

@@ -11,7 +11,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches BNpcNameId to names. </summary>
 public sealed class DictBNpc(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : NameDictionary(pluginInterface, log, gameData, "BNpcs", 6, () => CreateBNpcData(gameData))
+    : NameDictionary(pluginInterface, log, gameData, "BNpcs", 7, () => CreateBNpcData(gameData))
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateBNpcData(IDataManager gameData)

@@ -13,7 +13,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A set of items restricted to female characters. </summary>
 public sealed class RestrictedItemsFemale(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<IReadOnlyDictionary<uint, uint>>(pluginInterface, log, "GenderRestrictedItemsFemale", gameData.Language, 2,
+    : DataSharer<IReadOnlyDictionary<uint, uint>>(pluginInterface, log, "GenderRestrictedItemsFemale", gameData.Language, 3,
         () => CreateItems(log, gameData))
 {
     /// <summary> Check if the item is restricted to female characters and the character is not female. </summary>

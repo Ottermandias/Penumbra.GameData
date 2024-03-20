@@ -12,7 +12,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary mapping certain path keys to emote identities. </summary>
 public sealed class DictEmote(DalamudPluginInterface pluginInterface, Logger log, IDataManager data)
-    : DictLuminaName<Emote>(pluginInterface, log, "Emotes", data.Language, 7, () => CreateEmoteList(log, data))
+    : DictLuminaName<Emote>(pluginInterface, log, "Emotes", data.Language, 8, () => CreateEmoteList(log, data))
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<string, IReadOnlyList<Emote>> CreateEmoteList(Logger log, IDataManager gameData)

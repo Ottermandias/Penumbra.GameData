@@ -11,7 +11,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches ENpcId to names. </summary>
 public sealed class DictENpc(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : NameDictionary(pluginInterface, log, gameData, "ENpcs", 6, () => CreateENpcData(gameData))
+    : NameDictionary(pluginInterface, log, gameData, "ENpcs", 7, () => CreateENpcData(gameData))
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateENpcData(IDataManager gameData)
