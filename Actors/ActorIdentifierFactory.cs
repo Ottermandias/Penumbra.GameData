@@ -401,7 +401,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         if (index < ObjectIndex.GPosePlayer)
             return (index.Index & 1) == 0;
         if (index > ObjectIndex.Card8)
-            return index.Index < _objects.Count;
+            return index.Index < _objects.TotalCount;
 
         return index < ObjectIndex.CharacterScreen;
     }
@@ -662,7 +662,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
             if (split3.Length != 2)
                 return idx;
 
-            if (ushort.TryParse(split3[1], out var intIdx) && intIdx < _objects.Count)
+            if (ushort.TryParse(split3[1], out var intIdx) && intIdx < _objects.TotalCount)
                 idx = intIdx;
             else
                 throw new IdentifierParseError($"Could not parse index {split3[1]} to valid Index.");
