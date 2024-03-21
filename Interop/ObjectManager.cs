@@ -6,47 +6,140 @@ using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
+using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 
 namespace Penumbra.GameData.Interop;
 
 public unsafe class ObjectManager(DalamudPluginInterface pi, Logger log, IFramework framework, IObjectTable objects)
-    : DataSharer<Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>>>(pi, log, "Penumbra.ObjectManager",
+    : DataSharer<Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>, int[]>>(pi, log, "Penumbra.ObjectManager",
         ClientLanguage.English, 1,
-        () => new Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>>(
+        () => new Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>, int[]>(
             [DateTime.UnixEpoch],
             new List<IntPtr>(objects.Count),
-            new Dictionary<GameObjectID, IntPtr>(objects.Count))), IReadOnlyCollection<Actor>
+            new Dictionary<GameObjectID, IntPtr>(objects.Count), new int[4])), IReadOnlyCollection<Actor>
 {
     public readonly  IObjectTable Objects  = objects;
     private readonly Actor*       _address = (Actor*)objects.Address;
 
-    public virtual void Update()
+    public virtual bool Update()
     {
         var frame = framework.LastUpdateUTC;
         if (LastFrame == frame)
-            return;
+            return false;
 
         LastFrame = frame;
         InternalIdDict.Clear();
         InternalAvailable.Clear();
-        for (var i = 0; i < TotalCount; ++i)
+
+        for (var i = 0; i < ObjectIndex.CutsceneStart.Index; ++i)
+            AddActor(i);
+        BnpcEnd = InternalAvailable.Count;
+
+        for (var i = ObjectIndex.CutsceneStart.Index; i < ObjectIndex.CharacterScreen.Index; ++i)
+            AddActor(i);
+        CutsceneEnd = InternalAvailable.Count;
+
+        for (var i = ObjectIndex.CharacterScreen.Index; i < (int)ScreenActor.ScreenEnd; ++i)
+            AddActor(i);
+        SpecialEnd = InternalAvailable.Count;
+
+        for (var i = (int)ScreenActor.ScreenEnd; i < ObjectIndex.IslandStart.Index; ++i)
+            AddActor(i);
+        EnpcEnd = InternalAvailable.Count;
+
+        for (var i = ObjectIndex.IslandStart.Index; i < TotalCount; ++i)
+            AddActor(i);
+
+        return true;
+
+        void AddActor(int index)
         {
-            var actor = this[i];
+            var actor = this[index];
             if (!actor.Valid)
-                continue;
+                return;
 
             InternalAvailable.Add(actor);
             var id = actor.AsObject->GetObjectID();
-            InternalIdDict.Add(id, actor);
+            InternalIdDict.TryAdd(id, actor);
         }
+    }
+
+    public IEnumerable<Actor> BattleNpcs
+    {
+        get
+        {
+            for (var i = 0; i < BnpcEnd; ++i)
+                yield return InternalAvailable[i];
+        }
+    }
+
+    public IEnumerable<Actor> CutsceneCharacters
+    {
+        get
+        {
+            for (var i = BnpcEnd; i < CutsceneEnd; ++i)
+                yield return InternalAvailable[i];
+        }
+    }
+
+    public IEnumerable<Actor> SpecialCharacters
+    {
+        get
+        {
+            for (var i = CutsceneEnd; i < SpecialEnd; ++i)
+                yield return InternalAvailable[i];
+        }
+    }
+
+    public IEnumerable<Actor> EventNpcs
+    {
+        get
+        {
+            for (var i = SpecialEnd; i < EnpcEnd; ++i)
+                yield return InternalAvailable[i];
+        }
+    }
+
+    public IEnumerable<Actor> IslandNpcs
+    {
+        get
+        {
+            for (var i = EnpcEnd; i < InternalAvailable.Count; ++i)
+                yield return InternalAvailable[i];
+        }
+    }
+
+
+    protected int BnpcEnd
+    {
+        get => Value.Item4[0];
+        set => Value.Item4[0] = value;
+    }
+
+    protected int CutsceneEnd
+    {
+        get => Value.Item4[1];
+        set => Value.Item4[1] = value;
+    }
+
+    protected int SpecialEnd
+    {
+        get => Value.Item4[2];
+        set => Value.Item4[2] = value;
+    }
+
+    protected int EnpcEnd
+    {
+        get => Value.Item4[3];
+        set => Value.Item4[3] = value;
     }
 
     protected DateTime LastFrame
     {
         get => Value.Item1[0];
-        set => Value.Item1[0] = value;
+        private set => Value.Item1[0] = value;
     }
 
     protected List<nint> InternalAvailable

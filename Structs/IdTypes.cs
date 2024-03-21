@@ -493,6 +493,7 @@ public readonly record struct ObjectIndex(ushort Index) : IComparisonOperators<O
     public static readonly ObjectIndex Card6           = new((ushort)ScreenActor.Card6);
     public static readonly ObjectIndex Card7           = new((ushort)ScreenActor.Card7);
     public static readonly ObjectIndex Card8           = new((ushort)ScreenActor.Card8);
+    public static readonly ObjectIndex IslandStart     = new(529);
 
     public static implicit operator ObjectIndex(ushort index)
         => new(index);
@@ -525,4 +526,3 @@ public readonly record struct ObjectIndex(ushort Index) : IComparisonOperators<O
             => serializer.Deserialize<ushort>(reader);
     }
 }
-
