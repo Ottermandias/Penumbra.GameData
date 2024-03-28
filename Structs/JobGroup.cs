@@ -9,7 +9,10 @@ namespace Penumbra.GameData.Structs;
 /// We do not need to name these since they are just bit-shifted by job IDs.
 /// </summary>
 [Flags]
-public enum JobFlag : ulong;
+public enum JobFlag : ulong
+{
+    All = ulong.MaxValue,
+}
 
 /// <summary> The game specifies different job groups that can contain specific jobs or not. </summary>
 public readonly struct JobGroup
@@ -24,7 +27,7 @@ public readonly struct JobGroup
     public readonly JobGroupId Id;
 
     /// <summary> The contained jobs as bit set. </summary>
-    private readonly JobFlag _flags;
+    public readonly JobFlag Flags;
 
     /// <summary>
     /// Create a job group from a given category and the ClassJob sheet.
@@ -33,7 +36,7 @@ public readonly struct JobGroup
     public JobGroup(ClassJobCategory group, ExcelSheet<ClassJob> jobs)
     {
         Count  = 0;
-        _flags = 0ul;
+        Flags = 0ul;
         Id     = (JobGroupId)group.RowId;
         Name   = group.Name.ToDalamudString().ToString();
 
@@ -51,24 +54,24 @@ public readonly struct JobGroup
                 continue;
 
             ++Count;
-            _flags |= (JobFlag)(1ul << (int)job.RowId);
+            Flags |= (JobFlag)(1ul << (int)job.RowId);
         }
     }
 
     /// <summary> Check if a job is contained inside this group. </summary>
     public bool Fits(Job job)
-        => _flags.HasFlag(job.Flag);
+        => Flags.HasFlag(job.Flag);
 
     /// <summary> Check if a job is contained inside this group. </summary>
     public bool Fits(JobId jobId)
     {
         var flag = (JobFlag)(1ul << jobId.Id);
-        return _flags.HasFlag(flag);
+        return Flags.HasFlag(flag);
     }
 
     /// <summary> Check if any of the jobs in the given flags fit this group. </summary>
     public bool Fits(JobFlag flag)
-        => (_flags & flag) != 0;
+        => (Flags & flag) != 0;
 
     /// <inheritdoc/>
     public override string ToString()
@@ -77,11 +80,11 @@ public readonly struct JobGroup
     /// <summary> Iterate over all jobs set in this group. </summary>
     public IEnumerable<JobId> Iterate()
     {
-        var minSet = BitOperations.TrailingZeroCount((ulong)_flags);
-        var maxSet = 64 - BitOperations.LeadingZeroCount((ulong)_flags);
+        var minSet = BitOperations.TrailingZeroCount((ulong)Flags);
+        var maxSet = 64 - BitOperations.LeadingZeroCount((ulong)Flags);
         for (var i = minSet; i < maxSet; ++i)
         {
-            if (_flags.HasFlag((JobFlag)(1ul << i)))
+            if (Flags.HasFlag((JobFlag)(1ul << i)))
                 yield return (JobId)i;
         }
     }
