@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -9,7 +10,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches action keys to their identities. </summary>
 public sealed class DictAction(DalamudPluginInterface pluginInterface, Logger log, IDataManager data)
-    : DictLuminaName<Action>(pluginInterface, log, "Actions", data.Language, 7, () => CreateActionList(data))
+    : DictLuminaName<Action>(pluginInterface, log, "Actions", data.Language, 8, () => CreateActionList(data))
 {
     /// <remarks>This is too much effort to do accurately.</remarks>>
     protected override int TypeSize
@@ -37,8 +38,7 @@ public sealed class DictAction(DalamudPluginInterface pluginInterface, Logger lo
             AddAction(hitKey,   action);
         });
 
-        // TODO: FrozenDictionary
-        return storage.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Action>)kvp.Value.Distinct().ToArray());
+        return storage.ToFrozenDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Action>)kvp.Value.Distinct().ToArray());
 
         void AddAction(string? key, Action action)
         {

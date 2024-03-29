@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -11,17 +12,17 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps WorldIds to their names. </summary>
 public sealed class DictWorld(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<IReadOnlyDictionary<ushort, string>>(pluginInterface, log, "Worlds", gameData.Language, 6, () => CreateWorldData(gameData)),
+    : DataSharer<IReadOnlyDictionary<ushort, string>>(pluginInterface, log, "Worlds", gameData.Language, 7, () => CreateWorldData(gameData)),
         IReadOnlyDictionary<WorldId, string>
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<ushort, string> CreateWorldData(IDataManager gameData)
     {
-        var dict = new Dictionary<ushort, string>();
-        foreach (var w in gameData.GetExcelSheet<World>()!.Where(w => w.IsPublic && !w.Name.RawData.IsEmpty))
+        var sheet = gameData.GetExcelSheet<World>()!;
+        var dict  = new Dictionary<ushort, string>((int)sheet.RowCount);
+        foreach (var w in sheet.Where(w => w.IsPublic && !w.Name.RawData.IsEmpty))
             dict.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
-        // TODO: FrozenDictionary
-        return dict;
+        return dict.ToFrozenDictionary();
     }
 
     /// <inheritdoc/>

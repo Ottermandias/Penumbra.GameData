@@ -1,21 +1,21 @@
+using System.Collections.Frozen;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using ImGuiNET;
 using OtterGui;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
+using Penumbra.GameData.Interop;
 using Penumbra.GameData.Structs;
 using Penumbra.String;
-using Character = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace Penumbra.GameData.Actors;
 
 /// <summary> Creation of ActorIdentifiers. </summary>
-public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework, NameDicts _data, CutsceneResolver _toParentIdx)
+public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framework, NameDicts _data, CutsceneResolver _toParentIdx)
 {
     /// <summary> Expose the _toParentIdx function for convenience. </summary>
     /// <returns> The parent index for a cutscene object or -1 if no parent exists. </returns>
@@ -174,18 +174,18 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
     /// <param name="check"> Check obtained data for validity. </param>
     /// <param name="withoutIndex"> Skip the game object index for unowned NPCs. </param>
     /// <returns> An actor identifier for that object. </returns>
-    public unsafe ActorIdentifier FromObject(GameObject* actor, out GameObject* owner, bool allowPlayerNpc, bool check, bool withoutIndex)
+    public unsafe ActorIdentifier FromObject(Actor actor, out Actor owner, bool allowPlayerNpc, bool check, bool withoutIndex)
     {
-        owner = null;
-        if (actor == null)
+        owner = Actor.Null;
+        if (!actor.Valid)
             return ActorIdentifier.Invalid;
 
         actor = HandleCutscene(actor);
-        ObjectIndex idx = actor->ObjectIndex;
+        var idx = actor.Index;
         if (idx.Index is >= (ushort)ScreenActor.CharacterScreen and <= (ushort)ScreenActor.Card8)
             return CreateIndividualUnchecked(IdentifierType.Special, ByteString.Empty, idx.Index, ObjectKind.None, uint.MaxValue);
 
-        var kind = (ObjectKind)actor->ObjectKind;
+        var kind = (ObjectKind)actor.AsObject->ObjectKind;
         return kind switch
         {
             ObjectKind.Player    => CreatePlayerFromObject(actor, check),
@@ -199,13 +199,13 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         };
     }
 
-    /// <inheritdoc cref="FromObject(GameObject*,out GameObject*,bool,bool,bool)"/>
-    public unsafe ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.GameObject? actor,
-        out GameObject* owner, bool allowPlayerNpc, bool check, bool withoutIndex)
-        => FromObject((GameObject*)(actor?.Address ?? IntPtr.Zero), out owner, allowPlayerNpc, check, withoutIndex);
+    /// <inheritdoc cref="FromObject(Actor,out Actor,bool,bool,bool)"/>
+    public ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.GameObject? actor,
+        out Actor owner, bool allowPlayerNpc, bool check, bool withoutIndex)
+        => FromObject(actor?.Address ?? nint.Zero, out owner, allowPlayerNpc, check, withoutIndex);
 
-    /// <inheritdoc cref="FromObject(GameObject*,out GameObject*,bool,bool,bool)"/>
-    public unsafe ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.GameObject? actor, bool allowPlayerNpc, bool check,
+    /// <inheritdoc cref="FromObject(Actor,out Actor,bool,bool,bool)"/>
+    public ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.GameObject? actor, bool allowPlayerNpc, bool check,
         bool withoutIndex)
         => FromObject(actor, out _, allowPlayerNpc, check, withoutIndex);
 
@@ -401,7 +401,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         if (index < ObjectIndex.GPosePlayer)
             return (index.Index & 1) == 0;
         if (index > ObjectIndex.Card8)
-            return index.Index < _objects.Length;
+            return index.Index < _objects.TotalCount;
 
         return index < ObjectIndex.CharacterScreen;
     }
@@ -437,10 +437,10 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
 
     /// <summary> Create a player from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private unsafe ActorIdentifier CreatePlayerFromObject(GameObject* actor, bool check)
+    private ActorIdentifier CreatePlayerFromObject(Actor actor, bool check)
     {
-        var name      = new ByteString(actor->Name);
-        var homeWorld = ((Character*)actor)->HomeWorld;
+        var name      = actor.Utf8Name;
+        var homeWorld = actor.HomeWorld;
         return check
             ? CreatePlayer(name, homeWorld)
             : CreateIndividualUnchecked(IdentifierType.Player, name, homeWorld, ObjectKind.None, uint.MaxValue);
@@ -448,61 +448,60 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
 
     /// <summary> Create a battle npc from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private unsafe ActorIdentifier CreateBNpcFromObject(GameObject* actor, out GameObject* owner, bool check, bool allowPlayerNpc,
+    private unsafe ActorIdentifier CreateBNpcFromObject(Actor actor, out Actor owner, bool check, bool allowPlayerNpc,
         bool withoutIndex)
     {
-        var ownerId = actor->OwnerID;
+        var ownerId = actor.AsObject->OwnerID;
         // 952 -> 780 is a special case for chocobos because they have NameId == 0 otherwise.
-        var nameId = actor->DataID == 952 ? 780 : ((Character*)actor)->NameID;
+        var nameId = actor.AsObject->DataID == 952 ? 780 : actor.AsCharacter->NameID;
         if (ownerId != 0xE0000000)
         {
-            owner = HandleCutscene(
-                (GameObject*)(_objects.SearchById(ownerId)?.Address ?? IntPtr.Zero));
-            if (owner == null)
+            owner = HandleCutscene(_objects.ById(ownerId));
+            if (!owner.Valid)
                 return ActorIdentifier.Invalid;
 
-            var name      = new ByteString(owner->Name);
-            var homeWorld = ((Character*)owner)->HomeWorld;
+            var name      = owner.Utf8Name;
+            var homeWorld = owner.HomeWorld;
             return check
                 ? CreateOwned(name, homeWorld, ObjectKind.BattleNpc, nameId)
                 : CreateIndividualUnchecked(IdentifierType.Owned, name, homeWorld, ObjectKind.BattleNpc, nameId);
         }
 
-        owner = null;
+        owner = Actor.Null;
         // Hack to support Anamnesis changing ObjectKind for NPC faces.
         if (nameId == 0 && allowPlayerNpc)
         {
-            var name = new ByteString(actor->Name);
+            var name = actor.Utf8Name;
             if (!name.IsEmpty)
             {
-                var homeWorld = ((Character*)actor)->HomeWorld;
+                var homeWorld = actor.HomeWorld;
                 return check
                     ? CreatePlayer(name, homeWorld)
                     : CreateIndividualUnchecked(IdentifierType.Player, name, homeWorld, ObjectKind.None, uint.MaxValue);
             }
         }
 
-        var index = withoutIndex ? ushort.MaxValue : actor->ObjectIndex;
+        var index = withoutIndex ? ObjectIndex.AnyIndex : actor.Index;
         return check
             ? CreateNpc(ObjectKind.BattleNpc, nameId, index)
-            : CreateIndividualUnchecked(IdentifierType.Npc, ByteString.Empty, index, ObjectKind.BattleNpc, nameId);
+            : CreateIndividualUnchecked(IdentifierType.Npc, ByteString.Empty, index.Index, ObjectKind.BattleNpc, nameId);
     }
 
     /// <summary> Create an event npc from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private unsafe ActorIdentifier CreateENpcFromObject(GameObject* actor, bool check, bool withoutIndex)
+    private unsafe ActorIdentifier CreateENpcFromObject(Actor actor, bool check, bool withoutIndex)
     {
-        var dataId = actor->DataID;
+        var dataId = actor.AsObject->DataID;
         // Special case for squadron that is also in the game functions, cf. E8 ?? ?? ?? ?? 89 87 ?? ?? ?? ?? 4C 89 BF
         if (dataId == 0xF845D)
-            dataId = actor->GetNpcID();
+            dataId = actor.AsObject->GetNpcID();
         if (MannequinIds.Contains(dataId))
         {
             static ByteString Get(byte* ptr)
                 => ptr == null ? ByteString.Empty : new ByteString(ptr);
 
-            var retainerName = Get(actor->Name);
-            var actualName   = _framework.IsInFrameworkUpdateThread ? Get(actor->GetName()) : ByteString.Empty;
+            var retainerName = Get(actor.AsObject->Name);
+            var actualName   = _framework.IsInFrameworkUpdateThread ? Get(actor.AsObject->GetName()) : ByteString.Empty;
             if (!actualName.Equals(retainerName))
             {
                 var ident = check
@@ -514,24 +513,23 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             }
         }
 
-        var index = withoutIndex ? ushort.MaxValue : actor->ObjectIndex;
+        var index = withoutIndex ? ObjectIndex.AnyIndex : actor.Index;
         return check
             ? CreateNpc(ObjectKind.EventNpc, dataId, index)
-            : CreateIndividualUnchecked(IdentifierType.Npc, ByteString.Empty, index, ObjectKind.EventNpc, dataId);
+            : CreateIndividualUnchecked(IdentifierType.Npc, ByteString.Empty, index.Index, ObjectKind.EventNpc, dataId);
     }
 
     /// <summary> Create a companion npc from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private unsafe ActorIdentifier CreateCompanionFromObject(GameObject* actor, out GameObject* owner, ObjectKind kind, bool check)
+    private ActorIdentifier CreateCompanionFromObject(Actor actor, out Actor owner, ObjectKind kind, bool check)
     {
-        owner = HandleCutscene(
-            (GameObject*)_objects.GetObjectAddress(actor->ObjectIndex - 1));
-        if (owner == null)
+        owner = HandleCutscene(_objects.CompanionParent(actor));
+        if (!owner.Valid)
             return ActorIdentifier.Invalid;
 
-        var dataId    = GetCompanionId(actor, (Character*)owner);
-        var name      = new ByteString(owner->Name);
-        var homeWorld = ((Character*)owner)->HomeWorld;
+        var dataId    = GetCompanionId(actor, owner);
+        var name      = owner.Utf8Name;
+        var homeWorld = owner.HomeWorld;
         return check
             ? CreateOwned(name, homeWorld, kind, dataId)
             : CreateIndividualUnchecked(IdentifierType.Owned, name, homeWorld, kind, dataId);
@@ -539,9 +537,9 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
 
     /// <summary> Create a retainer from the game object.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private unsafe ActorIdentifier CreateRetainerFromObject(GameObject* actor, bool check)
+    private ActorIdentifier CreateRetainerFromObject(Actor actor, bool check)
     {
-        var name = new ByteString(actor->Name);
+        var name = actor.Utf8Name;
         return check
             ? CreateRetainer(name, ActorIdentifier.RetainerType.Bell)
             : CreateIndividualUnchecked(IdentifierType.Retainer, name, (ushort)ActorIdentifier.RetainerType.Bell, ObjectKind.None,
@@ -550,45 +548,45 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
 
     /// <summary> Create an unknown object. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private unsafe ActorIdentifier CreateUnkFromObject(GameObject* actor, bool withoutIndex)
+    private ActorIdentifier CreateUnkFromObject(Actor actor, bool withoutIndex)
     {
-        var name  = new ByteString(actor->Name);
-        var index = withoutIndex ? ushort.MaxValue : actor->ObjectIndex;
-        return CreateIndividualUnchecked(IdentifierType.UnkObject, name, index, ObjectKind.None, 0);
+        var name  = actor.Utf8Name;
+        var index = withoutIndex ? ObjectIndex.AnyIndex : actor.Index;
+        return CreateIndividualUnchecked(IdentifierType.UnkObject, name, index.Index, ObjectKind.None, 0);
     }
 
     #endregion
 
     /// <summary> Obtain the current companion ID for an object by its actor and owner. </summary>
-    private static unsafe NpcId GetCompanionId(GameObject* actor,
-        Character* owner)
+    private static unsafe NpcId GetCompanionId(Actor actor,
+        Actor owner)
     {
-        return (ObjectKind)actor->ObjectKind switch
+        return (ObjectKind)actor.AsObject->ObjectKind switch
         {
-            ObjectKind.MountType => owner->Mount.MountId,
-            ObjectKind.Ornament  => owner->Ornament.OrnamentId,
-            ObjectKind.Companion => actor->DataID,
-            _                    => actor->DataID,
+            ObjectKind.MountType => owner.AsCharacter->Mount.MountId,
+            ObjectKind.Ornament  => owner.AsCharacter->Ornament.OrnamentId,
+            ObjectKind.Companion => actor.AsObject->DataID,
+            _                    => actor.AsObject->DataID,
         };
     }
 
     /// <summary> Handle owned cutscene actors. </summary>
-    private unsafe GameObject* HandleCutscene(GameObject* main)
+    private Actor HandleCutscene(Actor main)
     {
-        if (main == null)
-            return null;
+        if (!main.Valid)
+            return Actor.Null;
 
-        if (main->ObjectIndex is < (ushort)ScreenActor.CutsceneStart or >= (ushort)ScreenActor.CutsceneEnd)
+        if (main.Index.Index is < (ushort)ScreenActor.CutsceneStart or >= (ushort)ScreenActor.CutsceneEnd)
             return main;
 
-        var parentIdx = _toParentIdx.Invoke(main->ObjectIndex);
-        var parent    = (GameObject*)_objects.GetObjectAddress(parentIdx);
-        return parent == null ? main : parent;
+        var parentIdx = _toParentIdx.Invoke(main.Index.Index);
+        var parent    = _objects[parentIdx];
+        return parent.Valid ? parent : main;
     }
 
     /// <summary> The existing IDs that correspond to mannequins. </summary>
-    private static readonly IReadOnlySet<ENpcId> MannequinIds = new HashSet<ENpcId> // TODO: frozen set.
-    {
+    private static readonly FrozenSet<ENpcId> MannequinIds = FrozenSet.ToFrozenSet<ENpcId>(
+    [
         1026228u,
         1026229u,
         1026986u,
@@ -605,7 +603,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
         1033659u,
         1007137u,
         // TODO: Female Hrothgar
-    };
+    ]);
 
     /// <summary> Parse a user string for player identifier data. </summary>
     private (ByteString, WorldId) ParsePlayer(string player)
@@ -664,7 +662,7 @@ public class ActorIdentifierFactory(IObjectTable _objects, IFramework _framework
             if (split3.Length != 2)
                 return idx;
 
-            if (ushort.TryParse(split3[1], out var intIdx) && intIdx < _objects.Length)
+            if (ushort.TryParse(split3[1], out var intIdx) && intIdx < _objects.TotalCount)
                 idx = intIdx;
             else
                 throw new IdentifierParseError($"Could not parse index {split3[1]} to valid Index.");

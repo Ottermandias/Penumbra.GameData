@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
@@ -12,7 +13,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A set of items restricted to female characters. </summary>
 public sealed class RestrictedItemsFemale(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<IReadOnlyDictionary<uint, uint>>(pluginInterface, log, "GenderRestrictedItemsFemale", gameData.Language, 2,
+    : DataSharer<IReadOnlyDictionary<uint, uint>>(pluginInterface, log, "GenderRestrictedItemsFemale", gameData.Language, 3,
         () => CreateItems(log, gameData))
 {
     /// <summary> Check if the item is restricted to female characters and the character is not female. </summary>
@@ -30,13 +31,12 @@ public sealed class RestrictedItemsFemale(DalamudPluginInterface pluginInterface
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, uint> CreateItems(Logger log, IDataManager gameData)
     {
-        var ret = new Dictionary<uint, uint>();
+        var ret = new Dictionary<uint, uint>(128);
         var items = gameData.GetExcelSheet<Item>()!;
         foreach (var pair in GenderRestrictedItems.KnownItems)
             GenderRestrictedItems.AddItemFemale(ret, pair, items, log);
         GenderRestrictedItems.AddUnknownItems(ret, items, log, 3);
-        // TODO: FrozenDictionary
-        return ret;
+        return ret.ToFrozenDictionary();
     }
 
     /// <inheritdoc/>

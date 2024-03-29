@@ -1,3 +1,5 @@
+using System.Collections.Frozen;
+
 namespace Penumbra.GameData.Enums;
 
 /// <summary> Body Slots as used by character model parts. </summary>
@@ -53,7 +55,6 @@ public static class BodySlotEnumExtension
 public static partial class Names
 {
     /// <summary> A dictionary converting path suffices into BodySlot. </summary>
-    // TODO: FrozenDictionary
-    public static readonly Dictionary<string, BodySlot> StringToBodySlot =
-        Enum.GetValues<BodySlot>().Skip(1).ToDictionary(e => e.ToSuffix(), e => e);
+    public static readonly IReadOnlyDictionary<string, BodySlot> StringToBodySlot =
+        Enum.GetValues<BodySlot>().Skip(1).ToFrozenDictionary(e => e.ToSuffix(), e => e);
 }

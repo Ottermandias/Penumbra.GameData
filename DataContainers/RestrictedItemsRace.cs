@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -12,10 +13,10 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A set of items restricted to specific races. </summary>
 public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<IReadOnlySet<uint>>(pluginInterface, log, "RacialRestrictedItems", gameData.Language, 1, () => CreateItems(log, gameData))
+    : DataSharer<IReadOnlySet<uint>>(pluginInterface, log, "RacialRestrictedItems", gameData.Language, 2, () => CreateItems(log, gameData))
 {
     /// <summary> Create the data and also warn for unknown restrictions. </summary>
-    private static IReadOnlySet<uint> CreateItems(Logger log, IDataManager gameData)
+    private static FrozenSet<uint> CreateItems(Logger log, IDataManager gameData)
     {
         var ret = RaceGenderGroup.Where(c => c is not 0 and not uint.MaxValue).ToHashSet();
 
@@ -30,8 +31,7 @@ public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, 
                 $"{item.RowId:D5} {item.Name.ToDalamudString().TextValue} has unknown restriction group {categories.GetRow(item.EquipRestriction)!.RowId:D2}.");
         }
 
-        // TODO: FrozenSet
-        return ret;
+        return ret.ToFrozenSet();
     }
 
     /// <summary> Check if the item is restricted to a different race than your characters. </summary>
@@ -60,8 +60,8 @@ public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, 
     /// but have no associated accessories or hats.
     /// </summary>
     // @Formatter:off
-    public static readonly IReadOnlyList<uint> RaceGenderGroup = new uint[]
-    {
+    public static readonly IReadOnlyList<uint> RaceGenderGroup =
+    [
         0x020054,
         0x020055,
         0x020056,
@@ -78,6 +78,6 @@ public sealed class RestrictedItemsRace(DalamudPluginInterface pluginInterface, 
         uint.MaxValue, // TODO: Female Hrothgar
         0x0102E8,
         0x010245,
-    };
+    ];
     // @Formatter:on
 }

@@ -1,11 +1,10 @@
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Penumbra.GameData.Enums;
+using Penumbra.GameData.Interop;
 using Penumbra.GameData.Structs;
 using Penumbra.String;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
@@ -13,24 +12,24 @@ using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 namespace Penumbra.GameData.Actors;
 
 /// <summary> Handles resolving specific situations and actors to actor identifiers. </summary>
-internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _objects, IClientState _clientState)
+internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _objects, IClientState _clientState)
 {
     /// <summary> Obtain an identifier for the current player. </summary>
     public ActorIdentifier GetCurrentPlayer(ActorIdentifierFactory factory)
     {
-        var address = (Character*)_objects.GetObjectAddress(0);
-        return address == null
+        var address = _objects[0];
+        return !address.Valid
             ? ActorIdentifier.Invalid
-            : factory.CreateIndividualUnchecked(IdentifierType.Player, new ByteString(address->GameObject.Name), address->HomeWorld,
-                ObjectKind.None,                               uint.MaxValue);
+            : factory.CreateIndividualUnchecked(IdentifierType.Player, address.Utf8Name, address.AsCharacter->HomeWorld,
+                ObjectKind.None, uint.MaxValue);
     }
 
     /// <summary> Obtain an identifier for the currently inspected player. </summary>
     public ActorIdentifier GetInspectPlayer(ActorIdentifierFactory factory)
     {
         var addon = _gameGui.GetAddonByName("CharacterInspect");
-        return addon == IntPtr.Zero 
-            ? ActorIdentifier.Invalid 
+        return addon == IntPtr.Zero
+            ? ActorIdentifier.Invalid
             : factory.CreatePlayer(InspectName, InspectWorldId);
     }
 
@@ -74,8 +73,8 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
         if (_clientState.TerritoryType != 831 && _gameGui.GetAddonByName("EmjIntro") == IntPtr.Zero)
             return false;
 
-        var obj = (Character*)_objects.GetObjectAddress((int)type);
-        if (obj == null)
+        var obj = _objects[(int)type];
+        if (!obj.Valid)
             return false;
 
         id = type switch
@@ -104,8 +103,8 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
         if (addon == null || addon->IsVisible)
             return false;
 
-        var obj = (Character*)_objects.GetObjectAddress((int)type);
-        if (obj == null)
+        var obj = _objects[(int)type];
+        if (!obj.Valid)
             return false;
 
         id = type switch
@@ -147,23 +146,22 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
         => new(UIState.Instance()->Inspect.Name);
 
     /// <summary> Check if a screen actor at a given index has the same customizations (up to height) as the given character, and return an identifier for the potential owner. </summary>
-    private bool SearchPlayerCustomize(ActorIdentifierFactory factory, Character* character, ObjectIndex idx, out ActorIdentifier id)
+    private bool SearchPlayerCustomize(ActorIdentifierFactory factory, Actor character, ObjectIndex idx, out ActorIdentifier id)
     {
-        var other = (Character*)_objects.GetObjectAddress(idx.Index);
-        if (other == null
-         || !CustomizeArray.ScreenActorEquals((CustomizeArray*)character->DrawData.CustomizeData.Data,
-                (CustomizeArray*)other->DrawData.CustomizeData.Data))
+        var other = _objects[idx];
+        if (!other.Valid || !CustomizeArray.ScreenActorEquals(character.Customize, other.Customize))
         {
             id = ActorIdentifier.Invalid;
             return false;
         }
 
-        id = factory.FromObject(&other->GameObject, out _, false, true, false);
+        id = factory.FromObject(other, out _, false, true, false);
         return true;
     }
 
     /// <summary> Check if one of the three indices has the same customizations. Used for Mahjong Banners. </summary>
-    private ActorIdentifier SearchPlayersCustomize(ActorIdentifierFactory factory, Character* gameObject, ObjectIndex idx1, ObjectIndex idx2, ObjectIndex idx3)
+    private ActorIdentifier SearchPlayersCustomize(ActorIdentifierFactory factory, Actor gameObject, ObjectIndex idx1, ObjectIndex idx2,
+        ObjectIndex idx3)
         => SearchPlayerCustomize(factory,  gameObject, idx1, out var ret)
          || SearchPlayerCustomize(factory, gameObject, idx2, out ret)
          || SearchPlayerCustomize(factory, gameObject, idx3, out ret)
@@ -171,23 +169,21 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, IObjectTable _obje
                 : ActorIdentifier.Invalid;
 
     /// <summary> Check if a cutscene actor has the same customizations. Used for PvP Banners. </summary>
-    private ActorIdentifier SearchPlayersCustomize(ActorIdentifierFactory factory, Character* gameObject)
+    private ActorIdentifier SearchPlayersCustomize(ActorIdentifierFactory factory, Actor gameObject)
     {
         for (var i = 0; i < ObjectIndex.CutsceneStart.Index; i += 2)
         {
-            var obj = (GameObject*)_objects.GetObjectAddress(i);
-            if (obj != null
-             && obj->ObjectKind is (byte)ObjectKind.Player
-             && Compare(gameObject, (Character*)obj))
+            var obj = _objects[i];
+            if (obj.IsPlayer && Compare(gameObject, obj))
                 return factory.FromObject(obj, out _, false, true, false);
         }
 
         return ActorIdentifier.Invalid;
 
-        static bool Compare(Character* a, Character* b)
+        static bool Compare(Actor a, Actor b)
         {
-            var data1  = (CustomizeArray*)a->DrawData.CustomizeData.Data;
-            var data2  = (CustomizeArray*)b->DrawData.CustomizeData.Data;
+            var data1  = (CustomizeArray*)a.AsCharacter->DrawData.CustomizeData.Data;
+            var data2  = (CustomizeArray*)b.AsCharacter->DrawData.CustomizeData.Data;
             var equals = CustomizeArray.ScreenActorEquals(data1, data2);
             return equals;
         }

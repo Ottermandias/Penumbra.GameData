@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using OtterGui.Services;
@@ -15,13 +16,13 @@ public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
         var stopwatch = Stopwatch.StartNew();
         _jobs = gameData.GetExcelSheet<ClassJob>()!
             .Where(j => j.Abbreviation.RawData.Length > 0)
-            .ToDictionary(j => (JobId)j.RowId, j => new Job(j));
+            .ToFrozenDictionary(j => (JobId)j.RowId, j => new Job(j));
         Memory = DataUtility.DictionaryMemory(32, Count) + _jobs.Sum(kvp => kvp.Value.Name.Length + kvp.Value.Abbreviation.Length) * 2;
         Time   = stopwatch.ElapsedMilliseconds;
     }
 
     /// <summary> The jobs. </summary>
-    private readonly Dictionary<JobId, Job> _jobs;
+    private readonly IReadOnlyDictionary<JobId, Job> _jobs;
 
     /// <inheritdoc/>
     public long Time { get; }

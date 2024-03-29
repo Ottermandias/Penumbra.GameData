@@ -328,6 +328,7 @@ public partial class ShpkFile : IWritable
     public static uint BuildSelector(Span<uint> systemKeys, Span<uint> sceneKeys, Span<uint> materialKeys, Span<uint> subViewKeys)
         => BuildSelector(BuildSelector(systemKeys), BuildSelector(sceneKeys), BuildSelector(materialKeys), BuildSelector(subViewKeys));
 
+    [SkipLocalsInit]
     public static uint BuildSelector(uint systemKeySelector, uint sceneKeySelector, uint materialKeySelector, uint subViewKeySelector)
     {
         Span<uint> parts = stackalloc uint[4];

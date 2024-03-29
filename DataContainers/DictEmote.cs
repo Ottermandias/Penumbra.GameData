@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
@@ -11,7 +12,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary mapping certain path keys to emote identities. </summary>
 public sealed class DictEmote(DalamudPluginInterface pluginInterface, Logger log, IDataManager data)
-    : DictLuminaName<Emote>(pluginInterface, log, "Emotes", data.Language, 7, () => CreateEmoteList(log, data))
+    : DictLuminaName<Emote>(pluginInterface, log, "Emotes", data.Language, 8, () => CreateEmoteList(log, data))
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<string, IReadOnlyList<Emote>> CreateEmoteList(Logger log, IDataManager gameData)
@@ -48,8 +49,7 @@ public sealed class DictEmote(DalamudPluginInterface pluginInterface, Logger log
         AddEmote("l_pose02_loop.pap", doze);
         AddEmote("l_pose03_loop.pap", doze);
 
-        // TODO: FrozenDictionary
-        return storage.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Emote>)kvp.Value.Distinct().ToArray());
+        return storage.ToFrozenDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Emote>)kvp.Value.Distinct().ToArray());
 
         // Process a single emote.
         void ProcessEmote(Emote emote)

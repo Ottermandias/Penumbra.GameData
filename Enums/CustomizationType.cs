@@ -1,3 +1,5 @@
+using System.Collections.Frozen;
+
 namespace Penumbra.GameData.Enums;
 
 /// <summary> Human Customizations. </summary>
@@ -38,16 +40,15 @@ public static class CustomizationTypeEnumExtension
 public static partial class Names
 {
     /// <summary> A dictionary converting path suffices into CustomizationType. </summary>
-    // TODO: FrozenDictionary
-    public static readonly Dictionary<string, CustomizationType> SuffixToCustomizationType = new()
-    {
-        { CustomizationType.Body.ToSuffix(), CustomizationType.Body },
-        { CustomizationType.Face.ToSuffix(), CustomizationType.Face },
-        { CustomizationType.Iris.ToSuffix(), CustomizationType.Iris },
-        { CustomizationType.Accessory.ToSuffix(), CustomizationType.Accessory },
-        { CustomizationType.Hair.ToSuffix(), CustomizationType.Hair },
-        { CustomizationType.Tail.ToSuffix(), CustomizationType.Tail },
-        { CustomizationType.Ear.ToSuffix(), CustomizationType.Ear },
-        { CustomizationType.Etc.ToSuffix(), CustomizationType.Etc },
-    };
+    public static readonly IReadOnlyDictionary<string, CustomizationType> SuffixToCustomizationType = FrozenDictionary.ToFrozenDictionary(
+    [
+        new KeyValuePair<string, CustomizationType>(CustomizationType.Body.ToSuffix(),      CustomizationType.Body),
+        new KeyValuePair<string, CustomizationType>(CustomizationType.Face.ToSuffix(),      CustomizationType.Face),
+        new KeyValuePair<string, CustomizationType>(CustomizationType.Iris.ToSuffix(),      CustomizationType.Iris),
+        new KeyValuePair<string, CustomizationType>(CustomizationType.Accessory.ToSuffix(), CustomizationType.Accessory),
+        new KeyValuePair<string, CustomizationType>(CustomizationType.Hair.ToSuffix(),      CustomizationType.Hair),
+        new KeyValuePair<string, CustomizationType>(CustomizationType.Tail.ToSuffix(),      CustomizationType.Tail),
+        new KeyValuePair<string, CustomizationType>(CustomizationType.Ear.ToSuffix(),       CustomizationType.Ear),
+        new KeyValuePair<string, CustomizationType>(CustomizationType.Etc.ToSuffix(),       CustomizationType.Etc),
+    ]);
 }

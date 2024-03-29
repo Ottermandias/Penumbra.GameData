@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using OtterGui.Log;
@@ -9,16 +10,15 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps StainIds to Stains. </summary>
 public sealed class DictStain(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)>>(pluginInterface, log, "Stains", gameData.Language, 3,
+    : DataSharer<IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)>>(pluginInterface, log, "Stains", gameData.Language, 4,
         () => CreateStainData(gameData)), IReadOnlyDictionary<StainId, Stain>
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> CreateStainData(IDataManager dataManager)
     {
         var stainSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Stain>(dataManager.Language)!;
-        // TODO: FrozenDictionary
         return stainSheet.Where(s => s.Color != 0 && s.Name.RawData.Length > 0)
-            .ToDictionary(s => (byte)s.RowId, s =>
+            .ToFrozenDictionary(s => (byte)s.RowId, s =>
             {
                 var stain = new Stain(s);
                 return (stain.Name, stain.RgbaColor, stain.Gloss);

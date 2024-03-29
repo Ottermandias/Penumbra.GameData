@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using OtterGui.Log;
@@ -13,7 +14,7 @@ public sealed class ItemsTertiaryModel(
     IDataManager gameData,
     ItemsByType items,
     ItemsSecondaryModel itemsSecondaries)
-    : ItemDictionary(pi, log, "ItemDictTertiary", gameData.Language, 1, () => CreateGauntlets(items, itemsSecondaries),
+    : ItemDictionary(pi, log, "ItemDictTertiary", gameData.Language, 2, () => CreateGauntlets(items, itemsSecondaries),
         itemsSecondaries.Awaiter)
 {
     /// <summary> Create data by taking only the tertiary models for all items. </summary>
@@ -24,7 +25,6 @@ public sealed class ItemsTertiaryModel(
             .Where(g => itemsSecondaries.Value
                 .ContainsKey((uint)g.Item2))
             .ToDictionary(g => (uint)g.Item2, g => g);
-        gauntlets.TrimExcess();
-        return gauntlets;
+        return gauntlets.ToFrozenDictionary();
     }
 }

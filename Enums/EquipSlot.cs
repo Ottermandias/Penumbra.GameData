@@ -1,3 +1,5 @@
+using System.Collections.Frozen;
+
 namespace Penumbra.GameData.Enums;
 
 /// <summary> Equip Slot, mostly as defined by the games EquipSlotCategory. </summary>
@@ -223,18 +225,17 @@ public static class EquipSlotExtensions
 public static partial class Names
 {
     /// <summary> A dictionary converting path suffices into EquipSlot. </summary>
-    // TODO: FrozenDictionary.
-    public static readonly Dictionary<string, EquipSlot> SuffixToEquipSlot = new()
-    {
-        { EquipSlot.Head.ToSuffix(), EquipSlot.Head },
-        { EquipSlot.Hands.ToSuffix(), EquipSlot.Hands },
-        { EquipSlot.Legs.ToSuffix(), EquipSlot.Legs },
-        { EquipSlot.Feet.ToSuffix(), EquipSlot.Feet },
-        { EquipSlot.Body.ToSuffix(), EquipSlot.Body },
-        { EquipSlot.Ears.ToSuffix(), EquipSlot.Ears },
-        { EquipSlot.Neck.ToSuffix(), EquipSlot.Neck },
-        { EquipSlot.RFinger.ToSuffix(), EquipSlot.RFinger },
-        { EquipSlot.LFinger.ToSuffix(), EquipSlot.LFinger },
-        { EquipSlot.Wrists.ToSuffix(), EquipSlot.Wrists },
-    };
+    public static readonly IReadOnlyDictionary<string, EquipSlot> SuffixToEquipSlot = FrozenDictionary.ToFrozenDictionary(
+    [
+        new KeyValuePair<string, EquipSlot>(EquipSlot.Head.ToSuffix(),    EquipSlot.Head),
+        new KeyValuePair<string, EquipSlot>(EquipSlot.Hands.ToSuffix(),   EquipSlot.Hands),
+        new KeyValuePair<string, EquipSlot>(EquipSlot.Legs.ToSuffix(),    EquipSlot.Legs),
+        new KeyValuePair<string, EquipSlot>(EquipSlot.Feet.ToSuffix(),    EquipSlot.Feet),
+        new KeyValuePair<string, EquipSlot>(EquipSlot.Body.ToSuffix(),    EquipSlot.Body),
+        new KeyValuePair<string, EquipSlot>(EquipSlot.Ears.ToSuffix(),    EquipSlot.Ears),
+        new KeyValuePair<string, EquipSlot>(EquipSlot.Neck.ToSuffix(),    EquipSlot.Neck),
+        new KeyValuePair<string, EquipSlot>(EquipSlot.RFinger.ToSuffix(), EquipSlot.RFinger),
+        new KeyValuePair<string, EquipSlot>(EquipSlot.LFinger.ToSuffix(), EquipSlot.LFinger),
+        new KeyValuePair<string, EquipSlot>(EquipSlot.Wrists.ToSuffix(),  EquipSlot.Wrists),
+    ]);
 }
