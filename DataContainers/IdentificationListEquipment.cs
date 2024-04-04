@@ -9,7 +9,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A list to efficiently identify equipment pieces. This requires ItemsByType to be finished. </summary>
 public sealed class IdentificationListEquipment(DalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
-    : KeyList<PseudoEquipItem>(pi, log, "EquipmentIdentification", gameData.Language, 8, () => CreateEquipmentList(items), ToKey, ValidKey,
+    : KeyList<PseudoEquipItem>(pi, log, "EquipmentIdentification", gameData.Language, 9, () => CreateEquipmentList(items), ToKey, ValidKey,
         ValueKeySelector, items.Awaiter)
 {
     /// <summary> Find all items affected by the given set of input data. </summary>
@@ -58,25 +58,25 @@ public sealed class IdentificationListEquipment(DalamudPluginInterface pi, Logge
 
     /// <summary> Custom items without actual items in the game data. </summary>
     private static IEnumerable<PseudoEquipItem> CustomList
-        => new[]
-        {
+        =>
+        [
             // @formatter:off
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)8100, (SecondaryId)0, 01, FullEquipType.Body, name:"Reaper Shroud"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9041, (SecondaryId)0, 01, FullEquipType.Head,  name:"Cid's Bandana (9041)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9041, (SecondaryId)0, 01, FullEquipType.Body,  name:"Cid's Body (9041)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Head,  name:"Smallclothes (NPC, 9903)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Body,  name:"Smallclothes (NPC, 9903)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Hands, name:"Smallclothes (NPC, 9903)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Legs,  name:"Smallclothes (NPC, 9903)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Feet,  name:"Smallclothes (NPC, 9903)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9212, (SecondaryId)0, 12, FullEquipType.Body,  name:"Ancient Robes (Lahabrea)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9212, (SecondaryId)0, 01, FullEquipType.Legs,  name:"Ancient Legs"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9212, (SecondaryId)0, 01, FullEquipType.Feet,  name:"Ancient Shoes"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 40672, (PrimaryId)0199, (SecondaryId)0, 01, FullEquipType.Head, name:"Veil of Eternal Innocence (Long)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 40673, (PrimaryId)0199, (SecondaryId)0, 01, FullEquipType.Head, name:"Veil of Eternal Passion (Long)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 40674, (PrimaryId)0199, (SecondaryId)0, 01, FullEquipType.Head, name:"Veil of Eternal Devotion (Long)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)8100, (SecondaryId)0, 01, FullEquipType.Body, name:"Reaper Shroud (8100-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9041, (SecondaryId)0, 01, FullEquipType.Head,  name:"Cid's Bandana (9041-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9041, (SecondaryId)0, 01, FullEquipType.Body,  name:"Cid's Body (9041-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Head,  name:"Smallclothes (NPC, 9903-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Body,  name:"Smallclothes (NPC, 9903-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Hands, name:"Smallclothes (NPC, 9903-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Legs,  name:"Smallclothes (NPC, 9903-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Feet,  name:"Smallclothes (NPC, 9903-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9212, (SecondaryId)0, 12, FullEquipType.Body,  name:"Ancient Robes (Lahabrea, 9212-12)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9212, (SecondaryId)0, 01, FullEquipType.Legs,  name:"Ancient Legs (9212-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9212, (SecondaryId)0, 01, FullEquipType.Feet,  name:"Ancient Shoes (9212-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 40672, (PrimaryId)0199, (SecondaryId)0, 01, FullEquipType.Head, name:"Veil of Eternal Innocence (Long, 199-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 40673, (PrimaryId)0199, (SecondaryId)0, 01, FullEquipType.Head, name:"Veil of Eternal Passion (Long, 199-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 40674, (PrimaryId)0199, (SecondaryId)0, 01, FullEquipType.Head, name:"Veil of Eternal Devotion (Long, 199-1)"),
             // @formatter:on
-        };
+        ];
 
     /// <inheritdoc/>
     protected override long ComputeMemory()
