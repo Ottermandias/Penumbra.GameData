@@ -21,7 +21,7 @@ public unsafe class ObjectManager(DalamudPluginInterface pi, Logger log, IFramew
             new Dictionary<GameObjectID, IntPtr>(objects.Count), new int[4])), IReadOnlyCollection<Actor>
 {
     public readonly  IObjectTable Objects  = objects;
-    private readonly Actor*       _address = (Actor*)objects.Address;
+    private readonly Actor*       _address = (Actor*)GameObjectManager.Instance()->ObjectList;
 
     public virtual bool Update()
     {

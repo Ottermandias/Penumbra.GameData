@@ -13,6 +13,7 @@ public static class ChangedItemExtensions
         return item switch
         {
             null                      => (ChangedItemType.None, 0),
+            EquipItem it              => (it.Type.IsOffhandType() ? ChangedItemType.ItemOffhand : ChangedItemType.Item, it.ItemId.Id),
             (Item i, FullEquipType t) => (t.IsOffhandType() ? ChangedItemType.ItemOffhand : ChangedItemType.Item, i.RowId),
             Action a                  => (ChangedItemType.Action, a.RowId),
             (ModelRace r, Gender g, CustomizeIndex i, CustomizeValue v) => (ChangedItemType.Customization,
