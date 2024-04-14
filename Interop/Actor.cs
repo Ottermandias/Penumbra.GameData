@@ -50,7 +50,7 @@ public readonly unsafe struct Actor : IEquatable<Actor>
         => AsCharacter->CharacterData.TransformationId != 0;
 
     public ActorIdentifier GetIdentifier(ActorManager actors)
-        => actors.FromObject(AsObject, out _, true, true, false);
+        => actors.FromObject(this, out _, true, true, false);
 
     public ByteString Utf8Name
         => Valid ? new ByteString(AsObject->Name) : ByteString.Empty;
