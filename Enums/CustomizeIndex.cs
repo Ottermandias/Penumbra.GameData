@@ -112,12 +112,12 @@ public static class CustomizationExtensions
             CustomizeIndex.Hairstyle         => "Hair Style",
             CustomizeIndex.Highlights        => "Enable Highlights",
             CustomizeIndex.SkinColor         => "Skin Color",
-            CustomizeIndex.EyeColorRight     => "Left Eye", // inverted due to compatibility bug.
+            CustomizeIndex.EyeColorRight     => "Right Eye",
             CustomizeIndex.HairColor         => "Hair Color",
             CustomizeIndex.HighlightsColor   => "Highlights Color",
             CustomizeIndex.TattooColor       => "Tattoo Color",
             CustomizeIndex.Eyebrows          => "Eyebrow Style",
-            CustomizeIndex.EyeColorLeft      => "Right Eye", // inverted due to compatibility bug.
+            CustomizeIndex.EyeColorLeft      => "Left Eye",
             CustomizeIndex.EyeShape          => "Small Pupils",
             CustomizeIndex.Nose              => "Nose Style",
             CustomizeIndex.Jaw               => "Jaw Style",
