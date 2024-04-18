@@ -41,7 +41,7 @@ public partial class MdlFile
         w.Write(Version);
         w.Write(StackSize);
         w.Write(totalSize - StackSize - FileHeaderSize);
-        w.Write((ushort)VertexDeclarations.Length);
+        w.Write((ushort)(VertexDeclarations.Length | RemainingVertexDeclarationBits));
         w.Write((ushort)Materials.Length);
         w.Write(0 < LodCount ? VertexOffset[0] + totalSize : 0u);
         w.Write(1 < LodCount ? VertexOffset[1] + totalSize : 0u);

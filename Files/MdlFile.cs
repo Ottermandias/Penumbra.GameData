@@ -1,6 +1,7 @@
 using Lumina.Data;
 using Lumina.Data.Parsing;
 using Lumina.Extensions;
+
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -36,6 +37,7 @@ public partial class MdlFile : IWritable
     public byte   BgCrestChangeMaterialIndex;
     public ushort Unknown4;
     public byte   Unknown5;
+    public ushort RemainingVertexDeclarationBits;
     public byte   Unknown6;
     public ushort Unknown7;
     public ushort Unknown8;
@@ -50,7 +52,6 @@ public partial class MdlFile : IWritable
     public byte   LodCount;
     public bool   EnableIndexBufferStreaming;
     public bool   EnableEdgeGeometry;
-
 
     public MdlStructs.ModelFlags1 Flags1;
     public MdlStructs.ModelFlags2 Flags2;
@@ -94,11 +95,15 @@ public partial class MdlFile : IWritable
         using var r      = new LuminaBinaryReader(stream);
 
         var header = LoadModelFileHeader(r);
-        LodCount         = header.LodCount;
-        VertexBufferSize = header.VertexBufferSize;
-        IndexBufferSize  = header.IndexBufferSize;
-        VertexOffset     = header.VertexOffset;
-        IndexOffset      = header.IndexOffset;
+        // Only the first 3 bits are the actual VertexDeclarationCount, the rest is used otherwise or not at all.
+        var vertexDeclarationCount = header.VertexDeclarationCount & 3;
+
+        RemainingVertexDeclarationBits = (ushort)(header.VertexDeclarationCount & ~3);
+        LodCount                       = header.LodCount;
+        VertexBufferSize               = header.VertexBufferSize;
+        IndexBufferSize                = header.IndexBufferSize;
+        VertexOffset                   = header.VertexOffset;
+        IndexOffset                    = header.IndexOffset;
 
         var dataOffset = FileHeaderSize + header.RuntimeSize + header.StackSize;
         for (var i = 0; i < LodCount; ++i)
@@ -107,8 +112,8 @@ public partial class MdlFile : IWritable
             IndexOffset[i]  -= dataOffset;
         }
 
-        VertexDeclarations = new MdlStructs.VertexDeclarationStruct[header.VertexDeclarationCount];
-        for (var i = 0; i < header.VertexDeclarationCount; ++i)
+        VertexDeclarations = new MdlStructs.VertexDeclarationStruct[vertexDeclarationCount];
+        for (var i = 0; i < vertexDeclarationCount; ++i)
             VertexDeclarations[i] = MdlStructs.VertexDeclarationStruct.Read(r);
 
         var (offsets, strings) = LoadStrings(r);
@@ -200,9 +205,9 @@ public partial class MdlFile : IWritable
         Valid         = true;
     }
 
-    private MdlStructs.ModelFileHeader LoadModelFileHeader(LuminaBinaryReader r)
+    private ModelFileHeader LoadModelFileHeader(LuminaBinaryReader r)
     {
-        var header = MdlStructs.ModelFileHeader.Read(r);
+        var header = ModelFileHeader.Read(r);
         Version                    = header.Version;
         EnableIndexBufferStreaming = header.EnableIndexBufferStreaming;
         EnableEdgeGeometry         = header.EnableEdgeGeometry;
@@ -261,21 +266,23 @@ public partial class MdlFile : IWritable
 
     public enum VertexType
     {
-        Single1  = 0,
-        Single2  = 1,  
-        Single3  = 2,
-        Single4  = 3,
+        Single1 = 0,
+        Single2 = 1,
+        Single3 = 2,
+        Single4 = 3,
+
         // Unk4  = 4,
-        UByte4   = 5,
-        Short2   = 6,
-        Short4   = 7,
-        NByte4   = 8,
-        NShort2  = 9,
-        NShort4  = 10,
+        UByte4  = 5,
+        Short2  = 6,
+        Short4  = 7,
+        NByte4  = 8,
+        NShort2 = 9,
+        NShort4 = 10,
+
         // Unk11 = 11,
         // Unk12 = 12
-        Half2    = 13,
-        Half4    = 14,
+        Half2 = 13,
+        Half4 = 14,
         // Unk15 = 15
     }
 
@@ -296,4 +303,39 @@ public partial class MdlFile : IWritable
         Min = [0f, 0f, 0f, 0f],
         Max = [0f, 0f, 0f, 0f],
     };
+
+    private struct ModelFileHeader
+    {
+        public  uint   Version;
+        public  uint   StackSize;
+        public  uint   RuntimeSize;
+        public  ushort VertexDeclarationCount;
+        public  ushort MaterialCount;
+        public  uint[] VertexOffset;
+        public  uint[] IndexOffset;
+        public  uint[] VertexBufferSize;
+        public  uint[] IndexBufferSize;
+        public  byte   LodCount;
+        public  bool   EnableIndexBufferStreaming;
+        public  bool   EnableEdgeGeometry;
+        private byte   Padding;
+
+        public static ModelFileHeader Read(LuminaBinaryReader br)
+            => new()
+            {
+                Version                    = br.ReadUInt32(),
+                StackSize                  = br.ReadUInt32(),
+                RuntimeSize                = br.ReadUInt32(),
+                VertexDeclarationCount     = br.ReadUInt16(),
+                MaterialCount              = br.ReadUInt16(),
+                VertexOffset               = br.ReadUInt32Array(3),
+                IndexOffset                = br.ReadUInt32Array(3),
+                VertexBufferSize           = br.ReadUInt32Array(3),
+                IndexBufferSize            = br.ReadUInt32Array(3),
+                LodCount                   = br.ReadByte(),
+                EnableIndexBufferStreaming = br.ReadBoolean(),
+                EnableEdgeGeometry         = br.ReadBoolean(),
+                Padding                    = br.ReadByte(),
+            };
+    }
 }
