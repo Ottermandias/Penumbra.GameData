@@ -1,6 +1,7 @@
 using Lumina.Data;
 using Lumina.Data.Parsing;
 using Lumina.Extensions;
+
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -51,7 +52,6 @@ public partial class MdlFile : IWritable
     public bool   EnableIndexBufferStreaming;
     public bool   EnableEdgeGeometry;
 
-
     public MdlStructs.ModelFlags1 Flags1;
     public MdlStructs.ModelFlags2 Flags2;
 
@@ -62,7 +62,7 @@ public partial class MdlFile : IWritable
 
     public MdlStructs.VertexDeclarationStruct[]    VertexDeclarations     = [];
     public MdlStructs.ElementIdStruct[]            ElementIds             = [];
-    public MdlStructs.MeshStruct[]                 Meshes                 = [];
+    public MeshStruct[]                            Meshes                 = [];
     public MdlStructs.BoneTableStruct[]            BoneTables             = [];
     public MdlStructs.BoundingBoxStruct[]          BoneBoundingBoxes      = [];
     public MdlStructs.SubmeshStruct[]              SubMeshes              = [];
@@ -135,9 +135,9 @@ public partial class MdlFile : IWritable
             ? r.ReadStructuresAsArray<MdlStructs.ExtraLodStruct>(3)
             : [];
 
-        Meshes = new MdlStructs.MeshStruct[modelHeader.MeshCount];
+        Meshes = new MeshStruct[modelHeader.MeshCount];
         for (var i = 0; i < modelHeader.MeshCount; i++)
-            Meshes[i] = MdlStructs.MeshStruct.Read(r);
+            Meshes[i] = MeshStruct.Read(r);
 
         Attributes = new string[modelHeader.AttributeCount];
         for (var i = 0; i < modelHeader.AttributeCount; ++i)
@@ -261,21 +261,23 @@ public partial class MdlFile : IWritable
 
     public enum VertexType
     {
-        Single1  = 0,
-        Single2  = 1,  
-        Single3  = 2,
-        Single4  = 3,
+        Single1 = 0,
+        Single2 = 1,
+        Single3 = 2,
+        Single4 = 3,
+
         // Unk4  = 4,
-        UByte4   = 5,
-        Short2   = 6,
-        Short4   = 7,
-        NByte4   = 8,
-        NShort2  = 9,
-        NShort4  = 10,
+        UByte4  = 5,
+        Short2  = 6,
+        Short4  = 7,
+        NByte4  = 8,
+        NShort2 = 9,
+        NShort4 = 10,
+
         // Unk11 = 11,
         // Unk12 = 12
-        Half2    = 13,
-        Half4    = 14,
+        Half2 = 13,
+        Half4 = 14,
         // Unk15 = 15
     }
 
@@ -296,4 +298,44 @@ public partial class MdlFile : IWritable
         Min = [0f, 0f, 0f, 0f],
         Max = [0f, 0f, 0f, 0f],
     };
+
+    public struct MeshStruct
+    {
+        public  ushort VertexCount;
+        private ushort Padding;
+        public  uint   IndexCount;
+        public  ushort MaterialIndex;
+        public  ushort SubMeshIndex;
+        public  ushort SubMeshCount;
+        public  ushort BoneTableIndex;
+        public  uint   StartIndex;
+        public  uint[] VertexBufferOffset;
+        public  byte[] VertexBufferStride;
+        private byte   _vertexStreamCountByte;
+
+        public byte VertexStreamCount
+        {
+            get => (byte)(_vertexStreamCountByte & 3);
+            set => _vertexStreamCountByte = (byte)(value & 3);
+        }
+
+        public byte VertexStreamCountRemainder
+            => (byte)(_vertexStreamCountByte & ~3);
+
+        public static MeshStruct Read(LuminaBinaryReader br)
+            => new()
+            {
+                VertexCount            = br.ReadUInt16(),
+                Padding                = br.ReadUInt16(),
+                IndexCount             = br.ReadUInt32(),
+                MaterialIndex          = br.ReadUInt16(),
+                SubMeshIndex           = br.ReadUInt16(),
+                SubMeshCount           = br.ReadUInt16(),
+                BoneTableIndex         = br.ReadUInt16(),
+                StartIndex             = br.ReadUInt32(),
+                VertexBufferOffset     = br.ReadUInt32Array(3),
+                VertexBufferStride     = br.ReadBytes(3),
+                _vertexStreamCountByte = br.ReadByte(),
+            };
+    }
 }

@@ -137,7 +137,7 @@ public partial class MdlFile
         }
     }
 
-    private static void Write(BinaryWriter w, MdlStructs.MeshStruct mesh)
+    private static void Write(BinaryWriter w, MeshStruct mesh)
     {
         w.Write(mesh.VertexCount);
         w.Write((ushort)0); // padding
@@ -153,7 +153,7 @@ public partial class MdlFile
         w.Write(mesh.VertexBufferStride[0]);
         w.Write(mesh.VertexBufferStride[1]);
         w.Write(mesh.VertexBufferStride[2]);
-        w.Write(mesh.VertexStreamCount);
+        w.Write(mesh.VertexStreamCount | mesh.VertexStreamCountRemainder);
     }
 
     private static void Write(BinaryWriter w, MdlStructs.BoneTableStruct bone)
