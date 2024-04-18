@@ -7,6 +7,7 @@ public class SklbFile
     private const int SklbMagic = 0x736B6C62; // "sklb"
 
     public SklbVersion Version;
+    public byte[]      RawHeader;
     public byte[]      Skeleton;
 
     public SklbFile(byte[] data)
@@ -44,8 +45,9 @@ public class SklbFile
             skeletonOffset = reader.ReadUInt32();
         }
 
-        reader.Seek(skeletonOffset);
-        Skeleton = reader.ReadBytes((int)(reader.BaseStream.Length - skeletonOffset));
+        reader.Seek(0L);
+        RawHeader = reader.ReadBytes((int)skeletonOffset);
+        Skeleton  = reader.ReadBytes((int)(reader.BaseStream.Length - skeletonOffset));
     }
 
     /// <summary> Version of a .sklb file. This is representative of the version specified in the SE-specific header, not the contained havok data. </summary>
