@@ -4,49 +4,47 @@ using Penumbra.GameData.Files.Utility;
 namespace Penumbra.GameData.Data;
 
 /// <remarks> This type is, notably, part of the PBD file format. </remarks>
-public sealed partial class RacialDeformer : ICloneable, IWritable
+public sealed class RacialDeformer : ICloneable, IWritable
 {
-    public readonly Dictionary<string, TransformMatrix> DeformMatrices = [];
+    public Dictionary<string, TransformMatrix> DeformMatrices { get; private set; } = [];
 
     public bool IsEmpty
         => DeformMatrices.Count == 0;
 
+    private RacialDeformer(Dictionary<string, TransformMatrix> matrices)
+        => DeformMatrices = matrices;
+
     public RacialDeformer()
-    {
-    }
+    { }
 
     public RacialDeformer(ReadOnlySpan<byte> data)
     {
         var reader = new SpanBinaryReader(data);
+        var bones  = new string[reader.ReadInt32()];
 
-        var bones = new string[reader.ReadInt32()];
-
+        // Read strings by offset.
         for (var i = 0; i < bones.Length; i++)
             bones[i] = reader.ReadString(reader.ReadUInt16());
+
+        // Align padding if necessary.
         if ((bones.Length & 1) != 0)
             reader.ReadUInt16();
 
+        // Read matrices.
         foreach (var bone in bones)
             DeformMatrices.Add(bone, reader.Read<TransformMatrix>());
     }
 
     public RacialDeformer Clone()
-    {
-        var clone = new RacialDeformer();
-
-        foreach (var (bone, matrix) in DeformMatrices)
-            clone.DeformMatrices.Add(bone, matrix);
-
-        return clone;
-    }
+        => new(DeformMatrices.ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
 
     object ICloneable.Clone()
         => Clone();
 
     public void IntersectWith(RacialDeformer deformer)
     {
-        foreach (var bone in DeformMatrices.Keys.Where(key => !deformer.DeformMatrices.ContainsKey(key)).ToList())
-            DeformMatrices.Remove(bone);
+        DeformMatrices = DeformMatrices.Where(kvp => deformer.DeformMatrices.ContainsKey(kvp.Key))
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 
     public void AddDefaults(RacialDeformer deformer)
@@ -78,8 +76,40 @@ public sealed partial class RacialDeformer : ICloneable, IWritable
     }
 
     public void Invert()
+        => DeformMatrices = DeformMatrices.Select(kvp => (kvp.Key, kvp.Value.Invert())).ToDictionary(kvp => kvp.Key, kvp => kvp.Item2);
+
+    public bool Valid
+        => true;
+
+    public void Write(Stream stream)
     {
-        foreach (var (bone, matrix) in DeformMatrices.ToArray())
-            DeformMatrices[bone] = matrix.Invert();
+        var names = new StringPool();
+
+        using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
+        {
+            writer.Write(DeformMatrices.Count);
+
+            foreach (var bone in DeformMatrices.Keys)
+                writer.Write((ushort)names.FindOrAddString(bone).Offset);
+            // Add padding if necessary.
+            if ((DeformMatrices.Count & 1) != 0)
+                writer.Write((ushort)0);
+
+            foreach (var matrix in DeformMatrices.Values)
+                writer.Write(matrix);
+        }
+
+        names.WriteTo(stream);
+
+        // Add padding if necessary.
+        if ((stream.Length & 3) != 0)
+            stream.Write(new byte[4 - (stream.Length & 3)]);
+    }
+
+    public byte[] Write()
+    {
+        using var mem = new MemoryStream();
+        Write(mem);
+        return mem.ToArray();
     }
 }

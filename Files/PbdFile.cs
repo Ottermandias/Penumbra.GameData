@@ -8,9 +8,9 @@ public partial class PbdFile : IWritable
 {
     public struct Deformer
     {
-        public GenderRace GenderRace;
-        public short TreeEntryIndex;
-        public float UnkScale;
+        public GenderRace     GenderRace;
+        public short          TreeEntryIndex;
+        public float          UnkScale;
         public RacialDeformer RacialDeformer;
     }
 
@@ -23,7 +23,7 @@ public partial class PbdFile : IWritable
         public short DeformerIndex;
     }
 
-    public Deformer[] Deformers;
+    public Deformer[]  Deformers;
     public TreeEntry[] RacialTree;
 
     public Deformer this[GenderRace genderRace]
@@ -42,16 +42,16 @@ public partial class PbdFile : IWritable
 
     public PbdFile(ReadOnlySpan<byte> data)
     {
-        var reader = new SpanBinaryReader(data);
+        var reader     = new SpanBinaryReader(data);
         var entryCount = reader.ReadInt32();
 
         Deformers = new Deformer[entryCount];
         for (var i = 0; i < entryCount; ++i)
         {
-            Deformers[i].GenderRace = (GenderRace)reader.ReadUInt16();
+            Deformers[i].GenderRace     = (GenderRace)reader.ReadUInt16();
             Deformers[i].TreeEntryIndex = reader.ReadInt16();
             var offset = reader.ReadInt32();
-            Deformers[i].UnkScale = reader.Read<float>();
+            Deformers[i].UnkScale       = reader.Read<float>();
             Deformers[i].RacialDeformer = offset == 0 ? new RacialDeformer() : new RacialDeformer(data[offset..]);
         }
 

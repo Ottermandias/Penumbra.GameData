@@ -1,6 +1,6 @@
 namespace Penumbra.GameData.Files.Utility;
 
-public static class IOExtensions
+public static class IoExtensions
 {
     public static void Write<T>(this Stream stream, in T value) where T : unmanaged
         => stream.Write(MemoryMarshal.AsBytes(new ReadOnlySpan<T>(in value)));
