@@ -316,7 +316,7 @@ public partial class MdlFile : IWritable
         public byte VertexStreamCount
         {
             get => (byte)(_vertexStreamCountByte & 3);
-            set => _vertexStreamCountByte = (byte)(value & 3);
+            set => _vertexStreamCountByte = (byte)((value & 3) | VertexStreamCountRemainder);
         }
 
         public byte VertexStreamCountRemainder
