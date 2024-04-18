@@ -1,6 +1,7 @@
 using Lumina.Data;
-using Lumina.Data.Parsing;
 using Lumina.Extensions;
+using static Lumina.Data.Parsing.MdlStructs;
+using MeshStruct = Penumbra.GameData.Files.ModelStructs.MeshStruct;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -9,6 +10,8 @@ namespace Penumbra.GameData.Files;
 
 public partial class MdlFile : IWritable
 {
+    public const int  V5             = 0x01000005;
+    public const int  V6             = 0x01000006;
     public const uint NumVertices    = 17;
     public const uint FileHeaderSize = 0x44;
 
@@ -19,7 +22,7 @@ public partial class MdlFile : IWritable
         public ushort[] ShapeMeshStartIndex;
         public ushort[] ShapeMeshCount;
 
-        public Shape(MdlStructs.ShapeStruct data, uint[] offsets, string[] strings)
+        public Shape(ShapeStruct data, uint[] offsets, string[] strings)
         {
             var idx = offsets.AsSpan().IndexOf(data.StringOffset);
             ShapeName           = idx >= 0 ? strings[idx] : string.Empty;
@@ -29,16 +32,15 @@ public partial class MdlFile : IWritable
     }
 
     // Raw data to write back.
-    public uint   Version = 16777221;
+    public uint   Version = 0x01000005;
     public float  Radius;
     public float  ModelClipOutDistance;
     public float  ShadowClipOutDistance;
     public byte   BgChangeMaterialIndex;
     public byte   BgCrestChangeMaterialIndex;
-    public ushort Unknown4;
-    public byte   Unknown5;
+    public ushort CullingGridCount;
+    public byte   Flags3;
     public byte   Unknown6;
-    public ushort Unknown7;
     public ushort Unknown8;
     public ushort Unknown9;
 
@@ -52,27 +54,27 @@ public partial class MdlFile : IWritable
     public bool   EnableIndexBufferStreaming;
     public bool   EnableEdgeGeometry;
 
-    public MdlStructs.ModelFlags1 Flags1;
-    public MdlStructs.ModelFlags2 Flags2;
+    public ModelFlags1 Flags1;
+    public ModelFlags2 Flags2;
 
-    public MdlStructs.BoundingBoxStruct BoundingBoxes            = EmptyBoundingBox;
-    public MdlStructs.BoundingBoxStruct ModelBoundingBoxes       = EmptyBoundingBox;
-    public MdlStructs.BoundingBoxStruct WaterBoundingBoxes       = EmptyBoundingBox;
-    public MdlStructs.BoundingBoxStruct VerticalFogBoundingBoxes = EmptyBoundingBox;
+    public BoundingBoxStruct BoundingBoxes            = EmptyBoundingBox;
+    public BoundingBoxStruct ModelBoundingBoxes       = EmptyBoundingBox;
+    public BoundingBoxStruct WaterBoundingBoxes       = EmptyBoundingBox;
+    public BoundingBoxStruct VerticalFogBoundingBoxes = EmptyBoundingBox;
 
-    public MdlStructs.VertexDeclarationStruct[]    VertexDeclarations     = [];
-    public MdlStructs.ElementIdStruct[]            ElementIds             = [];
-    public MeshStruct[]                            Meshes                 = [];
-    public MdlStructs.BoneTableStruct[]            BoneTables             = [];
-    public MdlStructs.BoundingBoxStruct[]          BoneBoundingBoxes      = [];
-    public MdlStructs.SubmeshStruct[]              SubMeshes              = [];
-    public MdlStructs.ShapeMeshStruct[]            ShapeMeshes            = [];
-    public MdlStructs.ShapeValueStruct[]           ShapeValues            = [];
-    public MdlStructs.TerrainShadowMeshStruct[]    TerrainShadowMeshes    = [];
-    public MdlStructs.TerrainShadowSubmeshStruct[] TerrainShadowSubMeshes = [];
-    public MdlStructs.LodStruct[]                  Lods                   = [];
-    public MdlStructs.ExtraLodStruct[]             ExtraLods              = [];
-    public ushort[]                                SubMeshBoneMap         = [];
+    public VertexDeclarationStruct[]      VertexDeclarations     = [];
+    public ElementIdStruct[]              ElementIds             = [];
+    public MeshStruct[]                   Meshes                 = [];
+    public ModelStructs.BoneTableStruct[] BoneTables             = [];
+    public BoundingBoxStruct[]            BoneBoundingBoxes      = [];
+    public SubmeshStruct[]                SubMeshes              = [];
+    public ShapeMeshStruct[]              ShapeMeshes            = [];
+    public ShapeValueStruct[]             ShapeValues            = [];
+    public TerrainShadowMeshStruct[]      TerrainShadowMeshes    = [];
+    public TerrainShadowSubmeshStruct[]   TerrainShadowSubMeshes = [];
+    public LodStruct[]                    Lods                   = [];
+    public ExtraLodStruct[]               ExtraLods              = [];
+    public ushort[]                       SubMeshBoneMap         = [];
 
     // Strings are written in order
     public string[] Attributes = [];
@@ -107,21 +109,21 @@ public partial class MdlFile : IWritable
             IndexOffset[i]  -= dataOffset;
         }
 
-        VertexDeclarations = new MdlStructs.VertexDeclarationStruct[header.VertexDeclarationCount];
+        VertexDeclarations = new VertexDeclarationStruct[header.VertexDeclarationCount];
         for (var i = 0; i < header.VertexDeclarationCount; ++i)
-            VertexDeclarations[i] = MdlStructs.VertexDeclarationStruct.Read(r);
+            VertexDeclarations[i] = VertexDeclarationStruct.Read(r);
 
         var (offsets, strings) = LoadStrings(r);
 
         var modelHeader = LoadModelHeader(r);
-        ElementIds = new MdlStructs.ElementIdStruct[modelHeader.ElementIdCount];
+        ElementIds = new ElementIdStruct[modelHeader.ElementIdCount];
         for (var i = 0; i < modelHeader.ElementIdCount; i++)
-            ElementIds[i] = MdlStructs.ElementIdStruct.Read(r);
+            ElementIds[i] = ElementIdStruct.Read(r);
 
-        Lods = new MdlStructs.LodStruct[3];
+        Lods = new LodStruct[3];
         for (var i = 0; i < 3; i++)
         {
-            var lod = r.ReadStructure<MdlStructs.LodStruct>();
+            var lod = r.ReadStructure<LodStruct>();
             if (i < LodCount)
             {
                 lod.VertexDataOffset -= dataOffset;
@@ -131,8 +133,8 @@ public partial class MdlFile : IWritable
             Lods[i] = lod;
         }
 
-        ExtraLods = modelHeader.ExtraLodEnabled
-            ? r.ReadStructuresAsArray<MdlStructs.ExtraLodStruct>(3)
+        ExtraLods = (modelHeader.Flags2 & ModelFlags2.ExtraLodEnabled) != 0
+            ? r.ReadStructuresAsArray<ExtraLodStruct>(3)
             : [];
 
         Meshes = new MeshStruct[modelHeader.MeshCount];
@@ -147,9 +149,9 @@ public partial class MdlFile : IWritable
             Attributes[i] = stringIdx >= 0 ? strings[stringIdx] : string.Empty;
         }
 
-        TerrainShadowMeshes    = r.ReadStructuresAsArray<MdlStructs.TerrainShadowMeshStruct>(modelHeader.TerrainShadowMeshCount);
-        SubMeshes              = r.ReadStructuresAsArray<MdlStructs.SubmeshStruct>(modelHeader.SubmeshCount);
-        TerrainShadowSubMeshes = r.ReadStructuresAsArray<MdlStructs.TerrainShadowSubmeshStruct>(modelHeader.TerrainShadowSubmeshCount);
+        TerrainShadowMeshes    = r.ReadStructuresAsArray<TerrainShadowMeshStruct>(modelHeader.TerrainShadowMeshCount);
+        SubMeshes              = r.ReadStructuresAsArray<SubmeshStruct>(modelHeader.SubmeshCount);
+        TerrainShadowSubMeshes = r.ReadStructuresAsArray<TerrainShadowSubmeshStruct>(modelHeader.TerrainShadowSubmeshCount);
 
         Materials = new string[modelHeader.MaterialCount];
         for (var i = 0; i < modelHeader.MaterialCount; ++i)
@@ -167,16 +169,26 @@ public partial class MdlFile : IWritable
             Bones[i] = stringIdx >= 0 ? strings[stringIdx] : string.Empty;
         }
 
-        BoneTables = new MdlStructs.BoneTableStruct[modelHeader.BoneTableCount];
-        for (var i = 0; i < modelHeader.BoneTableCount; i++)
-            BoneTables[i] = MdlStructs.BoneTableStruct.Read(r);
+        BoneTables = new ModelStructs.BoneTableStruct[modelHeader.BoneTableCount];
+        if (Version is V5)
+        {
+            for (var i = 0; i < modelHeader.BoneTableCount; i++)
+                BoneTables[i] = ModelStructs.BoneTableStruct.ReadV5(r);
+        }
+        else if (Version is V6)
+        {
+            for (var i = 0; i < modelHeader.BoneTableCount; i++)
+                BoneTables[i] = ModelStructs.BoneTableStruct.ReadV6(r);
+            r.Position += modelHeader.BoneTableArrayCountTotal * 2;
+        }
+
 
         Shapes = new Shape[modelHeader.ShapeCount];
         for (var i = 0; i < modelHeader.ShapeCount; i++)
-            Shapes[i] = new Shape(MdlStructs.ShapeStruct.Read(r), offsets, strings);
+            Shapes[i] = new Shape(ShapeStruct.Read(r), offsets, strings);
 
-        ShapeMeshes = r.ReadStructuresAsArray<MdlStructs.ShapeMeshStruct>(modelHeader.ShapeMeshCount);
-        ShapeValues = r.ReadStructuresAsArray<MdlStructs.ShapeValueStruct>(modelHeader.ShapeValueCount);
+        ShapeMeshes = r.ReadStructuresAsArray<ShapeMeshStruct>(modelHeader.ShapeMeshCount);
+        ShapeValues = r.ReadStructuresAsArray<ShapeValueStruct>(modelHeader.ShapeValueCount);
 
         var submeshBoneMapSize = r.ReadUInt32();
         SubMeshBoneMap = r.ReadStructures<ushort>((int)submeshBoneMapSize / 2).ToArray();
@@ -185,13 +197,13 @@ public partial class MdlFile : IWritable
         r.Seek(r.BaseStream.Position + paddingAmount);
 
         // Dunno what this first one is for?
-        BoundingBoxes            = MdlStructs.BoundingBoxStruct.Read(r);
-        ModelBoundingBoxes       = MdlStructs.BoundingBoxStruct.Read(r);
-        WaterBoundingBoxes       = MdlStructs.BoundingBoxStruct.Read(r);
-        VerticalFogBoundingBoxes = MdlStructs.BoundingBoxStruct.Read(r);
-        BoneBoundingBoxes        = new MdlStructs.BoundingBoxStruct[modelHeader.BoneCount];
+        BoundingBoxes            = BoundingBoxStruct.Read(r);
+        ModelBoundingBoxes       = BoundingBoxStruct.Read(r);
+        WaterBoundingBoxes       = BoundingBoxStruct.Read(r);
+        VerticalFogBoundingBoxes = BoundingBoxStruct.Read(r);
+        BoneBoundingBoxes        = new BoundingBoxStruct[modelHeader.BoneCount];
         for (var i = 0; i < modelHeader.BoneCount; i++)
-            BoneBoundingBoxes[i] = MdlStructs.BoundingBoxStruct.Read(r);
+            BoneBoundingBoxes[i] = BoundingBoxStruct.Read(r);
 
         var runtimePadding = header.RuntimeSize + FileHeaderSize + header.StackSize - r.BaseStream.Position;
         if (runtimePadding > 0)
@@ -200,33 +212,26 @@ public partial class MdlFile : IWritable
         Valid         = true;
     }
 
-    private MdlStructs.ModelFileHeader LoadModelFileHeader(LuminaBinaryReader r)
+    private ModelFileHeader LoadModelFileHeader(LuminaBinaryReader r)
     {
-        var header = MdlStructs.ModelFileHeader.Read(r);
+        var header = ModelFileHeader.Read(r);
         Version                    = header.Version;
         EnableIndexBufferStreaming = header.EnableIndexBufferStreaming;
         EnableEdgeGeometry         = header.EnableEdgeGeometry;
         return header;
     }
 
-    private MdlStructs.ModelHeader LoadModelHeader(BinaryReader r)
+    private ModelStructs.ModelHeader LoadModelHeader(BinaryReader r)
     {
-        var modelHeader = r.ReadStructure<MdlStructs.ModelHeader>();
-        Radius = modelHeader.Radius;
-        Flags1 = (MdlStructs.ModelFlags1)(modelHeader.GetType()
-                .GetField("Flags1", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)?.GetValue(modelHeader)
-         ?? 0);
-        Flags2 = (MdlStructs.ModelFlags2)(modelHeader.GetType()
-                .GetField("Flags2", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)?.GetValue(modelHeader)
-         ?? 0);
-        ModelClipOutDistance  = modelHeader.ModelClipOutDistance;
-        ShadowClipOutDistance = modelHeader.ShadowClipOutDistance;
-        Unknown4              = modelHeader.Unknown4;
-        Unknown5 = (byte)(modelHeader.GetType()
-                .GetField("Unknown5", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)?.GetValue(modelHeader)
-         ?? 0);
+        var modelHeader = r.ReadStructure<ModelStructs.ModelHeader>();
+        Radius                     = modelHeader.Radius;
+        Flags1                     = modelHeader.Flags1;
+        Flags2                     = modelHeader.Flags2;
+        ModelClipOutDistance       = modelHeader.ModelClipOutDistance;
+        ShadowClipOutDistance      = modelHeader.ShadowClipOutDistance;
+        CullingGridCount           = modelHeader.CullingGridCount;
+        Flags3                     = modelHeader.Flags3;
         Unknown6                   = modelHeader.Unknown6;
-        Unknown7                   = modelHeader.Unknown7;
         Unknown8                   = modelHeader.Unknown8;
         Unknown9                   = modelHeader.Unknown9;
         BgChangeMaterialIndex      = modelHeader.BGChangeMaterialIndex;
@@ -257,7 +262,7 @@ public partial class MdlFile : IWritable
     }
 
     public unsafe uint StackSize
-        => (uint)(VertexDeclarations.Length * NumVertices * sizeof(MdlStructs.VertexElement));
+        => (uint)(VertexDeclarations.Length * NumVertices * sizeof(VertexElement));
 
     public enum VertexType
     {
@@ -278,7 +283,10 @@ public partial class MdlFile : IWritable
         // Unk12 = 12
         Half2 = 13,
         Half4 = 14,
+
         // Unk15 = 15
+        UShort2 = 16,
+        UShort4 = 17,
     }
 
     public enum VertexUsage
@@ -293,49 +301,9 @@ public partial class MdlFile : IWritable
         Color        = 7,
     }
 
-    public static MdlStructs.BoundingBoxStruct EmptyBoundingBox = new()
+    public static BoundingBoxStruct EmptyBoundingBox = new()
     {
         Min = [0f, 0f, 0f, 0f],
         Max = [0f, 0f, 0f, 0f],
     };
-
-    public struct MeshStruct
-    {
-        public  ushort VertexCount;
-        private ushort Padding;
-        public  uint   IndexCount;
-        public  ushort MaterialIndex;
-        public  ushort SubMeshIndex;
-        public  ushort SubMeshCount;
-        public  ushort BoneTableIndex;
-        public  uint   StartIndex;
-        public  uint[] VertexBufferOffset;
-        public  byte[] VertexBufferStride;
-        private byte   _vertexStreamCountByte;
-
-        public byte VertexStreamCount
-        {
-            get => (byte)(_vertexStreamCountByte & 3);
-            set => _vertexStreamCountByte = (byte)((value & 3) | VertexStreamCountRemainder);
-        }
-
-        public byte VertexStreamCountRemainder
-            => (byte)(_vertexStreamCountByte & ~3);
-
-        public static MeshStruct Read(LuminaBinaryReader br)
-            => new()
-            {
-                VertexCount            = br.ReadUInt16(),
-                Padding                = br.ReadUInt16(),
-                IndexCount             = br.ReadUInt32(),
-                MaterialIndex          = br.ReadUInt16(),
-                SubMeshIndex           = br.ReadUInt16(),
-                SubMeshCount           = br.ReadUInt16(),
-                BoneTableIndex         = br.ReadUInt16(),
-                StartIndex             = br.ReadUInt32(),
-                VertexBufferOffset     = br.ReadUInt32Array(3),
-                VertexBufferStride     = br.ReadBytes(3),
-                _vertexStreamCountByte = br.ReadByte(),
-            };
-    }
 }

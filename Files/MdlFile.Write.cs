@@ -1,5 +1,6 @@
 using Lumina.Data.Parsing;
 using OtterGui;
+using Penumbra.GameData.Files.ModelStructs;
 
 namespace Penumbra.GameData.Files;
 
@@ -26,7 +27,7 @@ public partial class MdlFile
             .Concat(Shapes.Select(s => s.ShapeName))
             .Select(attribute => Write(w, attribute, basePos)).ToList();
 
-        var padding = (w.BaseStream.Position & 0b111) > 0 ? (w.BaseStream.Position & ~0b111) + 8 : w.BaseStream.Position;
+        var padding = (w.BaseStream.Position & 0b11) > 0 ? (w.BaseStream.Position & ~0b11) + 4 : w.BaseStream.Position;
         for (var i = w.BaseStream.Position; i < padding; ++i)
             w.Write((byte)0);
         var size = (int)w.BaseStream.Position - basePos;
@@ -80,19 +81,28 @@ public partial class MdlFile
         w.Write((byte)Flags2);
         w.Write(ModelClipOutDistance);
         w.Write(ShadowClipOutDistance);
-        w.Write(Unknown4);
+        w.Write(CullingGridCount);
         w.Write((ushort)TerrainShadowSubMeshes.Length);
-        w.Write(Unknown5);
+        w.Write(Flags3);
         w.Write(BgChangeMaterialIndex);
         w.Write(BgCrestChangeMaterialIndex);
         w.Write(Unknown6);
-        w.Write(Unknown7);
+        w.Write(BoneTableSum());
         w.Write(Unknown8);
         w.Write(Unknown9);
         w.Write((uint)0); // 6 byte padding
         w.Write((ushort)0);
-    }
+        return;
 
+        ushort BoneTableSum()
+        {
+            if (Version is V5)
+                return 0;
+
+            var count = BoneTables.Sum(t => (t.BoneCount & 1) == 1 ? t.BoneCount + 1 : t.BoneCount);
+            return (ushort)count;
+        }
+    }
 
     private static void Write(BinaryWriter w, in MdlStructs.VertexElement vertex)
     {
@@ -137,26 +147,8 @@ public partial class MdlFile
         }
     }
 
-    private static void Write(BinaryWriter w, MeshStruct mesh)
-    {
-        w.Write(mesh.VertexCount);
-        w.Write((ushort)0); // padding
-        w.Write(mesh.IndexCount);
-        w.Write(mesh.MaterialIndex);
-        w.Write(mesh.SubMeshIndex);
-        w.Write(mesh.SubMeshCount);
-        w.Write(mesh.BoneTableIndex);
-        w.Write(mesh.StartIndex);
-        w.Write(mesh.VertexBufferOffset[0]);
-        w.Write(mesh.VertexBufferOffset[1]);
-        w.Write(mesh.VertexBufferOffset[2]);
-        w.Write(mesh.VertexBufferStride[0]);
-        w.Write(mesh.VertexBufferStride[1]);
-        w.Write(mesh.VertexBufferStride[2]);
-        w.Write(mesh.VertexStreamCount | mesh.VertexStreamCountRemainder);
-    }
 
-    private static void Write(BinaryWriter w, MdlStructs.BoneTableStruct bone)
+    private static void Write(BinaryWriter w, BoneTableStruct bone)
     {
         foreach (var index in bone.BoneIndex)
             w.Write(index);
@@ -210,7 +202,7 @@ public partial class MdlFile
 
             // LoDs contain absolute offsets, and will need to be written after the rest of the size is known.
             var lodPosition = (int)w.BaseStream.Position;
-            unsafe 
+            unsafe
             {
                 w.Seek(sizeof(MdlStructs.LodStruct) * 3, SeekOrigin.Current);
             }
@@ -240,8 +232,10 @@ public partial class MdlFile
             for (var i = 0; i < Bones.Length; ++i)
                 w.Write(offsets[Attributes.Length + i]);
 
-            foreach (var boneTable in BoneTables)
-                Write(w, boneTable);
+            if (Version is V5)
+                BoneTableStruct.WriteV5(w, BoneTables);
+            else
+                BoneTableStruct.WriteV6(w, BoneTables);
 
             for (var i = 0; i < Shapes.Length; ++i)
                 Write(w, i, offsets);
@@ -281,11 +275,13 @@ public partial class MdlFile
             // LoD data also includes absolute offsets, move back to their position and write out now we know how large the metadata is.
             w.Seek(lodPosition, SeekOrigin.Begin);
             foreach (var (lod, index) in Lods.WithIndex())
+            {
                 Write(w, lod with
                 {
                     VertexDataOffset = index < LodCount ? lod.VertexDataOffset + totalSize : 0,
                     IndexDataOffset = index < LodCount ? lod.IndexDataOffset + totalSize : 0,
                 });
+            }
         }
 
         return stream.ToArray();
