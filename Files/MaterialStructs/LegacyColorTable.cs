@@ -145,7 +145,8 @@ internal unsafe struct LegacyColorTable : IEnumerable<LegacyColorTable.Row>
     }
 
     public const  int  NumRows = 16;
-    private fixed byte _rowData[NumRows * Row.Size];
+    public const  int  Size    = NumRows * Row.Size;
+    private fixed byte _rowData[Size];
 
     public ref Row this[int i]
     {
@@ -171,7 +172,7 @@ internal unsafe struct LegacyColorTable : IEnumerable<LegacyColorTable.Row>
     {
         fixed (byte* ptr = _rowData)
         {
-            return new ReadOnlySpan<byte>(ptr, NumRows * Row.Size);
+            return new ReadOnlySpan<byte>(ptr, Size);
         }
     }
 
@@ -187,5 +188,21 @@ internal unsafe struct LegacyColorTable : IEnumerable<LegacyColorTable.Row>
     {
         for (var i = 0; i < NumRows; ++i)
             this[i] = Row.Default;
+    }
+
+    internal LegacyColorTable(in ColorTable newTable)
+    {
+        for (var i = 0; i < NumRows; ++i)
+        {
+            ref readonly var newRow = ref newTable[i];
+            ref var          row    = ref this[i];
+            row.Diffuse          = newRow.Diffuse;
+            row.Specular         = newRow.Specular;
+            row.MaterialRepeat   = newRow.MaterialRepeat;
+            row.MaterialSkew     = newRow.MaterialSkew;
+            row.SpecularStrength = newRow.SpecularStrength;
+            row.GlossStrength    = newRow.GlossStrength;
+            row.TileSet          = newRow.TileSet;
+        }
     }
 }

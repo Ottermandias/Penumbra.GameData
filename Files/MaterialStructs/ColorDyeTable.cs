@@ -82,12 +82,12 @@ public unsafe struct ColorDyeTable : IEnumerable<ColorDyeTable.Row>
         {
             var     oldRow = oldTable[i];
             ref var row    = ref this[i];
-            this[i].Template         = oldRow.Template;
-            this[i].Diffuse          = oldRow.Diffuse;
-            this[i].Specular         = oldRow.Specular;
-            this[i].Emissive         = oldRow.Emissive;
-            this[i].Gloss            = oldRow.Gloss;
-            this[i].SpecularStrength = oldRow.SpecularStrength;
+            row.Template         = oldRow.Template;
+            row.Diffuse          = oldRow.Diffuse;
+            row.Specular         = oldRow.Specular;
+            row.Emissive         = oldRow.Emissive;
+            row.Gloss            = oldRow.Gloss;
+            row.SpecularStrength = oldRow.SpecularStrength;
         }
     }
 }

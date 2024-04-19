@@ -1,3 +1,5 @@
+using System;
+using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Files.Utility;
 
 namespace Penumbra.GameData.Files;
@@ -39,16 +41,36 @@ public partial class MtrlFile
             var dataSetSize = 0;
             if (HasTable)
             {
-                var span = Table.AsBytes();
-                w.Write(span);
-                dataSetSize += span.Length;
+                if (IsDawnTrail)
+                {
+                    var span = Table.AsBytes();
+                    w.Write(span);
+                    dataSetSize += span.Length;
+                }
+                else
+                {
+                    var table = new LegacyColorTable(Table);
+                    var span  = table.AsBytes();
+                    w.Write(span);
+                    dataSetSize += span.Length;
+                }
             }
 
             if (HasTable && HasDyeTable)
             {
-                var span = DyeTable.AsBytes();
-                w.Write(span);
-                dataSetSize += span.Length;
+                if (IsDawnTrail)
+                {
+                    var span = DyeTable.AsBytes();
+                    w.Write(span);
+                    dataSetSize += span.Length;
+                }
+                else
+                {
+                    var table = new LegacyColorDyeTable(DyeTable);
+                    var span  = table.AsBytes();
+                    w.Write(span);
+                    dataSetSize += span.Length;
+                }
             }
 
             w.Write((ushort)(ShaderPackage.ShaderValues.Length * 4));

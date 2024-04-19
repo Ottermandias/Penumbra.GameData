@@ -75,4 +75,19 @@ internal unsafe struct LegacyColorDyeTable : IEnumerable<LegacyColorDyeTable.Row
             return new ReadOnlySpan<byte>(ptr, NumRows * sizeof(ushort));
         }
     }
+
+    internal LegacyColorDyeTable(in ColorDyeTable newTable)
+    {
+        for (var i = 0; i < NumRows; ++i)
+        {
+            var     newRow = newTable[i];
+            ref var row    = ref this[i];
+            row.Template         = newRow.Template;
+            row.Diffuse          = newRow.Diffuse;
+            row.Specular         = newRow.Specular;
+            row.Emissive         = newRow.Emissive;
+            row.Gloss            = newRow.Gloss;
+            row.SpecularStrength = newRow.SpecularStrength;
+        }
+    }
 }
