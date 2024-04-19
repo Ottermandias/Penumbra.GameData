@@ -1,4 +1,5 @@
 using Lumina.Data.Parsing;
+using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Files.Utility;
 using Penumbra.GameData.Structs;
 
@@ -36,6 +37,24 @@ public partial class MtrlFile : IWritable, ICloneable
         }
     }
 
+    private bool IsDawnTrail
+    {
+        get => AdditionalData.Length > 1 && AdditionalData[1] == 0x05 && (AdditionalData[0] & 0x30) == 0x30;
+        set
+        {
+            if (AdditionalData.Length == 0)
+            {
+                if (value == false)
+                    return;
+
+                AdditionalData = new byte[4];
+            }
+
+            AdditionalData[1] = (byte)(value ? 0x05 : 0);
+            AdditionalData[0] = (byte)(value ? AdditionalData[0] | 0x30 : AdditionalData[0] & ~0x30);
+        }
+    }
+
     public bool HasTable
     {
         get => (TableFlags & 0x4) != 0;
@@ -48,16 +67,17 @@ public partial class MtrlFile : IWritable, ICloneable
         set => TableFlags = (byte)(value ? TableFlags | 0x8 : TableFlags & ~0x8);
     }
 
-    public bool ApplyDyeTemplate(StmFile stm, int rowIdx, StainId stainId)
+    public bool ApplyDyeTemplate(StmFile stm, int rowIdx, StainId stainId1, StainId stainId2)
     {
-        if (!HasDyeTable || rowIdx is < 0 or >= ColorTable.NumRows)
+        if (!HasDyeTable || rowIdx is < 0 or >= LegacyColorTable.NumRows)
             return false;
 
         var dyeSet = DyeTable[rowIdx];
-        if (!stm.TryGetValue(dyeSet.Template, stainId, out var dyes))
+        if (!stm.TryGetValue(dyeSet.Template, stainId1, out var dyes1)
+         || !stm.TryGetValue(dyeSet.Template, stainId2, out var dyes2))
             return false;
 
-        return Table[rowIdx].ApplyDyeTemplate(dyeSet, dyes);
+        return Table[rowIdx].ApplyDyeTemplate(dyeSet, dyes1, dyes2);
     }
 
     public Span<float> GetConstantValues(Constant constant)
@@ -115,6 +135,7 @@ public partial class MtrlFile : IWritable, ICloneable
 
         AdditionalData = r.Read<byte>(additionalDataSize).ToArray();
 
+        if (IsDawnTrail)
         {
             var dataSet = r.SliceFromHere(dataSetSize);
             if (HasTable && dataSet.Remaining >= ColorTable.NumRows * ColorTable.Row.Size)
@@ -123,6 +144,25 @@ public partial class MtrlFile : IWritable, ICloneable
                 Table.SetDefault();
             if (HasDyeTable && dataSet.Remaining >= ColorDyeTable.NumRows * ColorDyeTable.Row.Size)
                 DyeTable = dataSet.Read<ColorDyeTable>();
+        }
+        else
+        {
+            var dataSet = r.SliceFromHere(dataSetSize);
+            if (HasTable && dataSet.Remaining >= LegacyColorTable.NumRows * LegacyColorTable.Row.Size)
+            {
+                var table = dataSet.Read<LegacyColorTable>();
+                Table = new ColorTable(table);
+            }
+            else
+            {
+                Table.SetDefault();
+            }
+
+            if (HasDyeTable && dataSet.Remaining >= LegacyColorDyeTable.NumRows * LegacyColorDyeTable.Row.Size)
+            {
+                var dyeTable = dataSet.Read<LegacyColorDyeTable>();
+                DyeTable = new ColorDyeTable(dyeTable);
+            }
         }
 
         var shaderValueListSize = r.ReadUInt16();
