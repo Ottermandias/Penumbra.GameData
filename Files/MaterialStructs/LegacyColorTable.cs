@@ -198,6 +198,7 @@ internal unsafe struct LegacyColorTable : IEnumerable<LegacyColorTable.Row>
             ref var          row    = ref this[i];
             row.Diffuse          = newRow.Diffuse;
             row.Specular         = newRow.Specular;
+            row.Emissive         = newRow.Emissive;
             row.MaterialRepeat   = newRow.MaterialRepeat;
             row.MaterialSkew     = newRow.MaterialSkew;
             row.SpecularStrength = newRow.SpecularStrength;

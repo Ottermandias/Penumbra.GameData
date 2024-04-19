@@ -189,6 +189,7 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
             ref var          row    = ref this[i];
             row.Diffuse          = oldRow.Diffuse;
             row.Specular         = oldRow.Specular;
+            row.Emissive         = oldRow.Emissive;
             row.MaterialRepeat   = oldRow.MaterialRepeat;
             row.MaterialSkew     = oldRow.MaterialSkew;
             row.SpecularStrength = oldRow.SpecularStrength;
