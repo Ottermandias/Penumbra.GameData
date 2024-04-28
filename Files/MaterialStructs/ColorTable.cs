@@ -3,12 +3,28 @@ namespace Penumbra.GameData.Files.MaterialStructs;
 // TODO: those values are not correct at all, just taken from legacy for now.
 public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
 {
+    /// <summary>
+    /// The number after the parameter is the bit in the dye flags.
+    /// <code>
+    /// #       |    X (+0)    |    |    Y (+1)    |    |    Z (+2)   |    |   W (+3)    |
+    /// --------------------------------------------------------------------------------------
+    /// 0 (+ 0) |    Diffuse.R |  0 |    Diffuse.G |  0 |   Diffuse.B |  0 |             |  
+    /// 1 (+ 4) |   Specular.R |  1 |   Specular.G |  0 |  Specular.B |  0 |         Unk |
+    /// 2 (+ 8) |   Emissive.R |  2 |   Emissive.G |  0 |  Emissive.B |  2 |         Unk |  3
+    /// 3 (+12) |          Unk |  6 |          Unk |  7 |         Unk |  8 |             |
+    /// 4 (+16) |          Unk |  5 |              |    |         Unk |  4 |         Unk |  9
+    /// 5 (+20) |              |    |          Unk | 11 |             |    |             |   
+    /// 6 (+24) |   Shader Idx |    |   Tile Index |    |         Unk |    |         Unk | 10
+    /// 7 (+28) | Tile Count.X |    | Tile Count.Y |    | Tile Skew.X |    | Tile Skew.Y |
+    /// </code>
+    /// </summary>
     public struct Row
     {
-        public const int NumHalves = 32;
-        public const int Size      = NumHalves * 2;
+        public const int NumVec4 = 8;
+        public const int Halves  = 4;
+        public const int Size    = NumVec4 * Halves * 2;
 
-        private fixed ushort _data[NumHalves];
+        private fixed ushort _data[NumVec4 * Halves];
 
         public static readonly Row Default = new();
 
@@ -47,21 +63,21 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
 
         public Vector2 MaterialRepeat
         {
-            readonly get => new(ToFloat(12), ToFloat(15));
+            readonly get => new(ToFloat(28), ToFloat(29));
             set
             {
-                _data[12] = FromFloat(value.X);
-                _data[15] = FromFloat(value.Y);
+                _data[28] = FromFloat(value.X);
+                _data[29] = FromFloat(value.Y);
             }
         }
 
         public Vector2 MaterialSkew
         {
-            readonly get => new(ToFloat(13), ToFloat(14));
+            readonly get => new(ToFloat(30), ToFloat(31));
             set
             {
-                _data[13] = FromFloat(value.X);
-                _data[14] = FromFloat(value.Y);
+                _data[30] = FromFloat(value.X);
+                _data[31] = FromFloat(value.Y);
             }
         }
 
@@ -73,21 +89,21 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
 
         public float GlossStrength
         {
-            readonly get => ToFloat(7);
-            set => _data[7] = FromFloat(value);
+            readonly get => ToFloat(11);
+            set => _data[11] = FromFloat(value);
         }
 
         public ushort TileSet
         {
-            readonly get => (ushort)(ToFloat(11) * 64f);
-            set => _data[11] = FromFloat((value + 0.5f) / 64f);
+            readonly get => (ushort)(ToFloat(25) * 64f);
+            set => _data[25] = FromFloat((value + 0.5f) / 64f);
         }
 
         public readonly Span<Half> AsHalves()
         {
             fixed (ushort* ptr = _data)
             {
-                return new Span<Half>(ptr, NumHalves);
+                return new Span<Half>(ptr, NumVec4 * Halves);
             }
         }
 

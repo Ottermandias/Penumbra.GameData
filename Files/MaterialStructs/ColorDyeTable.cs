@@ -3,6 +3,7 @@ namespace Penumbra.GameData.Files.MaterialStructs;
 // TODO those values are not correct at all, just taken from the old values for now.
 public unsafe struct ColorDyeTable : IEnumerable<ColorDyeTable.Row>
 {
+    /// <inheritdoc cref="ColorTable.Row"/>
     public struct Row
     {
         public const int  Size = 4;
@@ -10,38 +11,68 @@ public unsafe struct ColorDyeTable : IEnumerable<ColorDyeTable.Row>
 
         public ushort Template
         {
-            get => (ushort)(_data >> 5);
-            set => _data = (_data & 0x1Fu) | ((uint)value << 5);
+            get => (ushort)(_data >> 10);
+            set => _data = (_data & 0x03FFu) | ((uint)value << 10);
         }
 
         public bool Diffuse
         {
-            get => (_data & 0x01) != 0;
-            set => _data = value ? _data | 0x01u : _data & 0xFFFEu;
+            get => (_data & 0x0001) != 0;
+            set => _data = value ? _data | 0x0001u : _data & ~0x0001u;
         }
 
         public bool Specular
         {
-            get => (_data & 0x02) != 0;
-            set => _data = value ? _data | 0x02u : _data & 0xFFFDu;
+            get => (_data & 0x0002) != 0;
+            set => _data = value ? _data | 0x0002u : _data & ~0x0002u;
         }
 
         public bool Emissive
         {
-            get => (_data & 0x04) != 0;
-            set => _data = value ? _data | 0x04u : _data & 0xFFFBu;
+            get => (_data & 0x0004) != 0;
+            set => _data = value ? _data | 0x0004u : _data & ~0x0004u;
         }
 
         public bool Gloss
         {
-            get => (_data & 0x08) != 0;
-            set => _data = value ? _data | 0x08u : _data & 0xFFF7u;
+            get => (_data & 0x0008) != 0;
+            set => _data = value ? _data | 0x0008u : _data & ~0x0008u;
         }
 
         public bool SpecularStrength
         {
-            get => (_data & 0x10) != 0;
-            set => _data = value ? _data | 0x10u : _data & 0xFFEFu;
+            get => (_data & 0x0010) != 0;
+            set => _data = value ? _data | 0x0010u : _data & ~0x0010u;
+        }
+
+        public bool Unk1
+        {
+            get => (_data & 0x0020) != 0;
+            set => _data = value ? _data | 0x0020u : _data & ~0x0020u;
+        }
+
+        public bool Unk2
+        {
+            get => (_data & 0x0040) != 0;
+            set => _data = value ? _data | 0x0040u : _data & ~0x0040u;
+        }
+
+        public bool Unk3
+        {
+            get => (_data & 0x0080) != 0;
+            set => _data = value ? _data | 0x0080u : _data & ~0x0080u;
+        }
+
+        public bool Unk4
+        {
+            get => (_data & 0x0100) != 0;
+            set => _data = value ? _data | 0x0100u : _data & ~0x0100u;
+        }
+
+        public bool Unk5
+        {
+            get => (_data & 0x0200) != 0;
+            set => _data = value ? _data | 0x0200u : _data & ~0x0200u;
         }
     }
 

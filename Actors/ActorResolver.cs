@@ -182,8 +182,8 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
 
         static bool Compare(Actor a, Actor b)
         {
-            var data1  = (CustomizeArray*)a.AsCharacter->DrawData.CustomizeData.Data;
-            var data2  = (CustomizeArray*)b.AsCharacter->DrawData.CustomizeData.Data;
+            var data1  = (CustomizeArray*) &a.AsCharacter->DrawData.CustomizeData;
+            var data2  = (CustomizeArray*) &b.AsCharacter->DrawData.CustomizeData;
             var equals = CustomizeArray.ScreenActorEquals(data1, data2);
             return equals;
         }
