@@ -9,8 +9,8 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
     /// #       |    X (+0)    |    |    Y (+1)    |    |    Z (+2)   |    |   W (+3)    |
     /// --------------------------------------------------------------------------------------
     /// 0 (+ 0) |    Diffuse.R |  0 |    Diffuse.G |  0 |   Diffuse.B |  0 |             |  
-    /// 1 (+ 4) |   Specular.R |  1 |   Specular.G |  0 |  Specular.B |  0 |         Unk |
-    /// 2 (+ 8) |   Emissive.R |  2 |   Emissive.G |  0 |  Emissive.B |  2 |         Unk |  3
+    /// 1 (+ 4) |   Specular.R |  1 |   Specular.G |  1 |  Specular.B |  1 |         Unk |
+    /// 2 (+ 8) |   Emissive.R |  2 |   Emissive.G |  2 |  Emissive.B |  2 |         Unk |  3
     /// 3 (+12) |          Unk |  6 |          Unk |  7 |         Unk |  8 |             |
     /// 4 (+16) |          Unk |  5 |              |    |         Unk |  4 |         Unk |  9
     /// 5 (+20) |              |    |          Unk | 11 |             |    |             |   
