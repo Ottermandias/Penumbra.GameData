@@ -90,17 +90,27 @@ public static class Eqp
 
     /// <summary> Get the number of bytes used per slot, and the offset of those bytes in the flag. </summary>
     public static (int, int) BytesAndOffset(EquipSlot slot)
-    {
-        return slot switch
+        => slot switch
         {
             EquipSlot.Body  => (2, 0),
             EquipSlot.Legs  => (1, 2),
             EquipSlot.Hands => (1, 3),
             EquipSlot.Feet  => (1, 4),
             EquipSlot.Head  => (3, 5),
-            _               => throw new InvalidEnumArgumentException(),
+            _               => (0, 0),
         };
-    }
+
+    /// <summary> Get the number of bytes used per slot, and the offset of those bytes in the flag. </summary>
+    public static (int, EqpEntry) OffsetAndMask(EquipSlot slot)
+        => slot switch
+        {
+            EquipSlot.Body  => (0 * 8, EqpEntry.BodyMask),
+            EquipSlot.Legs  => (2 * 8, EqpEntry.HeadMask),
+            EquipSlot.Hands => (3 * 8, EqpEntry.LegsMask),
+            EquipSlot.Feet  => (4 * 8, EqpEntry.FeetMask),
+            EquipSlot.Head  => (5 * 8, EqpEntry.HandsMask),
+            _               => (0, 0),
+        };
 
     /// <summary> Read an array of bytes and convert them to an EqpEntry given a slot. </summary>
     public static EqpEntry FromSlotAndBytes(EquipSlot slot, byte[] value)
@@ -118,17 +128,7 @@ public static class Eqp
 
     /// <summary> Get the mask for a given slot. </summary>
     public static EqpEntry Mask(EquipSlot slot)
-    {
-        return slot switch
-        {
-            EquipSlot.Body  => EqpEntry.BodyMask,
-            EquipSlot.Head  => EqpEntry.HeadMask,
-            EquipSlot.Legs  => EqpEntry.LegsMask,
-            EquipSlot.Feet  => EqpEntry.FeetMask,
-            EquipSlot.Hands => EqpEntry.HandsMask,
-            _               => 0,
-        };
-    }
+        => OffsetAndMask(slot).Item2;
 
     /// <summary> Convert an entry flag to the slot it affects. </summary>
     public static EquipSlot ToEquipSlot(this EqpEntry entry)

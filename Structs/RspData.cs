@@ -4,7 +4,7 @@ namespace Penumbra.GameData.Structs;
 
 /// <summary> A Racial Scaling Parameter entry controls scaling for specific attributes for a specific gender and race. </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public readonly struct RspEntry
+public readonly struct RspData
 {
     /// <summary> The byte size of all attributes. </summary>
     public const int ByteSize = (int)RspAttribute.NumAttributes * 4;
@@ -13,12 +13,12 @@ public readonly struct RspEntry
     private readonly float[] _attributes;
 
     /// <summary> Copy an RSP Entry. </summary>
-    public RspEntry(RspEntry copy)
+    public RspData(RspData copy)
         => _attributes = (float[])copy._attributes.Clone();
 
 
     /// <summary> Read a set of entries from byte data at a given position. </summary>
-    public RspEntry(ReadOnlySpan<byte> bytes, int offset)
+    public RspData(ReadOnlySpan<byte> bytes, int offset)
     {
         if (offset < 0 || offset + ByteSize > bytes.Length)
             throw new ArgumentOutOfRangeException();
