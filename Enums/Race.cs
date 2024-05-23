@@ -109,6 +109,12 @@ public enum GenderRace : ushort
 
 public static class RaceEnumExtensions
 {
+    private static readonly Dictionary<GenderRace, string> GenderRaceNames = Enum.GetValues<GenderRace>().ToDictionary(g => g, g =>
+    {
+        var (gender, race) = g.Split();
+        return $"{race.ToName()} - {gender.ToName()}";
+    });
+
     /// <summary> Convert a ModelRace to a Race, i.e. Midlander and Highlander to Hyur. </summary>
     public static Race ToRace(this ModelRace race)
         => race switch
@@ -214,6 +220,10 @@ public static class RaceEnumExtensions
             SubRace.Veena           => "Veena",
             _                       => "Unknown",
         };
+
+    /// <summary> Obtain a combined name for a GenderRace in order {Race} - {Gender}. </summary>
+    public static string ToName(this GenderRace genderRace)
+        => GenderRaceNames.GetValueOrDefault(genderRace, "Unknown - Unknown");
 
     /// <summary> Obtain abbreviated names for SubRace. </summary>
     public static string ToShortName(this SubRace subRace)
@@ -364,8 +374,10 @@ public static class RaceEnumExtensions
         while (currentRace != MidlanderMale)
         {
             yield return currentRace;
+
             currentRace = currentRace.Fallback();
         }
+
         yield return MidlanderMale;
     }
 
