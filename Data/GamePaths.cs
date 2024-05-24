@@ -32,7 +32,7 @@ public static partial class GamePaths
             [GeneratedRegex(@"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/b\k'id'\.imc", Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId monsterId, PrimaryId bodyId)
+            public static string Path(PrimaryId monsterId, SecondaryId bodyId)
                 => $"chara/monster/m{monsterId.Id:D4}/obj/body/b{bodyId.Id:D4}/b{bodyId.Id:D4}.imc";
         }
 
@@ -41,7 +41,7 @@ public static partial class GamePaths
             [GeneratedRegex(@"chara/monster/m(?'monster'\d{4})/obj/body/b(?'id'\d{4})/model/m\k'monster'b\k'id'\.mdl", Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId monsterId, PrimaryId bodyId)
+            public static string Path(PrimaryId monsterId, SecondaryId bodyId)
                 => $"chara/monster/m{monsterId.Id:D4}/obj/body/b{bodyId.Id:D4}/model/m{monsterId.Id:D4}b{bodyId.Id:D4}.mdl";
         }
 
@@ -52,7 +52,7 @@ public static partial class GamePaths
                 Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId monsterId, PrimaryId bodyId, Variant variant, string suffix)
+            public static string Path(PrimaryId monsterId, SecondaryId bodyId, Variant variant, string suffix)
                 => $"chara/monster/m{monsterId.Id:D4}/obj/body/b{bodyId.Id:D4}/material/v{variant.Id:D4}/mt_m{monsterId.Id:D4}b{bodyId.Id:D4}_{suffix}.mtrl";
         }
 
@@ -63,7 +63,7 @@ public static partial class GamePaths
                 Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId monsterId, PrimaryId bodyId, Variant variant, char suffix1, char suffix2 = '\0')
+            public static string Path(PrimaryId monsterId, SecondaryId bodyId, Variant variant, char suffix1, char suffix2 = '\0')
                 => $"chara/monster/m{monsterId.Id:D4}/obj/body/b{bodyId.Id:D4}/texture/v{variant.Id:D2}_m{monsterId.Id:D4}b{bodyId.Id:D4}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
         }
 
@@ -93,7 +93,7 @@ public static partial class GamePaths
             [GeneratedRegex(@"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/b\k'weapon'\.imc", Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId weaponId, PrimaryId bodyId)
+            public static string Path(PrimaryId weaponId, SecondaryId bodyId)
                 => $"chara/weapon/w{weaponId.Id:D4}/obj/body/b{bodyId.Id:D4}/b{bodyId.Id:D4}.imc";
         }
 
@@ -102,7 +102,7 @@ public static partial class GamePaths
             [GeneratedRegex(@"chara/weapon/w(?'id'\d{4})/obj/body/b(?'weapon'\d{4})/model/w\k'id'b\k'weapon'\.mdl", Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId weaponId, PrimaryId bodyId)
+            public static string Path(PrimaryId weaponId, SecondaryId bodyId)
                 => $"chara/weapon/w{weaponId.Id:D4}/obj/body/b{bodyId.Id:D4}/model/w{weaponId.Id:D4}b{bodyId.Id:D4}.mdl";
         }
 
@@ -113,7 +113,7 @@ public static partial class GamePaths
                 Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId weaponId, PrimaryId bodyId, Variant variant, string suffix)
+            public static string Path(PrimaryId weaponId, SecondaryId bodyId, Variant variant, string suffix)
                 => $"chara/weapon/w{weaponId.Id:D4}/obj/body/b{bodyId.Id:D4}/material/v{variant.Id:D4}/mt_w{weaponId.Id:D4}b{bodyId.Id:D4}_{suffix}.mtrl";
         }
 
@@ -124,7 +124,7 @@ public static partial class GamePaths
                 Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId weaponId, PrimaryId bodyId, Variant variant, char suffix1, char suffix2 = '\0')
+            public static string Path(PrimaryId weaponId, SecondaryId bodyId, Variant variant, char suffix1, char suffix2 = '\0')
                 => $"chara/weapon/w{weaponId.Id:D4}/obj/body/b{bodyId.Id:D4}/texture/v{variant.Id:D2}_w{weaponId.Id:D4}b{bodyId.Id:D4}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
         }
 
@@ -142,7 +142,7 @@ public static partial class GamePaths
             [GeneratedRegex(@"chara/demihuman/d(?'id'\d{4})/obj/equipment/e(?'equip'\d{4})/e\k'equip'\.imc", Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId demiId, PrimaryId equipId)
+            public static string Path(PrimaryId demiId, SecondaryId equipId)
                 => $"chara/demihuman/d{demiId.Id:D4}/obj/equipment/e{equipId.Id:D4}/e{equipId.Id:D4}.imc";
         }
 
@@ -152,7 +152,7 @@ public static partial class GamePaths
                 Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId demiId, PrimaryId equipId, EquipSlot slot)
+            public static string Path(PrimaryId demiId, SecondaryId equipId, EquipSlot slot)
                 => $"chara/demihuman/d{demiId.Id:D4}/obj/equipment/e{equipId.Id:D4}/model/d{demiId.Id:D4}e{equipId.Id:D4}_{slot.ToSuffix()}.mdl";
         }
 
@@ -163,7 +163,7 @@ public static partial class GamePaths
                 Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId demiId, PrimaryId equipId, EquipSlot slot, Variant variant, string suffix)
+            public static string Path(PrimaryId demiId, SecondaryId equipId, EquipSlot slot, Variant variant, string suffix)
                 => $"chara/demihuman/d{demiId.Id:D4}/obj/equipment/e{equipId.Id:D4}/material/v{variant.Id:D4}/mt_d{demiId.Id:D4}e{equipId.Id:D4}_{slot.ToSuffix()}_{suffix}.mtrl";
         }
 
@@ -174,7 +174,7 @@ public static partial class GamePaths
                 Flags1)]
             public static partial Regex Regex();
 
-            public static string Path(PrimaryId demiId, PrimaryId equipId, EquipSlot slot, Variant variant, char suffix1, char suffix2 = '\0')
+            public static string Path(PrimaryId demiId, SecondaryId equipId, EquipSlot slot, Variant variant, char suffix1, char suffix2 = '\0')
                 => $"chara/demihuman/d{demiId.Id:D4}/obj/equipment/e{equipId.Id:D4}/texture/v{variant.Id:D2}_d{demiId.Id:D4}e{equipId.Id:D4}_{slot.ToSuffix()}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
         }
 
