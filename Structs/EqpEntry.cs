@@ -105,10 +105,10 @@ public static class Eqp
         => slot switch
         {
             EquipSlot.Body  => (0 * 8, EqpEntry.BodyMask),
-            EquipSlot.Legs  => (2 * 8, EqpEntry.HeadMask),
-            EquipSlot.Hands => (3 * 8, EqpEntry.LegsMask),
+            EquipSlot.Legs  => (2 * 8, EqpEntry.LegsMask),
+            EquipSlot.Hands => (3 * 8, EqpEntry.HandsMask),
             EquipSlot.Feet  => (4 * 8, EqpEntry.FeetMask),
-            EquipSlot.Head  => (5 * 8, EqpEntry.HandsMask),
+            EquipSlot.Head  => (5 * 8, EqpEntry.HeadMask),
             _               => (0, 0),
         };
 
