@@ -344,7 +344,7 @@ public static partial class GamePaths
         public static partial class Mtrl
         {
             [GeneratedRegex(
-                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/material(/v(?'variant'\d{4}))?/mt_c\k'race'\k'typeabr'\k'id'(_(?'slot'[a-z]{3}))?_[a-z]+(?:_[^.]*)?\.mtrl",
+                @"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/material(/v(?'variant'\d{4}))?/mt_c\k'race'\k'typeabr'\k'id'(.*?_(?'slot'[a-z]{3}))?_[a-z]+(?:_[^.]*)?\.mtrl",
                 Flags1)]
             public static partial Regex Regex();
 
