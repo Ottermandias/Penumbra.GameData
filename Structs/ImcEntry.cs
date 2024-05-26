@@ -15,6 +15,7 @@ public readonly struct ImcEntry : IEquatable<ImcEntry>
     public byte DecalId { get; init; }
 
     /// <summary> Additional attributes and a sound ID packed. </summary>
+    [JsonIgnore]
     public readonly ushort AttributeAndSound;
 
     /// <summary> An optional VFX to use with this variant. 0 means none. </summary>
