@@ -142,6 +142,18 @@ public unsafe struct LegacyColorTable : IEnumerable<LegacyColorTable.Row>
 
         private static ushort FromFloat(float x)
             => BitConverter.HalfToUInt16Bits((Half)x);
+
+        public Row(in ColorTable.Row row)
+        {
+            Diffuse          = row.Diffuse;
+            Specular         = row.Specular;
+            Emissive         = row.Emissive;
+            MaterialRepeat   = row.MaterialRepeat;
+            MaterialSkew     = row.MaterialSkew;
+            SpecularStrength = row.SpecularStrength;
+            GlossStrength    = row.GlossStrength;
+            TileSet          = row.TileSet;
+        }
     }
 
     public const  int  NumRows     = 16;
@@ -191,20 +203,9 @@ public unsafe struct LegacyColorTable : IEnumerable<LegacyColorTable.Row>
             this[i] = Row.Default;
     }
 
-    internal LegacyColorTable(in ColorTable newTable)
+    public LegacyColorTable(in ColorTable newTable)
     {
         for (var i = 0; i < NumRows; ++i)
-        {
-            ref readonly var newRow = ref newTable[i];
-            ref var          row    = ref this[i];
-            row.Diffuse          = newRow.Diffuse;
-            row.Specular         = newRow.Specular;
-            row.Emissive         = newRow.Emissive;
-            row.MaterialRepeat   = newRow.MaterialRepeat;
-            row.MaterialSkew     = newRow.MaterialSkew;
-            row.SpecularStrength = newRow.SpecularStrength;
-            row.GlossStrength    = newRow.GlossStrength;
-            row.TileSet          = newRow.TileSet;
-        }
+            this[i] = new Row(newTable[i]);
     }
 }

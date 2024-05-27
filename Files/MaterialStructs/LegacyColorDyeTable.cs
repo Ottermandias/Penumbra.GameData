@@ -43,6 +43,16 @@ public unsafe struct LegacyColorDyeTable : IEnumerable<LegacyColorDyeTable.Row>
             get => (_data & 0x10) != 0;
             set => _data = (ushort)(value ? _data | 0x10 : _data & 0xFFEF);
         }
+
+        public Row(in ColorDyeTable.Row row)
+        {
+            Template         = row.Template;
+            Diffuse          = row.Diffuse;
+            Specular         = row.Specular;
+            Emissive         = row.Emissive;
+            Gloss            = row.Gloss;
+            SpecularStrength = row.SpecularStrength;
+        }
     }
 
     public const  int    NumRows     = 16;
@@ -77,18 +87,9 @@ public unsafe struct LegacyColorDyeTable : IEnumerable<LegacyColorDyeTable.Row>
         }
     }
 
-    internal LegacyColorDyeTable(in ColorDyeTable newTable)
+    public LegacyColorDyeTable(in ColorDyeTable newTable)
     {
         for (var i = 0; i < NumRows; ++i)
-        {
-            var     newRow = newTable[i];
-            ref var row    = ref this[i];
-            row.Template         = newRow.Template;
-            row.Diffuse          = newRow.Diffuse;
-            row.Specular         = newRow.Specular;
-            row.Emissive         = newRow.Emissive;
-            row.Gloss            = newRow.Gloss;
-            row.SpecularStrength = newRow.SpecularStrength;
-        }
+            this[i] = new Row(newTable[i]);
     }
 }
