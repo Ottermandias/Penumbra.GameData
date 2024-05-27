@@ -1,6 +1,6 @@
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-internal unsafe struct LegacyColorTable : IEnumerable<LegacyColorTable.Row>
+public unsafe struct LegacyColorTable : IEnumerable<LegacyColorTable.Row>
 {
     public struct Row
     {
@@ -144,8 +144,9 @@ internal unsafe struct LegacyColorTable : IEnumerable<LegacyColorTable.Row>
             => BitConverter.HalfToUInt16Bits((Half)x);
     }
 
-    public const  int  NumRows = 16;
-    public const  int  Size    = NumRows * Row.Size;
+    public const  int  NumRows     = 16;
+    public const  int  NumUsedRows = 16;
+    public const  int  Size        = NumRows * Row.Size;
     private fixed byte _rowData[Size];
 
     public ref Row this[int i]

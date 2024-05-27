@@ -1,6 +1,6 @@
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-internal unsafe struct LegacyColorDyeTable : IEnumerable<LegacyColorDyeTable.Row>
+public unsafe struct LegacyColorDyeTable : IEnumerable<LegacyColorDyeTable.Row>
 {
     public struct Row
     {
@@ -45,7 +45,8 @@ internal unsafe struct LegacyColorDyeTable : IEnumerable<LegacyColorDyeTable.Row
         }
     }
 
-    public const  int    NumRows = 16;
+    public const  int    NumRows     = 16;
+    public const  int    NumUsedRows = 16;
     private fixed ushort _rowData[NumRows];
 
     public ref Row this[int i]
