@@ -85,7 +85,7 @@ public partial class MdlFile : IWritable
     // Raw, unparsed data.
     public byte[] RemainingData = [];
 
-    public bool Valid { get; }
+    public bool Valid { get; set; }
 
     public MdlFile()
     { }
