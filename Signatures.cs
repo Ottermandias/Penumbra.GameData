@@ -97,4 +97,7 @@ public static class Sigs
 
     // Flag Slot for Update service
     public const string FlagSlotForUpdate = "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 8B DA 49 8B F0 48 8B F9 83 FA 0A";
+
+    // Partial/composable materials
+    public const string CreateMaterial = "E8 ?? ?? ?? ?? 48 89 87 ?? ?? ?? ?? 48 85 C0 0F 84 ?? ?? ?? ?? 45 8B DC";
 }
