@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace Penumbra.GameData.Structs;
 
 /// <summary>
@@ -89,6 +91,7 @@ public struct GmpEntry : IEquatable<GmpEntry>
     }
 
     /// <summary> Both unknown parameters together. Bits 32-40 or byte 5. </summary>
+    [JsonIgnore]
     public byte UnknownTotal
     {
         get => _value5;
@@ -96,6 +99,7 @@ public struct GmpEntry : IEquatable<GmpEntry>
     }
 
     /// <summary> The total value of the parameter as single 8 byte integer, the upper 3 bytes are always 0. </summary>
+    [JsonIgnore]
     public ulong Value
     {
         readonly get => _value1 | ((ulong)_value2 << 8) | ((ulong)_value3 << 16) | ((ulong)_value4 << 24) | ((ulong)_value5 << 32);
