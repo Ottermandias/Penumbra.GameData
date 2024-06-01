@@ -113,41 +113,59 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
         private static ushort FromFloat(float x)
             => BitConverter.HalfToUInt16Bits((Half)x);
 
-        public bool ApplyDyeTemplate(ColorDyeTable.Row dyeRow, StmFile.DyePack dyes1, StmFile.DyePack dyes2)
+        public bool ApplyDyeTemplate2(ColorDyeTable.Row dyeRow, StmFile.DyePack dye)
+        {
+            // TODO
+            return false;
+        }
+
+        public bool ApplyDyeTemplate1(ColorDyeTable.Row dyeRow, StmFile.DyePack dye)
         {
             var ret = false;
 
-            if (dyeRow.Diffuse && Diffuse != dyes1.Diffuse)
+            if (dyeRow.Diffuse && Diffuse != dye.Diffuse)
             {
-                Diffuse = dyes1.Diffuse;
+                Diffuse = dye.Diffuse;
                 ret     = true;
             }
 
-            if (dyeRow.Specular && Specular != dyes1.Specular)
+            if (dyeRow.Specular && Specular != dye.Specular)
             {
-                Specular = dyes1.Specular;
+                Specular = dye.Specular;
                 ret      = true;
             }
 
-            if (dyeRow.SpecularStrength && SpecularStrength != dyes1.SpecularPower)
+            if (dyeRow.SpecularStrength && SpecularStrength != dye.SpecularPower)
             {
-                SpecularStrength = dyes1.SpecularPower;
+                SpecularStrength = dye.SpecularPower;
                 ret              = true;
             }
 
-            if (dyeRow.Emissive && Emissive != dyes1.Emissive)
+            if (dyeRow.Emissive && Emissive != dye.Emissive)
             {
-                Emissive = dyes1.Emissive;
+                Emissive = dye.Emissive;
                 ret      = true;
             }
 
-            if (dyeRow.Gloss && GlossStrength != dyes1.Gloss)
+            if (dyeRow.Gloss && GlossStrength != dye.Gloss)
             {
-                GlossStrength = dyes1.Gloss;
+                GlossStrength = dye.Gloss;
                 ret           = true;
             }
 
             return ret;
+        }
+
+        public Row(in LegacyColorTable.Row oldRow)
+        {
+            Diffuse          = oldRow.Diffuse;
+            Specular         = oldRow.Specular;
+            Emissive         = oldRow.Emissive;
+            MaterialRepeat   = oldRow.MaterialRepeat;
+            MaterialSkew     = oldRow.MaterialSkew;
+            SpecularStrength = oldRow.SpecularStrength;
+            GlossStrength    = oldRow.GlossStrength;
+            TileSet          = oldRow.TileSet;
         }
     }
 
@@ -197,20 +215,9 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
             this[i] = Row.Default;
     }
 
-    internal ColorTable(in LegacyColorTable oldTable)
+    public ColorTable(in LegacyColorTable oldTable)
     {
         for (var i = 0; i < LegacyColorTable.NumRows; ++i)
-        {
-            ref readonly var oldRow = ref oldTable[i];
-            ref var          row    = ref this[i];
-            row.Diffuse          = oldRow.Diffuse;
-            row.Specular         = oldRow.Specular;
-            row.Emissive         = oldRow.Emissive;
-            row.MaterialRepeat   = oldRow.MaterialRepeat;
-            row.MaterialSkew     = oldRow.MaterialSkew;
-            row.SpecularStrength = oldRow.SpecularStrength;
-            row.GlossStrength    = oldRow.GlossStrength;
-            row.TileSet          = oldRow.TileSet;
-        }
+            this[i] = new Row(oldTable[i]);
     }
 }

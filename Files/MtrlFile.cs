@@ -73,11 +73,13 @@ public partial class MtrlFile : IWritable, ICloneable
             return false;
 
         var dyeSet = DyeTable[rowIdx];
-        if (!stm.TryGetValue(dyeSet.Template, stainId1, out var dyes1)
-         || !stm.TryGetValue(dyeSet.Template, stainId2, out var dyes2))
-            return false;
+        var ret = false;
+        if (stainId1 != 0 && stm.TryGetValue(dyeSet.Template, stainId1, out var dyes1))
+            ret |= Table[rowIdx].ApplyDyeTemplate1(dyeSet, dyes1);
+        if (stainId2 != 0 && stm.TryGetValue(dyeSet.Template, stainId2, out var dyes2))
+            ret |= Table[rowIdx].ApplyDyeTemplate2(dyeSet, dyes2);
 
-        return Table[rowIdx].ApplyDyeTemplate(dyeSet, dyes1, dyes2);
+        return ret;
     }
 
     public Span<float> GetConstantValues(Constant constant)
