@@ -12,7 +12,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps WorldIds to their names. </summary>
 public sealed class DictWorld(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<IReadOnlyDictionary<ushort, string>>(pluginInterface, log, "Worlds", gameData.Language, 7, () => CreateWorldData(gameData)),
+    : DataSharer<IReadOnlyDictionary<ushort, string>>(pluginInterface, log, "Worlds", gameData.Language, 8, () => CreateWorldData(gameData)),
         IReadOnlyDictionary<WorldId, string>
 {
     /// <summary> Create the data. </summary>
@@ -20,9 +20,23 @@ public sealed class DictWorld(DalamudPluginInterface pluginInterface, Logger log
     {
         var sheet = gameData.GetExcelSheet<World>()!;
         var dict  = new Dictionary<ushort, string>((int)sheet.RowCount);
-        foreach (var w in sheet.Where(w => w.IsPublic && !w.Name.RawData.IsEmpty))
+        foreach (var w in sheet.Where(IsValid))
             dict.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
         return dict.ToFrozenDictionary();
+    }
+
+    private static bool IsValid(World world)
+    {
+        if (world.Name.RawData.IsEmpty)
+            return false;
+
+        if (world.DataCenter.Row is 0)
+            return false;
+
+        if (world.IsPublic)
+            return true;
+
+        return char.IsUpper((char)world.Name.RawData[0]);
     }
 
     /// <inheritdoc/>
