@@ -33,7 +33,7 @@ public struct GmpEntry : IEquatable<GmpEntry>
     /// <summary> Whether toggling the visor is animated. Bit 2.</summary>
     public bool Animated
     {
-        readonly get => (_value2 & 2) == 2;
+        readonly get => (_value1 & 2) == 2;
         set
         {
             if (value)
