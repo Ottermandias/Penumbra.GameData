@@ -46,6 +46,8 @@ public enum EqdpEntry : ushort
     RingL1    = 0b0100000000,
     RingL2    = 0b1000000000,
     RingLMask = 0b1100000000,
+
+    FullMask = 0b1111111111,
 }
 
 public static class Eqdp
