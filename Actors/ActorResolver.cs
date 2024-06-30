@@ -42,7 +42,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     public bool ResolvePartyBannerPlayer(ActorIdentifierFactory factory, ScreenActor type, out ActorIdentifier id)
     {
         id = ActorIdentifier.Invalid;
-        var module = Framework.Instance()->GetUiModule()->GetAgentModule();
+        var module = Framework.Instance()->UIModule->GetAgentModule();
         if (module == null)
             return false;
 
@@ -56,7 +56,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
         if (agent->Data == null)
             return true;
 
-        ref var character = ref agent->Data->CharacterArraySpan[idx];
+        ref var character = ref agent->Data->Characters[idx];
 
         var name = new ByteString(character.Name1.StringPtr);
         id = factory.CreatePlayer(name, (WorldId)character.WorldId);

@@ -452,9 +452,9 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
     private unsafe ActorIdentifier CreateBNpcFromObject(Actor actor, out Actor owner, bool check, bool allowPlayerNpc,
         bool withoutIndex)
     {
-        var ownerId = actor.AsObject->OwnerID;
+        var ownerId = actor.AsObject->OwnerId;
         // 952 -> 780 is a special case for chocobos because they have NameId == 0 otherwise.
-        var nameId = actor.AsObject->DataID == 952 ? 780 : actor.AsCharacter->NameID;
+        var nameId = actor.AsObject->BaseId == 952 ? 780 : actor.AsCharacter->NameId;
         if (ownerId != 0xE0000000)
         {
             owner = HandleCutscene(_objects.ById(ownerId));
@@ -492,10 +492,10 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private unsafe ActorIdentifier CreateENpcFromObject(Actor actor, bool check, bool withoutIndex)
     {
-        var dataId = actor.AsObject->DataID;
+        var dataId = actor.AsObject->BaseId;
         // Special case for squadron that is also in the game functions, cf. E8 ?? ?? ?? ?? 89 87 ?? ?? ?? ?? 4C 89 BF
         if (dataId == 0xF845D)
-            dataId = actor.AsObject->GetNpcID();
+            dataId = actor.AsObject->GetNameId();
         if (MannequinIds.Contains(dataId))
         {
             static ByteString Get(byte* ptr)
@@ -565,9 +565,9 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         return (ObjectKind)actor.AsObject->ObjectKind switch
         {
             ObjectKind.MountType => owner.AsCharacter->Mount.MountId,
-            ObjectKind.Ornament  => owner.AsCharacter->Ornament.OrnamentId,
-            ObjectKind.Companion => actor.AsObject->DataID,
-            _                    => actor.AsObject->DataID,
+            ObjectKind.Ornament  => owner.AsCharacter->OrnamentData.OrnamentId,
+            ObjectKind.Companion => actor.AsObject->BaseId,
+            _                    => actor.AsObject->BaseId,
         };
     }
 

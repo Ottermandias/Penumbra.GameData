@@ -62,7 +62,7 @@ public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFrame
                 return;
 
             InternalAvailable.Add(actor);
-            var id = actor.AsObject->GetObjectID();
+            var id = actor.AsObject->GetGameObjectId();
             InternalIdDict.TryAdd(id, actor);
         }
     }
@@ -182,12 +182,12 @@ public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFrame
         => Objects[index.Index] as ICharacter;
 
     protected override long ComputeMemory()
-        => DataUtility.DictionaryMemory(16,  Objects.Count)
-          + DataUtility.DictionaryMemory(16, Objects.Count / 2)
-          + DataUtility.ListMemory(8, Objects.Count);
+        => DataUtility.DictionaryMemory(16,  Objects.Length)
+          + DataUtility.DictionaryMemory(16, Objects.Length / 2)
+          + DataUtility.ListMemory(8, Objects.Length);
 
     protected override int ComputeTotalCount()
-        => Objects.Count;
+        => Objects.Length;
 
     public IEnumerator<Actor> GetEnumerator()
     {
