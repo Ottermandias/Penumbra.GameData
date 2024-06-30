@@ -14,7 +14,7 @@ namespace Penumbra.GameData.DataContainers.Bases;
 /// <param name="version"> The version of the data share. </param>
 /// <param name="factory"> The factory function to create the data from. </param>
 public abstract class NameDictionary(
-    DalamudPluginInterface pluginInterface,
+    IDalamudPluginInterface pluginInterface,
     Logger log,
     IDataManager gameData,
     string name,

@@ -12,7 +12,7 @@ using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 
 namespace Penumbra.GameData.Interop;
 
-public unsafe class ObjectManager(DalamudPluginInterface pi, Logger log, IFramework framework, IObjectTable objects)
+public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFramework framework, IObjectTable objects)
     : DataSharer<Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>, int[]>>(pi, log, "Penumbra.ObjectManager",
         ClientLanguage.English, 1,
         () => new Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>, int[]>(

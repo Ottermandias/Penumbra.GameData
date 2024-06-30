@@ -15,7 +15,7 @@ namespace Penumbra.GameData.DataContainers.Bases;
 /// <param name="factory"> A factory function to create the data. </param>
 /// <param name="continuation"> Awaiter of the dependencies of the factory function. </param>
 public abstract class DictLuminaName<T>(
-    DalamudPluginInterface pluginInterface,
+    IDalamudPluginInterface pluginInterface,
     Logger log,
     string name,
     ClientLanguage language,

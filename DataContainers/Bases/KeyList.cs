@@ -78,7 +78,7 @@ public abstract class KeyList<T> : DataSharer<IReadOnlyList<(ulong Key, T Data)>
     /// <param name="validKey"> A predicate checking for valid or invalid keys. </param>
     /// <param name="valueKeySelector"> A sorter that can sort multiple identical keys based on the data. </param>
     /// <param name="continuation"> An awaiter that has to have finished before calling the factory. </param>
-    protected KeyList(DalamudPluginInterface pi, Logger log, string name, ClientLanguage language, int version, Func<IEnumerable<T>> data,
+    protected KeyList(IDalamudPluginInterface pi, Logger log, string name, ClientLanguage language, int version, Func<IEnumerable<T>> data,
         Func<T, ulong> toKey, Func<ulong, bool> validKey, Func<T, int> valueKeySelector, Task? continuation = null)
         : base(pi, log, name, language, version,
             () => data().Select(d => (toKey(d), d)).Where(p => validKey(p.Item1)).OrderBy(p => p.Item1)

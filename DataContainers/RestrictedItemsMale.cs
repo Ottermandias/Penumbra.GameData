@@ -12,7 +12,7 @@ using Race = Penumbra.GameData.Enums.Race;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A set of items restricted to male characters. </summary>
-public sealed class RestrictedItemsMale(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
+public sealed class RestrictedItemsMale(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<uint, uint>>(pluginInterface, log, "GenderRestrictedItemsMale", gameData.Language, 3,
         () => CreateItems(log, gameData))
 {

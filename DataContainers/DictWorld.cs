@@ -11,7 +11,7 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps WorldIds to their names. </summary>
-public sealed class DictWorld(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
+public sealed class DictWorld(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<ushort, string>>(pluginInterface, log, "Worlds", gameData.Language, 8, () => CreateWorldData(gameData)),
         IReadOnlyDictionary<WorldId, string>
 {

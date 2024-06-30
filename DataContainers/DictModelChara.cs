@@ -13,7 +13,7 @@ namespace Penumbra.GameData.DataContainers;
 /// <summary> A dictionary mapping ModelCharaIds to lists of NPCs using that ModelChara. </summary>
 /// <remarks> This requires <paramref name="nameDicts"/> and <paramref name="bNpcNames"/> to have finished. </remarks>
 public sealed class DictModelChara(
-    DalamudPluginInterface pluginInterface,
+    IDalamudPluginInterface pluginInterface,
     Logger log,
     IDataManager gameData,
     DictBNpcNames bNpcNames,
