@@ -27,7 +27,7 @@ public readonly unsafe struct Actor : IEquatable<Actor>
         => Address != nint.Zero;
 
     public bool IsPlayer
-        => Valid && AsObject->ObjectKind is (byte)ObjectKind.Pc;
+        => Valid && AsObject->ObjectKind is ObjectKind.Pc;
 
     public bool IsCharacter
         => Valid && AsObject->IsCharacter();
