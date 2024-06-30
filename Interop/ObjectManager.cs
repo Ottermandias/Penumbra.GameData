@@ -9,17 +9,17 @@ using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
-using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
+using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
 namespace Penumbra.GameData.Interop;
 
 public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFramework framework, IObjectTable objects)
-    : DataSharer<Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>, int[]>>(pi, log, "Penumbra.ObjectManager",
+    : DataSharer<Tuple<DateTime[], List<nint>, Dictionary<GameObjectId, nint>, int[]>>(pi, log, "Penumbra.ObjectManager",
         ClientLanguage.English, 1,
-        () => new Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>, int[]>(
+        () => new Tuple<DateTime[], List<nint>, Dictionary<GameObjectId, nint>, int[]>(
             [DateTime.UnixEpoch],
-            new List<IntPtr>(objects.Count),
-            new Dictionary<GameObjectID, IntPtr>(objects.Count), new int[4])), IReadOnlyCollection<Actor>
+            new List<IntPtr>(objects.Length),
+            new Dictionary<GameObjectId, IntPtr>(objects.Length), new int[4])), IReadOnlyCollection<Actor>
 {
     public readonly  IObjectTable Objects  = objects;
     private readonly Actor*       _address = (Actor*)GameObjectManager.Instance()->ObjectList;
@@ -146,7 +146,7 @@ public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFrame
     protected List<nint> InternalAvailable
         => Value.Item2;
 
-    protected Dictionary<GameObjectID, nint> InternalIdDict
+    protected Dictionary<GameObjectId, nint> InternalIdDict
         => Value.Item3;
 
     public Actor this[ObjectIndex index]
@@ -156,14 +156,14 @@ public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFrame
         => index < 0 || index >= TotalCount ? Actor.Null : _address[index];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public Actor ById(GameObjectID id)
+    public Actor ById(GameObjectId id)
     {
         Update();
         return ByIdWithoutUpdate(id);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public Actor ByIdWithoutUpdate(GameObjectID id)
+    public Actor ByIdWithoutUpdate(GameObjectId id)
         => InternalIdDict.GetValueOrDefault(id, nint.Zero);
 
     public Actor CompanionParent(Actor companion)
@@ -175,11 +175,11 @@ public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFrame
     public GameObject? GetDalamudObject(ObjectIndex index)
         => Objects[index.Index];
 
-    public Character? GetDalamudCharacter(int index)
-        => Objects[index] as Character;
+    public ICharacter? GetDalamudCharacter(int index)
+        => Objects[index] as ICharacter;
 
-    public Character? GetDalamudCharacter(ObjectIndex index)
-        => Objects[index.Index] as Character;
+    public ICharacter? GetDalamudCharacter(ObjectIndex index)
+        => Objects[index.Index] as ICharacter;
 
     protected override long ComputeMemory()
         => DataUtility.DictionaryMemory(16,  Objects.Count)

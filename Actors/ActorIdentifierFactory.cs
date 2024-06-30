@@ -201,12 +201,12 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
     }
 
     /// <inheritdoc cref="FromObject(Actor,out Actor,bool,bool,bool)"/>
-    public ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.GameObject? actor,
+    public ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.IGameObject? actor,
         out Actor owner, bool allowPlayerNpc, bool check, bool withoutIndex)
         => FromObject(actor?.Address ?? nint.Zero, out owner, allowPlayerNpc, check, withoutIndex);
 
     /// <inheritdoc cref="FromObject(Actor,out Actor,bool,bool,bool)"/>
-    public ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.GameObject? actor, bool allowPlayerNpc, bool check,
+    public ActorIdentifier FromObject(Dalamud.Game.ClientState.Objects.Types.IGameObject? actor, bool allowPlayerNpc, bool check,
         bool withoutIndex)
         => FromObject(actor, out _, allowPlayerNpc, check, withoutIndex);
 
