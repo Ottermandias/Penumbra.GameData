@@ -2,6 +2,7 @@ using System.Collections.Frozen;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.Interop;
 using ImGuiNET;
 using OtterGui;
 using Penumbra.GameData.Data;

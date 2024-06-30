@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using Dalamud;
+using Dalamud.Game;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using OtterGui.Services;
