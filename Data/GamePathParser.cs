@@ -279,11 +279,11 @@ public class GamePathParser(Logger log) : IService
 
         var language = groups["lang"].Value switch
         {
-            "en" => Dalamud.ClientLanguage.English,
-            "ja" => Dalamud.ClientLanguage.Japanese,
-            "de" => Dalamud.ClientLanguage.German,
-            "fr" => Dalamud.ClientLanguage.French,
-            _    => Dalamud.ClientLanguage.English,
+            "en" => ClientLanguage.English,
+            "ja" => ClientLanguage.Japanese,
+            "de" => ClientLanguage.German,
+            "fr" => ClientLanguage.French,
+            _    => ClientLanguage.English,
         };
         return GameObjectInfo.Icon(fileType, id, hq, hr, language);
     }
