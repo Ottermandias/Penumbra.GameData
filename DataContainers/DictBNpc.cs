@@ -10,7 +10,7 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches BNpcNameId to names. </summary>
-public sealed class DictBNpc(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
+public sealed class DictBNpc(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : NameDictionary(pluginInterface, log, gameData, "BNpcs", 7, () => CreateBNpcData(gameData))
 {
     /// <summary> Create the data. </summary>

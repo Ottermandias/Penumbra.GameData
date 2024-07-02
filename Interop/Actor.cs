@@ -26,7 +26,7 @@ public readonly unsafe struct Actor : IEquatable<Actor>
         => Address != nint.Zero;
 
     public bool IsPlayer
-        => Valid && AsObject->ObjectKind is (byte)ObjectKind.Pc;
+        => Valid && AsObject->ObjectKind is ObjectKind.Pc;
 
     public bool IsCharacter
         => Valid && AsObject->IsCharacter();
@@ -109,7 +109,7 @@ public readonly unsafe struct Actor : IEquatable<Actor>
 
     /// <summary> Only valid for characters. </summary>
     public CharacterArmor GetArmor(EquipSlot slot)
-        => ((CharacterArmor*)&AsCharacter->DrawData.Head)[slot.ToIndex()];
+        => ((CharacterArmor*)Unsafe.AsPointer(ref AsCharacter->DrawData.EquipmentModelIds[0]))[slot.ToIndex()];
 
     public bool GetCrest(CrestFlag slot)
         => CrestBitfield.HasFlag(slot);

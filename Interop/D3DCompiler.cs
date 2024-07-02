@@ -12,7 +12,7 @@ internal static class D3DCompiler
         public unsafe void* GetBufferPointer();
 
         [PreserveSig]
-        public UIntPtr GetBufferSize();
+        public nuint GetBufferSize();
     }
 
     [Flags]
@@ -35,7 +35,7 @@ internal static class D3DCompiler
         {
             fixed (byte* pSrcData = blob)
             {
-                var hr = D3DDisassemble(pSrcData, new UIntPtr((uint)blob.Length), (uint)flags, comments, out disassembly);
+                var hr = D3DDisassemble(pSrcData, new nuint((uint)blob.Length), (uint)flags, comments, out disassembly);
                 Marshal.ThrowExceptionForHR(hr);
             }
 
@@ -54,7 +54,7 @@ internal static class D3DCompiler
     [DllImport("D3DCompiler_47.dll")]
     private static extern unsafe int D3DDisassemble(
         [In] byte* pSrcData,
-        [In] UIntPtr srcDataSize,
+        [In] nuint srcDataSize,
         uint flags,
         [MarshalAs(UnmanagedType.LPStr)] string szComments,
         out ID3DBlob? ppDisassembly);

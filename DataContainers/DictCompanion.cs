@@ -10,7 +10,7 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches CompanionId to names. </summary>
-public sealed class DictCompanion(DalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
+public sealed class DictCompanion(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : NameDictionary(pluginInterface, log, gameData, "Companions", 7, () => CreateCompanionData(gameData))
 {
     /// <summary> Create the data. </summary>

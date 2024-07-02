@@ -11,9 +11,10 @@ namespace Penumbra.GameData.Structs;
 [Flags]
 public enum ItemFlags : byte
 {
-    IsDyable      = 0x01,
+    IsDyable1     = 0x01,
     IsTradable    = 0x02,
     IsCrestWorthy = 0x04,
+    IsDyable2     = 0x08,
 }
 
 /// <summary> All useful information for a single model of a single item. </summary>
@@ -129,7 +130,12 @@ public readonly struct EquipItem : IEquatable<EquipItem>
 
     /// <summary> Convert lumina data to misc. information. </summary>
     private static ItemFlags GetFlags(Item item)
-        => (item.IsDyeable ? ItemFlags.IsDyable : 0)
+        => item.DyeCount switch
+            {
+                1 => ItemFlags.IsDyable1,
+                2 => ItemFlags.IsDyable1 | ItemFlags.IsDyable2,
+                _ => 0,
+            }
           | (item.IsCrestWorthy ? ItemFlags.IsCrestWorthy : 0)
           | (item.IsUntradable ? 0 : ItemFlags.IsTradable);
 

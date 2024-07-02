@@ -8,7 +8,7 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A list to efficiently identify equipment pieces. This requires ItemsByType to be finished. </summary>
-public sealed class IdentificationListEquipment(DalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
+public sealed class IdentificationListEquipment(IDalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
     : KeyList<PseudoEquipItem>(pi, log, "EquipmentIdentification", gameData.Language, 9, () => CreateEquipmentList(items), ToKey, ValidKey,
         ValueKeySelector, items.Awaiter)
 {

@@ -8,7 +8,7 @@ using Penumbra.GameData.Enums;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary mapping ItemIds to all primary model items. This requires ItemsByType to be finished. </summary>
-public sealed class ItemsPrimaryModel(DalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
+public sealed class ItemsPrimaryModel(IDalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
     : ItemDictionary(pi, log, "ItemDictPrimary", gameData.Language, 3, () => CreateMainItems(items), items.Awaiter)
 {
     /// <summary> Create data by taking only the primary models for all items. </summary>

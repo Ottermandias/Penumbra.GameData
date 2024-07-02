@@ -1,4 +1,4 @@
-using Dalamud;
+using Dalamud.Game;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;

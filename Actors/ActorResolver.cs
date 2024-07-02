@@ -28,7 +28,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     public ActorIdentifier GetInspectPlayer(ActorIdentifierFactory factory)
     {
         var addon = _gameGui.GetAddonByName("CharacterInspect");
-        return addon == IntPtr.Zero
+        return addon == nint.Zero
             ? ActorIdentifier.Invalid
             : factory.CreatePlayer(InspectName, InspectWorldId);
     }
@@ -41,7 +41,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     public bool ResolvePartyBannerPlayer(ActorIdentifierFactory factory, ScreenActor type, out ActorIdentifier id)
     {
         id = ActorIdentifier.Invalid;
-        var module = Framework.Instance()->GetUiModule()->GetAgentModule();
+        var module = Framework.Instance()->GetUIModule()->GetAgentModule();
         if (module == null)
             return false;
 
@@ -55,7 +55,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
         if (agent->Data == null)
             return true;
 
-        ref var character = ref agent->Data->CharacterArraySpan[idx];
+        ref var character = ref agent->Data->Characters[idx];
 
         var name = new ByteString(character.Name1.StringPtr);
         id = factory.CreatePlayer(name, (WorldId)character.WorldId);
@@ -70,7 +70,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     public bool ResolveMahjongPlayer(ActorIdentifierFactory factory, ScreenActor type, out ActorIdentifier id)
     {
         id = ActorIdentifier.Invalid;
-        if (_clientState.TerritoryType != 831 && _gameGui.GetAddonByName("EmjIntro") == IntPtr.Zero)
+        if (_clientState.TerritoryType != 831 && _gameGui.GetAddonByName("EmjIntro") == nint.Zero)
             return false;
 
         var obj = _objects[(int)type];
@@ -134,7 +134,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     public ActorIdentifier GetGlamourPlayer(ActorIdentifierFactory factory)
     {
         var addon = _gameGui.GetAddonByName("MiragePrismMiragePlate");
-        return addon == IntPtr.Zero ? ActorIdentifier.Invalid : GetCurrentPlayer(factory);
+        return addon == nint.Zero ? ActorIdentifier.Invalid : GetCurrentPlayer(factory);
     }
 
     /// <summary> The home world of the currently inspected player. </summary>
@@ -143,7 +143,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
 
     /// <summary> The name of the currently inspected player. </summary>
     private static ByteString InspectName
-        => new(UIState.Instance()->Inspect.Name);
+        => ByteString.FromSpanUnsafe(UIState.Instance()->Inspect.Name, false, false, null);
 
     /// <summary> Check if a screen actor at a given index has the same customizations (up to height) as the given character, and return an identifier for the potential owner. </summary>
     private bool SearchPlayerCustomize(ActorIdentifierFactory factory, Actor character, ObjectIndex idx, out ActorIdentifier id)

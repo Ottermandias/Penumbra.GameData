@@ -9,7 +9,7 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps full item types to lists of all corresponding items. </summary>
-public sealed class ItemsByType(DalamudPluginInterface pi, Logger log, IDataManager dataManager)
+public sealed class ItemsByType(IDalamudPluginInterface pi, Logger log, IDataManager dataManager)
     : DataSharer<IReadOnlyList<IReadOnlyList<PseudoEquipItem>>>(pi, log, "ItemsByType", dataManager.Language, 2,
             () => CreateItems(dataManager)),
         IReadOnlyDictionary<FullEquipType, IReadOnlyList<EquipItem>>

@@ -1,4 +1,4 @@
-﻿using Dalamud;
+﻿using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -8,20 +8,19 @@ using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
-using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 
 namespace Penumbra.GameData.Interop;
 
-public unsafe class ObjectManager(DalamudPluginInterface pi, Logger log, IFramework framework, IObjectTable objects)
-    : DataSharer<Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>, int[]>>(pi, log, "Penumbra.ObjectManager",
+public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFramework framework, IObjectTable objects)
+    : DataSharer<Tuple<DateTime[], List<nint>, Dictionary<GameObjectId, nint>, int[]>>(pi, log, "Penumbra.ObjectManager",
         ClientLanguage.English, 1,
-        () => new Tuple<DateTime[], List<nint>, Dictionary<GameObjectID, nint>, int[]>(
+        () => new Tuple<DateTime[], List<nint>, Dictionary<GameObjectId, nint>, int[]>(
             [DateTime.UnixEpoch],
-            new List<IntPtr>(objects.Count),
-            new Dictionary<GameObjectID, IntPtr>(objects.Count), new int[4])), IReadOnlyCollection<Actor>
+            new List<nint>(objects.Length),
+            new Dictionary<GameObjectId, nint>(objects.Length), new int[4])), IReadOnlyCollection<Actor>
 {
     public readonly  IObjectTable Objects  = objects;
-    private readonly Actor*       _address = (Actor*)GameObjectManager.Instance()->ObjectList;
+    private readonly Actor*       _address = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
 
     public virtual bool Update()
     {
@@ -61,7 +60,7 @@ public unsafe class ObjectManager(DalamudPluginInterface pi, Logger log, IFramew
                 return;
 
             InternalAvailable.Add(actor);
-            var id = actor.AsObject->GetObjectID();
+            var id = actor.AsObject->GetGameObjectId();
             InternalIdDict.TryAdd(id, actor);
         }
     }
@@ -145,7 +144,7 @@ public unsafe class ObjectManager(DalamudPluginInterface pi, Logger log, IFramew
     protected List<nint> InternalAvailable
         => Value.Item2;
 
-    protected Dictionary<GameObjectID, nint> InternalIdDict
+    protected Dictionary<GameObjectId, nint> InternalIdDict
         => Value.Item3;
 
     public Actor this[ObjectIndex index]
@@ -155,38 +154,38 @@ public unsafe class ObjectManager(DalamudPluginInterface pi, Logger log, IFramew
         => index < 0 || index >= TotalCount ? Actor.Null : _address[index];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public Actor ById(GameObjectID id)
+    public Actor ById(GameObjectId id)
     {
         Update();
         return ByIdWithoutUpdate(id);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public Actor ByIdWithoutUpdate(GameObjectID id)
+    public Actor ByIdWithoutUpdate(GameObjectId id)
         => InternalIdDict.GetValueOrDefault(id, nint.Zero);
 
     public Actor CompanionParent(Actor companion)
         => this[companion.Index.Index - 1];
 
-    public GameObject? GetDalamudObject(int index)
+    public IGameObject? GetDalamudObject(int index)
         => Objects[index];
 
-    public GameObject? GetDalamudObject(ObjectIndex index)
+    public IGameObject? GetDalamudObject(ObjectIndex index)
         => Objects[index.Index];
 
-    public Character? GetDalamudCharacter(int index)
-        => Objects[index] as Character;
+    public ICharacter? GetDalamudCharacter(int index)
+        => Objects[index] as ICharacter;
 
-    public Character? GetDalamudCharacter(ObjectIndex index)
-        => Objects[index.Index] as Character;
+    public ICharacter? GetDalamudCharacter(ObjectIndex index)
+        => Objects[index.Index] as ICharacter;
 
     protected override long ComputeMemory()
-        => DataUtility.DictionaryMemory(16,  Objects.Count)
-          + DataUtility.DictionaryMemory(16, Objects.Count / 2)
-          + DataUtility.ListMemory(8, Objects.Count);
+        => DataUtility.DictionaryMemory(16,  Objects.Length)
+          + DataUtility.DictionaryMemory(16, Objects.Length / 2)
+          + DataUtility.ListMemory(8, Objects.Length);
 
     protected override int ComputeTotalCount()
-        => Objects.Count;
+        => Objects.Length;
 
     public IEnumerator<Actor> GetEnumerator()
     {
