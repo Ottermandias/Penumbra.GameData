@@ -143,7 +143,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
 
     /// <summary> The name of the currently inspected player. </summary>
     private static ByteString InspectName
-        => ByteString.FromSpanUnsafe(UIState.Instance()->Inspect.Name, false, false, null);
+        => new(UIState.Instance()->Inspect.Name);
 
     /// <summary> Check if a screen actor at a given index has the same customizations (up to height) as the given character, and return an identifier for the potential owner. </summary>
     private bool SearchPlayerCustomize(ActorIdentifierFactory factory, Actor character, ObjectIndex idx, out ActorIdentifier id)

@@ -231,11 +231,6 @@ public static class GenderRestrictedItems
         new RestrictedItemPair(20481, 20486, 3), // Nezha Lord's Gloves                        <-> Nezha Lady's Gloves
         new RestrictedItemPair(20482, 20487, 3), // Nezha Lord's Slops                         <-> Nezha Lady's Slops
         new RestrictedItemPair(20483, 20488, 3), // Nezha Lord's Boots                         <-> Nezha Lady's Kneeboots
-        new RestrictedItemPair(22367, 22372, 3), // Faerie Tale Prince's Circlet               <-> Faerie Tale Princess's Tiara
-        new RestrictedItemPair(22368, 22373, 3), // Faerie Tale Prince's Vest                  <-> Faerie Tale Princess's Dress
-        new RestrictedItemPair(22369, 22374, 3), // Faerie Tale Prince's Gloves                <-> Faerie Tale Princess's Gloves
-        new RestrictedItemPair(22370, 22375, 3), // Faerie Tale Prince's Slops                 <-> Faerie Tale Princess's Long Skirt
-        new RestrictedItemPair(22371, 22376, 3), // Faerie Tale Prince's Boots                 <-> Faerie Tale Princess's Heels
         new RestrictedItemPair(24599, 24602, 3), // Far Eastern Schoolboy's Hat                <-> Far Eastern Schoolgirl's Hair Ribbon
         new RestrictedItemPair(24600, 24603, 3), // Far Eastern Schoolboy's Hakama             <-> Far Eastern Schoolgirl's Hakama
         new RestrictedItemPair(24601, 24604, 3), // Far Eastern Schoolboy's Zori               <-> Far Eastern Schoolgirl's Boots
