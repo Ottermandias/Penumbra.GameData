@@ -61,19 +61,19 @@ public readonly struct EquipItem : IEquatable<EquipItem>
 
     /// <summary> Get the represented model as armor without stain. </summary>
     public CharacterArmor Armor()
-        => new(PrimaryId, Variant, 0);
+        => new(PrimaryId, Variant, 0, 0);
 
     /// <summary> Get the represented model as armor with a specific stain. </summary>
-    public CharacterArmor Armor(StainId stain)
-        => new(PrimaryId, Variant, stain);
+    public CharacterArmor Armor(StainId stain1, StainId stain2)
+        => new(PrimaryId, Variant, stain1, stain2);
 
     /// <summary> Get the represented model as weapon without stain. </summary>
     public CharacterWeapon Weapon()
-        => new(PrimaryId, SecondaryId, Variant, 0);
+        => new(PrimaryId, SecondaryId, Variant, 0, 0);
 
     /// <summary> Get the represented model as weapon with a specific stain. </summary>
-    public CharacterWeapon Weapon(StainId stain)
-        => new(PrimaryId, SecondaryId, Variant, stain);
+    public CharacterWeapon Weapon(StainId stain1, StainId stain2)
+        => new(PrimaryId, SecondaryId, Variant, stain1, stain2);
 
     /// <summary> An empty item. </summary>
     public EquipItem()

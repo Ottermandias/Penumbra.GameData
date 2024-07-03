@@ -43,7 +43,7 @@ public sealed class RestrictedItemsRace(IDalamudPluginInterface pluginInterface,
 
         var idx   = ((int)race - 1) * 2 + (gender is Gender.Female or Gender.FemaleNpc ? 1 : 0);
         var value = RaceGenderGroup[idx];
-        return (value != quad, new CharacterArmor((ushort)value, (byte)(value >> 16), armor.Stain1));
+        return (value != quad, new CharacterArmor((ushort)value, (byte)(value >> 16), armor.Stain1, armor.Stain2));
     }
 
     /// <inheritdoc/>

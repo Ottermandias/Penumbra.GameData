@@ -63,7 +63,7 @@ public class RestrictedGearDrawer(RestrictedGear _restrictedGear, RestrictedItem
 
         foreach (var (value, idx) in RestrictedItemsRace.RaceGenderGroup.WithIndex())
         {
-            var armor  = new CharacterArmor((PrimaryId)(value & 0xFFFF), (Variant)(value >> 16), 0);
+            var armor  = new CharacterArmor((PrimaryId)(value & 0xFFFF), (Variant)(value >> 16), 0, 0);
             var gender = idx % 2 == 0 ? Gender.Male : Gender.Female;
             var race   = (Race)(idx / 2 + 1);
             ImGuiUtil.DrawTableColumn(race.ToName());
@@ -85,8 +85,8 @@ public class RestrictedGearDrawer(RestrictedGear _restrictedGear, RestrictedItem
 
         foreach (var (value, replacement) in dict)
         {
-            var armor  = new CharacterArmor((PrimaryId)(value & 0xFFFF),       (Variant)(value >> 16),       0);
-            var armor2 = new CharacterArmor((PrimaryId)(replacement & 0xFFFF), (Variant)(replacement >> 16), 0);
+            var armor  = new CharacterArmor((PrimaryId)(value & 0xFFFF),       (Variant)(value >> 16),       0,0);
+            var armor2 = new CharacterArmor((PrimaryId)(replacement & 0xFFFF), (Variant)(replacement >> 16), 0,0);
             var slot   = (EquipSlot)(value >> 24);
             ImGuiUtil.DrawTableColumn(slot.ToName());
             ImGuiUtil.DrawTableColumn(armor.Set.Id.ToString());

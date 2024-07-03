@@ -270,6 +270,8 @@ public readonly record struct Variant(byte Id)
 [JsonConverter(typeof(Converter))]
 public readonly record struct StainId(byte Id)
 {
+    public const int NumStains = 2;
+
     public static implicit operator StainId(byte id)
         => new(id);
 
