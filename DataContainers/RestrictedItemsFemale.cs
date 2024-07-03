@@ -24,7 +24,7 @@ public sealed class RestrictedItemsFemale(IDalamudPluginInterface pluginInterfac
 
         var needle = armor.Set.Id | (uint)armor.Variant.Id << 16 | (uint)slot.ToSlot() << 24;
         if (Value.TryGetValue(needle, out var newValue))
-            return (true, new CharacterArmor((ushort)newValue, (byte)(newValue >> 16), armor.Stain1, armor.Stain2));
+            return (true, new CharacterArmor((ushort)newValue, (byte)(newValue >> 16), armor.Stains));
         return (false, armor);
     }
 

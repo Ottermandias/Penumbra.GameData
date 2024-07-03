@@ -289,6 +289,30 @@ public readonly record struct StainId(byte Id)
     }
 }
 
+public record struct StainIds(StainId Stain1, StainId Stain2)
+{
+    public static readonly StainIds None = new();
+
+    public StainIds(StainId stain1)
+        : this(stain1, 0)
+    { }
+
+    public StainIds ChangeSecond(StainId stain2)
+        => this with { Stain2 = stain2 };
+
+    public static StainIds Second(StainId stain2)
+        => new(0, stain2);
+
+    public static implicit operator StainIds(StainId stain1)
+        => new(stain1);
+
+    public override string ToString()
+        => $"{Stain1.Id},{Stain2.Id}";
+
+    public static StainIds FromUShort(ushort value)
+        => new((StainId)(value & 0xFF), (StainId)(value >> 8));
+}
+
 [JsonConverter(typeof(Converter))]
 public readonly record struct ItemId(uint Id) : IComparisonOperators<ItemId, ItemId, bool>
 {

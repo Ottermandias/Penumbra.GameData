@@ -61,19 +61,19 @@ public readonly struct EquipItem : IEquatable<EquipItem>
 
     /// <summary> Get the represented model as armor without stain. </summary>
     public CharacterArmor Armor()
-        => new(PrimaryId, Variant, 0, 0);
+        => new(PrimaryId, Variant, StainIds.None);
 
     /// <summary> Get the represented model as armor with a specific stain. </summary>
-    public CharacterArmor Armor(StainId stain1, StainId stain2)
-        => new(PrimaryId, Variant, stain1, stain2);
+    public CharacterArmor Armor(StainIds stain)
+        => new(PrimaryId, Variant, stain);
 
     /// <summary> Get the represented model as weapon without stain. </summary>
     public CharacterWeapon Weapon()
-        => new(PrimaryId, SecondaryId, Variant, 0, 0);
+        => new(PrimaryId, SecondaryId, Variant, StainIds.None);
 
     /// <summary> Get the represented model as weapon with a specific stain. </summary>
-    public CharacterWeapon Weapon(StainId stain1, StainId stain2)
-        => new(PrimaryId, SecondaryId, Variant, stain1, stain2);
+    public CharacterWeapon Weapon(StainIds stain)
+        => new(PrimaryId, SecondaryId, Variant, stain);
 
     /// <summary> An empty item. </summary>
     public EquipItem()
@@ -81,8 +81,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
 
     /// <summary> Create an EquipItem from all data used. </summary>
     public EquipItem(string name, CustomItemId id, IconId iconId, PrimaryId primaryId, SecondaryId secondaryId, Variant variant,
-        FullEquipType type,
-        ItemFlags flags, CharacterLevel level, JobGroupId restrictions)
+        FullEquipType type, ItemFlags flags, CharacterLevel level, JobGroupId restrictions)
     {
         Name            = string.Intern(name);
         Id              = id;

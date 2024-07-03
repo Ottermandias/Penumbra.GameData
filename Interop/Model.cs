@@ -98,7 +98,7 @@ public readonly unsafe struct Model : IEquatable<Model>
         return !weapon.IsWeapon
             ? (Null, CharacterWeapon.Empty)
             : (weapon, new CharacterWeapon(weapon.AsWeapon->ModelSetId, weapon.AsWeapon->SecondaryId, (Variant)weapon.AsWeapon->Variant,
-                (StainId)weapon.AsWeapon->ModelUnknown, (StainId)(weapon.AsWeapon->ModelUnknown >> 8)));
+                (StainId)weapon.AsWeapon->ModelUnknown));
     }
 
     public (Model Address, CharacterWeapon Data) GetOffhand()
@@ -112,7 +112,7 @@ public readonly unsafe struct Model : IEquatable<Model>
             return (Null, CharacterWeapon.Empty);
 
         return (offhand, new CharacterWeapon(offhand.AsWeapon->ModelSetId, offhand.AsWeapon->SecondaryId, (Variant)offhand.AsWeapon->Variant,
-            (StainId)offhand.AsWeapon->ModelUnknown, (StainId)(offhand.AsWeapon->ModelUnknown >> 8)));
+            (StainId)offhand.AsWeapon->ModelUnknown));
     }
 
     /// <summary> Obtain the mainhand and offhand and their data by guesstimating which child object is which. </summary>
@@ -124,13 +124,14 @@ public readonly unsafe struct Model : IEquatable<Model>
             case 0: return (Null, Null, CharacterWeapon.Empty, CharacterWeapon.Empty);
             case 1:
                 return (first, Null, new CharacterWeapon(first.AsWeapon->ModelSetId, first.AsWeapon->SecondaryId,
-                    (Variant)first.AsWeapon->Variant, (StainId)first.AsWeapon->ModelUnknown, (StainId)(first.AsWeapon->ModelUnknown >> 8)), CharacterWeapon.Empty);
+                    (Variant)first.AsWeapon->Variant,
+                    (StainId)first.AsWeapon->ModelUnknown), CharacterWeapon.Empty);
             default:
                 var (main, off) = DetermineMainhand(first, second);
                 var mainData = new CharacterWeapon(main.AsWeapon->ModelSetId, main.AsWeapon->SecondaryId, (Variant)main.AsWeapon->Variant,
-                    (StainId)main.AsWeapon->ModelUnknown, (StainId)(main.AsWeapon->ModelUnknown >> 8));
+                    (StainId)main.AsWeapon->ModelUnknown);
                 var offData = new CharacterWeapon(off.AsWeapon->ModelSetId, off.AsWeapon->SecondaryId, (Variant)off.AsWeapon->Variant,
-                    (StainId)off.AsWeapon->ModelUnknown, (StainId)(off.AsWeapon->ModelUnknown >> 8) );
+                    (StainId)off.AsWeapon->ModelUnknown);
                 return (main, off, mainData, offData);
         }
     }
