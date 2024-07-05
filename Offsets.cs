@@ -19,9 +19,9 @@ public static class Offsets
     public const int TimeLinePtr           = 0x50;
 
     // PathResolver.Meta
-    public const int UpdateModelSkip     = 0x90c;
-    public const int GetEqpIndirectSkip1 = 0xA30;
-    public const int GetEqpIndirectSkip2 = 0xA28;
+    public const int UpdateModelSkip     = 0x9EC;
+    public const int GetEqpIndirectSkip1 = 0xBF8;
+    public const int GetEqpIndirectSkip2 = 0xBF0;
     public const int GetEqpIndirect2Skip = 0x90;
 
     // FontReloader
