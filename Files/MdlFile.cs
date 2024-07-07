@@ -212,6 +212,15 @@ public partial class MdlFile : IWritable
         Valid         = true;
     }
 
+    public bool ConvertV5ToV6()
+    {
+        if (Version != V5)
+            return false;
+
+        Version = V6;
+        return true;
+    }
+
     private ModelFileHeader LoadModelFileHeader(LuminaBinaryReader r)
     {
         var header = ModelFileHeader.Read(r);
