@@ -15,10 +15,11 @@ public static class Sigs
     // ResourceLoader.TexMdl
     public const string CheckFileState          = "E8 ?? ?? ?? ?? 48 85 C0 74 ?? 4C 8B C8"; 
     public const string LoadTexFileLocal        = "48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 49 8B F0 44 88 4C 24 20";
-    public const string LoadMdlFileLocal        = "48 89 5C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 48 8B 72 ?? 4C 8B EA";
+    public const string LoadMdlFileLocal        = "48 89 5C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 48 8B 72 ?? 4C 8B EA";                                      
     public const string LoadMdlFileExtern       = "E8 ?? ?? ?? ?? EB 02 B0 F1";
     public const string LodConfig               = "48 8B 05 ?? ?? ?? ?? B3";
-    public const string TexResourceHandleOnLoad = "40 53 55 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B D9";
+    public const string TexHandleOnLoad         = "40 53 55 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B D9";
+    public const string TexHandleUpdateCategory = "0F B7 41 ?? FF C8";
 
     // GameEventManager
     public const string ResourceHandleDestructor = "48 89 5C 24 ?? 57 48 83 EC ?? 48 8D 05 ?? ?? ?? ?? 48 8B D9 48 89 01 B8";
@@ -32,7 +33,7 @@ public static class Sigs
     public const string LoadSomePap                = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 41 8B D9 89 51";
     public const string LoadSomeAction             = "E8 ?? ?? ?? ?? C6 83 ?? ?? ?? ?? ?? 8B 8E";
     public const string LoadCharacterVfx           = "E8 ?? ?? ?? ?? 48 85 FF 48 8D 97";
-    public const string LoadAreaVfx                = "48 8B C4 48 89 58 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D A8 ?? ?? ?? ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 0F 29 78 ?? 48 8B 05";
+    public const string LoadAreaVfx                = "E8 ?? ?? ?? ?? 0F 28 74 24 ?? 48 89 43";
     public const string ScheduleClipUpdate         = "40 53 55 56 57 48 81 EC ?? ?? ?? ?? 48 8B F9";
     public const string UnkMountAnimation          = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 41 8B E9 45 0F B6 F8";
     public const string UnkParasolAnimation        = "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B FA 4C 8B F1";
@@ -64,7 +65,7 @@ public static class Sigs
     public const string HumanVTable = "48 8D 05 ?? ?? ?? ?? 48 89 03 89 8B";
 
     public const string WeaponVTable =
-        "48 8D 05 ?? ?? ?? ?? 48 89 03 B8 ?? ?? ?? ?? 66 89 83 ?? ?? ?? ?? 48 8B C3 48 89 8B ?? ?? ?? ?? 48 89 8B"; 
+        "48 8D 05 ?? ?? ?? ?? 48 89 8B ?? ?? ?? ?? 48 89 03 48 8B C3 89 8B"; 
 
     public const string DemiHumanVTable = "48 8D 05 ?? ?? ?? ?? 48 89 03 48 8B C3 89 8B";
     public const string MonsterVTable   = "48 8D 05 ?? ?? ?? ?? 48 89 03 33 C0 48 89 83 ?? ?? ?? ?? 48 89 83 ?? ?? ?? ?? 48 89 83 ?? ?? ?? ?? 66 89 83 ?? ?? ?? ?? 48 8B C3";
