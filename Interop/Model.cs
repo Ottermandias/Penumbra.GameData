@@ -97,8 +97,9 @@ public readonly unsafe struct Model : IEquatable<Model>
         Model weapon = AsDrawObject->Object.ChildObject;
         return !weapon.IsWeapon
             ? (Null, CharacterWeapon.Empty)
-            : (weapon, new CharacterWeapon(weapon.AsWeapon->ModelSetId, weapon.AsWeapon->SecondaryId, (Variant)weapon.AsWeapon->Variant,
-                (StainId)weapon.AsWeapon->ModelUnknown));
+            : (weapon,
+                new CharacterWeapon(weapon.AsWeapon->ModelSetId, weapon.AsWeapon->SecondaryId, (Variant)weapon.AsWeapon->Variant,
+                    new StainIds(weapon.AsWeapon->Stain0, weapon.AsWeapon->Stain1)));
     }
 
     public (Model Address, CharacterWeapon Data) GetOffhand()
@@ -111,8 +112,9 @@ public readonly unsafe struct Model : IEquatable<Model>
         if (offhand == mainhand || !offhand.IsWeapon)
             return (Null, CharacterWeapon.Empty);
 
-        return (offhand, new CharacterWeapon(offhand.AsWeapon->ModelSetId, offhand.AsWeapon->SecondaryId, (Variant)offhand.AsWeapon->Variant,
-            (StainId)offhand.AsWeapon->ModelUnknown));
+        return (offhand,
+            new CharacterWeapon(offhand.AsWeapon->ModelSetId, offhand.AsWeapon->SecondaryId, (Variant)offhand.AsWeapon->Variant,
+                new StainIds(offhand.AsWeapon->Stain0, offhand.AsWeapon->Stain1)));
     }
 
     /// <summary> Obtain the mainhand and offhand and their data by guesstimating which child object is which. </summary>
@@ -124,14 +126,13 @@ public readonly unsafe struct Model : IEquatable<Model>
             case 0: return (Null, Null, CharacterWeapon.Empty, CharacterWeapon.Empty);
             case 1:
                 return (first, Null, new CharacterWeapon(first.AsWeapon->ModelSetId, first.AsWeapon->SecondaryId,
-                    (Variant)first.AsWeapon->Variant,
-                    (StainId)first.AsWeapon->ModelUnknown), CharacterWeapon.Empty);
+                    (Variant)first.AsWeapon->Variant, new StainIds(first.AsWeapon->Stain0, first.AsWeapon->Stain1)), CharacterWeapon.Empty);
             default:
                 var (main, off) = DetermineMainhand(first, second);
                 var mainData = new CharacterWeapon(main.AsWeapon->ModelSetId, main.AsWeapon->SecondaryId, (Variant)main.AsWeapon->Variant,
-                    (StainId)main.AsWeapon->ModelUnknown);
+                    new StainIds(main.AsWeapon->Stain0, main.AsWeapon->Stain1));
                 var offData = new CharacterWeapon(off.AsWeapon->ModelSetId, off.AsWeapon->SecondaryId, (Variant)off.AsWeapon->Variant,
-                    (StainId)off.AsWeapon->ModelUnknown);
+                    new StainIds(off.AsWeapon->Stain0, off.AsWeapon->Stain1));
                 return (main, off, mainData, offData);
         }
     }
@@ -145,13 +146,15 @@ public readonly unsafe struct Model : IEquatable<Model>
         Model main     = actor.AsCharacter->DrawData.Weapon(DrawDataContainer.WeaponSlot.MainHand).DrawObject;
         var   mainData = CharacterWeapon.Empty;
         if (main.IsWeapon)
-            mainData = new CharacterWeapon(main.AsWeapon->ModelSetId, main.AsWeapon->SecondaryId, (Variant)main.AsWeapon->Variant, StainIds.FromUShort(main.AsWeapon->ModelUnknown)); // TODO stain
+            mainData = new CharacterWeapon(main.AsWeapon->ModelSetId, main.AsWeapon->SecondaryId, (Variant)main.AsWeapon->Variant,
+                new StainIds(main.AsWeapon->Stain0, main.AsWeapon->Stain1)); // TODO stain
         else
             main = Null;
         Model off     = actor.AsCharacter->DrawData.Weapon(DrawDataContainer.WeaponSlot.OffHand).DrawObject;
         var   offData = CharacterWeapon.Empty;
         if (off.IsWeapon)
-            offData = new CharacterWeapon(off.AsWeapon->ModelSetId, off.AsWeapon->SecondaryId, (Variant)off.AsWeapon->Variant, StainIds.FromUShort(off.AsWeapon->ModelUnknown)); // TODO stain
+            offData = new CharacterWeapon(off.AsWeapon->ModelSetId, off.AsWeapon->SecondaryId, (Variant)off.AsWeapon->Variant,
+                new StainIds(off.AsWeapon->Stain0, off.AsWeapon->Stain1)); // TODO stain
         else
             off = Null;
         return (main, off, mainData, offData);
