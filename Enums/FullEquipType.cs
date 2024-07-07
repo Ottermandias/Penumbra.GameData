@@ -71,8 +71,8 @@ public enum FullEquipType : byte
     GardenScythe,  // BTN Off
     Gig,           // FSH Off
 
-    Sabre,    // VPR TODO
-    SabreOff, // VPR Off TODO
+    Sabre,    // VPR
+    SabreOff, // VPR Off
     Brush,    // PCT
     Palette,  // PCT Off
     Whip,     // BMR TODO
@@ -303,10 +303,10 @@ public static class FullEquipTypeExtensions
             FullEquipType.Sledgehammer    => EquipSlot.OffHand,
             FullEquipType.GardenScythe    => EquipSlot.OffHand,
             FullEquipType.Gig             => EquipSlot.OffHand,
-            FullEquipType.Brush           => EquipSlot.MainHand,
-            FullEquipType.Palette         => EquipSlot.OffHand,
             FullEquipType.Sabre           => EquipSlot.MainHand,
             FullEquipType.SabreOff        => EquipSlot.OffHand,
+            FullEquipType.Brush           => EquipSlot.MainHand,
+            FullEquipType.Palette         => EquipSlot.OffHand,
             FullEquipType.Whip            => EquipSlot.MainHand,
             _                             => EquipSlot.Unknown,
         };
@@ -400,10 +400,10 @@ public static class FullEquipTypeExtensions
             WeaponCategory.Dancer                    => FullEquipType.GlaivesOff,
             WeaponCategory.Reaper                    => FullEquipType.Scythe,
             WeaponCategory.Sage                      => FullEquipType.Nouliths,
-            WeaponCategory.Pictomancer when mainhand => FullEquipType.Brush,
-            WeaponCategory.Pictomancer               => FullEquipType.Palette,
             WeaponCategory.Viper when mainhand       => FullEquipType.Sabre,
             WeaponCategory.Viper                     => FullEquipType.SabreOff,
+            WeaponCategory.Pictomancer when mainhand => FullEquipType.Brush,
+            WeaponCategory.Pictomancer               => FullEquipType.Palette,
             WeaponCategory.Beastmaster               => FullEquipType.Whip,
             _                                        => FullEquipType.Unknown,
         };
@@ -422,8 +422,8 @@ public static class FullEquipTypeExtensions
             FullEquipType.Glaives => FullEquipType.GlaivesOff,
             FullEquipType.Bow     => FullEquipType.BowOff,
             FullEquipType.Katana  => FullEquipType.KatanaOff,
-            FullEquipType.Brush   => FullEquipType.Palette,
             FullEquipType.Sabre   => FullEquipType.SabreOff,
+            FullEquipType.Brush   => FullEquipType.Palette,
             _                     => FullEquipType.Unknown,
         };
 
@@ -452,8 +452,8 @@ public static class FullEquipTypeExtensions
             FullEquipType.Pickaxe         => FullEquipType.Sledgehammer,
             FullEquipType.Hatchet         => FullEquipType.GardenScythe,
             FullEquipType.FishingRod      => FullEquipType.Gig,
-            FullEquipType.Brush           => FullEquipType.Palette,
             FullEquipType.Sabre           => FullEquipType.SabreOff,
+            FullEquipType.Brush           => FullEquipType.Palette,
             _                             => FullEquipType.Unknown,
         };
 
