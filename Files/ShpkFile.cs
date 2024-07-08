@@ -19,13 +19,22 @@ public partial class ShpkFile : IWritable
     public readonly bool Disassembled;
 
     public uint                   Version;
+    public bool                   IsLegacy;
     public DxVersion              DirectXVersion;
     public Shader[]               VertexShaders;
     public Shader[]               PixelShaders;
     public uint                   MaterialParamsSize;
+    /// <remarks>
+    /// This is always null for legacy shaders.
+    /// </remarks>
+    public byte[]?                MaterialParamsDefaults;
     public MaterialParam[]        MaterialParams;
     public Resource[]             Constants;
     public Resource[]             Samplers;
+    /// <remarks>
+    /// When dealing with legacy shaders, this will always be empty, use <see cref="Samplers"/> instead.
+    /// </remarks>
+    public Resource[]             Textures;
     public Resource[]             Uavs;
     public Key[]                  SystemKeys;
     public Key[]                  SceneKeys;
@@ -41,6 +50,15 @@ public partial class ShpkFile : IWritable
     public MaterialParam? GetMaterialParamById(uint id)
         => MaterialParams.FirstOrNull(m => m.Id == id);
 
+    public Span<T> GetMaterialParamDefaults<T>(MaterialParam param) where T : struct
+    {
+        if (MaterialParamsDefaults == null || param.ByteOffset >= MaterialParamsDefaults.Length)
+            return [];
+
+        var byteEnd = Math.Min(param.ByteOffset + param.ByteSize, MaterialParamsDefaults.Length);
+        return MemoryMarshal.Cast<byte, T>(MaterialParamsDefaults.AsSpan(param.ByteOffset..byteEnd));
+    }
+
     public Resource? GetConstantById(uint id)
         => Constants.FirstOrNull(c => c.Id == id);
 
@@ -52,6 +70,12 @@ public partial class ShpkFile : IWritable
 
     public Resource? GetSamplerByName(string name)
         => Samplers.FirstOrNull(s => s.Name == name);
+
+    public Resource? GetTextureById(uint id)
+        => Textures.FirstOrNull(s => s.Id == id);
+
+    public Resource? GetTextureByName(string name)
+        => Textures.FirstOrNull(s => s.Name == name);
 
     public Resource? GetUavById(uint id)
         => Uavs.FirstOrNull(u => u.Id == id);
@@ -104,28 +128,35 @@ public partial class ShpkFile : IWritable
         var vertexShaderCount = r.ReadUInt32();
         var pixelShaderCount  = r.ReadUInt32();
         MaterialParamsSize = r.ReadUInt32();
-        var materialParamCount = r.ReadUInt32();
-        var constantCount      = r.ReadUInt32();
-        var samplerCount       = r.ReadUInt32();
-        var uavCount           = r.ReadUInt32();
-        var systemKeyCount     = r.ReadUInt32();
-        var sceneKeyCount      = r.ReadUInt32();
-        var materialKeyCount   = r.ReadUInt32();
-        var nodeCount          = r.ReadUInt32();
-        var nodeAliasCount     = r.ReadUInt32();
+        var materialParamCount  = r.ReadUInt16();
+        var hasMatParamDefaults = r.ReadUInt16() != 0;
+        var constantCount       = r.ReadUInt32();
+        var samplerCount        = r.ReadUInt16();
+        var textureCount        = r.ReadUInt16();
+        var uavCount            = r.ReadUInt32();
+        var systemKeyCount      = r.ReadUInt32();
+        var sceneKeyCount       = r.ReadUInt32();
+        var materialKeyCount    = r.ReadUInt32();
+        var nodeCount           = r.ReadUInt32();
+        var nodeAliasCount      = r.ReadUInt32();
+
+        IsLegacy = !hasMatParamDefaults && textureCount == 0;
 
         var blobs   = data[(int)blobsOffset..(int)stringsOffset];
         var strings = new SpanBinaryReader(data[(int)stringsOffset..]);
 
         VertexShaders = ReadShaderArray(ref r, (int)vertexShaderCount, DisassembledShader.ShaderStage.Vertex, DirectXVersion, disassemble,
-            blobs,                             ref strings);
-        PixelShaders = ReadShaderArray(ref r, (int)pixelShaderCount, DisassembledShader.ShaderStage.Pixel, DirectXVersion, disassemble, blobs,
-            ref strings);
+            IsLegacy,                          blobs,                  ref strings);
+        PixelShaders = ReadShaderArray(ref r, (int)pixelShaderCount, DisassembledShader.ShaderStage.Pixel, DirectXVersion, disassemble,
+            IsLegacy,                         blobs,                 ref strings);
 
-        MaterialParams = r.Read<MaterialParam>((int)materialParamCount).ToArray();
+        MaterialParams = r.Read<MaterialParam>(materialParamCount).ToArray();
+
+        MaterialParamsDefaults = hasMatParamDefaults ? r.Read<byte>((int)MaterialParamsSize).ToArray() : null;
 
         Constants = ReadResourceArray(ref r, (int)constantCount, ref strings);
-        Samplers  = ReadResourceArray(ref r, (int)samplerCount,  ref strings);
+        Samplers  = ReadResourceArray(ref r, samplerCount,       ref strings);
+        Textures  = ReadResourceArray(ref r, textureCount,       ref strings);
         Uavs      = ReadResourceArray(ref r, (int)uavCount,      ref strings);
 
         SystemKeys   = ReadKeyArray(ref r, (int)systemKeyCount);
@@ -174,6 +205,7 @@ public partial class ShpkFile : IWritable
     {
         var constants = new Dictionary<uint, Resource>();
         var samplers  = new Dictionary<uint, Resource>();
+        var textures  = new Dictionary<uint, Resource>();
         var uavs      = new Dictionary<uint, Resource>();
 
         static void CollectResources(Dictionary<uint, Resource> resources, Resource[] shaderResources, Func<uint, Resource?> getExistingById,
@@ -189,6 +221,7 @@ public partial class ShpkFile : IWritable
                 {
                     Id = resource.Id,
                     Name = resource.Name,
+                    IsTexture = resource.IsTexture,
                     Slot = existing?.Slot ?? (type == DisassembledShader.ResourceType.ConstantBuffer ? (ushort)65535 : (ushort)2),
                     Size = type == DisassembledShader.ResourceType.ConstantBuffer ? Math.Max(carry.Size, resource.Size) : existing?.Size ?? 0,
                     Used = null,
@@ -201,6 +234,7 @@ public partial class ShpkFile : IWritable
         {
             CollectResources(constants, shader.Constants, GetConstantById, DisassembledShader.ResourceType.ConstantBuffer);
             CollectResources(samplers,  shader.Samplers,  GetSamplerById,  DisassembledShader.ResourceType.Sampler);
+            CollectResources(textures,  shader.Textures,  GetTextureById,  DisassembledShader.ResourceType.Texture);
             CollectResources(uavs,      shader.Uavs,      GetUavById,      DisassembledShader.ResourceType.Uav);
         }
 
@@ -208,11 +242,13 @@ public partial class ShpkFile : IWritable
         {
             CollectResources(constants, shader.Constants, GetConstantById, DisassembledShader.ResourceType.ConstantBuffer);
             CollectResources(samplers,  shader.Samplers,  GetSamplerById,  DisassembledShader.ResourceType.Sampler);
+            CollectResources(textures,  shader.Textures,  GetTextureById,  DisassembledShader.ResourceType.Texture);
             CollectResources(uavs,      shader.Uavs,      GetUavById,      DisassembledShader.ResourceType.Uav);
         }
 
         Constants = constants.Values.ToArray();
         Samplers  = samplers.Values.ToArray();
+        Textures  = textures.Values.ToArray();
         Uavs      = uavs.Values.ToArray();
         UpdateUsed();
 
@@ -222,12 +258,20 @@ public partial class ShpkFile : IWritable
         foreach (var param in MaterialParams)
             MaterialParamsSize = Math.Max(MaterialParamsSize, (uint)param.ByteOffset + param.ByteSize);
         MaterialParamsSize = (MaterialParamsSize + 0xFu) & ~0xFu;
+
+        // Automatically grow MaterialParamsDefaults if needed. Shrinking it will be handled at write time.
+        if (MaterialParamsDefaults != null && MaterialParamsDefaults.Length < MaterialParamsSize)
+        {
+            var newDefaults = new byte[MaterialParamsSize];
+            Array.Copy(MaterialParamsDefaults, newDefaults, MaterialParamsDefaults.Length);
+            MaterialParamsDefaults = newDefaults;
+        }
     }
 
     private void UpdateUsed()
     {
         var cUsage = new Dictionary<uint, (DisassembledShader.VectorComponents[], DisassembledShader.VectorComponents)>();
-        var sUsage = new Dictionary<uint, (DisassembledShader.VectorComponents[], DisassembledShader.VectorComponents)>();
+        var tUsage = new Dictionary<uint, (DisassembledShader.VectorComponents[], DisassembledShader.VectorComponents)>();
         var uUsage = new Dictionary<uint, (DisassembledShader.VectorComponents[], DisassembledShader.VectorComponents)>();
 
         static void CollectUsed(Dictionary<uint, (DisassembledShader.VectorComponents[], DisassembledShader.VectorComponents)> usage,
@@ -268,20 +312,20 @@ public partial class ShpkFile : IWritable
         foreach (var shader in VertexShaders)
         {
             CollectUsed(cUsage, shader.Constants);
-            CollectUsed(sUsage, shader.Samplers);
+            CollectUsed(tUsage, shader.IsLegacy ? shader.Samplers : shader.Textures);
             CollectUsed(uUsage, shader.Uavs);
         }
 
         foreach (var shader in PixelShaders)
         {
             CollectUsed(cUsage, shader.Constants);
-            CollectUsed(sUsage, shader.Samplers);
+            CollectUsed(tUsage, shader.IsLegacy ? shader.Samplers : shader.Textures);
             CollectUsed(uUsage, shader.Uavs);
         }
 
-        CopyUsed(Constants, cUsage);
-        CopyUsed(Samplers,  sUsage);
-        CopyUsed(Uavs,      uUsage);
+        CopyUsed(Constants,                      cUsage);
+        CopyUsed(IsLegacy ? Samplers : Textures, tUsage);
+        CopyUsed(Uavs,                           uUsage);
     }
 
     public void UpdateKeyValues()
@@ -323,6 +367,26 @@ public partial class ShpkFile : IWritable
         CopyValues(SceneKeys,    sceneKeyValues);
         CopyValues(MaterialKeys, materialKeyValues);
         CopyValues(SubViewKeys,  subViewKeyValues);
+    }
+
+    /// <remarks>
+    /// Using this is discouraged, as it will generate a ShPk container in the new format, but still keep shaders designed for the old engine.
+    /// The resulting ShPk can be further processed by other tools, but attempts to load it into the game as-is should not be made.
+    /// </remarks>
+    public void UpgradeFromLegacy()
+    {
+        if (!IsLegacy)
+            return;
+
+        IsLegacy = false;
+
+        for (var i = 0; i < VertexShaders.Length; ++i)
+            VertexShaders[i].UpgradeFromLegacy(this);
+
+        for (var i = 0; i < PixelShaders.Length; ++i)
+            PixelShaders[i].UpgradeFromLegacy(this);
+
+        UpdateResources();
     }
 
     public static uint BuildSelector(Span<uint> systemKeys, Span<uint> sceneKeys, Span<uint> materialKeys, Span<uint> subViewKeys)
@@ -420,18 +484,22 @@ public partial class ShpkFile : IWritable
 
     private static Resource[] ReadResourceArray(ref SpanBinaryReader r, int count, ref SpanBinaryReader strings)
     {
+        if (count == 0)
+            return Array.Empty<Resource>();
+
         var ret = new Resource[count];
         for (var i = 0; i < count; ++i)
         {
             var id        = r.ReadUInt32();
             var strOffset = r.ReadUInt32();
-            var strSize   = r.ReadUInt32();
+            var strSize   = r.ReadUInt16();
             ret[i] = new Resource
             {
-                Id   = id,
-                Name = strings.ReadString((int)strOffset, (int)strSize),
-                Slot = r.ReadUInt16(),
-                Size = r.ReadUInt16(),
+                Id        = id,
+                Name      = strings.ReadString((int)strOffset, strSize),
+                IsTexture = r.ReadUInt16(),
+                Slot      = r.ReadUInt16(),
+                Size      = r.ReadUInt16(),
             };
         }
 
@@ -439,8 +507,11 @@ public partial class ShpkFile : IWritable
     }
 
     private static Shader[] ReadShaderArray(ref SpanBinaryReader r, int count, DisassembledShader.ShaderStage stage, DxVersion directX,
-        bool disassemble, ReadOnlySpan<byte> blobs, ref SpanBinaryReader strings)
+        bool disassemble, bool isLegacy, ReadOnlySpan<byte> blobs, ref SpanBinaryReader strings)
     {
+        if (count == 0)
+            return Array.Empty<Shader>();
+
         var extraHeaderSize = stage switch
         {
             DisassembledShader.ShaderStage.Vertex => directX switch
@@ -460,18 +531,19 @@ public partial class ShpkFile : IWritable
             var constantCount = r.ReadUInt16();
             var samplerCount  = r.ReadUInt16();
             var uavCount      = r.ReadUInt16();
-            if (r.ReadUInt16() != 0)
-                throw new NotImplementedException();
+            var textureCount  = r.ReadUInt16();
 
             var rawBlob = blobs.Slice((int)blobOffset, (int)blobSize);
 
             ret[i] = new Shader
             {
+                IsLegacy         = isLegacy,
                 Stage            = disassemble ? stage : DisassembledShader.ShaderStage.Unspecified,
                 DirectXVersion   = directX,
                 Constants        = ReadResourceArray(ref r, constantCount, ref strings),
                 Samplers         = ReadResourceArray(ref r, samplerCount,  ref strings),
                 Uavs             = ReadResourceArray(ref r, uavCount,      ref strings),
+                Textures         = ReadResourceArray(ref r, textureCount,  ref strings),
                 AdditionalHeader = rawBlob[..extraHeaderSize].ToArray(),
                 Blob             = rawBlob[extraHeaderSize..].ToArray(),
             };
@@ -482,6 +554,9 @@ public partial class ShpkFile : IWritable
 
     private static Key[] ReadKeyArray(ref SpanBinaryReader r, int count)
     {
+        if (count == 0)
+            return Array.Empty<Key>();
+
         var ret = new Key[count];
         for (var i = 0; i < count; ++i)
         {
@@ -499,6 +574,9 @@ public partial class ShpkFile : IWritable
     private static Node[] ReadNodeArray(ref SpanBinaryReader r, int count, int systemKeyCount, int sceneKeyCount, int materialKeyCount,
         int subViewKeyCount)
     {
+        if (count == 0)
+            return Array.Empty<Node>();
+
         var ret = new Node[count];
         for (var i = 0; i < count; ++i)
         {
@@ -529,6 +607,7 @@ public partial class ShpkFile : IWritable
     {
         public uint                                   Id;
         public string                                 Name;
+        public ushort                                 IsTexture; // We aren't sure what this is exactly yet, but it's been observed to always be 0 for constants and samplers, and 1 for textures.
         public ushort                                 Slot;
         public ushort                                 Size;
         public DisassembledShader.VectorComponents[]? Used;

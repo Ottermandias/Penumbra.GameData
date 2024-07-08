@@ -8,11 +8,16 @@ public partial class ShpkFile
 {
     public struct Shader
     {
+        public  bool                           IsLegacy;
         public  DisassembledShader.ShaderStage Stage;
         public  DxVersion                      DirectXVersion;
         public  Resource[]                     Constants;
         public  Resource[]                     Samplers;
         public  Resource[]                     Uavs;
+        /// <remarks>
+        /// When dealing with legacy shaders, this will always be empty, use <see cref="Samplers"/> instead.
+        /// </remarks>
+        public  Resource[]                     Textures;
         public  byte[]                         AdditionalHeader;
         private byte[]                         _byteData;
         private DisassembledShader?            _disassembly;
@@ -34,7 +39,7 @@ public partial class ShpkFile
                             $"The supplied blob is a DirectX {(disasm.ShaderModel >> 8) + 6} {disasm.Stage} shader ; expected a DirectX {(uint)DirectXVersion} {Stage} shader.",
                             nameof(value));
 
-                    if (disasm.ShaderModel >= 0x0500)
+                    if (IsLegacy && disasm.ShaderModel >= 0x0500)
                     {
                         var samplers = new Dictionary<uint, string>();
                         var textures = new Dictionary<uint, string>();
@@ -102,6 +107,12 @@ public partial class ShpkFile
         public Resource? GetUavByName(string name)
             => Uavs.FirstOrNull(u => u.Name == name);
 
+        public Resource? GetTextureById(uint id)
+            => Textures.FirstOrNull(s => s.Id == id);
+
+        public Resource? GetTextureByName(string name)
+            => Textures.FirstOrNull(s => s.Name == name);
+
         public void UpdateResources(ShpkFile file)
         {
             if (_disassembly == null)
@@ -129,6 +140,7 @@ public partial class ShpkFile
             var constants = new List<Resource>();
             var samplers  = new List<Resource>();
             var uavs      = new List<Resource>();
+            var textures  = new List<Resource>();
             foreach (var binding in _disassembly.ResourceBindings)
             {
                 switch (binding.Type)
@@ -141,19 +153,37 @@ public partial class ShpkFile
                         {
                             Id              = id,
                             Name            = name,
+                            IsTexture       = 0,
                             Slot            = (ushort)binding.Slot,
                             Size            = (ushort)binding.RegisterCount,
                             Used            = binding.Used,
                             UsedDynamically = binding.UsedDynamically,
                         });
                         break;
-                    case DisassembledShader.ResourceType.Texture:
+                    case DisassembledShader.ResourceType.Sampler:
                         name = NormalizeResourceName(binding.Name);
                         id   = GetSamplerByName(name)?.Id ?? file.GetSamplerByName(name)?.Id ?? Crc32.Get(name, 0xFFFFFFFFu);
                         samplers.Add(new Resource
                         {
                             Id              = id,
                             Name            = name,
+                            IsTexture       = 0,
+                            Slot            = (ushort)binding.Slot,
+                            Size            = (ushort)binding.Slot,
+                            Used            = binding.Used,
+                            UsedDynamically = binding.UsedDynamically,
+                        });
+                        break;
+                    case DisassembledShader.ResourceType.Texture:
+                        if (IsLegacy)
+                            break;
+                        name = NormalizeResourceName(binding.Name);
+                        id   = GetTextureByName(name)?.Id ?? file.GetTextureByName(name)?.Id ?? Crc32.Get(name, 0xFFFFFFFFu);
+                        textures.Add(new Resource
+                        {
+                            Id              = id,
+                            Name            = name,
+                            IsTexture       = 1,
                             Slot            = (ushort)binding.Slot,
                             Size            = (ushort)binding.Slot,
                             Used            = binding.Used,
@@ -167,6 +197,7 @@ public partial class ShpkFile
                         {
                             Id              = id,
                             Name            = name,
+                            IsTexture       = 0, // Unsure.
                             Slot            = (ushort)binding.Slot,
                             Size            = (ushort)binding.Slot,
                             Used            = binding.Used,
@@ -179,6 +210,9 @@ public partial class ShpkFile
             Constants = constants.ToArray();
             Samplers  = samplers.ToArray();
             Uavs      = uavs.ToArray();
+            Textures  = textures.ToArray();
+
+            UpdateUsed();
         }
 
         private void UpdateUsed()
@@ -222,16 +256,25 @@ public partial class ShpkFile
                     }
                 }
 
-                CopyUsed(Constants, cbUsage);
-                CopyUsed(Samplers,  tUsage);
-                CopyUsed(Uavs,      uUsage);
+                CopyUsed(Constants,                      cbUsage);
+                CopyUsed(IsLegacy ? Samplers : Textures, tUsage);
+                CopyUsed(Uavs,                           uUsage);
             }
             else
             {
                 ClearUsed(Constants);
-                ClearUsed(Samplers);
+                ClearUsed(IsLegacy ? Samplers : Textures);
                 ClearUsed(Uavs);
             }
+        }
+
+        internal void UpgradeFromLegacy(ShpkFile file)
+        {
+            if (!IsLegacy)
+                return;
+
+            IsLegacy = false;
+            UpdateResources(file);
         }
 
         private static string NormalizeResourceName(string resourceName)
