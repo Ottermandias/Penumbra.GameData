@@ -1,4 +1,8 @@
+using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;
@@ -289,7 +293,7 @@ public readonly record struct StainId(byte Id)
     }
 }
 
-public record struct StainIds(StainId Stain1, StainId Stain2)
+public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOnlyList<StainId>
 {
     public static readonly StainIds None = new();
 
@@ -306,11 +310,76 @@ public record struct StainIds(StainId Stain1, StainId Stain2)
     public static implicit operator StainIds(StainId stain1)
         => new(stain1);
 
+    public StainIds With(int idx, StainId stain)
+    {
+        return idx switch
+        {
+            0 => this with { Stain1 = stain },
+            1 => this with { Stain2 = stain },
+            _ => this,
+        };
+    }
+
+    public IEnumerator<StainId> GetEnumerator()
+    {
+        yield return Stain1;
+        yield return Stain2;
+    }
+
     public override string ToString()
         => $"{Stain1.Id},{Stain2.Id}";
 
+    IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
+
     public static StainIds FromUShort(ushort value)
         => new((StainId)(value & 0xFF), (StainId)(value >> 8));
+
+    public int Count
+        => 2;
+
+    public StainId this[int index]
+        => index == 0 ? Stain1 : Stain2;
+
+    public JObject AddToObject(JObject obj)
+    {
+        obj["Stain"] = Stain1.Id;
+        var i = 2;
+        foreach (var stain in this.Skip(1))
+            obj[$"Stain{i++}"] = stain.Id;
+        return obj;
+    }
+
+    public static StainIds ParseFromObject(JObject? obj)
+    {
+        if (obj == null)
+            return None;
+
+        var stain  = (StainId)(obj["Stain"]?.ToObject<byte>() ?? 0);
+        var stain2 = (StainId)(obj["Stain2"]?.ToObject<byte>() ?? 0);
+        return new StainIds(stain, stain2);
+    }
+
+    public StainIds(IReadOnlyList<StainId> stains)
+        : this(stains.Count > 0 ? stains[0] : 0, stains.Count > 1 ? stains[1] : 0)
+    { }
+
+    public StainIds(IReadOnlyList<byte> stains)
+        : this(stains.Count > 0 ? (StainId)stains[0] : 0, stains.Count > 1 ? (StainId)stains[1] : 0)
+    { }
+
+    public StainIds(ReadOnlySpan<byte> stains)
+        : this(stains.Length > 0 ? (StainId)stains[0] : 0, stains.Length > 1 ? (StainId)stains[1] : 0)
+    { }
+
+    public static StainIds FromGearsetItem(in RaptureGearsetModule.GearsetItem item)
+        => new(item.Stain0Id, item.Stain1Id);
+
+    public static StainIds FromGlamourPlate(in MirageManager.GlamourPlate plate, int idx)
+        => new(plate.Stain0Ids[idx], plate.Stain1Ids[idx]);
+
+    public static StainIds FromWeapon(in Weapon weapon)
+        => new(weapon.Stain0, weapon.Stain1);
 }
 
 [JsonConverter(typeof(Converter))]

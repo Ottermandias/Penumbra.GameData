@@ -131,6 +131,14 @@ public readonly unsafe struct Actor : IEquatable<Actor>
 
     public OnlineStatus OnlineStatus
         => (OnlineStatus)AsCharacter->CharacterData.OnlineStatus;
+
+    public bool IsGPoseWet
+    {
+        get => AsCharacter->Effects.StatusEffects.HasFlag(EffectContainer.StatusEffect.IsGPoseWet);
+        set => AsCharacter->Effects.StatusEffects = value
+            ? AsCharacter->Effects.StatusEffects | EffectContainer.StatusEffect.IsGPoseWet
+            : AsCharacter->Effects.StatusEffects & ~EffectContainer.StatusEffect.IsGPoseWet;
+    }
 }
 
 public enum OnlineStatus : byte
