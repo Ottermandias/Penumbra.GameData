@@ -37,10 +37,10 @@ public partial class MtrlFile : IWritable, ICloneable
         }
     }
 
-    private bool IsDawnTrail
+    public bool IsDawnTrail
     {
         get => AdditionalData.Length > 1 && AdditionalData[1] == 0x05 && (AdditionalData[0] & 0x30) == 0x30;
-        set
+        private set
         {
             if (AdditionalData.Length == 0)
             {
@@ -53,6 +53,17 @@ public partial class MtrlFile : IWritable, ICloneable
             AdditionalData[1] = (byte)(value ? 0x05 : 0);
             AdditionalData[0] = (byte)(value ? AdditionalData[0] | 0x30 : AdditionalData[0] & ~0x30);
         }
+    }
+
+    public bool MigrateToDawntrail()
+    {
+        if (IsDawnTrail)
+            return false;
+
+        IsDawnTrail = true;
+        if (ShaderPackage.Name is "character.shpk")
+            ShaderPackage.Name = "characterlegacy.shpk";
+        return true;
     }
 
     public bool HasTable
@@ -73,7 +84,7 @@ public partial class MtrlFile : IWritable, ICloneable
             return false;
 
         var dyeSet = DyeTable[rowIdx];
-        var ret = false;
+        var ret    = false;
         if (stainId1 != 0 && stm.TryGetValue(dyeSet.Template, stainId1, out var dyes1))
             ret |= Table[rowIdx].ApplyDyeTemplate1(dyeSet, dyes1);
         if (stainId2 != 0 && stm.TryGetValue(dyeSet.Template, stainId2, out var dyes2))

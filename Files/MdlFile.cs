@@ -214,7 +214,7 @@ public partial class MdlFile : IWritable
 
     public bool ConvertV5ToV6()
     {
-        if (Version != V5)
+        if (Version != V5 || !Valid)
             return false;
 
         Version = V6;

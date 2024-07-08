@@ -1,4 +1,3 @@
-using System;
 using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Files.Utility;
 
