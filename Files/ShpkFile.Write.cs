@@ -34,9 +34,11 @@ public partial class ShpkFile
             w.Write((uint)VertexShaders.Length);
             w.Write((uint)PixelShaders.Length);
             w.Write(MaterialParamsSize);
-            w.Write((uint)MaterialParams.Length);
+            w.Write((ushort)MaterialParams.Length);
+            w.Write((ushort)(IsLegacy || MaterialParamsDefaults == null ? 0 : 1));
             w.Write((uint)Constants.Length);
-            w.Write((uint)Samplers.Length);
+            w.Write((ushort)Samplers.Length);
+            w.Write((ushort)(IsLegacy ? 0 : Textures.Length));
             w.Write((uint)Uavs.Length);
             w.Write((uint)SystemKeys.Length);
             w.Write((uint)SceneKeys.Length);
@@ -44,8 +46,8 @@ public partial class ShpkFile
             w.Write((uint)Nodes.Length);
             w.Write((uint)aliases.Count);
 
-            WriteShaderArray(w, VertexShaders, blobs, strings);
-            WriteShaderArray(w, PixelShaders,  blobs, strings);
+            WriteShaderArray(w, VertexShaders, blobs, strings, IsLegacy);
+            WriteShaderArray(w, PixelShaders,  blobs, strings, IsLegacy);
 
             foreach (var materialParam in MaterialParams)
             {
@@ -54,8 +56,17 @@ public partial class ShpkFile
                 w.Write(materialParam.ByteSize);
             }
 
+            if (!IsLegacy && MaterialParamsDefaults != null)
+            {
+                w.Write(MaterialParamsDefaults, 0, Math.Min((int)MaterialParamsSize, MaterialParamsDefaults.Length));
+                if (MaterialParamsDefaults.Length < MaterialParamsSize)
+                    w.Write(new byte[MaterialParamsSize - MaterialParamsDefaults.Length]);
+            }
+
             WriteResourceArray(w, Constants, strings);
             WriteResourceArray(w, Samplers,  strings);
+            if (!IsLegacy)
+                WriteResourceArray(w, Textures, strings);
             WriteResourceArray(w, Uavs,      strings);
 
             foreach (var key in SystemKeys)
@@ -139,16 +150,20 @@ public partial class ShpkFile
             var (strOffset, strSize) = strings.FindOrAddString(buf.Name);
             w.Write(buf.Id);
             w.Write(strOffset);
-            w.Write(strSize);
+            w.Write((ushort)strSize);
+            w.Write(buf.IsTexture);
             w.Write(buf.Slot);
             w.Write(buf.Size);
         }
     }
 
-    private static void WriteShaderArray(BinaryWriter w, Shader[] array, MemoryStream blobs, StringPool strings)
+    private static void WriteShaderArray(BinaryWriter w, Shader[] array, MemoryStream blobs, StringPool strings, bool isLegacy)
     {
         foreach (var shader in array)
         {
+            if (shader.IsLegacy != isLegacy)
+                throw new InvalidDataException();
+
             var blobOffset = (int)blobs.Position;
             blobs.Write(shader.AdditionalHeader);
             blobs.Write(shader.Blob);
@@ -159,11 +174,13 @@ public partial class ShpkFile
             w.Write((ushort)shader.Constants.Length);
             w.Write((ushort)shader.Samplers.Length);
             w.Write((ushort)shader.Uavs.Length);
-            w.Write((ushort)0);
+            w.Write((ushort)(isLegacy ? 0 : shader.Textures.Length));
 
             WriteResourceArray(w, shader.Constants, strings);
             WriteResourceArray(w, shader.Samplers,  strings);
             WriteResourceArray(w, shader.Uavs,      strings);
+            if (!isLegacy)
+                WriteResourceArray(w, shader.Textures, strings);
         }
     }
 }
