@@ -28,6 +28,6 @@ public static class Offsets
     public const int ReloadFontsVfunc = 43;
 
     // ObjectReloader
-    public const int EnableDrawVfunc  = 16;
-    public const int DisableDrawVfunc = 17;
+    public const int EnableDrawVfunc  = 12;
+    public const int DisableDrawVfunc = 13;
 }
