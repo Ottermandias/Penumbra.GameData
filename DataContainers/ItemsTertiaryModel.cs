@@ -14,7 +14,7 @@ public sealed class ItemsTertiaryModel(
     IDataManager gameData,
     ItemsByType items,
     ItemsSecondaryModel itemsSecondaries)
-    : ItemDictionary(pi, log, "ItemDictTertiary", gameData.Language, 2, () => CreateGauntlets(items, itemsSecondaries),
+    : ItemDictionary(pi, log, "ItemDictTertiary", gameData.Language, 3, () => CreateGauntlets(items, itemsSecondaries),
         itemsSecondaries.Awaiter)
 {
     /// <summary> Create data by taking only the tertiary models for all items. </summary>

@@ -383,6 +383,26 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
 }
 
 [JsonConverter(typeof(Converter))]
+public readonly record struct GlassesId(ushort Id)
+{
+    public static implicit operator GlassesId(ushort id)
+        => new(id);
+
+    public override string ToString()
+        => Id.ToString();
+
+    private class Converter : JsonConverter<GlassesId>
+    {
+        public override void WriteJson(JsonWriter writer, GlassesId value, JsonSerializer serializer)
+            => serializer.Serialize(writer, value.Id);
+
+        public override GlassesId ReadJson(JsonReader reader, Type objectType, GlassesId existingValue, bool hasExistingValue,
+            JsonSerializer serializer)
+            => serializer.Deserialize<ushort>(reader);
+    }
+}
+
+[JsonConverter(typeof(Converter))]
 public readonly record struct ItemId(uint Id) : IComparisonOperators<ItemId, ItemId, bool>
 {
     public static implicit operator ItemId(uint id)
@@ -473,9 +493,9 @@ public readonly record struct CustomItemId(ulong Id) : IComparisonOperators<Cust
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct IconId(ushort Id)
+public readonly record struct IconId(uint Id)
 {
-    public static implicit operator IconId(ushort id)
+    public static implicit operator IconId(uint id)
         => new(id);
 
     public override string ToString()
@@ -488,7 +508,7 @@ public readonly record struct IconId(ushort Id)
 
         public override IconId ReadJson(JsonReader reader, Type objectType, IconId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
-            => serializer.Deserialize<ushort>(reader);
+            => serializer.Deserialize<uint>(reader);
     }
 }
 

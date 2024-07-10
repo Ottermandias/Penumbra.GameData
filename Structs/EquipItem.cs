@@ -1,4 +1,4 @@
-﻿global using PseudoEquipItem = System.ValueTuple<string, ulong, ushort, ushort, ushort, byte, uint>;
+﻿global using PseudoEquipItem = System.ValueTuple<string, ulong, uint, ushort, ushort, byte, uint>;
 using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
 using Penumbra.GameData.Data;
