@@ -75,7 +75,7 @@ public sealed class RestrictedItemsRace(IDalamudPluginInterface pluginInterface,
         0x020101,
         0x020102,
         0x010255,
-        uint.MaxValue, // TODO: Female Hrothgar
+        0x01033D,
         0x0102E8,
         0x010245,
     ];
