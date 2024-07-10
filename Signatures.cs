@@ -107,7 +107,8 @@ public static class Sigs
     public const string ChangeJob = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 44 0F B6 FA 48 8B E9";
 
     // Flag Slot for Update service
-    public const string FlagSlotForUpdate = "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B DA 49 8B F0 48 8B F9";
+    public const string FlagSlotForUpdate      = "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B DA 49 8B F0 48 8B F9";
+    public const string FlagBonusSlotForUpdate = "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 49 8B F0 8B DA 48 8B F9 83 FA";
 
     // Partial/composable materials
     public const string CreateMaterial = "E8 ?? ?? ?? ?? 48 89 87 ?? ?? ?? ?? 48 85 C0 75 ?? 48 8B 8F ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 01";
@@ -118,5 +119,7 @@ public static class Sigs
 
     public const string CalculateHeight = "E8 ?? ?? ?? FF 48 8B 0D ?? ?? ?? ?? 0F 28 F0";
 
-    public const string CrestChange = "E8 ?? ?? ?? ?? 48 8B 55 ?? 49 8B CE E8";
+    public const string CrestChange          = "E8 ?? ?? ?? ?? 48 8B 55 ?? 49 8B CE E8";
+    public const string SetUnlockLinkValue   = "48 83 EC ?? 8B C2 83 E0";
+    public const string RequestGlamourPlates = "E8 ?? ?? ?? ?? 0F 1F 44 ?? 00 44 89 74 24";
 }
