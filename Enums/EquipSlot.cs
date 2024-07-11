@@ -30,8 +30,6 @@ public enum EquipSlot : byte
     ChestHands        = 22,
     Nothing           = 23,
     All               = 24, // Not officially existing
-    FaceWear          = 25, // Not officially existing
-    FaceWear2         = 26, // Not officially existing
 }
 
 public static class EquipSlotExtensions
@@ -55,77 +53,56 @@ public static class EquipSlotExtensions
             _  => EquipSlot.Unknown,
         };
 
-    public static EquipSlot ToBonusSlot(this uint value)
-        => value switch
-        {
-            0 => EquipSlot.FaceWear,
-            1 => EquipSlot.FaceWear2,
-            _ => EquipSlot.Unknown,
-        };
-
     /// <summary> Convert an EquipSlot to the index it is used at in most model code. </summary>
     public static uint ToIndex(this EquipSlot slot)
         => slot switch
         {
-            EquipSlot.Head      => 0,
-            EquipSlot.Body      => 1,
-            EquipSlot.Hands     => 2,
-            EquipSlot.Legs      => 3,
-            EquipSlot.Feet      => 4,
-            EquipSlot.Ears      => 5,
-            EquipSlot.Neck      => 6,
-            EquipSlot.Wrists    => 7,
-            EquipSlot.RFinger   => 8,
-            EquipSlot.LFinger   => 9,
-            EquipSlot.MainHand  => 10,
-            EquipSlot.OffHand   => 11,
-            EquipSlot.FaceWear  => 10,
-            EquipSlot.FaceWear2 => 11,
-            _                   => uint.MaxValue,
-        };
-
-    public static uint ToBonusIndex(this EquipSlot slot)
-        => slot switch
-        {
-            EquipSlot.FaceWear  => 0,
-            EquipSlot.FaceWear2 => 1,
-            _                   => uint.MaxValue,
+            EquipSlot.Head     => 0,
+            EquipSlot.Body     => 1,
+            EquipSlot.Hands    => 2,
+            EquipSlot.Legs     => 3,
+            EquipSlot.Feet     => 4,
+            EquipSlot.Ears     => 5,
+            EquipSlot.Neck     => 6,
+            EquipSlot.Wrists   => 7,
+            EquipSlot.RFinger  => 8,
+            EquipSlot.LFinger  => 9,
+            EquipSlot.MainHand => 10,
+            EquipSlot.OffHand  => 11,
+            _                  => uint.MaxValue,
         };
 
     public static uint ToModelIndex(this EquipSlot slot)
         => slot.ToSlot() switch
         {
-            EquipSlot.Head      => 0,
-            EquipSlot.Body      => 1,
-            EquipSlot.Hands     => 2,
-            EquipSlot.Legs      => 3,
-            EquipSlot.Feet      => 4,
-            EquipSlot.Ears      => 5,
-            EquipSlot.Neck      => 6,
-            EquipSlot.Wrists    => 7,
-            EquipSlot.RFinger   => 8,
-            EquipSlot.LFinger   => 9,
-            EquipSlot.FaceWear  => 16,
-            EquipSlot.FaceWear2 => 17,
-            _                   => uint.MaxValue,
+            EquipSlot.Head    => 0,
+            EquipSlot.Body    => 1,
+            EquipSlot.Hands   => 2,
+            EquipSlot.Legs    => 3,
+            EquipSlot.Feet    => 4,
+            EquipSlot.Ears    => 5,
+            EquipSlot.Neck    => 6,
+            EquipSlot.Wrists  => 7,
+            EquipSlot.RFinger => 8,
+            EquipSlot.LFinger => 9,
+            _                 => uint.MaxValue,
         };
 
     /// <summary> Get the suffix used for a specific EquipSlot in file names. </summary>
     public static string ToSuffix(this EquipSlot value)
         => value switch
         {
-            EquipSlot.Head     => "met",
-            EquipSlot.Hands    => "glv",
-            EquipSlot.Legs     => "dwn",
-            EquipSlot.Feet     => "sho",
-            EquipSlot.Body     => "top",
-            EquipSlot.Ears     => "ear",
-            EquipSlot.Neck     => "nek",
-            EquipSlot.RFinger  => "rir",
-            EquipSlot.LFinger  => "ril",
-            EquipSlot.Wrists   => "wrs",
-            EquipSlot.FaceWear => "met",
-            _                  => "unk",
+            EquipSlot.Head    => "met",
+            EquipSlot.Hands   => "glv",
+            EquipSlot.Legs    => "dwn",
+            EquipSlot.Feet    => "sho",
+            EquipSlot.Body    => "top",
+            EquipSlot.Ears    => "ear",
+            EquipSlot.Neck    => "nek",
+            EquipSlot.RFinger => "rir",
+            EquipSlot.LFinger => "ril",
+            EquipSlot.Wrists  => "wrs",
+            _                 => "unk",
         };
 
     /// <summary> Convert the EquipSlotCategory value to the actual inventory slot it is put in. </summary>
@@ -154,8 +131,6 @@ public static class EquipSlotExtensions
             EquipSlot.BodyHands         => EquipSlot.Body,
             EquipSlot.BodyLegsFeet      => EquipSlot.Body,
             EquipSlot.ChestHands        => EquipSlot.Body,
-            EquipSlot.FaceWear          => EquipSlot.FaceWear,
-            EquipSlot.FaceWear2         => EquipSlot.FaceWear2,
             _                           => EquipSlot.Unknown,
         };
 
@@ -185,8 +160,6 @@ public static class EquipSlotExtensions
             EquipSlot.BodyHands         => "Top",
             EquipSlot.BodyLegsFeet      => "Costume",
             EquipSlot.All               => "Costume",
-            EquipSlot.FaceWear          => "Facewear",
-            EquipSlot.FaceWear2         => "Unknown Facewear",
             _                           => "Unknown",
         };
 

@@ -111,6 +111,10 @@ public readonly unsafe struct Actor : IEquatable<Actor>
     public CharacterArmor GetArmor(EquipSlot slot)
         => ((CharacterArmor*)Unsafe.AsPointer(ref AsCharacter->DrawData.EquipmentModelIds[0]))[slot.ToIndex()];
 
+    /// <summary> Only valid for characters. </summary>
+    public GlassesId GetBonusSlot(BonusEquipFlag slot)
+        => AsCharacter->DrawData.GlassesIds[(int)slot.ToIndex()];
+
     public bool GetCrest(CrestFlag slot)
         => CrestBitfield.HasFlag(slot);
 
