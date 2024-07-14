@@ -1,4 +1,5 @@
 using Lumina.Excel.GeneratedSheets;
+using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Enums;
 
@@ -71,11 +72,11 @@ public enum FullEquipType : byte
     GardenScythe,  // BTN Off
     Gig,           // FSH Off
 
-    Sabre,    // VPR
-    SabreOff, // VPR Off
-    Brush,    // PCT
-    Palette,  // PCT Off
-    Whip,     // BMR TODO
+    Brush,        // PCT
+    Palette,      // PCT Off
+    Twinfangs,    // VPR
+    TwinfangsOff, // VPR Off
+    Whip,         // BMR TODO
 }
 
 public static class FullEquipTypeExtensions
@@ -113,7 +114,7 @@ public static class FullEquipTypeExtensions
             FullEquipType.Nouliths   => true,
             FullEquipType.Shield     => true,
             FullEquipType.Brush      => true,
-            FullEquipType.Sabre      => true,
+            FullEquipType.Twinfangs  => true,
             _                        => false,
         };
 
@@ -234,8 +235,8 @@ public static class FullEquipTypeExtensions
             FullEquipType.Gig             => "Gig",
             FullEquipType.Brush           => "Brush",
             FullEquipType.Palette         => "Palette",
-            FullEquipType.Sabre           => "Sabre",
-            FullEquipType.SabreOff        => "Sabre (Offhand)",
+            FullEquipType.Twinfangs       => "Twinfangs",
+            FullEquipType.TwinfangsOff    => "Twinfangs (Offhand)",
             FullEquipType.Whip            => "Whip",
             _                             => "Unknown",
         };
@@ -303,8 +304,8 @@ public static class FullEquipTypeExtensions
             FullEquipType.Sledgehammer    => EquipSlot.OffHand,
             FullEquipType.GardenScythe    => EquipSlot.OffHand,
             FullEquipType.Gig             => EquipSlot.OffHand,
-            FullEquipType.Sabre           => EquipSlot.MainHand,
-            FullEquipType.SabreOff        => EquipSlot.OffHand,
+            FullEquipType.Twinfangs       => EquipSlot.MainHand,
+            FullEquipType.TwinfangsOff    => EquipSlot.OffHand,
             FullEquipType.Brush           => EquipSlot.MainHand,
             FullEquipType.Palette         => EquipSlot.OffHand,
             FullEquipType.Whip            => EquipSlot.MainHand,
@@ -400,8 +401,8 @@ public static class FullEquipTypeExtensions
             WeaponCategory.Dancer                    => FullEquipType.GlaivesOff,
             WeaponCategory.Reaper                    => FullEquipType.Scythe,
             WeaponCategory.Sage                      => FullEquipType.Nouliths,
-            WeaponCategory.Viper when mainhand       => FullEquipType.Sabre,
-            WeaponCategory.Viper                     => FullEquipType.SabreOff,
+            WeaponCategory.Viper when mainhand       => FullEquipType.Twinfangs,
+            WeaponCategory.Viper                     => FullEquipType.TwinfangsOff,
             WeaponCategory.Pictomancer when mainhand => FullEquipType.Brush,
             WeaponCategory.Pictomancer               => FullEquipType.Palette,
             WeaponCategory.Beastmaster               => FullEquipType.Whip,
@@ -412,19 +413,19 @@ public static class FullEquipTypeExtensions
     public static FullEquipType ValidOffhand(this FullEquipType type)
         => type switch
         {
-            FullEquipType.Fists   => FullEquipType.FistsOff,
-            FullEquipType.Sword   => FullEquipType.Shield,
-            FullEquipType.Wand    => FullEquipType.Shield,
-            FullEquipType.Daggers => FullEquipType.DaggersOff,
-            FullEquipType.Gun     => FullEquipType.GunOff,
-            FullEquipType.Orrery  => FullEquipType.OrreryOff,
-            FullEquipType.Rapier  => FullEquipType.RapierOff,
-            FullEquipType.Glaives => FullEquipType.GlaivesOff,
-            FullEquipType.Bow     => FullEquipType.BowOff,
-            FullEquipType.Katana  => FullEquipType.KatanaOff,
-            FullEquipType.Sabre   => FullEquipType.SabreOff,
-            FullEquipType.Brush   => FullEquipType.Palette,
-            _                     => FullEquipType.Unknown,
+            FullEquipType.Fists     => FullEquipType.FistsOff,
+            FullEquipType.Sword     => FullEquipType.Shield,
+            FullEquipType.Wand      => FullEquipType.Shield,
+            FullEquipType.Daggers   => FullEquipType.DaggersOff,
+            FullEquipType.Gun       => FullEquipType.GunOff,
+            FullEquipType.Orrery    => FullEquipType.OrreryOff,
+            FullEquipType.Rapier    => FullEquipType.RapierOff,
+            FullEquipType.Glaives   => FullEquipType.GlaivesOff,
+            FullEquipType.Bow       => FullEquipType.BowOff,
+            FullEquipType.Katana    => FullEquipType.KatanaOff,
+            FullEquipType.Twinfangs => FullEquipType.TwinfangsOff,
+            FullEquipType.Brush     => FullEquipType.Palette,
+            _                       => FullEquipType.Unknown,
         };
 
     /// <summary> Obtain the correct offhand FullEquipType for a Mainhand FullEquipType, including tools. </summary>
@@ -452,7 +453,7 @@ public static class FullEquipTypeExtensions
             FullEquipType.Pickaxe         => FullEquipType.Sledgehammer,
             FullEquipType.Hatchet         => FullEquipType.GardenScythe,
             FullEquipType.FishingRod      => FullEquipType.Gig,
-            FullEquipType.Sabre           => FullEquipType.SabreOff,
+            FullEquipType.Twinfangs       => FullEquipType.TwinfangsOff,
             FullEquipType.Brush           => FullEquipType.Palette,
             _                             => FullEquipType.Unknown,
         };
@@ -484,17 +485,17 @@ public static class FullEquipTypeExtensions
     internal static string OffhandTypeSuffix(this FullEquipType type)
         => type switch
         {
-            FullEquipType.FistsOff   => " (Offhand)",
-            FullEquipType.DaggersOff => " (Offhand)",
-            FullEquipType.GunOff     => " (Aetherotransformer)",
-            FullEquipType.OrreryOff  => " (Card Holder)",
-            FullEquipType.RapierOff  => " (Focus)",
-            FullEquipType.GlaivesOff => " (Offhand)",
-            FullEquipType.BowOff     => " (Quiver)",
-            FullEquipType.KatanaOff  => " (Sheathe)",
-            FullEquipType.SabreOff   => " (Offhand)",
-            FullEquipType.Palette    => " (Palette)",
-            _                        => string.Empty,
+            FullEquipType.FistsOff     => " (Offhand)",
+            FullEquipType.DaggersOff   => " (Offhand)",
+            FullEquipType.GunOff       => " (Aetherotransformer)",
+            FullEquipType.OrreryOff    => " (Card Holder)",
+            FullEquipType.RapierOff    => " (Focus)",
+            FullEquipType.GlaivesOff   => " (Offhand)",
+            FullEquipType.BowOff       => " (Quiver)",
+            FullEquipType.KatanaOff    => " (Sheathe)",
+            FullEquipType.TwinfangsOff => " (Offhand)",
+            FullEquipType.Palette      => " (Palette)",
+            _                          => string.Empty,
         };
 
     /// <summary> Whether a FullEquipType is an inferred offhand type. </summary>

@@ -88,8 +88,9 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         (FullEquipType.Glaives, FullEquipType.GlaivesOff, 50),
         (FullEquipType.Nouliths, FullEquipType.Unknown, 100),
         (FullEquipType.Scythe, FullEquipType.Unknown, 100),
-        (FullEquipType.Brush, FullEquipType.Palette, 50), // TODO
-        (FullEquipType.Sabre, FullEquipType.SabreOff, 50), // TODO
+        (FullEquipType.Brush, FullEquipType.Palette, 50),
+        (FullEquipType.Twinfangs, FullEquipType.TwinfangsOff, 50),
+        (FullEquipType.Twinfangs, FullEquipType.TwinfangsOff, 50),
         (FullEquipType.Whip, FullEquipType.Unknown, 100), // TODO
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
@@ -133,6 +134,24 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         (FullEquipType.Hatchet, FullEquipType.GardenScythe, 50),
         (FullEquipType.FishingRod, FullEquipType.Gig, 50),
     ];
+
+    /// <remarks> See the bitmask used in Weapon.ResolveImcPath. </remarks>
+    public static bool AdaptOffhandImc(PrimaryId id, out PrimaryId adaptedId)
+    {
+        var category = id.Id / 100;
+        if (category is 3 or 16 or 18 or 26 or 30 or 31)
+        {
+            var remainder = id.Id - category * 100;
+            if (remainder > 50)
+            {
+                adaptedId = new PrimaryId((ushort)(id.Id - 50));
+                return true;
+            }
+        }
+
+        adaptedId = id;
+        return false;
+    }
 
     /// <summary> Convert a primary weapon ID to its equip type. </summary>
     public static FullEquipType ConvertWeaponId(PrimaryId id)
@@ -180,9 +199,11 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         //     > 2800 and <= 2900 => FullEquipType.Scythe,
         //     > 2900 and <= 2950 => FullEquipType.Brush,
         //     > 2950 and <= 3000 => FullEquipType.Palette,
-        //     > 3000 and <= 3050 => FullEquipType.Sabre,
-        //     > 3050 and <= 3100 => FullEquipType.SabreOff,
-        //     > 3100 and <= 3200 => FullEquipType.Whip,
+        //     > 3000 and <= 3050 => FullEquipType.Twinfangs,
+        //     > 3050 and <= 3100 => FullEquipType.TwinfangsOff,
+        //     > 3100 and <= 3150 => FullEquipType.Twinfangs,
+        //     > 3150 and <= 3200 => FullEquipType.TwinfangsOff,
+        //     > 3200 and <= 3300 => FullEquipType.Whip, TODO
         //     > 5040 and <= 5100 => FullEquipType.ClawHammer,
         //     > 5100 and <= 5140 => FullEquipType.CrossPeinHammer,
         //     > 5140 and <= 5200 => FullEquipType.File,
