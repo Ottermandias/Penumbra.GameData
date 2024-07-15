@@ -9,6 +9,8 @@ namespace Penumbra.GameData.Structs;
 public struct CharacterWeapon(PrimaryId skeleton, SecondaryId set, Variant variant, StainIds stains)
     : IEquatable<CharacterWeapon>, IComparable<CharacterWeapon>
 {
+    public const int Size = 8;
+
     /// <summary> The data as a single value. </summary>
     [FieldOffset(0)]
     public ulong Value = 0;

@@ -383,20 +383,20 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct GlassesId(ushort Id)
+public readonly record struct BonusItemId(ushort Id)
 {
-    public static implicit operator GlassesId(ushort id)
+    public static implicit operator BonusItemId(ushort id)
         => new(id);
 
     public override string ToString()
         => Id.ToString();
 
-    private class Converter : JsonConverter<GlassesId>
+    private class Converter : JsonConverter<BonusItemId>
     {
-        public override void WriteJson(JsonWriter writer, GlassesId value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, BonusItemId value, JsonSerializer serializer)
             => serializer.Serialize(writer, value.Id);
 
-        public override GlassesId ReadJson(JsonReader reader, Type objectType, GlassesId existingValue, bool hasExistingValue,
+        public override BonusItemId ReadJson(JsonReader reader, Type objectType, BonusItemId existingValue, bool hasExistingValue,
             JsonSerializer serializer)
             => serializer.Deserialize<ushort>(reader);
     }
