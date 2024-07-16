@@ -11,7 +11,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps GlassesIds to Glasses. </summary>
 public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<IReadOnlyDictionary<ushort, PseudoBonusItem>>(pluginInterface, log, "Glasses",
+    : DataSharer<IReadOnlyDictionary<ushort, PseudoBonusItem>>(pluginInterface, log, "BonusItems",
         gameData.Language, 1,
         () => CreateGlassesData(gameData)), IReadOnlyDictionary<BonusItemId, BonusItem>
 {

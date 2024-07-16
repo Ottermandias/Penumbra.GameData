@@ -599,7 +599,6 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         1033658u,
         1033659u,
         1007137u,
-        // TODO: Female Hrothgar
     ]);
 
     /// <summary> Parse a user string for player identifier data. </summary>
