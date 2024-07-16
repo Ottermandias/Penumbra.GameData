@@ -99,6 +99,8 @@ public sealed class DictJobGroup : IDataContainer, IReadOnlyDictionary<JobGroupI
             181 => true,
             188 => true,
             189 => true,
+            196 => true,
+            197 => true,
 
             // Class + Job
             38 => true,
