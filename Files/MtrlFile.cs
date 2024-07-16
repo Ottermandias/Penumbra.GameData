@@ -39,7 +39,7 @@ public partial class MtrlFile : IWritable, ICloneable
 
     public bool IsDawnTrail
     {
-        get => AdditionalData.Length > 1 && AdditionalData[1] == 0x05 && (AdditionalData[0] & 0x30) == 0x30;
+        get => AdditionalData.Length > 1 && (AdditionalData[1] & 0x05) == 0x05 && (AdditionalData[0] & 0x30) == 0x30;
         private set
         {
             if (AdditionalData.Length == 0)
@@ -50,7 +50,7 @@ public partial class MtrlFile : IWritable, ICloneable
                 AdditionalData = new byte[4];
             }
 
-            AdditionalData[1] = (byte)(value ? 0x05 : 0);
+            AdditionalData[1] = (byte)(value ? AdditionalData[0] | 0x05 : AdditionalData[0] & ~0x05);
             AdditionalData[0] = (byte)(value ? AdditionalData[0] | 0x30 : AdditionalData[0] & ~0x30);
         }
     }

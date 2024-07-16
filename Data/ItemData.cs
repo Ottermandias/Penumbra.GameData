@@ -204,6 +204,7 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         //     > 3100 and <= 3150 => FullEquipType.Twinfangs,
         //     > 3150 and <= 3200 => FullEquipType.TwinfangsOff,
         //     > 3200 and <= 3300 => FullEquipType.Whip, TODO
+        //     > 5000 and <= 5040 => FullEquipType.Saw,
         //     > 5040 and <= 5100 => FullEquipType.ClawHammer,
         //     > 5100 and <= 5140 => FullEquipType.CrossPeinHammer,
         //     > 5140 and <= 5200 => FullEquipType.File,

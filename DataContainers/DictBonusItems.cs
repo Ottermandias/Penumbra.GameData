@@ -21,10 +21,10 @@ public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logg
     {
         // TODO
         var glassesSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets2.Glasses>(dataManager.Language)!;
-        return glassesSheet.Where(s => s.Unknown0.RawData.Length > 0)
+        return glassesSheet.Where(s => s.Name.RawData.Length > 0)
             .ToFrozenDictionary(s => (ushort)s.RowId,
-                s => (s.Unknown3.ToDalamudString().ToString(), (uint)s.Unknown11, (ushort)s.RowId, (ushort)s.Unknown10,
-                    (byte)(s.Unknown10 >> 16), (byte)0)); // TODO slot other than glasses
+                s => (s.Name.ToDalamudString().ToString(), (uint)s.Icon, (ushort)s.RowId, (ushort)s.Unknown_70_7,
+                    (byte)(s.Unknown_70_7 >> 16), (byte)0)); // TODO slot other than glasses
     }
 
     /// <inheritdoc/>
