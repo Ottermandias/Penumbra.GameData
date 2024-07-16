@@ -24,7 +24,7 @@ public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logg
         return glassesSheet.Where(s => s.Unknown0.RawData.Length > 0)
             .ToFrozenDictionary(s => (ushort)s.RowId,
                 s => (s.Unknown3.ToDalamudString().ToString(), (uint)s.Unknown11, (ushort)s.RowId, (ushort)s.Unknown10,
-                    (byte)(s.Unknown10 >> 16), (byte)0)); // TODO slot other than glasses
+                    (byte)(s.Unknown10 >> 16), (byte)1)); // TODO slot other than glasses
     }
 
     /// <inheritdoc/>

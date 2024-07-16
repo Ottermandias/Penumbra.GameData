@@ -360,6 +360,9 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
         return new StainIds(stain, stain2);
     }
 
+    public static StainIds All(StainId stain)
+        => new(stain, stain);
+
     public StainIds(IReadOnlyList<StainId> stains)
         : this(stains.Count > 0 ? stains[0] : 0, stains.Count > 1 ? stains[1] : 0)
     { }
