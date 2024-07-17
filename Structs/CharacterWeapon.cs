@@ -36,11 +36,16 @@ public struct CharacterWeapon(PrimaryId skeleton, SecondaryId set, Variant varia
 
     /// <summary> Compare in inverse order. </summary>
     private readonly ulong CompareValue
-        => ((ulong)Skeleton.Id << 48) | ((ulong)Weapon.Id << 32) | ((ulong)Variant.Id << 16) | ((ulong)Stains.Stain1.Id << 8) | Stains.Stain2.Id;
+        => ((ulong)Skeleton.Id << 48)
+          | ((ulong)Weapon.Id << 32)
+          | ((ulong)Variant.Id << 16)
+          | ((ulong)Stains.Stain1.Id << 8)
+          | Stains.Stain2.Id;
 
     /// <summary> Create a character weapon from a single value. </summary>
     public CharacterWeapon(ulong value)
-        : this((PrimaryId)value, (SecondaryId)(value >> 16), (Variant)(value >> 32), new StainIds((StainId)(value >> 48), (StainId)(value >> 56)))
+        : this((PrimaryId)value, (SecondaryId)(value >> 16), (Variant)(value >> 32),
+            new StainIds((StainId)(value >> 48), (StainId)(value >> 56)))
     { }
 
     /// <summary> Return the same weapon with a different stain. </summary>
@@ -83,4 +88,14 @@ public struct CharacterWeapon(PrimaryId skeleton, SecondaryId set, Variant varia
     /// <summary> A helper to create CharacterWeapons without casting from integers. </summary>
     public static CharacterWeapon Int(int skeleton, int weapon, int variant)
         => new((PrimaryId)skeleton, (SecondaryId)weapon, (Variant)variant, StainIds.None);
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 7, Pack = 1)]
+public struct LegacyCharacterWeapon(CharacterWeapon weapon)
+{
+    public PrimaryId   Skeleton = weapon.Skeleton;
+    public SecondaryId Weapon   = weapon.Weapon;
+    public Variant     Variant  = weapon.Variant;
+    public byte        Padding;
+    public StainId     Stain = weapon.Stains.Stain1;
 }

@@ -64,3 +64,11 @@ public struct CharacterArmor(PrimaryId set, Variant variant, StainIds stains) : 
     public static bool operator !=(CharacterArmor left, CharacterArmor right)
         => left.Value != right.Value;
 }
+
+[StructLayout(LayoutKind.Sequential, Size = 4)]
+public struct LegacyCharacterArmor(CharacterArmor armor)
+{
+    public PrimaryId Set     = armor.Set;
+    public Variant   Variant = armor.Variant;
+    public StainId   Stain   = armor.Stains.Stain1;
+}
