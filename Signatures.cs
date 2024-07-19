@@ -115,6 +115,7 @@ public static class Sigs
     public const string PlaceMinion = "48 89 5C 24 ?? 55 57 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B F9";
 
     public const string PrepareColorSet = "E8 ?? ?? ?? ?? 49 89 04 ?? 49 83 C5";
+    public const string UpdateColorSets = "89 54 24 ?? 56 41 56 41 57";
 
     public const string CalculateHeight = "E8 ?? ?? ?? FF 48 8B 0D ?? ?? ?? ?? 0F 28 F0";
 

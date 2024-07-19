@@ -114,10 +114,8 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
             => BitConverter.HalfToUInt16Bits((Half)x);
 
         public bool ApplyDyeTemplate2(ColorDyeTable.Row dyeRow, StmFile.DyePack dye)
-        {
             // TODO
-            return false;
-        }
+            => false;
 
         public bool ApplyDyeTemplate1(ColorDyeTable.Row dyeRow, StmFile.DyePack dye)
         {
@@ -169,8 +167,7 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
         }
     }
 
-    public const  int  NumUsedRows = 16;
-    public const  int  NumRows     = 32;
+    public const  int  NumRows = 32;
     private fixed byte _rowData[NumRows * Row.Size];
 
     public ref Row this[int i]
@@ -219,5 +216,19 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
     {
         for (var i = 0; i < LegacyColorTable.NumRows; ++i)
             this[i] = new Row(oldTable[i]);
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < NumRows; ++i)
+        {
+            var row = this[i];
+            for (var j = 0; j < Row.NumVec4 * Row.Halves; ++j)
+                sb.Append($"{((Half*)(&row))[j]:F1} ");
+            sb[^1] = '\n';
+        }
+
+        return sb.ToString();
     }
 }
