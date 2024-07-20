@@ -54,6 +54,10 @@ public static class CustomizationExtensions
     public static readonly CustomizeIndex[] AllBasic = All
         .Where(v => v is not CustomizeIndex.Gender and not CustomizeIndex.Clan).ToArray();
 
+    /// <summary> A set of all options that are not race, gender, clan, face, or body type. </summary>
+    public static readonly CustomizeIndex[] AllBasicWithoutFace = AllBasic
+        .Where(v => v is not CustomizeIndex.Face).ToArray();
+
     /// <summary> Get the index of the customization option in the customize array, and a mask for its value. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static (int ByteIdx, byte Mask) ToByteAndMask(this CustomizeIndex index)
