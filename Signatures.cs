@@ -39,7 +39,7 @@ public static class Sigs
     public const string UnkParasolAnimation            = "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B FA 4C 8B F1";
     public const string Dismount                       = "E9 ?? ?? ?? ?? B8 ?? ?? ?? ?? 66 44 3B F8";
     public const string ApricotListenerSoundPlay       = "41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 4D 8B F9"; // Inlined in 48 89 83 ?? ?? ?? ?? 48 8B 46 ?? 48 85 C0 
-    public const string ApricotListenerSoundPlayCaller = "48 89 83 ?? ?? ?? ?? 48 8B 46 ?? 48 85 C0";
+    public const string ApricotListenerSoundPlayCaller = "4C 8B DC 56 48 81 EC ?? ?? ?? ?? F3 0F 10 89";
     public const string FootStepSound                  = "89 54 24 ?? 55 57 41 54 41 55 41 56";
 
     // PathResolver.DrawObjectState
