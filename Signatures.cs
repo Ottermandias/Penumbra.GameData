@@ -122,4 +122,12 @@ public static class Sigs
     public const string CrestChange          = "E8 ?? ?? ?? ?? 48 8B 55 ?? 49 8B CE E8";
     public const string SetUnlockLinkValue   = "48 83 EC ?? 8B C2 83 E0";
     public const string RequestGlamourPlates = "E8 ?? ?? ?? ?? 0F 1F 44 ?? 00 44 89 74 24";
+    
+    // Pap redirection
+    public const string LoadAlwaysResidentMotionPacks          = "E8 ?? ?? ?? FF 48 8B D0 48 8B CE E8 ?? ?? ?? 00 48 8B 4C 24";
+    public const string LoadWeaponDependentResidentMotionPacks = "E8 ?? ?? ?? FF 48 8B D0 48 8D 8F ?? ?? 00 00 E8 ?? ?? ?? 00 48 8B";
+    public const string LoadInitialResidentMotionPacks         = "E8 ?? ?? ?? FF 48 8B 5D ?? 48 8B 7D ?? 48 3B DF";
+    public const string LoadMotionPacks                        = "E8 ?? ?? ?? 00 48 8B 44 24 ?? 49 89 04 24";
+    public const string LoadMotionPacks2                       = "E8 ?? ?? ?? 00 48 8B 44 24 ?? 48 89 03";
+    public const string LoadMigratoryMotionPack                = "E9 ?? ?? ?? 00 8B 84 24 ?? ?? 00 00 48 8D";
 }
