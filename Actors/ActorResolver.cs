@@ -126,8 +126,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
         if (agent == null || agent->Data == null)
             return ActorIdentifier.Invalid;
 
-        var worldId = *(ushort*)((byte*)agent->Data + Offsets.AgentCharaCardDataWorldId);
-        return factory.CreatePlayer(new ByteString(agent->Data->Name.StringPtr), worldId);
+        return factory.CreatePlayer(new ByteString(agent->Data->Name.StringPtr), agent->Data->WorldId);
     }
 
     /// <summary> Obtain an identifier for glamour interface if it is open. </summary>
@@ -182,8 +181,8 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
 
         static bool Compare(Actor a, Actor b)
         {
-            var data1  = (CustomizeArray*) &a.AsCharacter->DrawData.CustomizeData;
-            var data2  = (CustomizeArray*) &b.AsCharacter->DrawData.CustomizeData;
+            var data1  = (CustomizeArray*)&a.AsCharacter->DrawData.CustomizeData;
+            var data2  = (CustomizeArray*)&b.AsCharacter->DrawData.CustomizeData;
             var equals = CustomizeArray.ScreenActorEquals(data1, data2);
             return equals;
         }

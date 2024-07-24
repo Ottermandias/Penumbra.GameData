@@ -4,7 +4,6 @@ namespace Penumbra.GameData;
 public static class Offsets
 {
     // ActorManager.Data
-    public const int AgentCharaCardDataWorldId = 0xC0;
 
     // ObjectIdentification
     public const  int DrawObjectGetModelTypeVfunc = 50;
@@ -15,14 +14,10 @@ public static class Offsets
     public const  int DrawObjectModelUnk4         = DrawObjectModelBase + 0x28;
 
     // PathResolver.AnimationState
-    public const int GetGameObjectIdxVfunc = 28;
-    public const int TimeLinePtr           = 0x50;
+    public const int TimeLinePtr = 0x50;
 
     // PathResolver.Meta
-    public const int UpdateModelSkip     = 0x9EC;
-    public const int GetEqpIndirectSkip1 = 0xBF8;
-    public const int GetEqpIndirectSkip2 = 0xBF0;
-    public const int GetEqpIndirect2Skip = 0x90;
+    public const int UpdateModelSkip = 0x9EC;
 
     // FontReloader
     public const int ReloadFontsVfunc = 43;
