@@ -193,8 +193,8 @@ public static class RaceEnumExtensions
         {
             Gender.Male      => "Male",
             Gender.Female    => "Female",
-            Gender.MaleNpc   => "Male (NPC)",
-            Gender.FemaleNpc => "Female (NPC)",
+            Gender.MaleNpc   => "Male (Child)",
+            Gender.FemaleNpc => "Female (Child)",
             _                => "Unknown",
         };
 
@@ -470,6 +470,7 @@ public static partial class Names
                 ModelRace.AuRa       => AuRaMaleNpc,
                 ModelRace.Hrothgar   => HrothgarMaleNpc,
                 ModelRace.Viera      => VieraMaleNpc,
+                ModelRace.Unknown    => UnknownMaleNpc,
                 _                    => Unknown,
             },
             Gender.Female => modelRace switch
@@ -496,6 +497,7 @@ public static partial class Names
                 ModelRace.AuRa       => AuRaFemaleNpc,
                 ModelRace.Hrothgar   => HrothgarFemaleNpc,
                 ModelRace.Viera      => VieraFemaleNpc,
+                ModelRace.Unknown    => UnknownFemaleNpc,
                 _                    => Unknown,
             },
             _ => Unknown,
