@@ -9,6 +9,18 @@ namespace Penumbra.GameData.Structs;
 /// </summary>
 public readonly struct Job(ClassJob job)
 {
+    public enum JobRole : byte
+    {
+        Unknown        = 0,
+        Tank           = 1,
+        Melee          = 2,
+        RangedPhysical = 3,
+        RangedMagical  = 4,
+        Healer         = 5,
+        Crafter        = 6,
+        Gatherer       = 7,
+    }
+
     /// <summary> The name of the job. </summary>
     public readonly string Name = string.Intern(job.Name.ToDalamudString().ToString());
 
@@ -17,6 +29,19 @@ public readonly struct Job(ClassJob job)
 
     /// <summary> The ID of the job. </summary>
     public readonly JobId Id = (JobId)job.RowId;
+
+    /// <summary> The role of the job. </summary>
+    public readonly JobRole Role = job.Role switch
+    {
+        1                           => JobRole.Tank,
+        2                           => JobRole.Melee,
+        3 when job.PrimaryStat is 4 => JobRole.RangedMagical,
+        3 when job.PrimaryStat is 2 => JobRole.RangedPhysical,
+        4                           => JobRole.Healer,
+        0 when job.PartyBonus is 6  => JobRole.Gatherer,
+        0 when job.PartyBonus is 7  => JobRole.Crafter,
+        _                           => JobRole.Unknown,
+    };
 
     /// <summary> The flag corresponding to the job's ID. </summary>
     public JobFlag Flag

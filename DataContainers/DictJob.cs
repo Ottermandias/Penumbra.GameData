@@ -17,9 +17,22 @@ public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
         _jobs = gameData.GetExcelSheet<ClassJob>()!
             .Where(j => j.Abbreviation.RawData.Length > 0)
             .ToFrozenDictionary(j => (JobId)j.RowId, j => new Job(j));
-        Memory = DataUtility.DictionaryMemory(32, Count) + _jobs.Sum(kvp => kvp.Value.Name.Length + kvp.Value.Abbreviation.Length) * 2;
-        Time   = stopwatch.ElapsedMilliseconds;
+
+        Ordered = gameData.GetExcelSheet<ClassJob>()!.Skip(1)
+            .Select(j => (j, _jobs[(JobId)j.RowId]))
+            .OrderBy(j => j.Item1.JobIndex == 0)
+            .ThenBy(j => j.Item1.IsLimitedJob)
+            .ThenBy(j => j.Item2.Role)
+            .Select(j => j.Item2)
+            .ToArray();
+
+        Memory = DataUtility.DictionaryMemory(32, Count)
+          + _jobs.Sum(kvp => kvp.Value.Name.Length + kvp.Value.Abbreviation.Length) * 2
+          + DataUtility.ArrayMemory(32, Count);
+        Time = stopwatch.ElapsedMilliseconds;
     }
+
+    public readonly IReadOnlyList<Job> Ordered;
 
     /// <summary> The jobs. </summary>
     private readonly IReadOnlyDictionary<JobId, Job> _jobs;
