@@ -292,7 +292,7 @@ public static class RaceEnumExtensions
             HrothgarFemale      => (Gender.Female, ModelRace.Hrothgar),
             HrothgarFemaleNpc   => (Gender.FemaleNpc, ModelRace.Hrothgar),
             VieraMale           => (Gender.Male, ModelRace.Viera),
-            VieraMaleNpc        => (Gender.Male, ModelRace.Viera),
+            VieraMaleNpc        => (Gender.MaleNpc, ModelRace.Viera),
             VieraFemale         => (Gender.Female, ModelRace.Viera),
             VieraFemaleNpc      => (Gender.FemaleNpc, ModelRace.Viera),
             UnknownMaleNpc      => (Gender.MaleNpc, ModelRace.Unknown),
