@@ -38,11 +38,15 @@ public sealed unsafe class MmioMemoryManager(MemoryMappedViewAccessor accessor, 
     public override Span<byte> GetSpan()
         => new(Pin(0).Pointer, Length);
 
+    /// <seealso cref="MemoryMappedViewAccessor.Flush"/>
+    public void Flush()
+        => _accessor.Flush();
+
     public override MemoryHandle Pin(int elementIndex = 0)
     {
         if (_pointer == null)
             _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref _pointer);
-        return new MemoryHandle(_pointer + elementIndex, pinnable: this);
+        return new MemoryHandle(_pointer + _accessor.PointerOffset + elementIndex, pinnable: this);
     }
 
     public override void Unpin()
