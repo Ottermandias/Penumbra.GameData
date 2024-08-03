@@ -1,6 +1,7 @@
-using Penumbra.GameData.Data;
+using Penumbra.GameData.Files.ShaderStructs;
 using Penumbra.GameData.Files.Utility;
 using DisassembledShader = Penumbra.GameData.Interop.DisassembledShader;
+using ShaderKeyValueSet = Penumbra.GameData.Structs.SharedSet<uint, uint>;
 
 namespace Penumbra.GameData.Files;
 
@@ -12,9 +13,18 @@ public partial class ShpkFile : IWritable
 
     public const uint MaterialParamsConstantId = 0x64D12851u; // g_MaterialParameter is a cbuffer filled from the ad hoc section of the mtrl
     public const uint TableSamplerId           = 0x2005679Fu; // g_SamplerTable is a texture filled from the mtrl's color set
+    public const uint NormalSamplerId          = 0x0C5EC1F1u; // g_SamplerNormal (suffix "_norm" or "_n") is the normal map
+    public const uint IndexSamplerId           = 0x565F8FD8u; // g_SamplerIndex (suffix "_id") is the texture used to address g_SamplerTable
+
+    public static readonly Name MaterialParamsConstantName = "g_MaterialParameter";
+    public static readonly Name TableSamplerName           = "g_SamplerTable";
+    public static readonly Name NormalSamplerName          = "g_SamplerNormal";
+    public static readonly Name IndexSamplerName           = "g_SamplerIndex";
 
     public const uint SelectorMultiplier        = 31;
     public const uint SelectorInverseMultiplier = 3186588639; // 31 * 3186588639 = 23 << 32 + 1, iow they're modular inverses
+
+    public const int MaxExhaustiveNodeAnalysisCombinations = 262144;
 
     public readonly bool Disassembled;
 
@@ -34,15 +44,16 @@ public partial class ShpkFile : IWritable
     /// <remarks>
     /// When dealing with legacy shaders, this will always be empty, use <see cref="Samplers"/> instead.
     /// </remarks>
-    public Resource[]             Textures;
-    public Resource[]             Uavs;
-    public Key[]                  SystemKeys;
-    public Key[]                  SceneKeys;
-    public Key[]                  MaterialKeys;
-    public Key[]                  SubViewKeys;
-    public Node[]                 Nodes;
-    public Dictionary<uint, uint> NodeSelectors;
-    public byte[]                 AdditionalData;
+    public Resource[]                 Textures;
+    public Resource[]                 Uavs;
+    public Key[]                      SystemKeys;
+    public Key[]                      SceneKeys;
+    public Key[]                      MaterialKeys;
+    public Key[]                      SubViewKeys;
+    public ShaderKeyValueSet.Universe Passes;
+    public Node[]                     Nodes;
+    public Dictionary<uint, uint>     NodeSelectors;
+    public byte[]                     AdditionalData;
 
     public  bool Valid { get; private set; }
     private bool _changed;
@@ -50,7 +61,7 @@ public partial class ShpkFile : IWritable
     public MaterialParam? GetMaterialParamById(uint id)
         => MaterialParams.FirstOrNull(m => m.Id == id);
 
-    public Span<T> GetMaterialParamDefaults<T>(MaterialParam param) where T : struct
+    public Span<T> GetMaterialParamDefault<T>(MaterialParam param) where T : struct
     {
         if (MaterialParamsDefaults == null || param.ByteOffset >= MaterialParamsDefaults.Length)
             return [];
@@ -172,15 +183,17 @@ public partial class ShpkFile : IWritable
             {
                 Id           = 1,
                 DefaultValue = subViewKey1Default,
-                Values       = Array.Empty<uint>(),
+                Values       = [subViewKey1Default],
             },
             new()
             {
                 Id           = 2,
                 DefaultValue = subViewKey2Default,
-                Values       = Array.Empty<uint>(),
+                Values       = [subViewKey2Default],
             },
         };
+
+        Passes = [];
 
         Nodes = ReadNodeArray(ref r, (int)nodeCount, SystemKeys.Length, SceneKeys.Length, MaterialKeys.Length, SubViewKeys.Length);
 
@@ -192,17 +205,51 @@ public partial class ShpkFile : IWritable
 
         AdditionalData = r.Read<byte>((int)(blobsOffset - r.Position)).ToArray(); // This should be empty, but just in case.
 
-        if (disassemble)
-            UpdateUsed();
-
+        UpdateUsed(null);
         UpdateKeyValues();
 
         Valid    = true;
         _changed = false;
     }
 
+    /// <summary> Determines whether a ShPk file is a legacy one, while examining the least possible amount of data, for performance reasons. </summary>
+    /// <param name="startOfData"> At least the 48 first bytes of the file. </param>
+    /// <seealso cref="IsLegacy"/>
+    public static bool FastIsLegacy(ReadOnlySpan<byte> startOfData)
+    {
+        const int hasMatParamDefaults = 19;
+        const int textureCount        = 23;
+
+        var asShorts = MemoryMarshal.Cast<byte, ushort>(startOfData);
+        return asShorts[hasMatParamDefaults] == 0 && asShorts[textureCount] == 0;
+    }
+
+    /// <summary> Extract all resource names from a ShPk file, while examining the least possible amount of data, for performance reasons. </summary>
+    /// <param name="data"> The bytes of the file. </param>
+    /// <returns> The extracted resource names, indexed by their CRC32 hash (that's usually used as resource ID). </returns>
+    public static IReadOnlyDictionary<uint, Name> FastExtractNames(ReadOnlySpan<byte> data)
+    {
+        var asInts        = MemoryMarshal.Cast<byte, uint>(data);
+        var stringsOffset = asInts[5];
+        var strings       = new SpanBinaryReader(data[(int)stringsOffset..]);
+        var names         = new List<Name>();
+        while (strings.Remaining > 0)
+        {
+            var str = strings.ReadByteString(strings.Position);
+            if (str.Length > 0)
+                names.Add(new(str));
+            if (str.Length + 1 >= strings.Remaining)
+                break;
+            strings.Skip(str.Length + 1);
+        }
+        return names.Indexed();
+    }
+
     public void UpdateResources()
     {
+        if (!Disassembled)
+            return;
+
         var constants = new Dictionary<uint, Resource>();
         var samplers  = new Dictionary<uint, Resource>();
         var textures  = new Dictionary<uint, Resource>();
@@ -250,7 +297,7 @@ public partial class ShpkFile : IWritable
         Samplers  = samplers.Values.ToArray();
         Textures  = textures.Values.ToArray();
         Uavs      = uavs.Values.ToArray();
-        UpdateUsed();
+        UpdateUsed(null);
 
         // Ceil required size to a multiple of 16 bytes.
         // Offsets can be skipped, MaterialParamsConstantId's size is the count.
@@ -268,8 +315,14 @@ public partial class ShpkFile : IWritable
         }
     }
 
-    private void UpdateUsed()
+    public void UpdateFilteredUsed(Predicate<Shader> filter)
+        => UpdateUsed(filter);
+
+    private void UpdateUsed(Predicate<Shader>? filter)
     {
+        if (!Disassembled)
+            return;
+
         var cUsage = new Dictionary<uint, (DisassembledShader.VectorComponents[], DisassembledShader.VectorComponents)>();
         var tUsage = new Dictionary<uint, (DisassembledShader.VectorComponents[], DisassembledShader.VectorComponents)>();
         var uUsage = new Dictionary<uint, (DisassembledShader.VectorComponents[], DisassembledShader.VectorComponents)>();
@@ -309,8 +362,28 @@ public partial class ShpkFile : IWritable
             }
         }
 
+        static void CopyFilteredUsed(Resource[] resources,
+            Dictionary<uint, (DisassembledShader.VectorComponents[], DisassembledShader.VectorComponents)> used)
+        {
+            for (var i = 0; i < resources.Length; ++i)
+            {
+                if (used.TryGetValue(resources[i].Id, out var usage))
+                {
+                    resources[i].FilteredUsed            = usage.Item1;
+                    resources[i].FilteredUsedDynamically = usage.Item2;
+                }
+                else
+                {
+                    resources[i].FilteredUsed            = null;
+                    resources[i].FilteredUsedDynamically = null;
+                }
+            }
+        }
+
         foreach (var shader in VertexShaders)
         {
+            if (filter != null && !filter(shader))
+                continue;
             CollectUsed(cUsage, shader.Constants);
             CollectUsed(tUsage, shader.IsLegacy ? shader.Samplers : shader.Textures);
             CollectUsed(uUsage, shader.Uavs);
@@ -318,55 +391,193 @@ public partial class ShpkFile : IWritable
 
         foreach (var shader in PixelShaders)
         {
+            if (filter != null && !filter(shader))
+                continue;
             CollectUsed(cUsage, shader.Constants);
             CollectUsed(tUsage, shader.IsLegacy ? shader.Samplers : shader.Textures);
             CollectUsed(uUsage, shader.Uavs);
         }
 
-        CopyUsed(Constants,                      cUsage);
-        CopyUsed(IsLegacy ? Samplers : Textures, tUsage);
-        CopyUsed(Uavs,                           uUsage);
+        if (filter == null)
+        {
+            CopyUsed(Constants,                      cUsage);
+            CopyUsed(IsLegacy ? Samplers : Textures, tUsage);
+            CopyUsed(Uavs,                           uUsage);
+        }
+        else
+        {
+            CopyFilteredUsed(Constants,                      cUsage);
+            CopyFilteredUsed(IsLegacy ? Samplers : Textures, tUsage);
+            CopyFilteredUsed(Uavs,                           uUsage);
+        }
     }
 
     public void UpdateKeyValues()
     {
-        static HashSet<uint>[] InitializeValueSet(Key[] keys)
-            => Array.ConvertAll(keys, key => new HashSet<uint>()
-            {
-                key.DefaultValue,
-            });
-
-        static void CollectValues(HashSet<uint>[] valueSets, uint[] values)
-        {
-            for (var i = 0; i < valueSets.Length; ++i)
-                valueSets[i].Add(values[i]);
-        }
-
-        static void CopyValues(Key[] keys, HashSet<uint>[] valueSets)
+        static void InitializeValues(Key[] keys)
         {
             for (var i = 0; i < keys.Length; ++i)
+                keys[i].Values = [keys[i].DefaultValue];
+        }
+
+        static void CollectValues(Key[] keys, uint[] values)
+        {
+            for (var i = 0; i < keys.Length; ++i)
+                keys[i].Values.Add(values[i]);
+        }
+
+        static void SortValues(Key[] keys)
+        {
+            for (var i = 0; i < keys.Length; ++i)
+                keys[i].Values = new ShaderKeyValueSet.SortedUniverse(keys[i].Values);
+        }
+
+        static void AddValues(ShaderKeyValueSet[] sets, uint[] values)
+        {
+            for (var i = 0; i < sets.Length; ++i)
+                sets[i].Add(values[i]);
+        }
+
+        void InitializeShaderValues(Shader[] shaders)
+        {
+            for (var i = 0; i < shaders.Length; ++i)
             {
-                keys[i].Values = valueSets[i].ToArray();
-                Array.Sort(keys[i].Values);
+                shaders[i].SystemValues   = Array.ConvertAll(SystemKeys,   key => new ShaderKeyValueSet(key.Values));
+                shaders[i].SceneValues    = Array.ConvertAll(SceneKeys,    key => new ShaderKeyValueSet(key.Values));
+                shaders[i].MaterialValues = Array.ConvertAll(MaterialKeys, key => new ShaderKeyValueSet(key.Values));
+                shaders[i].SubViewValues  = Array.ConvertAll(SubViewKeys,  key => new ShaderKeyValueSet(key.Values));
+                shaders[i].Passes         = new ShaderKeyValueSet(Passes);
             }
         }
 
-        var systemKeyValues   = InitializeValueSet(SystemKeys);
-        var sceneKeyValues    = InitializeValueSet(SceneKeys);
-        var materialKeyValues = InitializeValueSet(MaterialKeys);
-        var subViewKeyValues  = InitializeValueSet(SubViewKeys);
-        foreach (var node in Nodes)
+        void CollectShaderValues(ref Shader shader, Node node, uint passId)
         {
-            CollectValues(systemKeyValues,   node.SystemKeys);
-            CollectValues(sceneKeyValues,    node.SceneKeys);
-            CollectValues(materialKeyValues, node.MaterialKeys);
-            CollectValues(subViewKeyValues,  node.SubViewKeys);
+            for (var i = 0; i < shader.SystemValues!.Length; ++i)
+                shader.SystemValues[i] |= node.SystemValues![i];
+            for (var i = 0; i < shader.SceneValues!.Length; ++i)
+                shader.SceneValues[i] |= node.SceneValues![i];
+            for (var i = 0; i < shader.MaterialValues!.Length; ++i)
+                shader.MaterialValues[i] |= node.MaterialValues![i];
+            for (var i = 0; i < shader.SubViewValues!.Length; ++i)
+                shader.SubViewValues[i] |= node.SubViewValues![i];
+            shader.Passes.Add(passId);
         }
 
-        CopyValues(SystemKeys,   systemKeyValues);
-        CopyValues(SceneKeys,    sceneKeyValues);
-        CopyValues(MaterialKeys, materialKeyValues);
-        CopyValues(SubViewKeys,  subViewKeyValues);
+        InitializeValues(SystemKeys);
+        InitializeValues(SceneKeys);
+        InitializeValues(MaterialKeys);
+        InitializeValues(SubViewKeys);
+        var passes = new ShaderKeyValueSet.Universe();
+        foreach (var node in Nodes)
+        {
+            CollectValues(SystemKeys,   node.SystemKeys);
+            CollectValues(SceneKeys,    node.SceneKeys);
+            CollectValues(MaterialKeys, node.MaterialKeys);
+            CollectValues(SubViewKeys,  node.SubViewKeys);
+            foreach (var pass in node.Passes)
+                passes.Add(pass.Id);
+        }
+        SortValues(SystemKeys);
+        SortValues(SceneKeys);
+        SortValues(MaterialKeys);
+        SortValues(SubViewKeys);
+        Passes = new ShaderKeyValueSet.SortedUniverse(passes);
+
+        for (var i = 0; i < Nodes.Length; ++i)
+        {
+            ref var node = ref Nodes[i];
+            node.SystemValues   = Array.ConvertAll(SystemKeys,   key => new ShaderKeyValueSet(key.Values));
+            node.SceneValues    = Array.ConvertAll(SceneKeys,    key => new ShaderKeyValueSet(key.Values));
+            node.MaterialValues = Array.ConvertAll(MaterialKeys, key => new ShaderKeyValueSet(key.Values));
+            node.SubViewValues  = Array.ConvertAll(SubViewKeys,  key => new ShaderKeyValueSet(key.Values));
+            AddValues(node.SystemValues,   node.SystemKeys);
+            AddValues(node.SceneValues,    node.SceneKeys);
+            AddValues(node.MaterialValues, node.MaterialKeys);
+            AddValues(node.SubViewValues,  node.SubViewKeys);
+        }
+
+        if (IsExhaustiveNodeAnalysisFeasible())
+        {
+            foreach (var selector in AllSelectors(out var systemValues, out var sceneValues, out var materialValues, out var subViewValues))
+            {
+                if (!NodeSelectors.TryGetValue(selector, out var index) || index >= Nodes.Length)
+                    continue;
+                ref var node = ref Nodes[index];
+                AddValues(node.SystemValues!,   systemValues);
+                AddValues(node.SceneValues!,    sceneValues);
+                AddValues(node.MaterialValues!, materialValues);
+                AddValues(node.SubViewValues!,  subViewValues);
+            }
+        }
+
+        InitializeShaderValues(VertexShaders);
+        InitializeShaderValues(PixelShaders);
+        foreach (var node in Nodes)
+        {
+            foreach (var pass in node.Passes)
+            {
+                CollectShaderValues(ref VertexShaders[pass.VertexShader], node, pass.Id);
+                CollectShaderValues(ref PixelShaders[pass.PixelShader],   node, pass.Id);
+            }
+        }
+    }
+
+    /// <summary> Determines whether this shader package's nodes can be exhaustively analyzed within a reasonable resource budget. </summary>
+    /// <remarks> Some shader packages have billions of key combinations if not even more. </remarks>
+    public bool IsExhaustiveNodeAnalysisFeasible()
+    {
+        var combinations = 1;
+        foreach (var key in SystemKeys)
+        {
+            combinations *= key.Values.Count;
+            if (combinations > MaxExhaustiveNodeAnalysisCombinations)
+                return false;
+        }
+        foreach (var key in SceneKeys)
+        {
+            combinations *= key.Values.Count;
+            if (combinations > MaxExhaustiveNodeAnalysisCombinations)
+                return false;
+        }
+        foreach (var key in MaterialKeys)
+        {
+            combinations *= key.Values.Count;
+            if (combinations > MaxExhaustiveNodeAnalysisCombinations)
+                return false;
+        }
+        foreach (var key in SubViewKeys)
+        {
+            combinations *= key.Values.Count;
+            if (combinations > MaxExhaustiveNodeAnalysisCombinations)
+                return false;
+        }
+        return true;
+    }
+
+    public IEnumerable<uint> AllSelectors(out uint[] systemValues, out uint[] sceneValues, out uint[] materialValues, out uint[] subViewValues)
+    {
+        systemValues   = new uint[SystemKeys.Length];
+        sceneValues    = new uint[SceneKeys.Length];
+        materialValues = new uint[MaterialKeys.Length];
+        subViewValues  = new uint[SubViewKeys.Length];
+        return AllSelectors(systemValues, sceneValues, materialValues, subViewValues);
+    }
+
+    private IEnumerable<uint> AllSelectors(uint[] systemValues, uint[] sceneValues, uint[] materialValues, uint[] subViewValues)
+    {
+        foreach (var systemKeySelector in AllSelectors(SystemKeys, systemValues))
+        {
+            foreach (var sceneKeySelector in AllSelectors(SceneKeys, sceneValues))
+            {
+                foreach (var materialKeySelector in AllSelectors(MaterialKeys, materialValues))
+                {
+                    foreach (var subViewKeySelector in AllSelectors(SubViewKeys, subViewValues))
+                    {
+                        yield return BuildSelector(systemKeySelector, sceneKeySelector, materialKeySelector, subViewKeySelector);
+                    }
+                }
+            }
+        }
     }
 
     /// <remarks>
@@ -389,21 +600,22 @@ public partial class ShpkFile : IWritable
         UpdateResources();
     }
 
-    public static uint BuildSelector(Span<uint> systemKeys, Span<uint> sceneKeys, Span<uint> materialKeys, Span<uint> subViewKeys)
+    public static uint BuildSelector(ReadOnlySpan<uint> systemKeys, ReadOnlySpan<uint> sceneKeys, ReadOnlySpan<uint> materialKeys, ReadOnlySpan<uint> subViewKeys)
         => BuildSelector(BuildSelector(systemKeys), BuildSelector(sceneKeys), BuildSelector(materialKeys), BuildSelector(subViewKeys));
 
     [SkipLocalsInit]
     public static uint BuildSelector(uint systemKeySelector, uint sceneKeySelector, uint materialKeySelector, uint subViewKeySelector)
     {
-        Span<uint> parts = stackalloc uint[4];
-        parts[0] = systemKeySelector;
-        parts[1] = sceneKeySelector;
-        parts[2] = materialKeySelector;
-        parts[3] = subViewKeySelector;
+        ReadOnlySpan<uint> parts = [
+            systemKeySelector,
+            sceneKeySelector,
+            materialKeySelector,
+            subViewKeySelector,
+        ];
         return BuildSelector(parts);
     }
 
-    public static uint BuildSelector(Span<uint> keys)
+    public static uint BuildSelector(ReadOnlySpan<uint> keys)
     {
         unchecked
         {
@@ -435,7 +647,7 @@ public partial class ShpkFile : IWritable
         }
     }
 
-    public static IEnumerable<uint> AllSelectors(Memory<Key> keys)
+    public static IEnumerable<uint> AllSelectors(ReadOnlyMemory<Key> keys)
     {
         if (keys.Length == 0)
         {
@@ -445,17 +657,48 @@ public partial class ShpkFile : IWritable
         }
         else if (keys.Length == 1)
         {
-            foreach (var value in keys.Span[0].Values)
+            foreach (var value in (IEnumerable<uint>)keys.Span[0].Values)
                 yield return value;
         }
         else
         {
-            var values = keys.Span[0].Values;
+            var keyValues = keys.Span[0].Values;
             foreach (var selector in AllSelectors(keys[1..]))
             {
                 var multiplied = unchecked(selector * SelectorMultiplier);
-                foreach (var value in values)
+                foreach (var value in (IEnumerable<uint>)keyValues)
                     yield return unchecked(value + multiplied);
+            }
+        }
+    }
+
+    public static IEnumerable<uint> AllSelectors(ReadOnlyMemory<Key> keys, Memory<uint> values)
+    {
+        if (keys.Length == 0)
+        {
+            yield return 0;
+
+            yield break;
+        }
+        else if (keys.Length == 1)
+        {
+            foreach (var value in (IEnumerable<uint>)keys.Span[0].Values)
+            {
+                values.Span[0] = value;
+                yield return value;
+            }
+        }
+        else
+        {
+            var keyValues = keys.Span[0].Values;
+            foreach (var selector in AllSelectors(keys[1..], values[1..]))
+            {
+                var multiplied = unchecked(selector * SelectorMultiplier);
+                foreach (var value in (IEnumerable<uint>)keyValues)
+                {
+                    values.Span[0] = value;
+                    yield return unchecked(value + multiplied);
+                }
             }
         }
     }
@@ -564,8 +807,9 @@ public partial class ShpkFile : IWritable
             {
                 Id           = r.ReadUInt32(),
                 DefaultValue = r.ReadUInt32(),
-                Values       = Array.Empty<uint>(),
+                Values       = [],
             };
+            ret[i].Values.Add(ret[i].DefaultValue);
         }
 
         return ret;
@@ -612,6 +856,8 @@ public partial class ShpkFile : IWritable
         public ushort                                 Size;
         public DisassembledShader.VectorComponents[]? Used;
         public DisassembledShader.VectorComponents?   UsedDynamically;
+        public DisassembledShader.VectorComponents[]? FilteredUsed;
+        public DisassembledShader.VectorComponents?   FilteredUsedDynamically;
     }
 
     public struct MaterialParam
@@ -630,9 +876,9 @@ public partial class ShpkFile : IWritable
 
     public struct Key
     {
-        public uint   Id;
-        public uint   DefaultValue;
-        public uint[] Values;
+        public uint                       Id;
+        public uint                       DefaultValue;
+        public ShaderKeyValueSet.Universe Values;
     }
 
     public struct Node
@@ -644,6 +890,11 @@ public partial class ShpkFile : IWritable
         public uint[] MaterialKeys;
         public uint[] SubViewKeys;
         public Pass[] Passes;
+
+        public ShaderKeyValueSet[]? SystemValues;
+        public ShaderKeyValueSet[]? SceneValues;
+        public ShaderKeyValueSet[]? MaterialValues;
+        public ShaderKeyValueSet[]? SubViewValues;
     }
 
     public struct NodeAlias // aka Item
