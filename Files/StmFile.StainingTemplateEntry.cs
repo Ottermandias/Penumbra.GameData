@@ -1,9 +1,9 @@
-using Lumina.Extensions;
+using Penumbra.GameData.Files.Utility;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files;
 
-public partial class StmFile
+public partial class StmFile<TDyePack>
 {
     public readonly struct StainingTemplateEntry
     {
@@ -13,16 +13,13 @@ public partial class StmFile
         public const int NumElements = 128;
 
         // ColorTable row information for each stain.
-        public readonly IReadOnlyList<(Half R, Half G, Half B)> DiffuseEntries;
-        public readonly IReadOnlyList<(Half R, Half G, Half B)> SpecularEntries;
-        public readonly IReadOnlyList<(Half R, Half G, Half B)> EmissiveEntries;
-        public readonly IReadOnlyList<Half>                     GlossEntries;
-        public readonly IReadOnlyList<Half>                     SpecularPowerEntries;
+        public readonly IReadOnlyList<HalfColor>[] Colors;
+        public readonly IReadOnlyList<Half>[]      Scalars;
 
-        public DyePack this[StainId idx]
+        public TDyePack this[StainId idx]
             => this[(int)idx.Id];
 
-        public DyePack this[int idx]
+        public TDyePack this[int idx]
         {
             get
             {
@@ -31,66 +28,56 @@ public partial class StmFile
                     return default;
 
                 --idx;
-                var (dr, dg, db) = DiffuseEntries[idx];
-                var (sr, sg, sb) = SpecularEntries[idx];
-                var (er, eg, eb) = EmissiveEntries[idx];
-                var g  = GlossEntries[idx];
-                var sp = SpecularPowerEntries[idx];
-                // Convert to DyePack using floats.
-                return new DyePack
-                {
-                    Diffuse       = new Vector3((float)dr, (float)dg, (float)db),
-                    Specular      = new Vector3((float)sr, (float)sg, (float)sb),
-                    Emissive      = new Vector3((float)er, (float)eg, (float)eb),
-                    Gloss         = (float)g,
-                    SpecularPower = (float)sp,
-                };
+
+                var pack     = new TDyePack();
+                var packSpan = MemoryMarshal.Cast<TDyePack, Half>(new Span<TDyePack>(ref pack));
+                var colors   = MemoryMarshal.Cast<Half, HalfColor>(packSpan[0..(Colors.Length * 3)]);
+                var scalars  = packSpan[(Colors.Length * 3)..];
+
+                for (var i = 0; i < colors.Length; ++i)
+                    colors[i] = Colors[i][idx];
+                for (var i = 0; i < scalars.Length; ++i)
+                    scalars[i] = Scalars[i][idx];
+
+                return pack;
             }
         }
 
-        private static IReadOnlyList<T> ReadArray<T>(BinaryReader br, int offset, int size, Func<BinaryReader, T> read, int entrySize)
+        // Actually parse an entry.
+        public StainingTemplateEntry(SpanBinaryReader br)
         {
-            br.Seek(offset);
-            var arraySize = size / entrySize;
+            Span<ushort> byteCounts = stackalloc ushort[TDyePack.ColorCount + TDyePack.ScalarCount];
+            ushort       lastEnd    = 0;
+            for (var i = 0; i < byteCounts.Length; ++i)
+            {
+                var nextEnd   = (ushort)(br.ReadUInt16() * 2); // because the ends are in terms of ushort.
+                byteCounts[i] = (ushort)(nextEnd - lastEnd);
+                lastEnd       = nextEnd;
+            }
+
+            Colors  = new IReadOnlyList<HalfColor>[TDyePack.ColorCount];
+            Scalars = new IReadOnlyList<Half>[TDyePack.ScalarCount];
+            var j = 0;
+            for (var i = 0; i < Colors.Length; i++, j++)
+                Colors[i] = ReadArray<HalfColor>(br.SliceFromHere(byteCounts[j]));
+            for (var i = 0; i < Scalars.Length; i++, j++)
+                Scalars[i] = ReadArray<Half>(br.SliceFromHere(byteCounts[j]));
+        }
+
+        private static unsafe IReadOnlyList<T> ReadArray<T>(SpanBinaryReader br) where T : unmanaged
+        {
+            var arraySize = br.Remaining / sizeof(T);
             // The actual amount of entries informs which type of list we use.
             switch (arraySize)
             {
-                case 0: return new RepeatingList<T>(default!, NumElements); // All default
-                case 1: return new RepeatingList<T>(read(br), NumElements); // All single entry
-                case NumElements:                                           // 1-to-1 entries
-                    var ret = new T[NumElements];
-                    for (var i = 0; i < NumElements; ++i)
-                        ret[i] = read(br);
-                    return ret;
+                case 0: return new RepeatingList<T>(default!,     NumElements); // All default
+                case 1: return new RepeatingList<T>(br.Read<T>(), NumElements); // All single entry
+                case NumElements: return br.Read<T>(NumElements).ToArray();     // 1-to-1 entries
                 // Indexed access.
-                case < NumElements: return new IndexedList<T>(br, arraySize - NumElements / entrySize, NumElements, read);
+                case < NumElements: return new IndexedList<T>(br, (br.Remaining - NumElements) / sizeof(T), NumElements);
                 // Should not happen.
                 case > NumElements: throw new InvalidDataException($"Stain Template can not have more than {NumElements} elements.");
             }
-        }
-
-        // Read functions
-        private static (Half, Half, Half) ReadTriple(BinaryReader br)
-            => (br.ReadHalf(), br.ReadHalf(), br.ReadHalf());
-
-        private static Half ReadSingle(BinaryReader br)
-            => br.ReadHalf();
-
-        // Actually parse an entry.
-        public unsafe StainingTemplateEntry(BinaryReader br, int offset)
-        {
-            br.Seek(offset);
-            // 5 different lists of values.
-            Span<ushort> ends = stackalloc ushort[5];
-            for (var i = 0; i < ends.Length; ++i)
-                ends[i] = (ushort)(br.ReadUInt16() * 2); // because the ends are in terms of ushort.
-            offset += ends.Length * 2;
-
-            DiffuseEntries       = ReadArray(br, offset,           ends[0],           ReadTriple, 6);
-            SpecularEntries      = ReadArray(br, offset + ends[0], ends[1] - ends[0], ReadTriple, 6);
-            EmissiveEntries      = ReadArray(br, offset + ends[1], ends[2] - ends[1], ReadTriple, 6);
-            GlossEntries         = ReadArray(br, offset + ends[2], ends[3] - ends[2], ReadSingle, 2);
-            SpecularPowerEntries = ReadArray(br, offset + ends[3], ends[4] - ends[3], ReadSingle, 2);
         }
 
         /// <summary>
@@ -123,7 +110,7 @@ public partial class StmFile
         /// <summary>
         /// Used if there is a small set of values for a bigger list, accessed via index information.
         /// </summary>
-        private sealed class IndexedList<T> : IReadOnlyList<T>
+        private sealed class IndexedList<T> : IReadOnlyList<T> where T : unmanaged
         {
             private readonly T[]    _values;
             private readonly byte[] _indices;
@@ -131,20 +118,18 @@ public partial class StmFile
             /// <summary>
             /// Reads <paramref name="count"/> values from <paramref name="br"/> via <paramref name="read"/>, then reads <paramref name="indexCount"/> byte indices.
             /// </summary>
-            public IndexedList(BinaryReader br, int count, int indexCount, Func<BinaryReader, T> read)
+            public IndexedList(SpanBinaryReader br, int count, int indexCount)
             {
                 _values    = new T[count + 1];
                 _indices   = new byte[indexCount];
                 _values[0] = default!;
-                for (var i = 1; i < count + 1; ++i)
-                    _values[i] = read(br);
+                br.Read<T>(count).CopyTo(_values.AsSpan(1));
 
-                // Seems to be an unused 0xFF byte marker.
+                // First byte seems to be an unused 0xFF byte marker.
                 // Necessary for correct offsets.
-                br.ReadByte();
+                br.Read<byte>(indexCount)[1..].CopyTo(_indices);
                 for (var i = 0; i < indexCount; ++i)
                 {
-                    _indices[i] = br.ReadByte();
                     if (_indices[i] > count)
                         _indices[i] = 0;
                 }
