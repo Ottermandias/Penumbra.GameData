@@ -1,5 +1,6 @@
 using Lumina.Data.Parsing;
 using Penumbra.GameData.Files.MaterialStructs;
+using Penumbra.GameData.Files.StainMapStructs;
 using Penumbra.GameData.Files.Utility;
 using Penumbra.GameData.Structs;
 
@@ -15,92 +16,126 @@ public partial class MtrlFile : IWritable, ICloneable
     public Texture[]         Textures;
     public AttributeSet[]    UvSets;
     public AttributeSet[]    ColorSets;
-    public ColorTable        Table;
-    public ColorDyeTable     DyeTable;
+    public IColorTable?      Table;
+    public IColorDyeTable?   DyeTable;
     public ShaderPackageData ShaderPackage;
     public byte[]            AdditionalData;
 
-    private byte TableFlags
+    public TableFlags TableFlags
     {
-        get => AdditionalData.Length > 0 ? AdditionalData[0] : (byte)0;
+        get => AdditionalData.Length switch
+        {
+            0 => default,
+            1 => new(AdditionalData[0]),
+            2 => new(AdditionalData[0] | ((uint)AdditionalData[1] << 8)),
+            3 => new(AdditionalData[0] | ((uint)AdditionalData[1] << 8) | ((uint)AdditionalData[1] << 16)),
+            _ => GetTableFlagsRef(),
+        };
         set
         {
-            if (AdditionalData.Length == 0)
-            {
-                if (value == 0)
-                    return;
+            if (AdditionalData.Length < 4 && value == TableFlags)
+                return;
 
-                AdditionalData = new byte[4];
-            }
-
-            AdditionalData[0] = value;
+            GetTableFlagsRef() = value;
         }
     }
 
-    public bool IsDawnTrail
+    public bool IsDawntrail
+        => TableFlags.IsDawntrail && Table is not LegacyColorTable && DyeTable is not LegacyColorDyeTable;
+
+    private ref TableFlags GetTableFlagsRef()
     {
-        get => AdditionalData.Length > 1 && (AdditionalData[1] & 0x05) == 0x05 && (AdditionalData[0] & 0x30) == 0x30;
-        private set
-        {
-            if (AdditionalData.Length == 0)
-            {
-                if (value == false)
-                    return;
+        if (AdditionalData.Length < 4)
+            Array.Resize(ref AdditionalData, 4);
 
-                AdditionalData = new byte[4];
-            }
-
-            AdditionalData[1] = (byte)(value ? AdditionalData[0] | 0x05 : AdditionalData[0] & ~0x05);
-            AdditionalData[0] = (byte)(value ? AdditionalData[0] | 0x30 : AdditionalData[0] & ~0x30);
-        }
+        return ref MemoryMarshal.Cast<byte, TableFlags>(AdditionalData)[0];
     }
 
     public bool MigrateToDawntrail()
     {
-        if (IsDawnTrail)
+        if (IsDawntrail)
             return false;
 
-        IsDawnTrail = true;
         if (ShaderPackage.Name is "character.shpk")
             ShaderPackage.Name = "characterlegacy.shpk";
+
+        if (Table is LegacyColorTable)
+            Table = new ColorTable(Table);
+        if (DyeTable is LegacyColorDyeTable)
+            DyeTable = new ColorDyeTable(DyeTable);
+
+        var normalSamplerIdx = FindSampler(ShpkFile.NormalSamplerId);
+        if (normalSamplerIdx >= 0)
+        {
+            var normalSampler    = ShaderPackage.Samplers[normalSamplerIdx];
+            var normalTexture    = Textures[normalSampler.TextureIndex];
+            var indexPath        = normalTexture.Path.Replace("_norm", "_id").Replace("_n", "_id");
+            ref var indexSampler = ref GetOrAddSampler(ShpkFile.IndexSamplerId, indexPath);
+            ref var indexTexture = ref Textures[indexSampler.TextureIndex];
+            indexSampler.Flags   = normalSampler.Flags;
+            indexTexture.Path    = indexPath;
+            indexTexture.Flags   = normalTexture.Flags;
+        }
+
+        UpdateFlags();
+
         return true;
     }
 
-    public bool HasTable
+    public bool ApplyDye(StmFile<DyePack> stm, ReadOnlySpan<StainId> stainIds)
     {
-        get => (TableFlags & 0x4) != 0;
-        set => TableFlags = (byte)(value ? TableFlags | 0x4 : TableFlags & ~0x4);
-    }
-
-    public bool HasDyeTable
-    {
-        get => (TableFlags & 0x8) != 0;
-        set => TableFlags = (byte)(value ? TableFlags | 0x8 : TableFlags & ~0x8);
-    }
-
-    public bool ApplyDyeTemplate(StmFile stm, int rowIdx, StainId stainId1, StainId stainId2)
-    {
-        if (!HasDyeTable || rowIdx is < 0 or >= LegacyColorTable.NumRows)
+        if (DyeTable == null || stainIds.Length == 0)
             return false;
 
-        var dyeSet = DyeTable[rowIdx];
-        var ret    = false;
-        if (stainId1 != 0 && stm.TryGetValue(dyeSet.Template, stainId1, out var dyes1))
-            ret |= Table[rowIdx].ApplyDyeTemplate1(dyeSet, dyes1);
-        if (stainId2 != 0 && stm.TryGetValue(dyeSet.Template, stainId2, out var dyes2))
-            ret |= Table[rowIdx].ApplyDyeTemplate2(dyeSet, dyes2);
-
-        return ret;
+        if (Table is ColorTable table && DyeTable is ColorDyeTable dyeTable)
+            return table.ApplyDye(stm, stainIds, dyeTable);
+        else
+            return false;
     }
 
-    public Span<float> GetConstantValues(Constant constant)
+    public bool ApplyDye(StmFile<LegacyDyePack> stm, ReadOnlySpan<StainId> stainIds)
     {
-        if ((constant.ByteOffset & 0x3) != 0
-         || (constant.ByteSize & 0x3) != 0
-         || (constant.ByteOffset + constant.ByteSize) >> 2 > ShaderPackage.ShaderValues.Length)
+        if (DyeTable == null || stainIds.Length == 0)
+            return false;
+
+        if (Table is ColorTable table && DyeTable is ColorDyeTable dyeTable)
+            return table.ApplyDye(stm, stainIds, dyeTable);
+        else if (Table is LegacyColorTable legacyTable && DyeTable is LegacyColorDyeTable legacyDyeTable)
+            return legacyTable.ApplyDye(stm, stainIds, legacyDyeTable);
+        else
+            return false;
+    }
+
+    public bool ApplyDyeToRow(StmFile<DyePack> stm, ReadOnlySpan<StainId> stainIds, int rowIdx)
+    {
+        if (DyeTable == null || rowIdx < 0 || rowIdx >= DyeTable.Height || stainIds.Length == 0)
+            return false;
+
+        if (Table is ColorTable table && DyeTable is ColorDyeTable dyeTable)
+            return table.ApplyDyeToRow(stm, stainIds, rowIdx, dyeTable[rowIdx]);
+        else
+            return false;
+    }
+
+    public bool ApplyDyeToRow(StmFile<LegacyDyePack> stm, ReadOnlySpan<StainId> stainIds, int rowIdx)
+    {
+        if (DyeTable == null || rowIdx < 0 || rowIdx >= DyeTable.Height || stainIds.Length == 0)
+            return false;
+
+        if (Table is ColorTable table && DyeTable is ColorDyeTable dyeTable)
+            return table.ApplyDyeToRow(stm, stainIds, rowIdx, dyeTable[rowIdx]);
+        else if (Table is LegacyColorTable legacyTable && DyeTable is LegacyColorDyeTable legacyDyeTable)
+            return legacyTable.ApplyDyeToRow(stm, stainIds, rowIdx, legacyDyeTable[rowIdx]);
+        else
+            return false;
+    }
+
+    public Span<T> GetConstantValue<T>(Constant constant) where T : struct
+    {
+        if (constant.ByteOffset + constant.ByteSize > ShaderPackage.ShaderValues.Length)
             return null;
 
-        return ShaderPackage.ShaderValues.AsSpan().Slice(constant.ByteOffset >> 2, constant.ByteSize >> 2);
+        return MemoryMarshal.Cast<byte, T>(ShaderPackage.ShaderValues.AsSpan().Slice(constant.ByteOffset, constant.ByteSize));
     }
 
     public (Sampler? MtrlSampler, ShpkFile.Resource? ShpkSampler)[] GetSamplersByTexture(ShpkFile? shpk)
@@ -148,33 +183,24 @@ public partial class MtrlFile : IWritable, ICloneable
 
         AdditionalData = r.Read<byte>(additionalDataSize).ToArray();
 
-        if (IsDawnTrail)
+        var dataSet    = r.SliceFromHere(dataSetSize);
+        var tableFlags = TableFlags;
+        if (tableFlags.HasTable)
         {
-            var dataSet = r.SliceFromHere(dataSetSize);
-            if (HasTable && dataSet.Remaining >= ColorTable.NumRows * ColorTable.Row.Size)
-                Table = dataSet.Read<ColorTable>();
-            else
-                Table.SetDefault();
-            if (HasDyeTable && dataSet.Remaining >= ColorDyeTable.NumRows * ColorDyeTable.Row.Size)
-                DyeTable = dataSet.Read<ColorDyeTable>();
-        }
-        else
-        {
-            var dataSet = r.SliceFromHere(dataSetSize);
-            if (HasTable && dataSet.Remaining >= LegacyColorTable.NumRows * LegacyColorTable.Row.Size)
+            Table = tableFlags.TableDimensionLogs switch
             {
-                var table = dataSet.Read<LegacyColorTable>();
-                Table = new ColorTable(table);
-            }
-            else
+                0 or 0x42 => LegacyColorTable.TryReadFrom(ref dataSet),
+                0x53      => ColorTable.TryReadFrom(ref dataSet),
+                var logs  => OpaqueColorTable.TryReadFrom(logs, ref dataSet),
+            };
+            if (tableFlags.HasDyeTable)
             {
-                Table.SetDefault();
-            }
-
-            if (HasDyeTable && dataSet.Remaining >= LegacyColorDyeTable.NumRows * LegacyColorDyeTable.Row.Size)
-            {
-                var dyeTable = dataSet.Read<LegacyColorDyeTable>();
-                DyeTable = new ColorDyeTable(dyeTable);
+                DyeTable = tableFlags.TableDimensionLogs switch
+                {
+                    0                   => LegacyColorDyeTable.TryReadFrom(ref dataSet),
+                    >= 0x50 and <= 0x5F => ColorDyeTable.TryReadFrom(ref dataSet),
+                    _                   => OpaqueColorDyeTable.TryReadFrom(tableFlags.TableHeightLog, ref dataSet),
+                };
             }
         }
 
@@ -187,7 +213,7 @@ public partial class MtrlFile : IWritable, ICloneable
         ShaderPackage.ShaderKeys   = r.Read<ShaderKey>(shaderKeyCount).ToArray();
         ShaderPackage.Constants    = r.Read<Constant>(constantCount).ToArray();
         ShaderPackage.Samplers     = r.Read<Sampler>(samplerCount).ToArray();
-        ShaderPackage.ShaderValues = r.Read<float>(shaderValueListSize / 4).ToArray();
+        ShaderPackage.ShaderValues = r.Read<byte>(shaderValueListSize).ToArray();
     }
 
     private MtrlFile(MtrlFile original)
@@ -208,6 +234,16 @@ public partial class MtrlFile : IWritable, ICloneable
 
     object ICloneable.Clone()
         => new MtrlFile(this);
+
+    public void UpdateFlags()
+    {
+        TableFlags = TableFlags with
+        {
+            HasTable           = Table != null,
+            HasDyeTable        = Table != null && DyeTable != null,
+            TableDimensionLogs = Table?.DimensionLogs ?? 0,
+        };
+    }
 
     private static Texture[] ReadTextureOffsets(ref SpanBinaryReader r, int count, out ushort[] offsets)
     {
@@ -271,7 +307,7 @@ public partial class MtrlFile : IWritable, ICloneable
         public ShaderKey[] ShaderKeys;
         public Constant[]  Constants;
         public Sampler[]   Samplers;
-        public float[]     ShaderValues;
+        public byte[]      ShaderValues;
         public uint        Flags;
 
         public ShaderPackageData Clone()
@@ -281,7 +317,7 @@ public partial class MtrlFile : IWritable, ICloneable
                 ShaderKeys   = (ShaderKey[])ShaderKeys.Clone(),
                 Constants    = (Constant[])Constants.Clone(),
                 Samplers     = (Sampler[])Samplers.Clone(),
-                ShaderValues = (float[])ShaderValues.Clone(),
+                ShaderValues = (byte[])ShaderValues.Clone(),
                 Flags        = Flags,
             };
 

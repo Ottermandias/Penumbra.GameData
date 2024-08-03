@@ -1,4 +1,3 @@
-using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Files.Utility;
 
 namespace Penumbra.GameData.Files;
@@ -7,6 +6,8 @@ public partial class MtrlFile
 {
     public byte[] Write()
     {
+        UpdateFlags();
+
         using var stream  = new MemoryStream();
         using var strings = new StringPool();
         using (var w = new BinaryWriter(stream))
@@ -38,41 +39,21 @@ public partial class MtrlFile
 
             w.Write(AdditionalData);
             var dataSetSize = 0;
-            if (HasTable)
+            if (Table != null)
             {
-                if (IsDawnTrail)
-                {
-                    var span = Table.AsBytes();
-                    w.Write(span);
-                    dataSetSize += span.Length;
-                }
-                else
-                {
-                    var table = new LegacyColorTable(Table);
-                    var span  = table.AsBytes();
-                    w.Write(span);
-                    dataSetSize += span.Length;
-                }
+                var span = Table.AsBytes();
+                w.Write(span);
+                dataSetSize += span.Length;
             }
 
-            if (HasTable && HasDyeTable)
+            if (Table != null && DyeTable != null)
             {
-                if (IsDawnTrail)
-                {
-                    var span = DyeTable.AsBytes();
-                    w.Write(span);
-                    dataSetSize += span.Length;
-                }
-                else
-                {
-                    var table = new LegacyColorDyeTable(DyeTable);
-                    var span  = table.AsBytes();
-                    w.Write(span);
-                    dataSetSize += span.Length;
-                }
+                var span = DyeTable.AsBytes();
+                w.Write(span);
+                dataSetSize += span.Length;
             }
 
-            w.Write((ushort)(ShaderPackage.ShaderValues.Length * 4));
+            w.Write((ushort)ShaderPackage.ShaderValues.Length);
             w.Write((ushort)ShaderPackage.ShaderKeys.Length);
             w.Write((ushort)ShaderPackage.Constants.Length);
             w.Write((ushort)ShaderPackage.Samplers.Length);
@@ -100,8 +81,7 @@ public partial class MtrlFile
                 w.Write((byte)0);
             }
 
-            foreach (var value in ShaderPackage.ShaderValues)
-                w.Write(value);
+            w.Write(ShaderPackage.ShaderValues);
 
             WriteHeader(w, (ushort)w.BaseStream.Position, dataSetSize, (ushort)strings.Length, shaderPackageNameOffset);
         }
