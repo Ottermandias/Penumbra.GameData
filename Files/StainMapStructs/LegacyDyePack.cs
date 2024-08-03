@@ -6,11 +6,11 @@ namespace Penumbra.GameData.Files.StainMapStructs;
 /// All dye-able color set information for a row - legacy format.
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 2)]
-public record struct LegacyDyePack : IDyePack<LegacyDyePack>
+public record struct LegacyDyePack : IDyePack
 {
     public const string DefaultStmPath = "chara/base_material/stainingtemplate.stm";
 
-    static string IDyePack<LegacyDyePack>.DefaultStmPath => DefaultStmPath;
+    static string IDyePack.DefaultStmPath => DefaultStmPath;
 
     public HalfColor DiffuseColor;
     public HalfColor SpecularColor;
@@ -18,9 +18,9 @@ public record struct LegacyDyePack : IDyePack<LegacyDyePack>
     public Half      Shininess;
     public Half      SpecularMask;
 
-    readonly HalfColor IDyePack<LegacyDyePack>.DiffuseColor  => DiffuseColor;
-    readonly HalfColor IDyePack<LegacyDyePack>.SpecularColor => SpecularColor;
-    readonly HalfColor IDyePack<LegacyDyePack>.EmissiveColor => EmissiveColor;
+    readonly HalfColor IDyePack.DiffuseColor  => DiffuseColor;
+    readonly HalfColor IDyePack.SpecularColor => SpecularColor;
+    readonly HalfColor IDyePack.EmissiveColor => EmissiveColor;
 
     public static int ColorCount  => 3;
     public static int ScalarCount => 2;

@@ -6,11 +6,11 @@ namespace Penumbra.GameData.Files.StainMapStructs;
 /// All dye-able color set information for a row - GUD (Dawntrail) format.
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 2)]
-public record struct DyePack : IDyePack<DyePack>
+public record struct DyePack : IDyePack
 {
     public const string DefaultStmPath = "chara/base_material/stainingtemplate_gud.stm";
 
-    static string IDyePack<DyePack>.DefaultStmPath => DefaultStmPath;
+    static string IDyePack.DefaultStmPath => DefaultStmPath;
 
     public   HalfColor DiffuseColor;
     public   HalfColor SpecularColor;
@@ -31,9 +31,9 @@ public record struct DyePack : IDyePack<DyePack>
         set => RawSphereMapIndex = (Half)value;
     }
 
-    readonly HalfColor IDyePack<DyePack>.DiffuseColor  => DiffuseColor;
-    readonly HalfColor IDyePack<DyePack>.SpecularColor => SpecularColor;
-    readonly HalfColor IDyePack<DyePack>.EmissiveColor => EmissiveColor;
+    readonly HalfColor IDyePack.DiffuseColor  => DiffuseColor;
+    readonly HalfColor IDyePack.SpecularColor => SpecularColor;
+    readonly HalfColor IDyePack.EmissiveColor => EmissiveColor;
 
     public static int ColorCount  => 3;
     public static int ScalarCount => 9;

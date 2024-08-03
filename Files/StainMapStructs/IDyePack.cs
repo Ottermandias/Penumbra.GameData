@@ -2,7 +2,7 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files.StainMapStructs;
 
-public interface IDyePack<TDyePack> where TDyePack : unmanaged, IDyePack<TDyePack>
+public interface IDyePack
 {
     HalfColor DiffuseColor  { get; }
     HalfColor SpecularColor { get; }

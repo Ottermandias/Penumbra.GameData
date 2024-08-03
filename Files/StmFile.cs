@@ -5,7 +5,7 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files;
 
-public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack<TDyePack>
+public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
 {
     public const string LegacyPath = LegacyDyePack.DefaultStmPath;
     public const string GudPath    = DyePack.DefaultStmPath;
