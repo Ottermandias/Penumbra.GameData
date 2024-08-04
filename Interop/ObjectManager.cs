@@ -24,6 +24,9 @@ public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFrame
 
     public virtual bool Update()
     {
+        if (!framework.IsInFrameworkUpdateThread)
+            return false;
+
         var frame = framework.LastUpdateUTC;
         if (LastFrame == frame)
             return false;
