@@ -52,7 +52,7 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
         ActorIdentifierExtensions.Manager ??= this;
         _clientState.Login                +=  OnLogin;
         _clientState.Logout               +=  OnLogout;
-        _homeWorld                        =   _clientState.LocalPlayer?.HomeWorld.Id ?? 0;
+        _homeWorld                        =   objects[0].IsCharacter ? objects[0].HomeWorld : (ushort)0;
     }
 
     private void OnLogin()
