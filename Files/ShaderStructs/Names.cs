@@ -59,7 +59,8 @@ public static class Names
     #region Dictionaries
 
     private static IReadOnlyList<Name> GetKnownNames()
-        => [
+        =>
+        [
             // Shader resources - These are usually irrelevant because the SHPK supplies them.
             ShpkFile.MaterialParamsConstantName,
             ShpkFile.TableSamplerName,
@@ -315,7 +316,8 @@ public static class Names
         ];
 
     private static IReadOnlyList<string> GetKnownSuffixes()
-        => [
+        =>
+        [
             // Shader functions
             "0",
             "1",

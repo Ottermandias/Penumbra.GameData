@@ -14,14 +14,12 @@ public struct SharedSet<TItem, TBitVector>(SharedSet<TItem, TBitVector>.Universe
         => int.CreateSaturating(TBitVector.PopCount(_bitVector));
 
     private SharedSet(Universe? possibleValues, TBitVector bitVector) : this(possibleValues)
-    {
-        _bitVector = bitVector;
-    }
+        => _bitVector = bitVector;
 
     public bool Add(TItem value)
     {
         if (PossibleValues == null)
-            throw new NotSupportedException($"Cannot add anything to a SharedSet without a backing Universe");
+            throw new NotSupportedException("Cannot add anything to a SharedSet without a backing Universe");
         var index = PossibleValues.Find(value, true);
         var mask  = TBitVector.One << index;
         if ((_bitVector & mask) != TBitVector.Zero)
@@ -122,17 +120,17 @@ public struct SharedSet<TItem, TBitVector>(SharedSet<TItem, TBitVector>.Universe
 
     public static SharedSet<TItem, TBitVector> operator &(SharedSet<TItem, TBitVector> lhs, SharedSet<TItem, TBitVector> rhs)
         => lhs.PossibleValues == rhs.PossibleValues
-            ? new(lhs.PossibleValues, lhs._bitVector & rhs._bitVector)
+            ? new SharedSet<TItem, TBitVector>(lhs.PossibleValues, lhs._bitVector & rhs._bitVector)
             : throw new ArgumentException($"Cannot combine SharedSets not backed by the same Universe");
 
     public static SharedSet<TItem, TBitVector> operator |(SharedSet<TItem, TBitVector> lhs, SharedSet<TItem, TBitVector> rhs)
         => lhs.PossibleValues == rhs.PossibleValues
-            ? new(lhs.PossibleValues, lhs._bitVector | rhs._bitVector)
+            ? new SharedSet<TItem, TBitVector>(lhs.PossibleValues, lhs._bitVector | rhs._bitVector)
             : throw new ArgumentException($"Cannot combine SharedSets not backed by the same Universe");
 
     public static SharedSet<TItem, TBitVector> operator ^(SharedSet<TItem, TBitVector> lhs, SharedSet<TItem, TBitVector> rhs)
         => lhs.PossibleValues == rhs.PossibleValues
-            ? new(lhs.PossibleValues, lhs._bitVector ^ rhs._bitVector)
+            ? new SharedSet<TItem, TBitVector>(lhs.PossibleValues, lhs._bitVector ^ rhs._bitVector)
             : throw new ArgumentException($"Cannot combine SharedSets not backed by the same Universe");
 
     public class Universe : IReadOnlyList<TItem>
@@ -155,15 +153,7 @@ public struct SharedSet<TItem, TBitVector>(SharedSet<TItem, TBitVector>.Universe
             => Array.AsSpan(0, InternalCount);
 
         public unsafe Universe()
-        {
-            Array = new TItem[sizeof(TBitVector) << 3];
-        }
-
-        public Universe(IEnumerable<TItem> items) : this()
-        {
-            foreach (var item in items)
-                Find(item, true);
-        }
+            => Array = new TItem[sizeof(TBitVector) << 3];
 
         public ReadOnlySpan<TItem>.Enumerator GetEnumerator()
             => Span.GetEnumerator();
@@ -213,7 +203,7 @@ public struct SharedSet<TItem, TBitVector>(SharedSet<TItem, TBitVector>.Universe
             => values.FullSet();
     }
 
-    public class SortedUniverse(IComparer<TItem>? comparer = null) : Universe()
+    public class SortedUniverse(IComparer<TItem>? comparer = null) : Universe
     {
         public SortedUniverse(IEnumerable<TItem> items, IComparer<TItem>? comparer = null) : this(comparer)
         {

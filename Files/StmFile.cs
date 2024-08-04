@@ -55,35 +55,43 @@ public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
     /// <summary>
     /// Create an STM file from the given data array.
     /// </summary>
-    public StmFile(byte[] data) : this(data.AsSpan())
+    public StmFile(byte[] data)
+        : this(data.AsSpan())
     { }
 
     public unsafe StmFile(ReadOnlySpan<byte> data)
     {
-        var br = new SpanBinaryReader(data);
+        var br    = new SpanBinaryReader(data);
         var magic = br.ReadUInt16();
         if (magic != 0x534D)
             throw new InvalidDataException($"Invalid STM magic number 0x{magic:X4}");
+
         var version    = br.ReadUInt16();
         var numEntries = br.ReadUInt16();
         var numColors  = br.ReadByte();
         var numScalars = br.ReadByte();
 
-        if (version == 0x0101)
+        switch (version)
         {
-            if (numColors != 0 || numScalars != 0)
-                throw new InvalidDataException($"Unexpected column counts in STM v1.1 file: {numColors} colors, {numScalars} scalars");
-            numColors  = 3;
-            numScalars = 2;
+            case 0x0101:
+                if (numColors != 0 || numScalars != 0)
+                    throw new InvalidDataException($"Unexpected column counts in STM v1.1 file: {numColors} colors, {numScalars} scalars");
+
+                numColors  = 3;
+                numScalars = 2;
+                break;
+            case 0x200: break;
+            default:
+                throw new InvalidDataException($"Unrecognized STM version v{version >> 2}.{version & 0xFF}");
         }
-        else if (version != 0x0200)
-            throw new InvalidDataException($"Unrecognized STM version v{version >> 2}.{version & 0xFF}");
 
         if (numColors != TDyePack.ColorCount || numScalars != TDyePack.ScalarCount)
-            throw new InvalidDataException($"Dye pack type {typeof(TDyePack)} expects STM file to have {TDyePack.ColorCount} colors and {TDyePack.ScalarCount} scalars per row, got file with {numColors} colors and {numScalars} scalars");
+            throw new InvalidDataException(
+                $"Dye pack type {typeof(TDyePack)} expects STM file to have {TDyePack.ColorCount} colors and {TDyePack.ScalarCount} scalars per row, got file with {numColors} colors and {numScalars} scalars");
 
         if (numColors * 6 + numScalars * 2 != sizeof(TDyePack))
-            throw new InvalidOperationException($"Dye pack type {typeof(TDyePack)} has a size of {sizeof(TDyePack)} bytes, but expects {numColors} colors and {numScalars} scalars, that is {numColors * 6 + numScalars * 2} bytes");
+            throw new InvalidOperationException(
+                $"Dye pack type {typeof(TDyePack)} has a size of {sizeof(TDyePack)} bytes, but expects {numColors} colors and {numScalars} scalars, that is {numColors * 6 + numScalars * 2} bytes");
 
         var keys    = br.Read<ushort>(numEntries);
         var offsets = br.Read<ushort>(numEntries); // in ushorts/halves
