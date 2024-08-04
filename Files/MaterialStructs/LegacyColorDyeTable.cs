@@ -1,95 +1,92 @@
+using Penumbra.GameData.Files.Utility;
+
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-public unsafe struct LegacyColorDyeTable : IEnumerable<LegacyColorDyeTable.Row>
+public sealed class LegacyColorDyeTable : IEnumerable<LegacyColorDyeTableRow>, IColorDyeTable
 {
-    public struct Row
+    [InlineArray(NumRows)]
+    private struct Table
     {
-        public const int Size = 2;
-
-        private ushort _data;
-
-        public ushort Template
-        {
-            get => (ushort)(_data >> 5);
-            set => _data = (ushort)((_data & 0x1F) | (value << 5));
-        }
-
-        public bool Diffuse
-        {
-            get => (_data & 0x01) != 0;
-            set => _data = (ushort)(value ? _data | 0x01 : _data & 0xFFFE);
-        }
-
-        public bool Specular
-        {
-            get => (_data & 0x02) != 0;
-            set => _data = (ushort)(value ? _data | 0x02 : _data & 0xFFFD);
-        }
-
-        public bool Emissive
-        {
-            get => (_data & 0x04) != 0;
-            set => _data = (ushort)(value ? _data | 0x04 : _data & 0xFFFB);
-        }
-
-        public bool Gloss
-        {
-            get => (_data & 0x08) != 0;
-            set => _data = (ushort)(value ? _data | 0x08 : _data & 0xFFF7);
-        }
-
-        public bool SpecularStrength
-        {
-            get => (_data & 0x10) != 0;
-            set => _data = (ushort)(value ? _data | 0x10 : _data & 0xFFEF);
-        }
-
-        public Row(in ColorDyeTable.Row row)
-        {
-            Template         = row.Template;
-            Diffuse          = row.Diffuse;
-            Specular         = row.Specular;
-            Emissive         = row.Emissive;
-            Gloss            = row.Gloss;
-            SpecularStrength = row.SpecularStrength;
-        }
+        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "InlineArray")]
+        private LegacyColorDyeTableRow _element0;
     }
 
-    public const  int    NumRows     = 16;
-    public const  int    NumUsedRows = 16;
-    private fixed ushort _rowData[NumRows];
+    public const int NumRows = 16;
+    public const int Size    = NumRows * LegacyColorDyeTableRow.Size;
 
-    public ref Row this[int i]
-    {
-        get
-        {
-            fixed (ushort* ptr = _rowData)
-            {
-                return ref ((Row*)ptr)[i];
-            }
-        }
-    }
+    int IColorDyeTable.RowSize => LegacyColorDyeTableRow.Size;
+    int IColorDyeTable.Height  => NumRows;
+    int IColorDyeTable.Size    => Size;
 
-    public IEnumerator<Row> GetEnumerator()
+    private Table _rowData;
+
+    public ref LegacyColorDyeTableRow this[int i]
+        => ref _rowData[i];
+
+    public IEnumerator<LegacyColorDyeTableRow> GetEnumerator()
     {
         for (var i = 0; i < NumRows; ++i)
-            yield return this[i];
+            yield return _rowData[i];
     }
 
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
 
-    public ReadOnlySpan<byte> AsBytes()
+    public Span<byte> AsBytes()
+        => MemoryMarshal.AsBytes(_rowData[..]);
+
+    public Span<byte> RowAsBytes(int i)
+        => MemoryMarshal.AsBytes(new Span<LegacyColorDyeTableRow>(ref _rowData[i]));
+
+    public bool SetDefault()
     {
-        fixed (ushort* ptr = _rowData)
+        var ret = false;
+        for (var i = 0; i < NumRows; ++i)
+            ret |= SetDefaultRow(i);
+
+        return ret;
+    }
+
+    public bool SetDefaultRow(int i)
+    {
+        if (_rowData[i] == default)
+            return false;
+
+        _rowData[i] = default;
+        return true;
+    }
+
+    public LegacyColorDyeTable()
+        => SetDefault();
+
+    private LegacyColorDyeTable(ref SpanBinaryReader reader)
+        => reader.Read<LegacyColorDyeTableRow>(NumRows).CopyTo(_rowData);
+
+    public LegacyColorDyeTable(IColorDyeTable other)
+    {
+        switch (other)
         {
-            return new ReadOnlySpan<byte>(ptr, NumRows * sizeof(ushort));
+            case ColorDyeTable newTable:
+            {
+                for (var i = 0; i < NumRows; ++i)
+                    _rowData[i] = new LegacyColorDyeTableRow(newTable[i]);
+                break;
+            }
+            case LegacyColorDyeTable table:
+            {
+                for (var i = 0; i < NumRows; ++i)
+                    _rowData[i] = table[i];
+                break;
+            }
+            default: SetDefault();
+                break;
         }
     }
 
-    public LegacyColorDyeTable(in ColorDyeTable newTable)
-    {
-        for (var i = 0; i < NumRows; ++i)
-            this[i] = new Row(newTable[i]);
-    }
+    /// <summary>
+    /// Attempts to read a legacy color dye table from the given reader.
+    /// If the reader doesn't hold enough data, nothing will be read, and this will return a default table.
+    /// </summary>
+    public static LegacyColorDyeTable TryReadFrom(ref SpanBinaryReader reader)
+        => reader.Remaining >= Size ? new LegacyColorDyeTable(ref reader) : new LegacyColorDyeTable();
 }

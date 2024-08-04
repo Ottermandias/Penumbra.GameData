@@ -1,4 +1,6 @@
+using Lumina.Data.Parsing;
 using OtterGui;
+using Penumbra.GameData.Files.MaterialStructs;
 
 namespace Penumbra.GameData;
 
@@ -33,13 +35,12 @@ public static class UtilityFunctions
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static T[] AddItem<T>(this T[] array, T element, int count = 1)
     {
-        var length   = array.Length;
-        var newArray = new T[array.Length + count];
-        Array.Copy(array, newArray, length);
-        for (var i = length; i < newArray.Length; ++i)
-            newArray[i] = element;
+        var length = array.Length;
+        Array.Resize(ref array, length + count);
+        for (var i = length; i < array.Length; ++i)
+            array[i] = element;
 
-        return newArray;
+        return array;
     }
 
     /// <summary> Remove <paramref name="count"/> items starting from <paramref name="offset"/> from an array. </summary>
@@ -55,4 +56,19 @@ public static class UtilityFunctions
         Array.Copy(array, offset + count, newArray, offset, newArray.Length - offset);
         return newArray;
     }
+
+    /// <summary> Reinterprets some memory as another type. </summary>
+    /// <typeparam name="TFrom"> Source type. </typeparam>
+    /// <typeparam name="TTo"> Target type. Must be smaller or of the same size as the source type. </typeparam>
+    /// <param name="value"> The reference to reinterpret. </param>
+    /// <param name="index"> If several instances of the target type fit in the source type, index of the one to use. </param>
+    /// <returns> Reinterpreted reference. </returns>
+    /// <seealso cref="MemoryMarshal.Cast{TFrom, TTo}(Span{TFrom})"/>
+    internal static ref TTo Cast<TFrom, TTo>(ref TFrom value, int index = 0) where TFrom : struct where TTo : struct
+        => ref MemoryMarshal.Cast<TFrom, TTo>(new Span<TFrom>(ref value))[index];
+
+    /// <inheritdoc cref="Cast{TFrom, TTo}(ref TFrom, int)"/>
+    /// <seealso cref="MemoryMarshal.Cast{TFrom, TTo}(ReadOnlySpan{TFrom})"/>
+    internal static ref readonly TTo ReadOnlyCast<TFrom, TTo>(in TFrom value, int index = 0) where TFrom : struct where TTo : struct
+        => ref MemoryMarshal.Cast<TFrom, TTo>(new ReadOnlySpan<TFrom>(in value))[index];
 }

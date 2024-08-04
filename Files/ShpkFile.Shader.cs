@@ -1,6 +1,7 @@
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using Lumina.Misc;
 using DisassembledShader = Penumbra.GameData.Interop.DisassembledShader;
+using ShaderKeyValueSet = Penumbra.GameData.Structs.SharedSet<uint, uint>;
 
 namespace Penumbra.GameData.Files;
 
@@ -21,6 +22,12 @@ public partial class ShpkFile
         public  byte[]                         AdditionalHeader;
         private byte[]                         _byteData;
         private DisassembledShader?            _disassembly;
+
+        public ShaderKeyValueSet[]? SystemValues;
+        public ShaderKeyValueSet[]? SceneValues;
+        public ShaderKeyValueSet[]? MaterialValues;
+        public ShaderKeyValueSet[]? SubViewValues;
+        public ShaderKeyValueSet    Passes;
 
         public byte[] Blob
         {
@@ -77,40 +84,40 @@ public partial class ShpkFile
         /// <remarks>
         /// This is only stored for vertex shaders.
         /// </remarks>
-        public VertexShader.Input DeclaredInputs
+        public readonly VertexShader.Input DeclaredInputs
             => (VertexShader.Input)(AdditionalHeader.Length >= 4 ? BitConverter.ToUInt32(AdditionalHeader, 0) : 0u);
 
         /// <remarks>
         /// This is only stored for Shader Model 5 (DirectX 11) vertex shaders.
         /// </remarks>
-        public VertexShader.Input UsedInputs
+        public readonly VertexShader.Input UsedInputs
             => (VertexShader.Input)(AdditionalHeader.Length >= 8 ? BitConverter.ToUInt32(AdditionalHeader, 4) : 0u);
 
-        public DisassembledShader? Disassembly
+        public readonly DisassembledShader? Disassembly
             => _disassembly;
 
-        public Resource? GetConstantById(uint id)
+        public readonly Resource? GetConstantById(uint id)
             => Constants.FirstOrNull(res => res.Id == id);
 
-        public Resource? GetConstantByName(string name)
+        public readonly Resource? GetConstantByName(string name)
             => Constants.FirstOrNull(res => res.Name == name);
 
-        public Resource? GetSamplerById(uint id)
+        public readonly Resource? GetSamplerById(uint id)
             => Samplers.FirstOrNull(s => s.Id == id);
 
-        public Resource? GetSamplerByName(string name)
+        public readonly Resource? GetSamplerByName(string name)
             => Samplers.FirstOrNull(s => s.Name == name);
 
-        public Resource? GetUavById(uint id)
+        public readonly Resource? GetUavById(uint id)
             => Uavs.FirstOrNull(u => u.Id == id);
 
-        public Resource? GetUavByName(string name)
+        public readonly Resource? GetUavByName(string name)
             => Uavs.FirstOrNull(u => u.Name == name);
 
-        public Resource? GetTextureById(uint id)
+        public readonly Resource? GetTextureById(uint id)
             => Textures.FirstOrNull(s => s.Id == id);
 
-        public Resource? GetTextureByName(string name)
+        public readonly Resource? GetTextureByName(string name)
             => Textures.FirstOrNull(s => s.Name == name);
 
         public void UpdateResources(ShpkFile file)

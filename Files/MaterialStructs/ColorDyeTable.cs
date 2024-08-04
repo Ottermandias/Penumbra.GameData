@@ -1,124 +1,105 @@
+using Penumbra.GameData.Files.Utility;
+
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-// TODO those values are not correct at all, just taken from the old values for now.
-public unsafe struct ColorDyeTable : IEnumerable<ColorDyeTable.Row>
+public sealed class ColorDyeTable : IEnumerable<ColorDyeTableRow>, IColorDyeTable
 {
-    /// <inheritdoc cref="ColorTable.Row"/>
-    public struct Row
+    [InlineArray(NumRows)]
+    private struct Table
     {
-        public const int  Size = 4;
-        private      uint _data;
-
-        public ushort Template
-        {
-            get => (ushort)(_data >> 10);
-            set => _data = (_data & 0x03FFu) | ((uint)value << 10);
-        }
-
-        public bool Diffuse
-        {
-            get => (_data & 0x0001) != 0;
-            set => _data = value ? _data | 0x0001u : _data & ~0x0001u;
-        }
-
-        public bool Specular
-        {
-            get => (_data & 0x0002) != 0;
-            set => _data = value ? _data | 0x0002u : _data & ~0x0002u;
-        }
-
-        public bool Emissive
-        {
-            get => (_data & 0x0004) != 0;
-            set => _data = value ? _data | 0x0004u : _data & ~0x0004u;
-        }
-
-        public bool Gloss
-        {
-            get => (_data & 0x0008) != 0;
-            set => _data = value ? _data | 0x0008u : _data & ~0x0008u;
-        }
-
-        public bool SpecularStrength
-        {
-            get => (_data & 0x0010) != 0;
-            set => _data = value ? _data | 0x0010u : _data & ~0x0010u;
-        }
-
-        public bool Unk1
-        {
-            get => (_data & 0x0020) != 0;
-            set => _data = value ? _data | 0x0020u : _data & ~0x0020u;
-        }
-
-        public bool Unk2
-        {
-            get => (_data & 0x0040) != 0;
-            set => _data = value ? _data | 0x0040u : _data & ~0x0040u;
-        }
-
-        public bool Unk3
-        {
-            get => (_data & 0x0080) != 0;
-            set => _data = value ? _data | 0x0080u : _data & ~0x0080u;
-        }
-
-        public bool Unk4
-        {
-            get => (_data & 0x0100) != 0;
-            set => _data = value ? _data | 0x0100u : _data & ~0x0100u;
-        }
-
-        public bool Unk5
-        {
-            get => (_data & 0x0200) != 0;
-            set => _data = value ? _data | 0x0200u : _data & ~0x0200u;
-        }
+        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "InlineArray")]
+        private ColorDyeTableRow _element0;
     }
 
-    public const  int  NumRows = 32;
-    private fixed uint _rowData[NumRows];
+    public const int NumRows = 32;
+    public const int Size    = NumRows * ColorDyeTableRow.Size;
 
-    public ref Row this[int i]
-    {
-        get
-        {
-            fixed (uint* ptr = _rowData)
-            {
-                return ref ((Row*)ptr)[i];
-            }
-        }
-    }
+    int IColorDyeTable.RowSize
+        => ColorDyeTableRow.Size;
 
-    public IEnumerator<Row> GetEnumerator()
+    int IColorDyeTable.Height
+        => NumRows;
+
+    int IColorDyeTable.Size
+        => Size;
+
+    private Table _rowData;
+
+    public ref ColorDyeTableRow this[int i]
+        => ref _rowData[i];
+
+    public IEnumerator<ColorDyeTableRow> GetEnumerator()
     {
         for (var i = 0; i < NumRows; ++i)
-            yield return this[i];
+            yield return _rowData[i];
     }
 
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
 
-    public ReadOnlySpan<byte> AsBytes()
+    public Span<byte> AsBytes()
+        => MemoryMarshal.AsBytes(_rowData[..]);
+
+    public Span<byte> RowAsBytes(int i)
+        => MemoryMarshal.AsBytes(new Span<ColorDyeTableRow>(ref _rowData[i]));
+
+    public bool SetDefault()
     {
-        fixed (uint* ptr = _rowData)
+        var ret = false;
+        for (var i = 0; i < NumRows; ++i)
+            ret |= SetDefaultRow(i);
+
+        return ret;
+    }
+
+    public bool SetDefaultRow(int i)
+    {
+        if (_rowData[i] == default)
+            return false;
+
+        _rowData[i] = default;
+        return true;
+    }
+
+    public ColorDyeTable()
+        => SetDefault();
+
+    private ColorDyeTable(ref SpanBinaryReader reader)
+    {
+        reader.Read<ColorDyeTableRow>(NumRows).CopyTo(_rowData);
+    }
+
+    public ColorDyeTable(IColorDyeTable other)
+    {
+        switch (other)
         {
-            return new ReadOnlySpan<byte>(ptr, NumRows * sizeof(ushort));
+            case LegacyColorDyeTable oldTable:
+            {
+                for (var i = 0; i < LegacyColorDyeTable.NumRows; ++i)
+                    _rowData[i] = new ColorDyeTableRow(oldTable[i]);
+                for (var i = LegacyColorDyeTable.NumRows; i < NumRows; ++i)
+                    SetDefaultRow(i);
+                break;
+            }
+            case ColorDyeTable table:
+            {
+                for (var i = 0; i < NumRows; ++i)
+                    _rowData[i] = table[i];
+                break;
+            }
+            default:
+                SetDefault();
+                break;
         }
     }
 
-    internal ColorDyeTable(in LegacyColorDyeTable oldTable)
-    {
-        for (var i = 0; i < LegacyColorDyeTable.NumRows; ++i)
-        {
-            var     oldRow = oldTable[i];
-            ref var row    = ref this[i];
-            row.Template         = oldRow.Template;
-            row.Diffuse          = oldRow.Diffuse;
-            row.Specular         = oldRow.Specular;
-            row.Emissive         = oldRow.Emissive;
-            row.Gloss            = oldRow.Gloss;
-            row.SpecularStrength = oldRow.SpecularStrength;
-        }
-    }
+    public static ColorDyeTable CastOrConvert(IColorDyeTable other)
+        => other as ColorDyeTable ?? new ColorDyeTable(other);
+
+    /// <summary>
+    /// Attempts to read a color dye table from the given reader.
+    /// If the reader doesn't hold enough data, nothing will be read, and this will return a default table.
+    /// </summary>
+    public static ColorDyeTable TryReadFrom(ref SpanBinaryReader reader)
+        => reader.Remaining >= Size ? new ColorDyeTable(ref reader) : new ColorDyeTable();
 }

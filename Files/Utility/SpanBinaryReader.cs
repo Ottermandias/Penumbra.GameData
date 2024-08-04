@@ -1,4 +1,4 @@
-﻿namespace Penumbra.GameData.Files.Utility;
+namespace Penumbra.GameData.Files.Utility;
 
 /// <summary>
 /// Equivalent to <see cref="BinaryReader"/>, but for <see cref="ReadOnlySpan{Byte}"/>.
@@ -32,8 +32,18 @@ public unsafe ref struct SpanBinaryReader
 
     public int Remaining { get; private set; }
 
-    public int Count
+    public readonly int Count
         => Length;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void Skip(int numBytes)
+    {
+        if (Remaining < numBytes)
+            throw new EndOfStreamException();
+
+        _pos      =  ref Unsafe.Add(ref _pos, numBytes);
+        Remaining -= numBytes;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public T Read<T>() where T : unmanaged

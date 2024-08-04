@@ -1,222 +1,177 @@
+using Penumbra.GameData.Files.StainMapStructs;
+using Penumbra.GameData.Files.Utility;
+using Penumbra.GameData.Structs;
+
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-// TODO: those values are not correct at all, just taken from legacy for now.
-public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
+public sealed class ColorTable : IEnumerable<ColorTableRow>, IColorTable
 {
-    /// <summary>
-    /// The number after the parameter is the bit in the dye flags.
-    /// <code>
-    /// #       |    X (+0)    |    |    Y (+1)    |    |    Z (+2)   |    |   W (+3)    |
-    /// --------------------------------------------------------------------------------------
-    /// 0 (+ 0) |    Diffuse.R |  0 |    Diffuse.G |  0 |   Diffuse.B |  0 |             |  
-    /// 1 (+ 4) |   Specular.R |  1 |   Specular.G |  1 |  Specular.B |  1 |         Unk |
-    /// 2 (+ 8) |   Emissive.R |  2 |   Emissive.G |  2 |  Emissive.B |  2 |         Unk |  3
-    /// 3 (+12) |          Unk |  6 |          Unk |  7 |         Unk |  8 |             |
-    /// 4 (+16) |          Unk |  5 |              |    |         Unk |  4 |         Unk |  9
-    /// 5 (+20) |              |    |          Unk | 11 |             |    |             |   
-    /// 6 (+24) |   Shader Idx |    |   Tile Index |    |         Unk |    |         Unk | 10
-    /// 7 (+28) | Tile Count.X |    | Tile Count.Y |    | Tile Skew.X |    | Tile Skew.Y |
-    /// </code>
-    /// </summary>
-    public struct Row
+    [InlineArray(NumRows)]
+    private struct Table
     {
-        public const int NumVec4 = 8;
-        public const int Halves  = 4;
-        public const int Size    = NumVec4 * Halves * 2;
-
-        private fixed ushort _data[NumVec4 * Halves];
-
-        public static readonly Row Default = new();
-
-        public Vector3 Diffuse
-        {
-            readonly get => new(ToFloat(0), ToFloat(1), ToFloat(2));
-            set
-            {
-                _data[0] = FromFloat(value.X);
-                _data[1] = FromFloat(value.Y);
-                _data[2] = FromFloat(value.Z);
-            }
-        }
-
-        public Vector3 Specular
-        {
-            readonly get => new(ToFloat(4), ToFloat(5), ToFloat(6));
-            set
-            {
-                _data[4] = FromFloat(value.X);
-                _data[5] = FromFloat(value.Y);
-                _data[6] = FromFloat(value.Z);
-            }
-        }
-
-        public Vector3 Emissive
-        {
-            readonly get => new(ToFloat(8), ToFloat(9), ToFloat(10));
-            set
-            {
-                _data[8]  = FromFloat(value.X);
-                _data[9]  = FromFloat(value.Y);
-                _data[10] = FromFloat(value.Z);
-            }
-        }
-
-        public Vector2 MaterialRepeat
-        {
-            readonly get => new(ToFloat(28), ToFloat(29));
-            set
-            {
-                _data[28] = FromFloat(value.X);
-                _data[29] = FromFloat(value.Y);
-            }
-        }
-
-        public Vector2 MaterialSkew
-        {
-            readonly get => new(ToFloat(30), ToFloat(31));
-            set
-            {
-                _data[30] = FromFloat(value.X);
-                _data[31] = FromFloat(value.Y);
-            }
-        }
-
-        public float SpecularStrength
-        {
-            readonly get => ToFloat(3);
-            set => _data[3] = FromFloat(value);
-        }
-
-        public float GlossStrength
-        {
-            readonly get => ToFloat(11);
-            set => _data[11] = FromFloat(value);
-        }
-
-        public ushort TileSet
-        {
-            readonly get => (ushort)(ToFloat(25) * 64f);
-            set => _data[25] = FromFloat((value + 0.5f) / 64f);
-        }
-
-        public readonly Span<Half> AsHalves()
-        {
-            fixed (ushort* ptr = _data)
-            {
-                return new Span<Half>(ptr, NumVec4 * Halves);
-            }
-        }
-
-        private readonly float ToFloat(int idx)
-            => (float)BitConverter.UInt16BitsToHalf(_data[idx]);
-
-        private static ushort FromFloat(float x)
-            => BitConverter.HalfToUInt16Bits((Half)x);
-
-        public bool ApplyDyeTemplate2(ColorDyeTable.Row dyeRow, StmFile.DyePack dye)
-            // TODO
-            => false;
-
-        public bool ApplyDyeTemplate1(ColorDyeTable.Row dyeRow, StmFile.DyePack dye)
-        {
-            var ret = false;
-
-            if (dyeRow.Diffuse && Diffuse != dye.Diffuse)
-            {
-                Diffuse = dye.Diffuse;
-                ret     = true;
-            }
-
-            if (dyeRow.Specular && Specular != dye.Specular)
-            {
-                Specular = dye.Specular;
-                ret      = true;
-            }
-
-            if (dyeRow.SpecularStrength && SpecularStrength != dye.SpecularPower)
-            {
-                SpecularStrength = dye.SpecularPower;
-                ret              = true;
-            }
-
-            if (dyeRow.Emissive && Emissive != dye.Emissive)
-            {
-                Emissive = dye.Emissive;
-                ret      = true;
-            }
-
-            if (dyeRow.Gloss && GlossStrength != dye.Gloss)
-            {
-                GlossStrength = dye.Gloss;
-                ret           = true;
-            }
-
-            return ret;
-        }
-
-        public Row(in LegacyColorTable.Row oldRow)
-        {
-            Diffuse          = oldRow.Diffuse;
-            Specular         = oldRow.Specular;
-            Emissive         = oldRow.Emissive;
-            MaterialRepeat   = oldRow.MaterialRepeat;
-            MaterialSkew     = oldRow.MaterialSkew;
-            SpecularStrength = oldRow.SpecularStrength;
-            GlossStrength    = oldRow.GlossStrength;
-            TileSet          = oldRow.TileSet;
-        }
+        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "InlineArray")]
+        private ColorTableRow _element0;
     }
 
-    public const  int  NumRows = 32;
-    private fixed byte _rowData[NumRows * Row.Size];
+    public const int NumRows = 32;
+    public const int Size    = NumRows * ColorTableRow.Size;
 
-    public ref Row this[int i]
-    {
-        get
-        {
-            fixed (byte* ptr = _rowData)
-            {
-                return ref ((Row*)ptr)[i];
-            }
-        }
-    }
+    public const byte DimensionLogs = 0x53;
 
-    public IEnumerator<Row> GetEnumerator()
+    int IColorTable.Width
+        => ColorTableRow.NumVec4;
+
+    int IColorTable.RowSize
+        => ColorTableRow.Size;
+
+    int IColorTable.Height
+        => NumRows;
+
+    int IColorTable.Size
+        => Size;
+
+    byte IColorTable.DimensionLogs
+        => DimensionLogs;
+
+    private Table _rowData;
+
+    public ref ColorTableRow this[int i]
+        => ref _rowData[i];
+
+    public IEnumerator<ColorTableRow> GetEnumerator()
     {
         for (var i = 0; i < NumRows; ++i)
-            yield return this[i];
+            yield return _rowData[i];
     }
 
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
 
-    public readonly ReadOnlySpan<byte> AsBytes()
-    {
-        fixed (byte* ptr = _rowData)
-        {
-            return new ReadOnlySpan<byte>(ptr, NumRows * Row.Size);
-        }
-    }
+    public Span<byte> AsBytes()
+        => MemoryMarshal.AsBytes(_rowData[..]);
 
-    public readonly Span<Half> AsHalves()
-    {
-        fixed (byte* ptr = _rowData)
-        {
-            return new Span<Half>((Half*)ptr, NumRows * 16);
-        }
-    }
+    public Span<Half> AsHalves()
+        => MemoryMarshal.Cast<ColorTableRow, Half>(_rowData);
 
-    public void SetDefault()
+    public Span<byte> RowAsBytes(int i)
+        => MemoryMarshal.AsBytes(_rowData[i][..]);
+
+    public Span<Half> RowAsHalves(int i)
+        => _rowData[i];
+
+    public Span<ColorTableRow> AsRows()
+        => _rowData;
+
+    public bool SetDefault()
     {
+        var ret = false;
         for (var i = 0; i < NumRows; ++i)
-            this[i] = Row.Default;
+            ret |= SetDefaultRow(i);
+
+        return ret;
     }
 
-    public ColorTable(in LegacyColorTable oldTable)
+    public bool SetDefaultRow(int i)
     {
-        for (var i = 0; i < LegacyColorTable.NumRows; ++i)
-            this[i] = new Row(oldTable[i]);
+        if (_rowData[i] == ColorTableRow.Default)
+            return false;
+
+        _rowData[i] = ColorTableRow.Default;
+        return true;
     }
+
+    public bool ApplyDye(StmFile<DyePack> stm, ReadOnlySpan<StainId> stainIds, ColorDyeTable dyeTable)
+    {
+        if (stainIds.Length == 0)
+            return false;
+
+        var ret = false;
+        for (var rowIdx = 0; rowIdx < ColorDyeTable.NumRows; ++rowIdx)
+        {
+            var dyeRow  = dyeTable[rowIdx];
+            var stainId = dyeRow.Channel < stainIds.Length ? stainIds[dyeRow.Channel] : 0;
+            if (stainId != 0 && stm.TryGetValue(dyeRow.Template, stainId, out var dyes))
+                ret |= _rowData[rowIdx].ApplyDye(dyeRow, dyes);
+        }
+
+        return ret;
+    }
+
+    public bool ApplyDye(StmFile<LegacyDyePack> stm, ReadOnlySpan<StainId> stainIds, ColorDyeTable dyeTable)
+    {
+        if (stainIds.Length == 0)
+            return false;
+
+        var ret = false;
+        for (var rowIdx = 0; rowIdx < ColorDyeTable.NumRows; ++rowIdx)
+        {
+            var dyeRow  = dyeTable[rowIdx];
+            var stainId = dyeRow.Channel < stainIds.Length ? stainIds[dyeRow.Channel] : 0;
+            if (stainId != 0 && stm.TryGetValue(dyeRow.Template, stainId, out var dyes))
+                ret |= _rowData[rowIdx].ApplyDye(dyeRow, dyes);
+        }
+
+        return ret;
+    }
+
+    public bool ApplyDyeToRow(StmFile<DyePack> stm, ReadOnlySpan<StainId> stainIds, int rowIdx, ColorDyeTableRow dyeRow)
+    {
+        if (rowIdx < 0 || rowIdx >= NumRows || stainIds.Length == 0)
+            return false;
+
+        var ret     = false;
+        var stainId = dyeRow.Channel < stainIds.Length ? stainIds[dyeRow.Channel] : 0;
+        if (stainId != 0 && stm.TryGetValue(dyeRow.Template, stainId, out var dyes))
+            ret |= _rowData[rowIdx].ApplyDye(dyeRow, dyes);
+
+        return ret;
+    }
+
+    public bool ApplyDyeToRow(StmFile<LegacyDyePack> stm, ReadOnlySpan<StainId> stainIds, int rowIdx, ColorDyeTableRow dyeRow)
+    {
+        if (rowIdx < 0 || rowIdx >= NumRows || stainIds.Length == 0)
+            return false;
+
+        var ret     = false;
+        var stainId = dyeRow.Channel < stainIds.Length ? stainIds[dyeRow.Channel] : 0;
+        if (stainId != 0 && stm.TryGetValue(dyeRow.Template, stainId, out var dyes))
+            ret |= _rowData[rowIdx].ApplyDye(dyeRow, dyes);
+
+        return ret;
+    }
+
+    public ColorTable()
+        => SetDefault();
+
+    private ColorTable(ref SpanBinaryReader reader)
+        => _rowData = reader.Read<Table>();
+
+    public ColorTable(IColorTable other)
+    {
+        switch (other)
+        {
+            case LegacyColorTable oldTable:
+            {
+                for (var i = 0; i < LegacyColorTable.NumRows; ++i)
+                    _rowData[i] = new ColorTableRow(oldTable[i]);
+                for (var i = LegacyColorTable.NumRows; i < NumRows; ++i)
+                    _rowData[i] = ColorTableRow.LegacyDefault;
+                break;
+            }
+            case ColorTable table:
+            {
+                for (var i = 0; i < NumRows; ++i)
+                    _rowData[i] = table[i];
+                break;
+            }
+            default:
+                SetDefault();
+                break;
+        }
+    }
+
+    public static ColorTable CastOrConvert(IColorTable other)
+        => other as ColorTable ?? new ColorTable(other);
 
     public override string ToString()
     {
@@ -224,11 +179,18 @@ public unsafe struct ColorTable : IEnumerable<ColorTable.Row>
         for (var i = 0; i < NumRows; ++i)
         {
             var row = this[i];
-            for (var j = 0; j < Row.NumVec4 * Row.Halves; ++j)
-                sb.Append($"{((Half*)(&row))[j]:F1} ");
+            for (var j = 0; j < ColorTableRow.NumVec4 * ColorTableRow.Halves; ++j)
+                sb.Append($"{row[j]:F1} ");
             sb[^1] = '\n';
         }
 
         return sb.ToString();
     }
+
+    /// <summary>
+    /// Attempts to read a legacy color table from the given reader.
+    /// If the reader doesn't hold enough data, nothing will be read, and this will return a default table.
+    /// </summary>
+    public static ColorTable TryReadFrom(ref SpanBinaryReader reader)
+        => reader.Remaining >= Size ? new ColorTable(ref reader) : new ColorTable();
 }

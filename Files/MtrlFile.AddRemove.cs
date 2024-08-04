@@ -9,36 +9,49 @@ public partial class MtrlFile
     public const string DummyTexturePath    = GamePaths.Tex.DummyPath;
     public const uint   DefaultSamplerFlags = 0x000F8340u;
 
-    public int FindOrAddConstant(uint id, int numFloats)
+    public int FindConstant(uint id)
+        => ShaderPackage.Constants.IndexOf(c => c.Id == id);
+
+    public int FindOrAddConstant(uint id, ShpkFile shpk)
     {
         if (UtilityFunctions.FindIndex(ShaderPackage.Constants, c => c.Id == id, out var idx))
             return idx;
 
+        var shpkParam = shpk.GetMaterialParamById(id);
+        if (!shpkParam.HasValue)
+            throw new ArgumentException("Material constant not found in shader package");
+
         var offset = ShaderPackage.ShaderValues.Length;
-        if (offset >= 0x4000 || numFloats >= 0x4000)
+        if (offset >= 0x10000)
             throw new InvalidOperationException("Constant capacity exceeded");
 
-        ShaderPackage.ShaderValues = ShaderPackage.ShaderValues.AddItem(0.0f, numFloats);
+        Array.Resize(ref ShaderPackage.ShaderValues, ShaderPackage.ShaderValues.Length + shpkParam.Value.ByteSize);
 
-        var newI = ShaderPackage.Constants.Length;
-        ShaderPackage.Constants = ShaderPackage.Constants.AddItem(new Constant
+        var newConstant = new Constant
         {
-            Id         = id,
-            ByteOffset = (ushort)(offset << 2),
-            ByteSize   = (ushort)(numFloats << 2),
-        });
+            Id = id,
+            ByteOffset = (ushort)offset,
+            ByteSize = shpkParam.Value.ByteSize,
+        };
+        var newI = ShaderPackage.Constants.Length;
+        ShaderPackage.Constants = ShaderPackage.Constants.AddItem(newConstant);
+
+        shpk.GetMaterialParamDefault<byte>(shpkParam.Value).CopyTo(GetConstantValue<byte>(newConstant));
 
         return newI;
     }
 
-    public ref Constant GetOrAddConstant(uint id, int numFloats, out int i)
+    public ref Constant GetOrAddConstant(uint id, ShpkFile shpk, out int i)
     {
-        i = FindOrAddConstant(id, numFloats);
+        i = FindOrAddConstant(id, shpk);
         return ref ShaderPackage.Constants[i];
     }
 
-    public ref Constant GetOrAddConstant(uint id, int numFloats)
-        => ref GetOrAddConstant(id, numFloats, out _);
+    public ref Constant GetOrAddConstant(uint id, ShpkFile shpk)
+        => ref GetOrAddConstant(id, shpk, out _);
+
+    public int FindSampler(uint id)
+        => ShaderPackage.Samplers.IndexOf(c => c.SamplerId == id);
 
     public int FindOrAddSampler(uint id, string defaultTexture)
     {
@@ -122,20 +135,17 @@ public partial class MtrlFile
             if (!shpkParam.HasValue)
                 return false;
 
-            foreach (var value in mtrl.GetConstantValues(constant))
-            {
-                if (value != 0.0f)
-                    return true;
-            }
+            var value        = mtrl.GetConstantValue<byte>(constant);
+            var defaultValue = shpk.GetMaterialParamDefault<byte>(shpkParam.Value);
 
-            return false;
+            return defaultValue.Length > 0 ? !value.SequenceEqual(defaultValue) : value.ContainsAnyExcept((byte)0);
         }
 
         if (!keepSamplers.Contains(ShpkFile.TableSamplerId))
-            HasTable = false;
+            Table = null;
 
-        if (!HasTable)
-            HasDyeTable = false;
+        if (Table == null)
+            DyeTable = null;
 
         for (var i = ShaderPackage.Samplers.Length; i-- > 0;)
         {
@@ -168,16 +178,16 @@ public partial class MtrlFile
                 ShaderPackage.ShaderKeys = ShaderPackage.ShaderKeys.RemoveItems(i);
         }
 
-        var usedValues = new BitArray(ShaderPackage.ShaderValues.Length, false);
+        var usedBytes = new BitArray(ShaderPackage.ShaderValues.Length, false);
         for (var i = ShaderPackage.Constants.Length; i-- > 0;)
         {
             var constant = ShaderPackage.Constants[i];
             if (ShallKeepConstant(this, shpk, constant))
             {
-                var start = constant.ByteOffset >> 2;
-                var end   = Math.Min((constant.ByteOffset + constant.ByteSize + 0x3) >> 2, ShaderPackage.ShaderValues.Length);
+                var start = constant.ByteOffset;
+                var end   = Math.Min(constant.ByteOffset + constant.ByteSize, ShaderPackage.ShaderValues.Length);
                 for (var j = start; j < end; j++)
-                    usedValues[j] = true;
+                    usedBytes[j] = true;
             }
             else
             {
@@ -187,16 +197,16 @@ public partial class MtrlFile
 
         for (var i = ShaderPackage.ShaderValues.Length; i-- > 0;)
         {
-            if (usedValues[i])
+            if (usedBytes[i])
                 continue;
 
             var end = i + 1;
-            while (i >= 0 && !usedValues[i])
+            while (i >= 0 && !usedBytes[i])
                 --i;
             ++i;
             ShaderPackage.ShaderValues = ShaderPackage.ShaderValues.RemoveItems(i, end - i);
-            var byteStart = (ushort)(i << 2);
-            var byteShift = (ushort)((end - i) << 2);
+            var byteStart = (ushort)i;
+            var byteShift = (ushort)(end - i);
             for (var j = 0; j < ShaderPackage.Constants.Length; ++j)
             {
                 if (ShaderPackage.Constants[j].ByteOffset > byteStart)
