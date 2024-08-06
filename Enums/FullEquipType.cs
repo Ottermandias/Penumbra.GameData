@@ -1,5 +1,4 @@
 using Lumina.Excel.GeneratedSheets;
-using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Enums;
 
