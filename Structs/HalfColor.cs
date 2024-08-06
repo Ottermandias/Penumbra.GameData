@@ -7,7 +7,7 @@ namespace Penumbra.GameData.Structs;
 public struct HalfColor(Half red, Half green, Half blue) : IEquatable<HalfColor>
 {
     public static readonly HalfColor Black = new(Half.Zero, Half.Zero, Half.Zero);
-    public static readonly HalfColor White = new(Half.One,  Half.One,  Half.One);
+    public static readonly HalfColor White = new(Half.One, Half.One, Half.One);
 
     public Half Red   = red;
     public Half Green = green;

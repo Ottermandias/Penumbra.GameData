@@ -7,7 +7,7 @@ namespace Penumbra.GameData.Files.MaterialStructs;
 public sealed class ColorTable : IEnumerable<ColorTableRow>, IColorTable
 {
     [InlineArray(NumRows)]
-    private struct Table
+    public struct Table
     {
         [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "InlineArray")]
         private ColorTableRow _element0;
