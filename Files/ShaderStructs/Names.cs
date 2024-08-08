@@ -325,6 +325,7 @@ public static class Names
             "Add",
             "Alpha",
             "Body",
+            "BodyJJM",
             "Box",
             "Cascade",
             "CascadeWith",
