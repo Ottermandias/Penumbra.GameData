@@ -27,13 +27,13 @@ public sealed unsafe class MmioMemoryManager(MemoryMappedViewAccessor accessor, 
     public int Length
         => (int)_accessor.Capacity;
 
-    public MmioMemoryManager(MemoryMappedFile file, bool leaveOpen = false)
-        : this(file.CreateViewAccessor(), leaveOpen ? null : file)
+    public MmioMemoryManager(MemoryMappedFile file, MemoryMappedFileAccess access = MemoryMappedFileAccess.ReadWrite, bool leaveOpen = false)
+        : this(file.CreateViewAccessor(0, 0, access), leaveOpen ? null : file)
     { }
 
     /// <seealso cref="MemoryMappedFile.CreateFromFile(string, FileMode, string?, long, MemoryMappedFileAccess)"/>
     public static MmioMemoryManager CreateFromFile(string path, FileMode mode = FileMode.Open, string? mapName = null, long capacity = 0, MemoryMappedFileAccess access = MemoryMappedFileAccess.ReadWrite)
-        => new(MemoryMappedFile.CreateFromFile(path, mode, mapName, capacity, access));
+        => new(MemoryMappedFile.CreateFromFile(path, mode, mapName, capacity, access), access);
 
     public override Span<byte> GetSpan()
         => new(Pin(0).Pointer, Length);

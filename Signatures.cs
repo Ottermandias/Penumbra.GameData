@@ -103,6 +103,7 @@ public static class Sigs
 
     // ShaderReplacementFixer
     public const string ModelRendererOnRenderMaterial = "E8 ?? ?? ?? ?? 44 0F B7 20";
+    public const string ModelRendererUnkFunc          = "E8 ?? ?? ?? ?? 41 0F B6 46 ?? C0 E8";
 
     // Job service
     public const string ChangeJob = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 44 0F B6 FA 48 8B E9";
