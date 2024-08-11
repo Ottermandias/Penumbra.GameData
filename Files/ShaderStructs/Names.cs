@@ -335,6 +335,7 @@ public static class Names
             "Depth",
             "Distance",
             "Face",
+            "Face2",
             "FaceEmissive",
             "Hair",
             "Low",
