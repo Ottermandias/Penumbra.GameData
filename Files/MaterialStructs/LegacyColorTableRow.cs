@@ -92,7 +92,7 @@ public struct LegacyColorTableRow : IEquatable<LegacyColorTableRow>
         {
             this[12] = value.UU;
             this[13] = value.UV;
-            this[14] = value.VV;
+            this[14] = value.VU;
             this[15] = value.VV;
         }
     }
