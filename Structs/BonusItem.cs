@@ -16,4 +16,16 @@ public readonly record struct BonusItem(string Name, IconId Icon, BonusItemId Id
 
     public CharacterArmor ToArmor()
         => new(ModelId, Variant, StainIds.None);
+
+    public CustomItemId CustomId
+        => Id == BonusItemId.Invalid
+            ? new CustomItemId(ModelId, Variant, Slot)
+            : Id;
+
+    public static BonusItem FromIds(BonusItemId itemId, IconId iconId, PrimaryId modelId, Variant variant,
+        BonusItemFlag slot = BonusItemFlag.Unknown, string? name = null)
+    {
+        name ??= $"Unknown ({modelId}-{variant})";
+        return new BonusItem(name, iconId, itemId, modelId, variant, slot);
+    }
 }

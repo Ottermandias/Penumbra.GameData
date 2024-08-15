@@ -355,7 +355,7 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
         if (obj == null)
             return None;
 
-        var stain  = (StainId)(obj["Stain"]?.ToObject<byte>() ?? 0);
+        var stain = (StainId)(obj["Stain"]?.ToObject<byte>() ?? 0);
         var stain2 = (StainId)(obj["Stain2"]?.ToObject<byte>() ?? 0);
         return new StainIds(stain, stain2);
     }
@@ -388,6 +388,8 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
 [JsonConverter(typeof(Converter))]
 public readonly record struct BonusItemId(ushort Id)
 {
+    public static readonly BonusItemId Invalid = new(ushort.MaxValue);
+
     public static implicit operator BonusItemId(ushort id)
         => new(id);
 
@@ -415,8 +417,8 @@ public readonly record struct ItemId(uint Id) : IComparisonOperators<ItemId, Ite
         => new(Id switch
         {
             > 1000000 => Id - 1000000,
-            > 500000  => Id - 500000,
-            _         => Id,
+            > 500000 => Id - 500000,
+            _ => Id,
         });
 
     public override string ToString()
@@ -449,19 +451,41 @@ public readonly record struct ItemId(uint Id) : IComparisonOperators<ItemId, Ite
 public readonly record struct CustomItemId(ulong Id) : IComparisonOperators<CustomItemId, CustomItemId, bool>
 {
     private const ulong CustomFlag = 1ul << 48;
+    private const ulong BonusItemFlag = 1ul << 49;
+
+    public bool IsBonusItem
+        => (Id & BonusItemFlag) == BonusItemFlag;
 
     public bool IsItem
         => Id < CustomFlag;
 
+    public bool IsCustom
+        => (Id & CustomFlag) == CustomFlag;
+
     public ItemId Item
         => IsItem ? (ItemId)Id : 0;
+
+    public BonusItemId BonusItem
+        => IsBonusItem ? (BonusItemId)Id : BonusItemId.Invalid;
 
     public (PrimaryId Model, SecondaryId WeaponType, Variant Variant, FullEquipType Type) Split
         => IsItem ? (0, 0, 0, FullEquipType.Unknown) : ((PrimaryId)Id, (SecondaryId)(Id >> 16), (Variant)(Id >> 32), (FullEquipType)(Id >> 40));
 
+    public (PrimaryId Model, Variant Variant, BonusItemFlag Slot) SplitBonus
+        => (Id & (CustomFlag | BonusItemFlag)) == (CustomFlag | BonusItemFlag)
+            ? ((PrimaryId)Id, (Variant)(Id >> 16), (BonusItemFlag)(Id >> 24))
+            : (0, 0, Enums.BonusItemFlag.Unknown);
+
     public CustomItemId(PrimaryId model, SecondaryId secondaryId, Variant variant, FullEquipType type)
         : this(model.Id | ((ulong)secondaryId.Id << 16) | ((ulong)variant.Id << 32) | ((ulong)type << 40) | CustomFlag)
     { }
+
+    public CustomItemId(PrimaryId model, Variant variant, BonusItemFlag slot)
+        : this(model.Id | ((ulong)variant.Id << 16) | ((ulong)slot << 24) | CustomFlag | BonusItemFlag)
+    { }
+
+    public static implicit operator CustomItemId(BonusItemId id)
+        => new(id.Id | BonusItemFlag);
 
     public static implicit operator CustomItemId(ItemId id)
         => new(id.Id);
@@ -600,18 +624,18 @@ public readonly record struct CharacterLevel(byte Value)
 [JsonConverter(typeof(Converter))]
 public readonly record struct ObjectIndex(ushort Index) : IComparisonOperators<ObjectIndex, ObjectIndex, bool>, IComparable<ObjectIndex>
 {
-    public static readonly ObjectIndex AnyIndex        = new(ushort.MaxValue);
-    public static readonly ObjectIndex CutsceneStart   = new((ushort)ScreenActor.CutsceneStart);
-    public static readonly ObjectIndex GPosePlayer     = new((ushort)ScreenActor.GPosePlayer);
+    public static readonly ObjectIndex AnyIndex = new(ushort.MaxValue);
+    public static readonly ObjectIndex CutsceneStart = new((ushort)ScreenActor.CutsceneStart);
+    public static readonly ObjectIndex GPosePlayer = new((ushort)ScreenActor.GPosePlayer);
     public static readonly ObjectIndex CharacterScreen = new((ushort)ScreenActor.CharacterScreen);
-    public static readonly ObjectIndex ExamineScreen   = new((ushort)ScreenActor.ExamineScreen);
-    public static readonly ObjectIndex FittingRoom     = new((ushort)ScreenActor.FittingRoom);
-    public static readonly ObjectIndex DyePreview      = new((ushort)ScreenActor.DyePreview);
-    public static readonly ObjectIndex Portrait        = new((ushort)ScreenActor.Portrait);
-    public static readonly ObjectIndex Card6           = new((ushort)ScreenActor.Card6);
-    public static readonly ObjectIndex Card7           = new((ushort)ScreenActor.Card7);
-    public static readonly ObjectIndex Card8           = new((ushort)ScreenActor.Card8);
-    public static readonly ObjectIndex IslandStart     = new(539);
+    public static readonly ObjectIndex ExamineScreen = new((ushort)ScreenActor.ExamineScreen);
+    public static readonly ObjectIndex FittingRoom = new((ushort)ScreenActor.FittingRoom);
+    public static readonly ObjectIndex DyePreview = new((ushort)ScreenActor.DyePreview);
+    public static readonly ObjectIndex Portrait = new((ushort)ScreenActor.Portrait);
+    public static readonly ObjectIndex Card6 = new((ushort)ScreenActor.Card6);
+    public static readonly ObjectIndex Card7 = new((ushort)ScreenActor.Card7);
+    public static readonly ObjectIndex Card8 = new((ushort)ScreenActor.Card8);
+    public static readonly ObjectIndex IslandStart = new(539);
 
     public static implicit operator ObjectIndex(ushort index)
         => new(index);
