@@ -77,8 +77,8 @@ public struct ColorTableRow : IEquatable<ColorTableRow>, ILegacyColorRow
     // This does a legacy interpretation of the new structures.
     Half ILegacyColorRow.Shininess
     {
-        get => this[3];
-        set => this[3] = value;
+        get => Scalar3;
+        set => Scalar3 = value;
     }
 
     public HalfColor SpecularColor
@@ -101,8 +101,8 @@ public struct ColorTableRow : IEquatable<ColorTableRow>, ILegacyColorRow
     // This does a legacy interpretation of the new structures.
     Half ILegacyColorRow.SpecularMask
     {
-        get => this[3];
-        set => this[3] = value;
+        get => Scalar7;
+        set => Scalar7 = value;
     }
 
     public HalfColor EmissiveColor

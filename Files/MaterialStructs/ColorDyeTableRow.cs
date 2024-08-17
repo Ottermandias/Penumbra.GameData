@@ -45,8 +45,8 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>, ILegacyColorDyeRo
     // This does a legacy interpretation of the new structures.
     bool ILegacyColorDyeRow.Shininess
     {
-        readonly get => (_data & 0x0008) != 0;
-        set => _data = value ? _data | 0x0008u : _data & ~0x0008u;
+        readonly get => Scalar3;
+        set => Scalar3 = value;
     }
 
     public bool Metalness
@@ -58,8 +58,8 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>, ILegacyColorDyeRo
     // This does a legacy interpretation of the new structures.
     bool ILegacyColorDyeRow.SpecularMask
     {
-        readonly get => (_data & 0x0010) != 0;
-        set => _data = value ? _data | 0x0010u : _data & ~0x0010u;
+        readonly get => Metalness;
+        set => Metalness = value;
     }
 
     public bool Roughness
