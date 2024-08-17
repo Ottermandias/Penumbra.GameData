@@ -1,6 +1,6 @@
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-public struct LegacyColorDyeTableRow : IEquatable<LegacyColorDyeTableRow>
+public struct LegacyColorDyeTableRow : IEquatable<LegacyColorDyeTableRow>, ILegacyColorDyeRow
 {
     public const int Size = 2;
 
@@ -11,6 +11,9 @@ public struct LegacyColorDyeTableRow : IEquatable<LegacyColorDyeTableRow>
         readonly get => (ushort)(_data >> 5);
         set => _data = (ushort)((_data & 0x1F) | (value << 5));
     }
+
+    readonly byte IColorDyeRow.Channel
+        => 0;
 
     public bool DiffuseColor
     {

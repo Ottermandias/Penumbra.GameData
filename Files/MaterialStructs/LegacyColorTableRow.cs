@@ -15,7 +15,7 @@ namespace Penumbra.GameData.Files.MaterialStructs;
 /// </code>
 /// </summary>
 [InlineArray(NumVec4 * Halves)]
-public struct LegacyColorTableRow : IEquatable<LegacyColorTableRow>
+public struct LegacyColorTableRow : IEquatable<LegacyColorTableRow>, ILegacyColorRow
 {
     public const int NumVec4 = 4;
     public const int Halves  = 4;
@@ -84,6 +84,9 @@ public struct LegacyColorTableRow : IEquatable<LegacyColorTableRow>
         get => (ushort)((float)this[11] * 64f);
         set => this[11] = (Half)((value + 0.5f) / 64f);
     }
+
+    readonly Half IColorRow.TileAlpha
+        => Half.One;
 
     public HalfMatrix2x2 TileTransform
     {

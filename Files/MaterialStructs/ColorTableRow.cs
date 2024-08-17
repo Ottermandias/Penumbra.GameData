@@ -19,7 +19,7 @@ namespace Penumbra.GameData.Files.MaterialStructs;
 /// </code>
 /// </summary>
 [InlineArray(NumVec4 * Halves)]
-public struct ColorTableRow : IEquatable<ColorTableRow>
+public struct ColorTableRow : IEquatable<ColorTableRow>, ILegacyColorRow
 {
     public const int NumVec4 = 8;
     public const int Halves  = 4;
@@ -74,6 +74,13 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
         set => this[3] = value;
     }
 
+    // This does a legacy interpretation of the new structures.
+    Half ILegacyColorRow.Shininess
+    {
+        get => this[3];
+        set => this[3] = value;
+    }
+
     public HalfColor SpecularColor
     {
         get => new(((ReadOnlySpan<Half>)this)[4], this[5], this[6]);
@@ -89,6 +96,13 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
     {
         get => this[7];
         set => this[7] = value;
+    }
+
+    // This does a legacy interpretation of the new structures.
+    Half ILegacyColorRow.SpecularMask
+    {
+        get => this[3];
+        set => this[3] = value;
     }
 
     public HalfColor EmissiveColor

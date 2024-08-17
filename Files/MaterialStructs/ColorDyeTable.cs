@@ -2,7 +2,7 @@ using Penumbra.GameData.Files.Utility;
 
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-public sealed class ColorDyeTable : IEnumerable<ColorDyeTableRow>, IColorDyeTable
+public sealed class ColorDyeTable : IColorDyeTable<ColorDyeTableRow>
 {
     [InlineArray(NumRows)]
     private struct Table

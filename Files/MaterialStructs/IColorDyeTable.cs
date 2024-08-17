@@ -25,3 +25,8 @@ public interface IColorDyeTable
     /// <returns> Whether something actually changed. </returns>
     bool SetDefaultRow(int i);
 }
+
+public interface IColorDyeTable<TRow> : IColorDyeTable, IEnumerable<TRow> where TRow : unmanaged
+{
+    public ref TRow this[int i] { get; }
+}

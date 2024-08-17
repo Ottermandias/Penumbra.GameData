@@ -4,7 +4,7 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-public sealed class ColorTable : IEnumerable<ColorTableRow>, IColorTable
+public sealed class ColorTable : IColorTable<ColorTableRow>
 {
     [InlineArray(NumRows)]
     public struct Table

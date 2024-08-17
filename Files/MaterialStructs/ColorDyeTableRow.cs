@@ -1,7 +1,7 @@
 namespace Penumbra.GameData.Files.MaterialStructs;
 
 /// <inheritdoc cref="ColorTableRow"/>
-public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>
+public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>, ILegacyColorDyeRow
 {
     public const int  Size = 4;
     private      uint _data;
@@ -42,7 +42,21 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>
         set => _data = value ? _data | 0x0008u : _data & ~0x0008u;
     }
 
+    // This does a legacy interpretation of the new structures.
+    bool ILegacyColorDyeRow.Shininess
+    {
+        readonly get => (_data & 0x0008) != 0;
+        set => _data = value ? _data | 0x0008u : _data & ~0x0008u;
+    }
+
     public bool Metalness
+    {
+        readonly get => (_data & 0x0010) != 0;
+        set => _data = value ? _data | 0x0010u : _data & ~0x0010u;
+    }
+
+    // This does a legacy interpretation of the new structures.
+    bool ILegacyColorDyeRow.SpecularMask
     {
         readonly get => (_data & 0x0010) != 0;
         set => _data = value ? _data | 0x0010u : _data & ~0x0010u;

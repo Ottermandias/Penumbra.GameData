@@ -4,7 +4,7 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-public sealed class LegacyColorTable : IEnumerable<LegacyColorTableRow>, IColorTable
+public sealed class LegacyColorTable : IColorTable<LegacyColorTableRow>
 {
     [InlineArray(NumRows)]
     private struct Table
