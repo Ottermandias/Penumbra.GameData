@@ -101,7 +101,7 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>, ILegacyColorDyeRo
     public bool SphereMapMask
     {
         readonly get => (_data & 0x0800) != 0;
-        set => _data = value ? _data | 0x0800u : _data & ~0x0200u;
+        set => _data = value ? _data | 0x0800u : _data & ~0x0800u;
     }
 
     public ColorDyeTableRow(in LegacyColorDyeTableRow oldRow)
