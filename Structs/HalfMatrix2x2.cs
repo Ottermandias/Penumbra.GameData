@@ -3,6 +3,8 @@ namespace Penumbra.GameData.Structs;
 [StructLayout(LayoutKind.Sequential)]
 public struct HalfMatrix2x2(Half uu, Half uv, Half vu, Half vv) : IEquatable<HalfMatrix2x2>
 {
+    private const float HalfPi = MathF.PI * 0.5f;
+
     public static readonly HalfMatrix2x2 Zero     = new(Half.Zero, Half.Zero, Half.Zero, Half.Zero);
     public static readonly HalfMatrix2x2 Identity = new(Half.One,  Half.Zero, Half.Zero, Half.One);
 
@@ -14,7 +16,7 @@ public struct HalfMatrix2x2(Half uu, Half uv, Half vu, Half vv) : IEquatable<Hal
     public static HalfMatrix2x2 Compose(Vector2 scale, float rotation, float shear)
     {
         var vLength = scale.Y / MathF.Cos(shear);
-        var vAngle  = shear + MathF.PI * 0.5f + rotation;
+        var vAngle  = shear + HalfPi + rotation;
         return new(
             (Half)(scale.X * MathF.Cos(rotation)),
             (Half)(vLength * MathF.Cos(vAngle)),
@@ -26,14 +28,16 @@ public struct HalfMatrix2x2(Half uu, Half uv, Half vu, Half vv) : IEquatable<Hal
     {
         var floats = (Vector4)this;
         var scaleX = MathF.Sqrt(floats.X * floats.X + floats.Z * floats.Z);
+        var scaleY = MathF.Sqrt(floats.Y * floats.Y + floats.W * floats.W);
         rotation   = MathF.Atan2(floats.Z, floats.X);
-        shear      = MathF.Atan2(floats.W, floats.Y) - MathF.PI * 0.5f - rotation;
-        if (shear < -MathF.PI)
-            shear += MathF.Tau;
-        else if (shear > MathF.PI)
-            shear -= MathF.Tau;
-        var scaleY = MathF.Sqrt(floats.Y * floats.Y + floats.W * floats.W) * MathF.Cos(shear);
-        scale      = new(scaleX, scaleY);
+        // If scaleY is zero, force the shear angle to zero.
+        // Otherwise it would be pi, which causes a division by zero when recomposing.
+        shear = scaleY == 0.0f ? 0.0f : MathF.Atan2(floats.W, floats.Y) - HalfPi - rotation;
+        if (shear < -HalfPi)
+            shear += MathF.PI;
+        else if (shear > HalfPi)
+            shear -= MathF.PI;
+        scale = new(scaleX, scaleY * MathF.Cos(shear));
     }
 
     public override readonly bool Equals([NotNullWhen(true)] object? obj)
