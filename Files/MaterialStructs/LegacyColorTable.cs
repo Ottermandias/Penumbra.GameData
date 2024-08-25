@@ -107,18 +107,12 @@ public sealed class LegacyColorTable : IColorTable<LegacyColorTableRow>
         _rowData = reader.Read<Table>();
     }
 
-    public LegacyColorTable(ColorTable newTable)
-    {
-        for (var i = 0; i < NumRows; ++i)
-            this[i] = new LegacyColorTableRow(newTable[i]);
-    }
-
     public LegacyColorTable(IColorTable other)
     {
         if (other is ColorTable newTable)
         {
             for (var i = 0; i < NumRows; ++i)
-                _rowData[i] = new LegacyColorTableRow(newTable[i]);
+                _rowData[i].DowngradeFrom(newTable[i]);
         }
         else if (other is LegacyColorTable table)
         {

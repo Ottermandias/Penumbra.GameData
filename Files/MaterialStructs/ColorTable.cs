@@ -153,7 +153,7 @@ public sealed class ColorTable : IColorTable<ColorTableRow>
             case LegacyColorTable oldTable:
             {
                 for (var i = 0; i < LegacyColorTable.NumRows; ++i)
-                    _rowData[i] = new ColorTableRow(oldTable[i]);
+                    _rowData[i].UpgradeFrom(oldTable[i]);
                 for (var i = LegacyColorTable.NumRows; i < NumRows; ++i)
                     _rowData[i] = ColorTableRow.LegacyDefault;
                 break;
@@ -168,6 +168,12 @@ public sealed class ColorTable : IColorTable<ColorTableRow>
                 SetDefault();
                 break;
         }
+    }
+
+    public void ConvertFromCharacterLegacy()
+    {
+        for (var i = 0; i < NumRows; ++i)
+            _rowData[i].ConvertFromCharacterLegacy();
     }
 
     public static ColorTable CastOrConvert(IColorTable other)

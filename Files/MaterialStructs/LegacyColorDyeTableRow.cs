@@ -46,6 +46,9 @@ public struct LegacyColorDyeTableRow : IEquatable<LegacyColorDyeTableRow>, ILega
     }
 
     public LegacyColorDyeTableRow(in ColorDyeTableRow row)
+        => DowngradeFrom(row);
+
+    public void DowngradeFrom(in ColorDyeTableRow row)
     {
         Template      = row.Template;
         DiffuseColor  = row.DiffuseColor;

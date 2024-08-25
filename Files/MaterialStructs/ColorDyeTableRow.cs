@@ -105,6 +105,9 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>, ILegacyColorDyeRo
     }
 
     public ColorDyeTableRow(in LegacyColorDyeTableRow oldRow)
+        => UpgradeFrom(oldRow);
+
+    public void UpgradeFrom(in LegacyColorDyeTableRow oldRow)
     {
         Template      = oldRow.Template;
         DiffuseColor  = oldRow.DiffuseColor;
@@ -112,6 +115,16 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>, ILegacyColorDyeRo
         EmissiveColor = oldRow.EmissiveColor;
         Scalar3       = oldRow.Shininess;
         Metalness     = oldRow.SpecularMask;
+    }
+
+    public void ConvertFromCharacterLegacy()
+    {
+        if (Template != 0)
+            Template += 1000;
+
+        Metalness = false;
+        Roughness = Scalar3;
+        Scalar3 = false;
     }
 
     public override readonly bool Equals([NotNullWhen(true)] object? obj)

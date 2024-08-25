@@ -35,6 +35,12 @@ public struct HalfColor(Half red, Half green, Half blue) : IEquatable<HalfColor>
     public static explicit operator HalfColor(Vector3 color)
         => new((Half)color.X, (Half)color.Y, (Half)color.Z);
 
+    public static HalfColor operator *(HalfColor color, Half scalar)
+        => new(color.Red * scalar, color.Green * scalar, color.Blue * scalar);
+
+    public static HalfColor operator *(Half scalar, HalfColor color)
+        => new(scalar * color.Red, scalar * color.Green, scalar * color.Blue);
+
     public static bool operator ==(HalfColor left, HalfColor right)
         => left.Equals(right);
 

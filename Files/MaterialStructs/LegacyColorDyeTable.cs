@@ -69,7 +69,7 @@ public sealed class LegacyColorDyeTable : IColorDyeTable<LegacyColorDyeTableRow>
             case ColorDyeTable newTable:
             {
                 for (var i = 0; i < NumRows; ++i)
-                    _rowData[i] = new LegacyColorDyeTableRow(newTable[i]);
+                    _rowData[i].DowngradeFrom(newTable[i]);
                 break;
             }
             case LegacyColorDyeTable table:
