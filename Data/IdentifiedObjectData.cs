@@ -130,7 +130,15 @@ public sealed class IdentifiedItem(EquipItem item) : IIdentifiedObjectData
         => Item;
 
     public (ChangedItemType Type, uint Id) ToApiObject()
-        => (Item.Type.IsOffhandType() ? ChangedItemType.ItemOffhand : ChangedItemType.Item, Item.ItemId.Id);
+    {
+        if (Item.Id.IsItem)
+            return (Item.Type.IsOffhandType() ? ChangedItemType.ItemOffhand : ChangedItemType.Item, Item.ItemId.Id);
+
+        if (Item.Type.ToSlot() is EquipSlot.MainHand or EquipSlot.OffHand)
+            return (ChangedItemType.Unknown, 0);
+
+        return (ChangedItemType.CustomArmor, (uint)Item.PrimaryId.Id | ((uint)Item.Variant.Id << 16) | ((uint)Item.Type << 24));
+    }
 
     public string ToName(string key)
         => Item.Name;
