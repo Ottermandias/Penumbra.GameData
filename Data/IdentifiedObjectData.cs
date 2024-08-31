@@ -151,6 +151,9 @@ public sealed class IdentifiedItem(EquipItem item) : IIdentifiedObjectData
 
     public ChangedItemIcon Icon
         => Item.Type.GetCategoryIcon();
+
+    public static (PrimaryId Model, Variant Variant, FullEquipType Type) Split(uint id)
+        => ((PrimaryId)id, (Variant)(id >> 16), (FullEquipType)(id >> 24));
 }
 
 public sealed class IdentifiedCustomization : IIdentifiedObjectData
