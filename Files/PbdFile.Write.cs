@@ -107,8 +107,8 @@ public partial class PbdFile
         foreach (var blob in deformerBlobs)
             stream.Write(blob);
 
-        if ((stream.Length & 64) != 0)
-            stream.Write(new byte[64 - (stream.Length & 63)]);
+        if ((stream.Length & 16) != 0)
+            stream.Write(new byte[16 - (stream.Length & 15)]);
 
         return stream.ToArray();
     }
