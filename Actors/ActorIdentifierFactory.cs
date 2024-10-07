@@ -527,9 +527,13 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         var dataId    = GetCompanionId(actor, owner);
         var name      = owner.Utf8Name;
         var homeWorld = owner.HomeWorld;
-        return check
-            ? CreateOwned(name, homeWorld, kind, dataId)
-            : CreateIndividualUnchecked(IdentifierType.Owned, name, homeWorld, kind, dataId);
+        if (check)
+            return CreateOwned(name, homeWorld, kind, dataId);
+
+        if (name.Length > 0)
+            return CreateIndividualUnchecked(IdentifierType.Owned, name, homeWorld, kind, dataId);
+
+        return CreateNpc(kind, dataId, actor.Index);
     }
 
     /// <summary> Create a retainer from the game object.</summary>
