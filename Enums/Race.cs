@@ -68,8 +68,12 @@ public enum GenderRace : ushort
 {
     Unknown             = 0,
     MidlanderMale       = 0101,
+    MidlanderMaleUnk1   = 0102,
+    MidlanderMaleUnk2   = 0103,
     MidlanderMaleNpc    = 0104,
     MidlanderFemale     = 0201,
+    MidlanderFemaleUnk1 = 0202,
+    MidlanderFemaleUnk2 = 0203,
     MidlanderFemaleNpc  = 0204,
     HighlanderMale      = 0301,
     HighlanderMaleNpc   = 0304,
@@ -260,8 +264,12 @@ public static class RaceEnumExtensions
         {
             Unknown             => (Gender.Unknown, ModelRace.Unknown),
             MidlanderMale       => (Gender.Male, ModelRace.Midlander),
+            MidlanderMaleUnk1   => (Gender.Unknown, ModelRace.Midlander),
+            MidlanderMaleUnk2   => (Gender.Unknown, ModelRace.Midlander),
             MidlanderMaleNpc    => (Gender.MaleNpc, ModelRace.Midlander),
             MidlanderFemale     => (Gender.Female, ModelRace.Midlander),
+            MidlanderFemaleUnk1 => (Gender.Unknown, ModelRace.Midlander),
+            MidlanderFemaleUnk2 => (Gender.Unknown, ModelRace.Midlander),
             MidlanderFemaleNpc  => (Gender.FemaleNpc, ModelRace.Midlander),
             HighlanderMale      => (Gender.Male, ModelRace.Highlander),
             HighlanderMaleNpc   => (Gender.MaleNpc, ModelRace.Highlander),
@@ -310,8 +318,12 @@ public static class RaceEnumExtensions
         => value switch
         {
             MidlanderMale       => "0101",
+            MidlanderMaleUnk1   => "0102",
+            MidlanderMaleUnk2   => "0103",
             MidlanderMaleNpc    => "0104",
             MidlanderFemale     => "0201",
+            MidlanderFemaleUnk1 => "0202",
+            MidlanderFemaleUnk2 => "0203",
             MidlanderFemaleNpc  => "0204",
             HighlanderMale      => "0301",
             HighlanderMaleNpc   => "0304",
@@ -393,8 +405,12 @@ public static partial class Names
         => code switch
         {
             "0101" => MidlanderMale,
+            "0102" => MidlanderMaleUnk1,
+            "0103" => MidlanderMaleUnk2,
             "0104" => MidlanderMaleNpc,
             "0201" => MidlanderFemale,
+            "0202" => MidlanderFemaleUnk1,
+            "0203" => MidlanderFemaleUnk2,
             "0204" => MidlanderFemaleNpc,
             "0301" => HighlanderMale,
             "0304" => HighlanderMaleNpc,
