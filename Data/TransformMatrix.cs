@@ -63,6 +63,26 @@ public readonly struct TransformMatrix : IEquatable<TransformMatrix>
         ZRow = new Vector4(xColumn.Z, yColumn.Z, zColumn.Z, translation.Z);
     }
 
+    /// <summary> Return a new transform matrix with a single value changed. </summary>
+    public TransformMatrix ChangeValue(int i, int j, float value)
+    {
+        if (i is < 0 or > 2)
+            return this;
+        if (j is < 0 or > 3)
+            return this;
+
+        var xRow = XRow;
+        if (i == 0)
+            xRow[j] = value;
+        var yRow = YRow;
+        if (i == 1)
+            yRow[j] = value;
+        var zRow = ZRow;
+        if (i == 2)
+            zRow[j] = value;
+        return new TransformMatrix(xRow, yRow, zRow);
+    }
+
     /// <summary> Create a transform matrix that only translates. </summary>
     public static TransformMatrix CreateTranslation(Vector3 translation)
         => new(
@@ -168,6 +188,16 @@ public readonly struct TransformMatrix : IEquatable<TransformMatrix>
 
         return true;
     }
+
+    public float this[int i, int j]
+        => i switch
+        {
+            0 => XRow[j],
+            1 => YRow[j],
+            2 => ZRow[j],
+            3 => j == 3 ? 1 : 0,
+            _ => 0,
+        };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(in TransformMatrix lhs, in TransformMatrix rhs)
