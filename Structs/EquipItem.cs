@@ -221,6 +221,12 @@ public readonly struct EquipItem : IEquatable<EquipItem>
 
     public override int GetHashCode()
         => Id.Id.GetHashCode();
+
+    public const string Nothing = "Nothing";
+
+    /// <summary> An empty bonus item for a specific slot. </summary>
+    public static EquipItem BonusItemNothing(BonusItemFlag slot)
+        => new(Nothing, (BonusItemId)0, 0, 0, 0, 0, slot.ToEquipType(), 0, 0, 0);
 }
 
 /// <summary> A list wrapping a PseudoEquipItem list to an EquipItemList. </summary>

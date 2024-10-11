@@ -74,7 +74,7 @@ public sealed class ObjectIdentification(
     public IEnumerable<EquipItem> Identify(PrimaryId primaryId, Variant variant, BonusItemFlag slot)
     {
         if (primaryId.Id == 0 && variant.Id == 0)
-            return [new EquipItem("Nothing", (BonusItemId) 0, 0, 0, 0, 0, slot.ToEquipType(), 0, 0, 0)];
+            return [EquipItem.BonusItemNothing(slot)];
 
         return _equipmentIdentification.Between(primaryId, slot.ToEquipSlot(), variant);
     }
