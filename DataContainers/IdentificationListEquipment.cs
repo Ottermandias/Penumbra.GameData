@@ -9,7 +9,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A list to efficiently identify equipment pieces. This requires ItemsByType to be finished. </summary>
 public sealed class IdentificationListEquipment(IDalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
-    : KeyList<PseudoEquipItem>(pi, log, "EquipmentIdentification", gameData.Language, 10, () => CreateEquipmentList(items), ToKey, ValidKey,
+    : KeyList<PseudoEquipItem>(pi, log, "EquipmentIdentification", gameData.Language, 11, () => CreateEquipmentList(items), ToKey, ValidKey,
         ValueKeySelector, items.Awaiter)
 {
     /// <summary> Find all items affected by the given set of input data. </summary>
@@ -50,7 +50,7 @@ public sealed class IdentificationListEquipment(IDalamudPluginInterface pi, Logg
     /// <summary> Create the key list of all equipment pieces, including the custom defined ones without actual item representation.  </summary>
     private static IEnumerable<PseudoEquipItem> CreateEquipmentList(ItemsByType items)
     {
-        return items.Where(kvp => kvp.Key.IsEquipment() || kvp.Key.IsAccessory())
+        return items.Where(kvp => kvp.Key.IsEquipment() || kvp.Key.IsAccessory() || kvp.Key.IsBonus())
             .SelectMany(kvp => kvp.Value)
             .Select(i => (PseudoEquipItem)i)
             .Concat(CustomList);

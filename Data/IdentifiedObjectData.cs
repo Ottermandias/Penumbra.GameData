@@ -1,7 +1,4 @@
-using System.Diagnostics.Metrics;
-using System.Xml.Linq;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using FFXIVClientStructs.FFXIV.Common.Lua;
 using Lumina.Excel.GeneratedSheets;
 using OtterGui.Classes;
 using Penumbra.Api.Enums;
@@ -118,6 +115,9 @@ public static class IdentifiedObjectExtensions
             FullEquipType.Twinfangs       => ChangedItemIcon.Mainhand,
             FullEquipType.TwinfangsOff    => ChangedItemIcon.Offhand,
             FullEquipType.Whip            => ChangedItemIcon.Mainhand,
+            FullEquipType.UnknownMainhand => ChangedItemIcon.Mainhand,
+            FullEquipType.UnknownOffhand  => ChangedItemIcon.Offhand,
+            FullEquipType.Glasses         => ChangedItemIcon.Head,
             _                             => ChangedItemIcon.Unknown,
         };
 }
@@ -137,7 +137,7 @@ public sealed class IdentifiedItem(EquipItem item) : IIdentifiedObjectData
         if (Item.Type.ToSlot() is EquipSlot.MainHand or EquipSlot.OffHand)
             return (ChangedItemType.Unknown, 0);
 
-        return (ChangedItemType.CustomArmor, (uint)Item.PrimaryId.Id | ((uint)Item.Variant.Id << 16) | ((uint)Item.Type << 24));
+        return (ChangedItemType.CustomArmor, Item.PrimaryId.Id | ((uint)Item.Variant.Id << 16) | ((uint)Item.Type << 24));
     }
 
     public string ToName(string key)

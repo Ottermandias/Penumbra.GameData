@@ -5,33 +5,44 @@ using Dalamud.Utility;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
+using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps GlassesIds to Glasses. </summary>
 public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<IReadOnlyDictionary<ushort, PseudoBonusItem>>(pluginInterface, log, "BonusItems",
-        gameData.Language, 1,
-        () => CreateGlassesData(gameData)), IReadOnlyDictionary<BonusItemId, BonusItem>
+    : DataSharer<IReadOnlyDictionary<ushort, PseudoEquipItem>>(pluginInterface, log, "BonusItems",
+        gameData.Language, 2,
+        () => CreateGlassesData(gameData)), IReadOnlyDictionary<BonusItemId, EquipItem>
 {
     /// <summary> Create the data. </summary>
-    private static IReadOnlyDictionary<ushort, PseudoBonusItem> CreateGlassesData(
+    private static IReadOnlyDictionary<ushort, PseudoEquipItem> CreateGlassesData(
         IDataManager dataManager)
     {
         // TODO
         var glassesSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets2.Glasses>(dataManager.Language)!;
         return glassesSheet.Where(s => s.Name.RawData.Length > 0)
-            .ToFrozenDictionary(s => (ushort)s.RowId,
-                s => (s.Name.ToDalamudString().ToString(), (uint)s.Icon, (ushort)s.RowId, (ushort)s.Unknown_70_7,
-                    (byte)(s.Unknown_70_7 >> 16), (byte)1)); // TODO slot other than glasses
+            .ToFrozenDictionary(s => (ushort)s.RowId, FromBonusItem);
+    }
+
+    private static PseudoEquipItem FromBonusItem(Lumina.Excel.GeneratedSheets2.Glasses bonusItem)
+    {
+        var name            = bonusItem.Name.ToDalamudString().ToString();
+        var id              = (CustomItemId)new BonusItemId((ushort)bonusItem.RowId);
+        var icon            = new IconId((uint)bonusItem.Icon);
+        var model           = new PrimaryId((ushort)bonusItem.Unknown_70_7);
+        var variant         = new Variant((byte)(bonusItem.Unknown_70_7 >> 16));
+        var type            = FullEquipType.Glasses; // TODO slot other than glasses
+        var flags           = (ItemFlags)0;
+        var level           = (CharacterLevel)1;
+        var jobRestrictions = (JobGroupId)0;
+        return (PseudoEquipItem)new EquipItem(name, id, icon, model, 0, variant, type, flags, level, jobRestrictions);
     }
 
     /// <inheritdoc/>
-    public IEnumerator<KeyValuePair<BonusItemId, BonusItem>> GetEnumerator()
-        => Value.Select(kvp
-                => new KeyValuePair<BonusItemId, BonusItem>(new BonusItemId(kvp.Key), (BonusItem)kvp.Value))
-            .GetEnumerator();
+    public IEnumerator<KeyValuePair<BonusItemId, EquipItem>> GetEnumerator()
+        => Value.Select(kvp => new KeyValuePair<BonusItemId, EquipItem>(new BonusItemId(kvp.Key), kvp.Value)).GetEnumerator();
 
     /// <inheritdoc/>
     IEnumerator IEnumerable.GetEnumerator()
@@ -46,7 +57,7 @@ public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logg
         => Value.ContainsKey(key.Id);
 
     /// <inheritdoc/>
-    public bool TryGetValue(BonusItemId key, out BonusItem value)
+    public bool TryGetValue(BonusItemId key, out EquipItem value)
     {
         if (!Value.TryGetValue(key.Id, out var data))
         {
@@ -54,12 +65,12 @@ public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logg
             return false;
         }
 
-        value = (BonusItem)data;
+        value = data;
         return true;
     }
 
     /// <inheritdoc/>
-    public BonusItem this[BonusItemId key]
+    public EquipItem this[BonusItemId key]
         => TryGetValue(key, out var data) ? data : throw new ArgumentOutOfRangeException(nameof(key));
 
     /// <inheritdoc/>
@@ -67,12 +78,12 @@ public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logg
         => Value.Keys.Select(k => new BonusItemId(k));
 
     /// <inheritdoc/>
-    public IEnumerable<BonusItem> Values
-        => Value.Select(kvp => (BonusItem)kvp.Value);
+    public IEnumerable<EquipItem> Values
+        => Value.Select(kvp => (EquipItem)kvp.Value);
 
     /// <inheritdoc/>
     protected override long ComputeMemory()
-        => DataUtility.DictionaryMemory(24, Count);
+        => DataUtility.DictionaryMemory(32, Count);
 
     /// <inheritdoc/>
     protected override int ComputeTotalCount()

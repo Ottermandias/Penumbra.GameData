@@ -20,14 +20,14 @@ public abstract class ItemDictionary(
     string name,
     ClientLanguage language,
     int version,
-    Func<IReadOnlyDictionary<uint, PseudoEquipItem>> factory,
+    Func<IReadOnlyDictionary<ulong, PseudoEquipItem>> factory,
     Task? continuation = null)
-    : DataSharer<IReadOnlyDictionary<uint, PseudoEquipItem>>(pluginInterface, log, name, language, version, factory, continuation),
-        IReadOnlyDictionary<ItemId, EquipItem>
+    : DataSharer<IReadOnlyDictionary<ulong, PseudoEquipItem>>(pluginInterface, log, name, language, version, factory, continuation),
+        IReadOnlyDictionary<CustomItemId, EquipItem>
 {
     /// <inheritdoc/>
-    public IEnumerator<KeyValuePair<ItemId, EquipItem>> GetEnumerator()
-        => Value.Select(kvp => new KeyValuePair<ItemId, EquipItem>(kvp.Key, kvp.Value)).GetEnumerator();
+    public IEnumerator<KeyValuePair<CustomItemId, EquipItem>> GetEnumerator()
+        => Value.Select(kvp => new KeyValuePair<CustomItemId, EquipItem>(kvp.Key, kvp.Value)).GetEnumerator();
 
     /// <inheritdoc/>
     IEnumerator IEnumerable.GetEnumerator()
@@ -38,11 +38,11 @@ public abstract class ItemDictionary(
         => Value.Count;
 
     /// <inheritdoc/>
-    public bool ContainsKey(ItemId key)
+    public bool ContainsKey(CustomItemId key)
         => Value.ContainsKey(key.Id);
 
     /// <inheritdoc/>
-    public bool TryGetValue(ItemId key, out EquipItem value)
+    public bool TryGetValue(CustomItemId key, out EquipItem value)
     {
         if (Value.TryGetValue(key.Id, out var v))
         {
@@ -55,12 +55,12 @@ public abstract class ItemDictionary(
     }
 
     /// <inheritdoc/>
-    public EquipItem this[ItemId key]
+    public EquipItem this[CustomItemId key]
         => Value[key.Id];
 
     /// <inheritdoc/>
-    public IEnumerable<ItemId> Keys
-        => Value.Keys.Select(i => (ItemId) i);
+    public IEnumerable<CustomItemId> Keys
+        => Value.Keys.Select(i => (CustomItemId) i);
 
     /// <inheritdoc/>
     public IEnumerable<EquipItem> Values

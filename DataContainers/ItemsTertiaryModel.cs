@@ -14,17 +14,17 @@ public sealed class ItemsTertiaryModel(
     IDataManager gameData,
     ItemsByType items,
     ItemsSecondaryModel itemsSecondaries)
-    : ItemDictionary(pi, log, "ItemDictTertiary", gameData.Language, 3, () => CreateGauntlets(items, itemsSecondaries),
+    : ItemDictionary(pi, log, "ItemDictTertiary", gameData.Language, 4, () => CreateGauntlets(items, itemsSecondaries),
         itemsSecondaries.Awaiter)
 {
     /// <summary> Create data by taking only the tertiary models for all items. </summary>
-    private static IReadOnlyDictionary<uint, PseudoEquipItem> CreateGauntlets(ItemsByType items,
+    private static IReadOnlyDictionary<ulong, PseudoEquipItem> CreateGauntlets(ItemsByType items,
         ItemsSecondaryModel itemsSecondaries)
     {
         var gauntlets = items.Value[(int)FullEquipType.Hands]
             .Where(g => itemsSecondaries.Value
-                .ContainsKey((uint)g.Item2))
-            .ToDictionary(g => (uint)g.Item2, g => g);
+                .ContainsKey(g.Item2))
+            .ToDictionary(g => g.Item2, g => g);
         return gauntlets.ToFrozenDictionary();
     }
 }
