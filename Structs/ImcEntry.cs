@@ -72,4 +72,30 @@ public readonly struct ImcEntry : IEquatable<ImcEntry>
 
     public static bool operator !=(ImcEntry left, ImcEntry right)
         => !(left == right);
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder(128);
+        sb.Append("Material ")
+            .Append(MaterialId);
+        if (DecalId != 0)
+            sb.Append(", Decal ")
+                .Append(DecalId);
+        if (VfxId != 0)
+            sb.Append(", VFX ")
+                .Append(VfxId);
+        var sound = SoundId;
+        if (sound != 0)
+            sb.Append(", Sound ")
+                .Append(sound);
+
+        sb.Append(", Attributes ");
+        var mask = AttributeMask;
+        for (var i = 0; i < NumAttributes; ++i)
+        {
+            if ((mask & (1 << i)) != 0)
+                sb.Append((char) ('A' + i));
+        }
+        return sb.ToString();
+    }
 }
