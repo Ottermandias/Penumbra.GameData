@@ -189,6 +189,15 @@ public readonly struct EquipItem : IEquatable<EquipItem>
         return new EquipItem(name, fullId, iconId, modelId, type, variant, equipType, flags, level, restrictions);
     }
 
+    public static EquipItem FromBonusIds(BonusItemId itemId, IconId iconId, PrimaryId modelId, Variant variant, BonusItemFlag type, string? name = null)
+    {
+        name ??= $"Unknown ({modelId}-{variant})";
+        var fullId = itemId.Id is 0
+            ? new CustomItemId(modelId, variant, type)
+            : itemId;
+        return new EquipItem(name, fullId, iconId, modelId, 0, variant, type.ToEquipType(), 0, 0, 0);
+    }
+
 
     /// <summary> Create an EquipItem from a singular custom ID, if possible. </summary>
     public static EquipItem FromId(CustomItemId id)
@@ -226,7 +235,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
 
     /// <summary> An empty bonus item for a specific slot. </summary>
     public static EquipItem BonusItemNothing(BonusItemFlag slot)
-        => new(Nothing, (BonusItemId)0, 0, 0, 0, 0, slot.ToEquipType(), 0, 0, 0);
+        => new(Nothing, new CustomItemId(0, 0, slot), 0, 0, 0, 0, slot.ToEquipType(), 0, 0, 0);
 }
 
 /// <summary> A list wrapping a PseudoEquipItem list to an EquipItemList. </summary>
