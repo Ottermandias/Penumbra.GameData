@@ -2,7 +2,7 @@ using Penumbra.GameData.Files.Utility;
 
 namespace Penumbra.GameData.Files.MaterialStructs;
 
-public sealed class LegacyColorDyeTable : IEnumerable<LegacyColorDyeTableRow>, IColorDyeTable
+public sealed class LegacyColorDyeTable : IColorDyeTable<LegacyColorDyeTableRow>
 {
     [InlineArray(NumRows)]
     private struct Table
@@ -69,7 +69,7 @@ public sealed class LegacyColorDyeTable : IEnumerable<LegacyColorDyeTableRow>, I
             case ColorDyeTable newTable:
             {
                 for (var i = 0; i < NumRows; ++i)
-                    _rowData[i] = new LegacyColorDyeTableRow(newTable[i]);
+                    _rowData[i].DowngradeFrom(newTable[i]);
                 break;
             }
             case LegacyColorDyeTable table:
