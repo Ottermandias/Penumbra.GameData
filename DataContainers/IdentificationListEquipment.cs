@@ -9,7 +9,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A list to efficiently identify equipment pieces. This requires ItemsByType to be finished. </summary>
 public sealed class IdentificationListEquipment(IDalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
-    : KeyList<PseudoEquipItem>(pi, log, "EquipmentIdentification", gameData.Language, 10, () => CreateEquipmentList(items), ToKey, ValidKey,
+    : KeyList<PseudoEquipItem>(pi, log, "EquipmentIdentification", gameData.Language, 11, () => CreateEquipmentList(items), ToKey, ValidKey,
         ValueKeySelector, items.Awaiter)
 {
     /// <summary> Find all items affected by the given set of input data. </summary>
@@ -50,7 +50,7 @@ public sealed class IdentificationListEquipment(IDalamudPluginInterface pi, Logg
     /// <summary> Create the key list of all equipment pieces, including the custom defined ones without actual item representation.  </summary>
     private static IEnumerable<PseudoEquipItem> CreateEquipmentList(ItemsByType items)
     {
-        return items.Where(kvp => kvp.Key.IsEquipment() || kvp.Key.IsAccessory())
+        return items.Where(kvp => kvp.Key.IsEquipment() || kvp.Key.IsAccessory() || kvp.Key.IsBonus())
             .SelectMany(kvp => kvp.Value)
             .Select(i => (PseudoEquipItem)i)
             .Concat(CustomList);
@@ -64,11 +64,11 @@ public sealed class IdentificationListEquipment(IDalamudPluginInterface pi, Logg
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)8100, (SecondaryId)0, 01, FullEquipType.Body, name:"Reaper Shroud (8100-1)"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9041, (SecondaryId)0, 01, FullEquipType.Head,  name:"Cid's Bandana (9041-1)"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9041, (SecondaryId)0, 01, FullEquipType.Body,  name:"Cid's Body (9041-1)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Head,  name:"Smallclothes (NPC, 9903-1)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Body,  name:"Smallclothes (NPC, 9903-1)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Hands, name:"Smallclothes (NPC, 9903-1)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Legs,  name:"Smallclothes (NPC, 9903-1)"),
-            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Feet,  name:"Smallclothes (NPC, 9903-1)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Head,  name:"Smallclothes (NPC, 9903-1, Head)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Body,  name:"Smallclothes (NPC, 9903-1, Body)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Hands, name:"Smallclothes (NPC, 9903-1, Hands)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Legs,  name:"Smallclothes (NPC, 9903-1, Legs)"),
+            (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9903, (SecondaryId)0, 01, FullEquipType.Feet,  name:"Smallclothes (NPC, 9903-1, Feet)"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9212, (SecondaryId)0, 12, FullEquipType.Body,  name:"Ancient Robes (Lahabrea, 9212-12)"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9212, (SecondaryId)0, 01, FullEquipType.Legs,  name:"Ancient Legs (9212-1)"),
             (PseudoEquipItem)EquipItem.FromIds(0, 0, (PrimaryId)9212, (SecondaryId)0, 01, FullEquipType.Feet,  name:"Ancient Shoes (9212-1)"),

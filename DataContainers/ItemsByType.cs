@@ -9,13 +9,13 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps full item types to lists of all corresponding items. </summary>
-public sealed class ItemsByType(IDalamudPluginInterface pi, Logger log, IDataManager dataManager)
-    : DataSharer<IReadOnlyList<IReadOnlyList<PseudoEquipItem>>>(pi, log, "ItemsByType", dataManager.Language, 3,
-            () => CreateItems(dataManager)),
+public sealed class ItemsByType(IDalamudPluginInterface pi, Logger log, IDataManager dataManager, DictBonusItems bonusItems)
+    : DataSharer<IReadOnlyList<IReadOnlyList<PseudoEquipItem>>>(pi, log, "ItemsByType", dataManager.Language, 4,
+            () => CreateItems(dataManager, bonusItems)),
         IReadOnlyDictionary<FullEquipType, IReadOnlyList<EquipItem>>
 {
     /// <summary> Create the data. </summary>
-    private static IReadOnlyList<PseudoEquipItem>[] CreateItems(IDataManager dataManager)
+    private static IReadOnlyList<PseudoEquipItem>[] CreateItems(IDataManager dataManager, DictBonusItems bonusItems)
     {
         var tmp = Enum.GetValues<FullEquipType>().Select(_ => new List<EquipItem>(1024)).ToArray();
 
@@ -57,6 +57,9 @@ public sealed class ItemsByType(IDalamudPluginInterface pi, Logger log, IDataMan
                 tmp[(int)type].Add(EquipItem.FromArmor(item));
             }
         }
+
+        foreach (var item in bonusItems.Values)
+            tmp[(int)item.Type].Add(item);
 
         var ret = new IReadOnlyList<PseudoEquipItem>[tmp.Length];
         ret[0] = Array.Empty<PseudoEquipItem>();

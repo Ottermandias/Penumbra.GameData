@@ -288,7 +288,7 @@ public static partial class GamePaths
             public static partial Regex Regex();
 
             public static string Path(PrimaryId accessoryId, GenderRace raceCode, EquipSlot slot, Variant variant, string suffix)
-                => $"{FolderPath(accessoryId, variant)}/c{raceCode.ToRaceCode()}a{accessoryId.Id:D4}_{slot.ToSuffix()}_{suffix}.mtrl";
+                => $"{FolderPath(accessoryId, variant)}/mt_c{raceCode.ToRaceCode()}a{accessoryId.Id:D4}_{slot.ToSuffix()}_{suffix}.mtrl";
 
             public static string FolderPath(PrimaryId accessoryId, Variant variant)
                 => $"chara/accessory/a{accessoryId.Id:D4}/material/v{variant.Id:D4}";

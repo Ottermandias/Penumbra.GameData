@@ -9,24 +9,24 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary mapping ItemIds to all primary model items. This requires ItemsByType to be finished. </summary>
 public sealed class ItemsPrimaryModel(IDalamudPluginInterface pi, Logger log, IDataManager gameData, ItemsByType items)
-    : ItemDictionary(pi, log, "ItemDictPrimary", gameData.Language, 4, () => CreateMainItems(items), items.Awaiter)
+    : ItemDictionary(pi, log, "ItemDictPrimary", gameData.Language, 5, () => CreateMainItems(items), items.Awaiter)
 {
     /// <summary> Create data by taking only the primary models for all items. </summary>
-    private static IReadOnlyDictionary<uint, PseudoEquipItem> CreateMainItems(ItemsByType items)
+    private static IReadOnlyDictionary<ulong, PseudoEquipItem> CreateMainItems(ItemsByType items)
     {
-        var dict = new Dictionary<uint, PseudoEquipItem>(1024 * 16);
+        var dict = new Dictionary<ulong, PseudoEquipItem>(1024 * 16);
         foreach (var type in Enum.GetValues<FullEquipType>().Where(v => !FullEquipTypeExtensions.OffhandTypes.Contains(v)))
         {
             var list = items.Value[(int)type];
             if (type is FullEquipType.Hands)
             {
                 foreach (var item in list.Where(i => !i.Item1.EndsWith(" (Gauntlets)")))
-                    dict.TryAdd((uint)item.Item2, item);
+                    dict.TryAdd(item.Item2, item);
             }
             else
             {
                 foreach (var item in list)
-                    dict.TryAdd((uint)item.Item2, item);
+                    dict.TryAdd(item.Item2, item);
             }
         }
 

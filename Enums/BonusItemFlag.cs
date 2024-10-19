@@ -47,6 +47,14 @@ public static class BonusExtensions
             _                     => "unk",
         };
 
+    public static EquipSlot ToEquipSlot(this BonusItemFlag value)
+        => value switch
+        {
+            BonusItemFlag.Glasses => EquipSlot.Head,
+            BonusItemFlag.UnkSlot => EquipSlot.Unknown,
+            _                     => EquipSlot.Unknown,
+        };
+
     public static string ToName(this BonusItemFlag value)
         => value switch
         {

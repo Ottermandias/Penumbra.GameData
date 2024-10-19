@@ -148,4 +148,34 @@ public readonly struct GmpEntry : IEquatable<GmpEntry>
         _value4 = data[3];
         _value5 = data[4];
     }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder(128);
+        sb.Append(Enabled ? "Enabled" : "Disabled");
+        if (Animated)
+            sb.Append(", Animated");
+
+        var rotA = RotationA;
+        var rotB = RotationB;
+        var rotC = RotationC;
+        if (rotA != 0 || rotB != 0 || rotC != 0)
+            sb.Append(", Rotation (")
+                .Append(rotA)
+                .Append("°, ")
+                .Append(rotB)
+                .Append("°, ")
+                .Append(rotC)
+                .Append(')');
+
+        var unkA = UnknownA;
+        var unkB = UnknownB;
+        if (unkA != 0 || unkB != 0)
+            sb.Append(", Unknown (")
+                .Append(UnknownA)
+                .Append(", ")
+                .Append(UnknownB)
+                .Append(')');
+        return sb.ToString();
+    }
 }

@@ -18,7 +18,6 @@ public sealed class ObjectIdentification(
     IdentificationListEquipment _equipmentIdentification,
     IdentificationListWeapons _weaponIdentification,
     IdentificationListModels _modelIdentification,
-    IdentificationListBonus _bonusIdentification,
     GamePathParser _gamePathParser)
     : IAsyncService
 {
@@ -72,12 +71,12 @@ public sealed class ObjectIdentification(
     /// <param name="variant"> The variant of the material. </param>
     /// <param name="slot"> The bonus slot the item is used in. </param>
     /// <returns> An enumeration of all affected items. </returns>
-    public IEnumerable<BonusItem> Identify(PrimaryId primaryId, Variant variant, BonusItemFlag slot)
+    public IEnumerable<EquipItem> Identify(PrimaryId primaryId, Variant variant, BonusItemFlag slot)
     {
         if (primaryId.Id == 0 && variant.Id == 0)
-            return [BonusItem.Empty(slot)];
+            return [EquipItem.BonusItemNothing(slot)];
 
-        return _bonusIdentification.Between(primaryId, slot, variant);
+        return _equipmentIdentification.Between(primaryId, slot.ToEquipSlot(), variant);
     }
 
     /// <summary> Find and add all equipment pieces affected by <paramref name="info"/>. </summary>

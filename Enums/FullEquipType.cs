@@ -76,6 +76,11 @@ public enum FullEquipType : byte
     Twinfangs,    // VPR
     TwinfangsOff, // VPR Off
     Whip,         // BMR TODO
+
+    Glasses,
+
+    UnknownMainhand,
+    UnknownOffhand,
 }
 
 public static class FullEquipTypeExtensions
@@ -92,29 +97,30 @@ public static class FullEquipTypeExtensions
     public static bool IsWeapon(this FullEquipType type)
         => type switch
         {
-            FullEquipType.Fists      => true,
-            FullEquipType.Sword      => true,
-            FullEquipType.Axe        => true,
-            FullEquipType.Bow        => true,
-            FullEquipType.Lance      => true,
-            FullEquipType.Staff      => true,
-            FullEquipType.Wand       => true,
-            FullEquipType.Book       => true,
-            FullEquipType.Daggers    => true,
-            FullEquipType.Broadsword => true,
-            FullEquipType.Gun        => true,
-            FullEquipType.Orrery     => true,
-            FullEquipType.Katana     => true,
-            FullEquipType.Rapier     => true,
-            FullEquipType.Cane       => true,
-            FullEquipType.Gunblade   => true,
-            FullEquipType.Glaives    => true,
-            FullEquipType.Scythe     => true,
-            FullEquipType.Nouliths   => true,
-            FullEquipType.Shield     => true,
-            FullEquipType.Brush      => true,
-            FullEquipType.Twinfangs  => true,
-            _                        => false,
+            FullEquipType.Fists           => true,
+            FullEquipType.Sword           => true,
+            FullEquipType.Axe             => true,
+            FullEquipType.Bow             => true,
+            FullEquipType.Lance           => true,
+            FullEquipType.Staff           => true,
+            FullEquipType.Wand            => true,
+            FullEquipType.Book            => true,
+            FullEquipType.Daggers         => true,
+            FullEquipType.Broadsword      => true,
+            FullEquipType.Gun             => true,
+            FullEquipType.Orrery          => true,
+            FullEquipType.Katana          => true,
+            FullEquipType.Rapier          => true,
+            FullEquipType.Cane            => true,
+            FullEquipType.Gunblade        => true,
+            FullEquipType.Glaives         => true,
+            FullEquipType.Scythe          => true,
+            FullEquipType.Nouliths        => true,
+            FullEquipType.Shield          => true,
+            FullEquipType.Brush           => true,
+            FullEquipType.Twinfangs       => true,
+            FullEquipType.UnknownMainhand => true,
+            _                             => false,
         };
 
     /// <summary> Return whether a FullEquipType is a primary or secondary tool. </summary>
@@ -167,6 +173,21 @@ public static class FullEquipTypeExtensions
             FullEquipType.Wrists => true,
             FullEquipType.Finger => true,
             _                    => false,
+        };
+
+    /// <summary> Return whether a FullEquipType is a bonus slot. </summary>
+    public static bool IsBonus(this FullEquipType type)
+        => type switch
+        {
+            FullEquipType.Glasses => true,
+            _                     => false,
+        };
+
+    public static BonusItemFlag ToBonus(this FullEquipType type)
+        => type switch
+        {
+            FullEquipType.Glasses => BonusItemFlag.Glasses,
+            _                     => BonusItemFlag.Unknown,
         };
 
     /// <summary> Obtain a human-readable name for a FullEquipType. </summary>
@@ -237,6 +258,9 @@ public static class FullEquipTypeExtensions
             FullEquipType.Twinfangs       => "Twinfangs",
             FullEquipType.TwinfangsOff    => "Twinfangs (Offhand)",
             FullEquipType.Whip            => "Whip",
+            FullEquipType.Glasses         => BonusItemFlag.Glasses.ToName(),
+            FullEquipType.UnknownMainhand => EquipSlot.MainHand.ToName(),
+            FullEquipType.UnknownOffhand  => EquipSlot.OffHand.ToName(),
             _                             => "Unknown",
         };
 
@@ -308,6 +332,9 @@ public static class FullEquipTypeExtensions
             FullEquipType.Brush           => EquipSlot.MainHand,
             FullEquipType.Palette         => EquipSlot.OffHand,
             FullEquipType.Whip            => EquipSlot.MainHand,
+            FullEquipType.Glasses         => BonusItemFlag.Glasses.ToEquipSlot(),
+            FullEquipType.UnknownMainhand => EquipSlot.MainHand,
+            FullEquipType.UnknownOffhand  => EquipSlot.OffHand,
             _                             => EquipSlot.Unknown,
         };
 
@@ -339,6 +366,14 @@ public static class FullEquipTypeExtensions
             EquipSlot.OffHand           => category.ToEquipType(mainhand),
             EquipSlot.BothHand          => category.ToEquipType(mainhand),
             _                           => FullEquipType.Unknown,
+        };
+
+    public static FullEquipType ToEquipType(this BonusItemFlag bonusSlot)
+        => bonusSlot switch
+        {
+            BonusItemFlag.Glasses => FullEquipType.Glasses,
+            BonusItemFlag.UnkSlot => FullEquipType.Unknown,
+            _                     => FullEquipType.Unknown,
         };
 
     /// <summary> Convert a weapon category to a FullEquipType. </summary>
@@ -405,7 +440,8 @@ public static class FullEquipTypeExtensions
             WeaponCategory.Pictomancer when mainhand => FullEquipType.Brush,
             WeaponCategory.Pictomancer               => FullEquipType.Palette,
             WeaponCategory.Beastmaster               => FullEquipType.Whip,
-            _                                        => FullEquipType.Unknown,
+            _ when mainhand                          => FullEquipType.UnknownMainhand,
+            _                                        => FullEquipType.UnknownOffhand,
         };
 
     /// <summary> Obtain the correct offhand FullEquipType for a Mainhand FullEquipType, excluding tools. </summary>
@@ -477,6 +513,7 @@ public static class FullEquipTypeExtensions
             FullEquipType.RapierOff => true,
             FullEquipType.Shield    => true,
             FullEquipType.Palette   => true,
+            FullEquipType.Glasses   => true,
             _                       => false,
         };
 
@@ -503,7 +540,8 @@ public static class FullEquipTypeExtensions
 
     /// <summary> A list of all weapon types. </summary>
     public static readonly IReadOnlyList<FullEquipType> WeaponTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.IsWeapon()).ToArray();
+        = Enum.GetValues<FullEquipType>().Where(v => v.IsWeapon()).Except([FullEquipType.UnknownMainhand])
+            .ToArray();
 
     /// <summary> A list of all tool types, including offhands. </summary>
     public static readonly IReadOnlyList<FullEquipType> ToolTypes
@@ -520,4 +558,8 @@ public static class FullEquipTypeExtensions
     /// <summary> A list of all inferred offhand types. </summary>
     public static readonly IReadOnlyList<FullEquipType> OffhandTypes
         = Enum.GetValues<FullEquipType>().Where(IsOffhandType).ToArray();
+
+    /// <summary> A list of all inferred offhand types. </summary>
+    public static readonly IReadOnlyList<FullEquipType> BonusTypes
+        = Enum.GetValues<FullEquipType>().Where(IsBonus).ToArray();
 }

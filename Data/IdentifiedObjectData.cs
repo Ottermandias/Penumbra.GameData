@@ -1,7 +1,4 @@
-using System.Diagnostics.Metrics;
-using System.Xml.Linq;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using FFXIVClientStructs.FFXIV.Common.Lua;
 using Lumina.Excel.GeneratedSheets;
 using OtterGui.Classes;
 using Penumbra.Api.Enums;
@@ -118,6 +115,9 @@ public static class IdentifiedObjectExtensions
             FullEquipType.Twinfangs       => ChangedItemIcon.Mainhand,
             FullEquipType.TwinfangsOff    => ChangedItemIcon.Offhand,
             FullEquipType.Whip            => ChangedItemIcon.Mainhand,
+            FullEquipType.UnknownMainhand => ChangedItemIcon.Mainhand,
+            FullEquipType.UnknownOffhand  => ChangedItemIcon.Offhand,
+            FullEquipType.Glasses         => ChangedItemIcon.Head,
             _                             => ChangedItemIcon.Unknown,
         };
 }
@@ -130,7 +130,15 @@ public sealed class IdentifiedItem(EquipItem item) : IIdentifiedObjectData
         => Item;
 
     public (ChangedItemType Type, uint Id) ToApiObject()
-        => (Item.Type.IsOffhandType() ? ChangedItemType.ItemOffhand : ChangedItemType.Item, Item.ItemId.Id);
+    {
+        if (Item.Id.IsItem)
+            return (Item.Type.IsOffhandType() ? ChangedItemType.ItemOffhand : ChangedItemType.Item, Item.ItemId.Id);
+
+        if (Item.Type.ToSlot() is EquipSlot.MainHand or EquipSlot.OffHand)
+            return (ChangedItemType.Unknown, 0);
+
+        return (ChangedItemType.CustomArmor, Item.PrimaryId.Id | ((uint)Item.Variant.Id << 16) | ((uint)Item.Type << 24));
+    }
 
     public string ToName(string key)
         => Item.Name;
@@ -143,6 +151,9 @@ public sealed class IdentifiedItem(EquipItem item) : IIdentifiedObjectData
 
     public ChangedItemIcon Icon
         => Item.Type.GetCategoryIcon();
+
+    public static (PrimaryId Model, Variant Variant, FullEquipType Type) Split(uint id)
+        => ((PrimaryId)id, (Variant)(id >> 16), (FullEquipType)(id >> 24));
 }
 
 public sealed class IdentifiedCustomization : IIdentifiedObjectData

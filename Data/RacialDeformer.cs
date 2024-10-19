@@ -88,11 +88,12 @@ public sealed class RacialDeformer : ICloneable, IWritable
         using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
         {
             writer.Write(DeformMatrices.Count);
-
+            var needsPadding = (DeformMatrices.Count & 1) != 0;
+            var offset       = (needsPadding ? 6 : 4) + DeformMatrices.Count * (2 + 12 * 4);
             foreach (var bone in DeformMatrices.Keys)
-                writer.Write((ushort)names.FindOrAddString(bone).Offset);
+                writer.Write((ushort)(names.FindOrAddString(bone).Offset + offset));
             // Add padding if necessary.
-            if ((DeformMatrices.Count & 1) != 0)
+            if (needsPadding)
                 writer.Write((ushort)0);
 
             foreach (var matrix in DeformMatrices.Values)

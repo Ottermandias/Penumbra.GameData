@@ -476,11 +476,34 @@ public partial class DisassembledShader
                 headers[i] = headerLine[columns[i]].Trim();
         }
         var data = new List<string[]>();
+        var termBuilder = new StringBuilder();
         foreach (var line in lines[2..])
         {
             var row = new string[columns.Count];
+            var idx = 0;
             for (var i = 0; i < columns.Count; ++i)
-                row[i] = line[columns[i]].Trim();
+            {
+                termBuilder.Clear();
+                var columnSize = columns[i].End.Value - columns[i].Start.Value;
+                var remaining  = line[idx..];
+
+                termBuilder.Append(remaining[..columnSize]);
+                remaining = remaining[columnSize..];
+                // if remaining begins with non-space, we need to find the next space
+                if (remaining.Length > 0 && remaining[0] != ' ')
+                {
+                    var nextSpace = remaining.IndexOf(' ');
+                    termBuilder.Append(remaining[..nextSpace]);
+                    idx += columnSize + nextSpace + 1;
+                }
+                else
+                {
+                    idx += columnSize + 1;
+                }
+                
+                row[i] = termBuilder.ToString().Trim();
+            }
+            
             data.Add(row);
         }
 

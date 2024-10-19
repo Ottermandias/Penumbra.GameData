@@ -34,8 +34,8 @@ public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, It
         => ByType.TotalCount;
 
     /// <summary> Iterate through all primary or secondary items. </summary>
-    public IEnumerable<(ItemId, EquipItem)> AllItems(bool main)
-        => (main ? (ItemDictionary)Primary : Secondary).Select(i => ((ItemId)i.Key, i.Value));
+    public IEnumerable<(CustomItemId, EquipItem)> AllItems(bool main)
+        => (main ? (ItemDictionary)Primary : Secondary).Select(i => (i.Key, i.Value));
 
     /// <summary> Try to obtain an item by ID and Slot. </summary>
     /// <param name="key"> The Item ID to search. </param>
