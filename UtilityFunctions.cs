@@ -71,4 +71,17 @@ public static class UtilityFunctions
     /// <seealso cref="MemoryMarshal.Cast{TFrom, TTo}(ReadOnlySpan{TFrom})"/>
     internal static ref readonly TTo ReadOnlyCast<TFrom, TTo>(in TFrom value, int index = 0) where TFrom : struct where TTo : struct
         => ref MemoryMarshal.Cast<TFrom, TTo>(new ReadOnlySpan<TFrom>(in value))[index];
+
+    /// <summary> Reinterprets a structure as its raw bytes. </summary>
+    /// <typeparam name="T"> Source type. </typeparam>
+    /// <param name="value"> A reference to the structure to reinterpret. </param>
+    /// <returns> The raw bytes of the structure. </returns>
+    /// <seealso cref="MemoryMarshal.AsBytes{T}(Span{T})"/>
+    public static Span<byte> AsBytes<T>(ref T value) where T : unmanaged
+        => MemoryMarshal.AsBytes(new Span<T>(ref value));
+
+    /// <inheritdoc cref="AsBytes{T}(ref T)"/>
+    /// <seealso cref="MemoryMarshal.AsBytes{T}(ReadOnlySpan{T})"/>
+    public static ReadOnlySpan<byte> ReadOnlyAsBytes<T>(in T value) where T : unmanaged
+        => MemoryMarshal.AsBytes(new ReadOnlySpan<T>(in value));
 }

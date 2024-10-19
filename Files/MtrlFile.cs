@@ -43,6 +43,9 @@ public partial class MtrlFile : IWritable, ICloneable
     public bool IsDawntrail
         => TableFlags.IsDawntrail && Table is not LegacyColorTable && DyeTable is not LegacyColorDyeTable;
 
+    public bool IsCharacterLegacy
+        => ShaderPackage.Name == "characterlegacy.shpk";
+
     private ref TableFlags GetTableFlagsRef()
     {
         if (AdditionalData.Length < 4)
