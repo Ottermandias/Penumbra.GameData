@@ -173,12 +173,6 @@ public static class GenderRestrictedItems
         new RestrictedItemPair(13298, 13567, 3), // Black-feathered Flat Hat                   <-> Red-feathered Flat Hat
         new RestrictedItemPair(13300, 13639, 3), // Lord's Suikan                              <-> Lady's Suikan
         new RestrictedItemPair(13724, 13725, 3), // Little Lord's Clogs                        <-> Little Lady's Clogs
-        new RestrictedItemPair(14854, 14857, 3), // Eastern Lord's Togi                        <-> Eastern Lady's Togi
-        new RestrictedItemPair(14855, 14858, 3), // Eastern Lord's Trousers                    <-> Eastern Lady's Loincloth
-        new RestrictedItemPair(14856, 14859, 3), // Eastern Lord's Crakows                     <-> Eastern Lady's Crakows
-        new RestrictedItemPair(15639, 15642, 3), // Far Eastern Patriarch's Hat                <-> Far Eastern Matriarch's Sun Hat
-        new RestrictedItemPair(15640, 15643, 3), // Far Eastern Patriarch's Tunic              <-> Far Eastern Matriarch's Dress
-        new RestrictedItemPair(15641, 15644, 3), // Far Eastern Patriarch's Longboots          <-> Far Eastern Matriarch's Boots
         new RestrictedItemPair(15922, 15925, 3), // Moonfire Vest                              <-> Moonfire Halter
         new RestrictedItemPair(15923, 15926, 3), // Moonfire Trunks                            <-> Moonfire Tanga
         new RestrictedItemPair(15924, 15927, 3), // Moonfire Caligae                           <-> Moonfire Sandals
@@ -226,19 +220,9 @@ public static class GenderRestrictedItems
         new RestrictedItemPair(17236, 17241, 3), // Common Makai Priest's Fingerless Gloves    <-> Common Makai Priestess's Fingerless Gloves
         new RestrictedItemPair(17237, 17242, 3), // Common Makai Priest's Slops                <-> Common Makai Priestess's Skirt
         new RestrictedItemPair(17238, 17243, 3), // Common Makai Priest's Boots                <-> Common Makai Priestess's Longboots
-        new RestrictedItemPair(20479, 20484, 3), // Star of the Nezha Lord                     <-> Star of the Nezha Lady
-        new RestrictedItemPair(20480, 20485, 3), // Nezha Lord's Togi                          <-> Nezha Lady's Togi
-        new RestrictedItemPair(20481, 20486, 3), // Nezha Lord's Gloves                        <-> Nezha Lady's Gloves
-        new RestrictedItemPair(20482, 20487, 3), // Nezha Lord's Slops                         <-> Nezha Lady's Slops
-        new RestrictedItemPair(20483, 20488, 3), // Nezha Lord's Boots                         <-> Nezha Lady's Kneeboots
         new RestrictedItemPair(24599, 24602, 3), // Far Eastern Schoolboy's Hat                <-> Far Eastern Schoolgirl's Hair Ribbon
         new RestrictedItemPair(24600, 24603, 3), // Far Eastern Schoolboy's Hakama             <-> Far Eastern Schoolgirl's Hakama
         new RestrictedItemPair(24601, 24604, 3), // Far Eastern Schoolboy's Zori               <-> Far Eastern Schoolgirl's Boots
-        new RestrictedItemPair(28600, 28605, 3), // Eastern Lord Errant's Hat                  <-> Eastern Lady Errant's Hat
-        new RestrictedItemPair(28601, 28606, 3), // Eastern Lord Errant's Jacket               <-> Eastern Lady Errant's Coat
-        new RestrictedItemPair(28602, 28607, 3), // Eastern Lord Errant's Wristbands           <-> Eastern Lady Errant's Gloves
-        new RestrictedItemPair(28603, 28608, 3), // Eastern Lord Errant's Trousers             <-> Eastern Lady Errant's Skirt
-        new RestrictedItemPair(28604, 28609, 3), // Eastern Lord Errant's Shoes                <-> Eastern Lady Errant's Boots
         new RestrictedItemPair(37442, 37447, 3), // Makai Vanguard's Monocle                   <-> Makai Vanbreaker's Ribbon
         new RestrictedItemPair(37443, 37448, 3), // Makai Vanguard's Battlegarb                <-> Makai Vanbreaker's Battledress
         new RestrictedItemPair(37444, 37449, 3), // Makai Vanguard's Fingerless Gloves         <-> Makai Vanbreaker's Fingerless Gloves
