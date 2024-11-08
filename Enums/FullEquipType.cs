@@ -93,6 +93,10 @@ public static class FullEquipTypeExtensions
         return slot.ToEquipType(weapon);
     }
 
+    /// <summary> Return whether a FullEquipType is not fully known. </summary>
+    public static bool IsUnknown(this FullEquipType type)
+        => type is FullEquipType.Unknown or FullEquipType.UnknownMainhand or FullEquipType.UnknownOffhand;
+
     /// <summary> Return whether a FullEquipType is a primary weapon type. </summary>
     public static bool IsWeapon(this FullEquipType type)
         => type switch

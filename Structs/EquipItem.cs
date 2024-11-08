@@ -181,7 +181,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
         string? name = null)
     {
         name ??= $"Unknown ({modelId}-{(type.Id != 0 ? $"{type}-" : string.Empty)}{variant})";
-        if (equipType is FullEquipType.Unknown && type.Id != 0)
+        if (equipType.IsUnknown() && type.Id != 0)
             equipType = ItemData.ConvertWeaponId(modelId);
         var fullId = itemId.Id is 0
             ? new CustomItemId(modelId, type, variant, equipType)
@@ -203,7 +203,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
     public static EquipItem FromId(CustomItemId id)
     {
         var (setId, weaponType, variant, equipType) = id.Split;
-        if (equipType == FullEquipType.Unknown && weaponType.Id != 0)
+        if (equipType.IsUnknown() && weaponType.Id != 0)
             equipType = ItemData.ConvertWeaponId(setId);
 
         return new EquipItem($"Unknown ({setId}-{(weaponType.Id != 0 ? $"{weaponType}-" : string.Empty)}{variant})", id, 0, setId, weaponType,
