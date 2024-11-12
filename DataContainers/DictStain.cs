@@ -16,8 +16,8 @@ public sealed class DictStain(IDalamudPluginInterface pluginInterface, Logger lo
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> CreateStainData(IDataManager dataManager)
     {
-        var stainSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Stain>(dataManager.Language)!;
-        return stainSheet.Where(s => s.Color != 0 && s.Name.RawData.Length > 0)
+        var stainSheet = dataManager.GetExcelSheet<Lumina.Excel.Sheets.Stain>(dataManager.Language);
+        return stainSheet.Where(s => s.Color != 0 && s.Name.ByteLength > 0)
             .ToFrozenDictionary(s => (byte)s.RowId, s =>
             {
                 var stain = new Stain(s);

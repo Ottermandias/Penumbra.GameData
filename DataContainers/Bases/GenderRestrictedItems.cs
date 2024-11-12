@@ -1,6 +1,6 @@
 using Dalamud.Utility;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Enums;
 
@@ -23,7 +23,7 @@ public static class GenderRestrictedItems
             if (item.RowId is 13700 or 13699)
                 continue;
 
-            var value = (uint)item.ModelMain | ((uint)((EquipSlot)item.EquipSlotCategory.Row).ToSlot() << 24);
+            var value = (uint)item.ModelMain | ((uint)((EquipSlot)item.EquipSlotCategory.RowId).ToSlot() << 24);
             if (dict.ContainsKey(value) || KnownItems.Any(restriction == 2 ? (i => i.MaleId == item.RowId) : (i => i.FemaleId == item.RowId)))
                 continue;
 
@@ -42,7 +42,7 @@ public static class GenderRestrictedItems
         // Add a redirection to emperors gear for unknown items.
         void AddEmperor(Item item)
         {
-            var slot = ((EquipSlot)item.EquipSlotCategory.Row).ToSlot();
+            var slot = ((EquipSlot)item.EquipSlotCategory.RowId).ToSlot();
             var emperor = ((uint)slot << 24)
               | slot switch
               {
@@ -84,9 +84,7 @@ public static class GenderRestrictedItems
 
         // Get the direction.
         var (source, target, restriction) = direction == 1 ? (pair.MaleId, pair.FemaleId, 2) : (pair.FemaleId, pair.MaleId, 3);
-        var sourceRow = items.GetRow(source);
-        var targetRow = items.GetRow(target);
-        if (sourceRow == null || targetRow == null)
+        if (items.TryGetRow(source, out var sourceRow) || items.TryGetRow(target, out var targetRow))
         {
             log.Warning($"Could not add item pair [{pair.MaleId}, {pair.FemaleId}] to restricted items.");
             return;
@@ -98,8 +96,8 @@ public static class GenderRestrictedItems
             return;
         }
 
-        var sourceSlot = ((EquipSlot)sourceRow.EquipSlotCategory.Row).ToSlot();
-        var targetSlot = ((EquipSlot)targetRow.EquipSlotCategory.Row).ToSlot();
+        var sourceSlot = ((EquipSlot)sourceRow.EquipSlotCategory.RowId).ToSlot();
+        var targetSlot = ((EquipSlot)targetRow.EquipSlotCategory.RowId).ToSlot();
         if (!sourceSlot.IsAccessory() && !sourceSlot.IsEquipment())
         {
             log.Warning($"{sourceRow.Name.ToDalamudString().TextValue} is not equippable to a known slot.");

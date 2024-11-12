@@ -2,7 +2,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
@@ -32,7 +32,7 @@ public sealed class DictModelChara(
         var bag        = new ConcurrentBag<(int ModelID, string Name, ObjectKind Kind, uint Id)>();
         var ret = Enumerable
             .Repeat((IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>)Array.Empty<(string Name, ObjectKind Kind, uint Id)>(),
-                (int)modelSheet.RowCount).ToArray();
+                (int)modelSheet.Count).ToArray();
 
         // Add Ornaments.
         var oTask = System.Threading.Tasks.Task.Run(() =>
@@ -45,21 +45,21 @@ public sealed class DictModelChara(
         var mTask = System.Threading.Tasks.Task.Run(() =>
         {
             foreach (var mount in gameData.GetExcelSheet<Mount>(gameData.Language)!)
-                AddChara((int)mount.ModelChara.Row, ObjectKind.MountType, mount.RowId, mount.RowId);
+                AddChara((int)mount.ModelChara.RowId, ObjectKind.MountType, mount.RowId, mount.RowId);
         });
 
         // Add Companions.
         var cTask = System.Threading.Tasks.Task.Run(() =>
         {
             foreach (var companion in gameData.GetExcelSheet<Companion>(gameData.Language)!)
-                AddChara((int)companion.Model.Row, ObjectKind.Companion, companion.RowId, companion.RowId);
+                AddChara((int)companion.Model.RowId, ObjectKind.Companion, companion.RowId, companion.RowId);
         });
 
         // Add EventNPCs.
         var eTask = System.Threading.Tasks.Task.Run(() =>
         {
             foreach (var eNpc in gameData.GetExcelSheet<ENpcBase>(gameData.Language)!)
-                AddChara((int)eNpc.ModelChara.Row, ObjectKind.EventNpc, eNpc.RowId, eNpc.RowId);
+                AddChara((int)eNpc.ModelChara.RowId, ObjectKind.EventNpc, eNpc.RowId, eNpc.RowId);
         });
 
         var options = new ParallelOptions()
@@ -71,7 +71,7 @@ public sealed class DictModelChara(
         Parallel.ForEach(gameData.GetExcelSheet<BNpcBase>(gameData.Language)!.Where(b => b.RowId < bNpcNames.Count), options, bNpc =>
         {
             foreach (var name in bNpcNames[bNpc.RowId])
-                AddChara((int)bNpc.ModelChara.Row, ObjectKind.BattleNpc, name.Id, bNpc.RowId);
+                AddChara((int)bNpc.ModelChara.RowId, ObjectKind.BattleNpc, name.Id, bNpc.RowId);
         });
 
         System.Threading.Tasks.Task.WaitAll(oTask, mTask, cTask, eTask);
@@ -85,7 +85,7 @@ public sealed class DictModelChara(
         // Add a modelChara if a name can be fetched.
         void AddChara(int modelChara, ObjectKind kind, uint dataId, uint displayId)
         {
-            if (modelChara >= modelSheet.RowCount)
+            if (modelChara >= modelSheet.Count)
                 return;
 
             if (nameDicts.TryGetName(kind, dataId, out var name))

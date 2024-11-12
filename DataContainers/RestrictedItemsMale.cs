@@ -1,7 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
@@ -33,7 +33,7 @@ public sealed class RestrictedItemsMale(IDalamudPluginInterface pluginInterface,
     private static IReadOnlyDictionary<uint, uint> CreateItems(Logger log, IDataManager gameData)
     {
         var ret   = new Dictionary<uint, uint>(128);
-        var items = gameData.GetExcelSheet<Item>()!;
+        var items = gameData.GetExcelSheet<Item>();
         foreach (var pair in GenderRestrictedItems.KnownItems)
             GenderRestrictedItems.AddItemMale(ret, pair, items, log);
         GenderRestrictedItems.AddUnknownItems(ret, items, log, 2);

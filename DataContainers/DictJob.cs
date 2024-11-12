@@ -1,6 +1,6 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Services;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Structs;
@@ -15,7 +15,7 @@ public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
     {
         var stopwatch = Stopwatch.StartNew();
         _jobs = gameData.GetExcelSheet<ClassJob>()!
-            .Where(j => j.Abbreviation.RawData.Length > 0)
+            .Where(j => j.Abbreviation.ByteLength > 0)
             .ToFrozenDictionary(j => (JobId)j.RowId, j => new Job(j));
 
         Ordered = gameData.GetExcelSheet<ClassJob>()!.Skip(1)

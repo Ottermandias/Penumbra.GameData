@@ -1,7 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
@@ -17,8 +17,8 @@ public sealed class DictENpc(IDalamudPluginInterface pluginInterface, Logger log
     private static IReadOnlyDictionary<uint, string> CreateENpcData(IDataManager gameData)
     {
         var sheet = gameData.GetExcelSheet<ENpcResident>(gameData.Language)!;
-        var dict  = new Dictionary<uint, string>((int) sheet.RowCount);
-        foreach (var n in sheet.Where(e => e.Singular.RawData.Length > 0))
+        var dict  = new Dictionary<uint, string>((int) sheet.Count);
+        foreach (var n in sheet.Where(e => e.Singular.ByteLength > 0))
             dict.TryAdd(n.RowId, DataUtility.ToTitleCaseExtended(n.Singular, n.Article));
         return dict.ToFrozenDictionary();
     }

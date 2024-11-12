@@ -1,6 +1,6 @@
 ﻿using Dalamud.Utility;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace Penumbra.GameData.Structs;
 
@@ -38,9 +38,9 @@ public readonly struct JobGroup
         Count  = 0;
         Flags = 0ul;
         Id     = (JobGroupId)group.RowId;
-        Name   = group.Name.ToDalamudString().ToString();
+        Name   = group.Name.ToString();
 
-        Debug.Assert(jobs.RowCount < 64, $"Number of Jobs exceeded 63 ({jobs.RowCount}).");
+        Debug.Assert(jobs.Count < 64, $"Number of Jobs exceeded 63 ({jobs.Count}).");
         foreach (var job in jobs)
         {
             var abbr = job.Abbreviation.ToString();

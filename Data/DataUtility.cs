@@ -1,5 +1,6 @@
 using Dalamud.Utility;
 using Lumina.Text;
+using Lumina.Text.ReadOnly;
 
 namespace Penumbra.GameData.Data;
 
@@ -16,6 +17,33 @@ public static class DataUtility
             return string.Intern(s.ToDalamudString().ToString());
 
         var sb        = new StringBuilder(s.ToDalamudString().ToString());
+        var lastSpace = true;
+        for (var i = 0; i < sb.Length; ++i)
+        {
+            if (sb[i] == ' ')
+            {
+                lastSpace = true;
+            }
+            else if (lastSpace)
+            {
+                lastSpace = false;
+                sb[i]     = char.ToUpperInvariant(sb[i]);
+            }
+        }
+
+        return string.Intern(sb.ToString());
+    }
+
+    /// <summary> Convert a given ReadonlySeString to title case and intern it. </summary>
+    /// <param name="s"> The string to convert. </param>
+    /// <param name="article"> The article byte indicates whether the name is used with an article, in which case the capitalization is already done right. </param>
+    /// <returns> The interned string in title case. </returns>
+    public static string ToTitleCaseExtended(in ReadOnlySeString s, sbyte article)
+    {
+        if (article == 1)
+            return string.Intern(s.ToString());
+
+        var sb        = new StringBuilder(s.ToString());
         var lastSpace = true;
         for (var i = 0; i < sb.Length; ++i)
         {

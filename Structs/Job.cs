@@ -1,5 +1,5 @@
 ﻿using Dalamud.Utility;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace Penumbra.GameData.Structs;
 
@@ -7,7 +7,7 @@ namespace Penumbra.GameData.Structs;
 /// A struct containing the different jobs the game supports.
 /// Also contains the jobs Name and Abbreviation as strings.
 /// </summary>
-public readonly struct Job(ClassJob job)
+public readonly struct Job(in ClassJob job)
 {
     public enum JobRole : byte
     {
@@ -22,10 +22,10 @@ public readonly struct Job(ClassJob job)
     }
 
     /// <summary> The name of the job. </summary>
-    public readonly string Name = string.Intern(job.Name.ToDalamudString().ToString());
+    public readonly string Name = string.Intern(job.Name.ToString());
 
     /// <summary> The 3-letter abbreviation of the job. </summary>
-    public readonly string Abbreviation = string.Intern(job.Abbreviation.ToDalamudString().ToString());
+    public readonly string Abbreviation = string.Intern(job.Abbreviation.ToString());
 
     /// <summary> The ID of the job. </summary>
     public readonly JobId Id = (JobId)job.RowId;

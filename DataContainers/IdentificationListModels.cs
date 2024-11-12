@@ -1,7 +1,7 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;

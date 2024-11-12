@@ -1,7 +1,7 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
@@ -28,7 +28,7 @@ public sealed class HumanModelList(IDalamudPluginInterface pluginInterface, Logg
     private static Tuple<BitArray, int> GetValidHumanModels(IDataManager gameData)
     {
         var sheet = gameData.GetExcelSheet<ModelChara>()!;
-        var ret   = new BitArray((int)sheet.RowCount, false);
+        var ret   = new BitArray((int)sheet.Count, false);
         var count = 0;
         foreach (var (_, idx) in sheet.Select((m, i) => (m, i)).Where(p => p.m.Type == (byte)CharacterBase.ModelType.Human))
         {

@@ -1,6 +1,6 @@
 ﻿global using PseudoEquipItem = System.ValueTuple<string, ulong, uint, ushort, ushort, byte, uint>;
 using Dalamud.Utility;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 
@@ -112,7 +112,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
             PackBytes(it.Type, it.Flags, it.Level, it.JobRestrictions));
 
     /// <summary> Create an EquipItem from a lumina item representing armor. </summary>
-    public static EquipItem FromArmor(Item item)
+    public static EquipItem FromArmor(in Item item)
     {
         var type            = item.ToEquipType();
         var name            = item.Name.ToDalamudString().TextValue;
@@ -123,12 +123,12 @@ public readonly struct EquipItem : IEquatable<EquipItem>
         var variant         = (Variant)(item.ModelMain >> 16);
         var flags           = GetFlags(item);
         var level           = item.LevelEquip;
-        var jobRestrictions = (byte)item.ClassJobCategory.Row;
+        var jobRestrictions = (byte)item.ClassJobCategory.RowId;
         return new EquipItem(name, id, icon, model, weapon, variant, type, flags, level, jobRestrictions);
     }
 
     /// <summary> Convert lumina data to misc. information. </summary>
-    private static ItemFlags GetFlags(Item item)
+    private static ItemFlags GetFlags(in Item item)
         => item.DyeCount switch
             {
                 1 => ItemFlags.IsDyable1,
@@ -139,7 +139,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
           | (item.IsUntradable ? 0 : ItemFlags.IsTradable);
 
     /// <summary> Create an EquipItem from a lumina item representing a weapon using the primary model. </summary>
-    public static EquipItem FromMainhand(Item item)
+    public static EquipItem FromMainhand(in Item item)
     {
         var type            = item.ToEquipType();
         var name            = item.Name.ToDalamudString().TextValue;
@@ -150,7 +150,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
         var variant         = (Variant)(item.ModelMain >> 32);
         var flags           = GetFlags(item);
         var level           = item.LevelEquip;
-        var jobRestrictions = (byte)item.ClassJobCategory.Row;
+        var jobRestrictions = (byte)item.ClassJobCategory.RowId;
         return new EquipItem(name, id, icon, model, weapon, variant, type, flags, level, jobRestrictions);
     }
 
@@ -166,7 +166,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
         var variant         = (Variant)(item.ModelSub >> 32);
         var flags           = GetFlags(item);
         var level           = item.LevelEquip;
-        var jobRestrictions = (byte)item.ClassJobCategory.Row;
+        var jobRestrictions = (byte)item.ClassJobCategory.RowId;
         return new EquipItem(name, id, icon, model, weapon, variant, type, flags, level, jobRestrictions);
     }
 

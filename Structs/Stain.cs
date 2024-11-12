@@ -48,8 +48,8 @@ public readonly struct Stain
         => ((color & 0xFF) << 16) | ((color >> 16) & 0xFF) | (color & 0xFF00) | 0xFF000000;
 
     /// <summary> Create a Stain from the sheet data. </summary>
-    public Stain(Lumina.Excel.GeneratedSheets.Stain stain)
-        : this(stain.Name.ToDalamudString().ToString(), SeColorToRgba(stain.Color), (StainId)stain.RowId, stain.Unknown5)
+    public Stain(Lumina.Excel.Sheets.Stain stain)
+        : this(stain.Name.ToDalamudString().ToString(), SeColorToRgba(stain.Color), (StainId)stain.RowId, stain.Unknown1)
     { }
 
     /// <summary> Simple constructor for all data. </summary>
