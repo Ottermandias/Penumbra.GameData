@@ -37,7 +37,7 @@ public sealed class DictAction(IDalamudPluginInterface pluginInterface, Logger l
             AddAction(hitKey,   action);
         });
 
-        return storage.ToFrozenDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Lumina.Excel.Sheets.Action>)kvp.Value.Distinct().ToArray());
+        return storage.ToFrozenDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<Lumina.Excel.Sheets.Action>)kvp.Value.DistinctBy(a => a.RowId).ToArray());
 
         void AddAction(string? key, Lumina.Excel.Sheets.Action action)
         {

@@ -234,22 +234,4 @@ public sealed class ObjectIdentification(
 
         return ret;
     }
-
-    /// <summary> Currently unused. </summary>
-    public static unsafe ulong KeyFromCharacterBase(CharacterBase* drawObject)
-    {
-        var type = (*(delegate* unmanaged<CharacterBase*, uint>**)drawObject)[Offsets.DrawObjectGetModelTypeVfunc](drawObject);
-        var unk  = (ulong)*((byte*)drawObject + Offsets.DrawObjectModelUnk1) << 8;
-        return type switch
-        {
-            1 => type | unk,
-            2 => type | unk | ((ulong)*(ushort*)((byte*)drawObject + Offsets.DrawObjectModelUnk3) << 16),
-            3 => type
-              | unk
-              | ((ulong)*(ushort*)((byte*)drawObject + Offsets.DrawObjectModelUnk2) << 16)
-              | ((ulong)**(ushort**)((byte*)drawObject + Offsets.DrawObjectModelUnk4) << 32)
-              | ((ulong)**(ushort**)((byte*)drawObject + Offsets.DrawObjectModelUnk3) << 40),
-            _ => 0u,
-        };
-    }
 }
