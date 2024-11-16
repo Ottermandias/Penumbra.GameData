@@ -1,5 +1,4 @@
 ﻿global using PseudoEquipItem = System.ValueTuple<string, ulong, uint, ushort, ushort, byte, uint>;
-using Dalamud.Utility;
 using Lumina.Excel.Sheets;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
@@ -115,7 +114,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
     public static EquipItem FromArmor(in Item item)
     {
         var type            = item.ToEquipType();
-        var name            = item.Name.ToDalamudString().TextValue;
+        var name            = item.Name.ExtractText();
         var id              = item.RowId;
         var icon            = item.Icon;
         var model           = (PrimaryId)item.ModelMain;
@@ -142,7 +141,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
     public static EquipItem FromMainhand(in Item item)
     {
         var type            = item.ToEquipType();
-        var name            = item.Name.ToDalamudString().TextValue;
+        var name            = item.Name.ExtractText();
         var id              = item.RowId;
         var icon            = item.Icon;
         var model           = (PrimaryId)item.ModelMain;
@@ -158,7 +157,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
     public static EquipItem FromOffhand(Item item)
     {
         var type            = item.ToEquipType().ValidOffhand();
-        var name            = item.Name.ToDalamudString().TextValue + type.OffhandTypeSuffix();
+        var name            = item.Name.ExtractText() + type.OffhandTypeSuffix();
         var id              = item.RowId;
         var icon            = item.Icon;
         var model           = (PrimaryId)item.ModelSub;

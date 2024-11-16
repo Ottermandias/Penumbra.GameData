@@ -1,6 +1,4 @@
-using Lumina.Data.Parsing;
 using OtterGui;
-using Penumbra.GameData.Files.MaterialStructs;
 
 namespace Penumbra.GameData;
 
@@ -24,7 +22,13 @@ public static class UtilityFunctions
     /// <returns> The first object fulfilling the predicate, or a null-optional. </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static T? FirstOrNull<T>(this IEnumerable<T> values, Func<T, bool> predicate) where T : struct
-        => values.Cast<T?>().FirstOrDefault(v => predicate(v!.Value));
+    {
+        foreach(var val in values)
+            if (predicate(val))
+                return val;
+
+        return null;
+    }
 
 
     /// <summary> Add an item <paramref name="count"/> times to the end of a given array. </summary>

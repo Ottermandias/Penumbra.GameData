@@ -106,7 +106,7 @@ public static class Sigs
     public const string ModelRendererUnkFunc          = "E8 ?? ?? ?? ?? 41 0F B6 46 ?? C0 E8";
 
     // Job service
-    public const string ChangeJob = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 44 0F B6 FA 48 8B E9";
+    public const string ChangeJob = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 44 0F B6 FA";
 
     // Flag Slot for Update service
     public const string FlagSlotForUpdate      = "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B DA 49 8B F0 48 8B F9";
@@ -116,15 +116,16 @@ public static class Sigs
     public const string CreateMaterial = "E8 ?? ?? ?? ?? 48 89 87 ?? ?? ?? ?? 48 85 C0 75 ?? 48 8B 8F ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 01";
 
     public const string PlaceMinion = "48 89 5C 24 ?? 55 57 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B F9";
+    public const string UpdateOrnament = "E8 ?? ?? ?? ?? F3 0F 10 4D ?? 0F 57 D2";
 
     public const string PrepareColorSet = "E8 ?? ?? ?? ?? 49 89 04 ?? 49 83 C5";
     public const string UpdateColorSets = "89 54 24 ?? 56 41 56 41 57";
 
     public const string CalculateHeight = "E8 ?? ?? ?? FF 48 8B 0D ?? ?? ?? ?? 0F 28 F0";
 
-    public const string CrestChange          = "E8 ?? ?? ?? ?? 48 8B 55 ?? 49 8B CE E8";
+    public const string CrestChange          = "E8 ?? ?? ?? ?? 48 8B 55 ?? 49 8D 8E";
     public const string SetUnlockLinkValue   = "48 83 EC ?? 8B C2 83 E0";
-    public const string RequestGlamourPlates = "E8 ?? ?? ?? ?? 0F 1F 44 ?? 00 44 89 74 24";
+    public const string RequestGlamourPlates = "E8 ?? ?? ?? ?? 66 90 44 89 74 24";
     
     // Pap redirection
     public const string LoadAlwaysResidentMotionPacks          = "E8 ?? ?? ?? FF 48 8B D0 48 8B CE E8 ?? ?? ?? 00 48 8B 4C 24";

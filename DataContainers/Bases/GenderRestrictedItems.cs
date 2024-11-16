@@ -17,7 +17,7 @@ public static class GenderRestrictedItems
     internal static void AddUnknownItems(Dictionary<uint, uint> dict, ExcelSheet<Item> items, Logger log, byte restriction)
     {
         var unhandled = 0;
-        foreach (var item in items.Where(i => i.EquipRestriction == restriction))
+        foreach (var item in items.Where(i => i.EquipRestriction == restriction && i.EquipSlotCategory.RowId > 0))
         {
             // Skip Scion Chronocler's Ringbands and Scion Thaumaturge's Moccasins as they are not actually restricted.
             if (item.RowId is 13700 or 13699)
@@ -31,7 +31,7 @@ public static class GenderRestrictedItems
             AddEmperor(item);
 
             log.Warning(
-                $"{item.RowId:D5} {item.Name.ToDalamudString().TextValue} is restricted to {(restriction == 2 ? "male" : "female")} characters but is not known, redirected to Emperor.");
+                $"{item.RowId:D5} {item.Name.ExtractText()} is restricted to {(restriction == 2 ? "male" : "female")} characters but is not known, redirected to Emperor. {item.EquipSlotCategory.RowId}");
         }
 
         if (unhandled > 0)
@@ -84,7 +84,7 @@ public static class GenderRestrictedItems
 
         // Get the direction.
         var (source, target, restriction) = direction == 1 ? (pair.MaleId, pair.FemaleId, 2) : (pair.FemaleId, pair.MaleId, 3);
-        if (items.TryGetRow(source, out var sourceRow) || items.TryGetRow(target, out var targetRow))
+        if (!items.TryGetRow(source, out var sourceRow) || !items.TryGetRow(target, out var targetRow))
         {
             log.Warning($"Could not add item pair [{pair.MaleId}, {pair.FemaleId}] to restricted items.");
             return;
@@ -92,7 +92,7 @@ public static class GenderRestrictedItems
 
         if (sourceRow.EquipRestriction != restriction)
         {
-            log.Warning($"{sourceRow.Name.ToDalamudString().TextValue} is not restricted anymore.");
+            log.Warning($"{sourceRow.Name.ExtractText()} is not restricted anymore.");
             return;
         }
 
@@ -100,13 +100,13 @@ public static class GenderRestrictedItems
         var targetSlot = ((EquipSlot)targetRow.EquipSlotCategory.RowId).ToSlot();
         if (!sourceSlot.IsAccessory() && !sourceSlot.IsEquipment())
         {
-            log.Warning($"{sourceRow.Name.ToDalamudString().TextValue} is not equippable to a known slot.");
+            log.Warning($"{sourceRow.Name.ExtractText()} is not equippable to a known slot.");
             return;
         }
 
         if (sourceSlot != targetSlot)
         {
-            log.Warning($"{sourceRow.Name.ToDalamudString().TextValue} and {targetRow.Name.ToDalamudString().TextValue} are not compatible.");
+            log.Warning($"{sourceRow.Name.ExtractText()} and {targetRow.Name.ExtractText()} are not compatible.");
             return;
         }
 

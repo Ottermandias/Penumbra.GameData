@@ -1,7 +1,6 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
 using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
@@ -21,7 +20,7 @@ public sealed class DictWorld(IDalamudPluginInterface pluginInterface, Logger lo
         var sheet = gameData.GetExcelSheet<World>()!;
         var dict  = new Dictionary<ushort, string>((int)sheet.Count);
         foreach (var w in sheet.Where(IsValid))
-            dict.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
+            dict.TryAdd((ushort)w.RowId, string.Intern(w.Name.ExtractText()));
         return dict.ToFrozenDictionary();
     }
 
