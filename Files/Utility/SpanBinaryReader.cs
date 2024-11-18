@@ -9,7 +9,9 @@ namespace Penumbra.GameData.Files.Utility;
 /// </remarks>
 public unsafe ref struct SpanBinaryReader
 {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly ref byte _start;
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private ref          byte _pos;
 
     private SpanBinaryReader(ref byte start, int length)
@@ -19,6 +21,9 @@ public unsafe ref struct SpanBinaryReader
         Length    = length;
         Remaining = Length;
     }
+
+    public override string ToString()
+        => $"{Position} / {Length}";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public SpanBinaryReader(ReadOnlySpan<byte> span)
@@ -102,6 +107,10 @@ public unsafe ref struct SpanBinaryReader
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public nint ReadIntPtr()
         => Read<nint>();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public float ReadSingle()
+        => Read<float>();
 
     /// <summary>
     /// Create a slice of the reader from <paramref name="position"/> to
