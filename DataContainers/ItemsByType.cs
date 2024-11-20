@@ -1,6 +1,6 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -21,7 +21,7 @@ public sealed class ItemsByType(IDalamudPluginInterface pi, Logger log, IDataMan
 
         var itemSheet = dataManager.GetExcelSheet<Item>(dataManager.Language)!;
         // Take all items with actual names.
-        foreach (var item in itemSheet.Where(i => i.Name.RawData.Length > 1))
+        foreach (var item in itemSheet.Where(i => i.Name.ByteLength > 1))
         {
             var type = item.ToEquipType();
 

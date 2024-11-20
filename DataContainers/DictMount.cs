@@ -1,8 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
@@ -18,7 +17,7 @@ public sealed class DictMount(IDalamudPluginInterface pluginInterface, Logger lo
     private static IReadOnlyDictionary<uint, string> CreateMountData(IDataManager gameData)
     {
         var sheet = gameData.GetExcelSheet<Mount>(gameData.Language)!;
-        var dict  = new Dictionary<uint, string>((int) sheet.RowCount);
+        var dict  = new Dictionary<uint, string>(sheet.Count);
         // Add some custom data.
         dict.TryAdd(119, "Falcon (Porter)");
         dict.TryAdd(295, "Hippo Cart (Quest)");
@@ -27,14 +26,14 @@ public sealed class DictMount(IDalamudPluginInterface pluginInterface, Logger lo
         dict.TryAdd(309, "Moon-hopper (Quest)");
         foreach (var m in sheet)
         {
-            if (m.Singular.RawData.Length > 0 && m.Order >= 0)
+            if (m.Singular.ByteLength > 0 && m.Order >= 0)
             {
                 dict.TryAdd(m.RowId, DataUtility.ToTitleCaseExtended(m.Singular, m.Article));
             }
-            else if (m.Unknown18.RawData.Length > 0)
+            else if (m.Unknown1.ByteLength > 0)
             {
                 // Try to transform some file names into category names.
-                var whistle = m.Unknown18.ToDalamudString().ToString();
+                var whistle = m.Unknown1.ToString();
                 whistle = whistle.Replace("SE_Bt_Etc_", string.Empty)
                     .Replace("Mount_", string.Empty)
                     .Replace("_call", string.Empty)

@@ -1,7 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
@@ -17,8 +17,8 @@ public sealed class DictOrnament(IDalamudPluginInterface pluginInterface, Logger
     private static IReadOnlyDictionary<uint, string> CreateOrnamentData(IDataManager gameData)
     {
         var sheet = gameData.GetExcelSheet<Ornament>(gameData.Language)!;
-        var dict  = new Dictionary<uint, string>((int)sheet.RowCount);
-        foreach (var o in sheet.Where(o => o.Singular.RawData.Length > 0))
+        var dict  = new Dictionary<uint, string>((int)sheet.Count);
+        foreach (var o in sheet.Where(o => o.Singular.ByteLength > 0))
             dict.TryAdd(o.RowId, DataUtility.ToTitleCaseExtended(o.Singular, o.Article));
         return dict.ToFrozenDictionary();
     }

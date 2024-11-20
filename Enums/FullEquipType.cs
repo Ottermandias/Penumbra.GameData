@@ -1,4 +1,4 @@
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace Penumbra.GameData.Enums;
 
@@ -88,10 +88,14 @@ public static class FullEquipTypeExtensions
     /// <summary> Obtain the FullEquipType of an item. </summary>
     internal static FullEquipType ToEquipType(this Item item)
     {
-        var slot   = (EquipSlot)item.EquipSlotCategory.Row;
-        var weapon = (WeaponCategory)item.ItemUICategory.Row;
+        var slot   = (EquipSlot)item.EquipSlotCategory.RowId;
+        var weapon = (WeaponCategory)item.ItemUICategory.RowId;
         return slot.ToEquipType(weapon);
     }
+
+    /// <summary> Return whether a FullEquipType is not fully known. </summary>
+    public static bool IsUnknown(this FullEquipType type)
+        => type is FullEquipType.Unknown or FullEquipType.UnknownMainhand or FullEquipType.UnknownOffhand;
 
     /// <summary> Return whether a FullEquipType is a primary weapon type. </summary>
     public static bool IsWeapon(this FullEquipType type)

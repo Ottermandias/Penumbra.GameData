@@ -32,6 +32,26 @@ public enum EquipSlot : byte
     All               = 24, // Not officially existing
 }
 
+public enum HumanSlot : uint
+{
+    Head    = 0,
+    Body    = 1,
+    Hands   = 2,
+    Legs    = 3,
+    Feet    = 4,
+    Ears    = 5,
+    Neck    = 6,
+    Wrists  = 7,
+    RFinger = 8,
+    LFinger = 9,
+    Hair    = 10,
+    Face    = 11,
+    Ear     = 12,
+    Glasses = 16,
+
+    Unknown = uint.MaxValue,
+}
+
 public static class EquipSlotExtensions
 {
     /// <summary> Convert the integer to the EquipSlot it is used to represent in most model code. </summary>
@@ -50,10 +70,53 @@ public static class EquipSlotExtensions
             9  => EquipSlot.LFinger,
             10 => EquipSlot.MainHand,
             11 => EquipSlot.OffHand,
+            16 => EquipSlot.Head,
             _  => EquipSlot.Unknown,
         };
 
-    /// <summary> Convert an EquipSlot to the index it is used at in most model code. </summary>
+    public static EquipSlot ToEquipSlot(this HumanSlot slot)
+        => slot switch
+        {
+            HumanSlot.Head    => EquipSlot.Head,
+            HumanSlot.Body    => EquipSlot.Body,
+            HumanSlot.Hands   => EquipSlot.Hands,
+            HumanSlot.Legs    => EquipSlot.Legs,
+            HumanSlot.Feet    => EquipSlot.Feet,
+            HumanSlot.Ears    => EquipSlot.Ears,
+            HumanSlot.Neck    => EquipSlot.Neck,
+            HumanSlot.Wrists  => EquipSlot.Wrists,
+            HumanSlot.RFinger => EquipSlot.RFinger,
+            HumanSlot.LFinger => EquipSlot.LFinger,
+            HumanSlot.Glasses => EquipSlot.Head,
+            _                 => EquipSlot.Unknown,
+        };
+
+    public static uint ToIndex(this HumanSlot slot)
+        => (uint)slot;
+
+    public static HumanSlot ToHumanSlot(this EquipSlot slot)
+        => slot switch
+        {
+            EquipSlot.Head              => HumanSlot.Head,
+            EquipSlot.Body              => HumanSlot.Body,
+            EquipSlot.Hands             => HumanSlot.Hands,
+            EquipSlot.Legs              => HumanSlot.Legs,
+            EquipSlot.Feet              => HumanSlot.Feet,
+            EquipSlot.Ears              => HumanSlot.Ears,
+            EquipSlot.Neck              => HumanSlot.Neck,
+            EquipSlot.Wrists            => HumanSlot.Wrists,
+            EquipSlot.RFinger           => HumanSlot.RFinger,
+            EquipSlot.LFinger           => HumanSlot.LFinger,
+            EquipSlot.HeadBody          => HumanSlot.Body,
+            EquipSlot.BodyHandsLegsFeet => HumanSlot.Body,
+            EquipSlot.LegsFeet          => HumanSlot.Legs,
+            EquipSlot.FullBody          => HumanSlot.Body,
+            EquipSlot.BodyHands         => HumanSlot.Body,
+            EquipSlot.BodyLegsFeet      => HumanSlot.Body,
+            EquipSlot.ChestHands        => HumanSlot.Body,
+            _                           => HumanSlot.Unknown,
+        };
+
     public static uint ToIndex(this EquipSlot slot)
         => slot switch
         {
@@ -70,22 +133,6 @@ public static class EquipSlotExtensions
             EquipSlot.MainHand => 10,
             EquipSlot.OffHand  => 11,
             _                  => uint.MaxValue,
-        };
-
-    public static uint ToModelIndex(this EquipSlot slot)
-        => slot.ToSlot() switch
-        {
-            EquipSlot.Head    => 0,
-            EquipSlot.Body    => 1,
-            EquipSlot.Hands   => 2,
-            EquipSlot.Legs    => 3,
-            EquipSlot.Feet    => 4,
-            EquipSlot.Ears    => 5,
-            EquipSlot.Neck    => 6,
-            EquipSlot.Wrists  => 7,
-            EquipSlot.RFinger => 8,
-            EquipSlot.LFinger => 9,
-            _                 => uint.MaxValue,
         };
 
     /// <summary> Get the suffix used for a specific EquipSlot in file names. </summary>

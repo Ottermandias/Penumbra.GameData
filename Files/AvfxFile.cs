@@ -78,14 +78,14 @@ public class AvfxFile : IWritable
     public byte GlobalFogEnabled    = byte.MaxValue;
     public byte LtsEnabled          = byte.MaxValue;
 
-    public Block[]  Schedulers = Array.Empty<Block>();
-    public Block[]  Timelines  = Array.Empty<Block>();
-    public Block[]  Emitters   = Array.Empty<Block>();
-    public Block[]  Particles  = Array.Empty<Block>();
-    public Block[]  Effectors  = Array.Empty<Block>();
-    public Block[]  Binders    = Array.Empty<Block>();
-    public string[] Textures   = Array.Empty<string>();
-    public Block[]  Models     = Array.Empty<Block>();
+    public Block[]  Schedulers = [];
+    public Block[]  Timelines  = [];
+    public Block[]  Emitters   = [];
+    public Block[]  Particles  = [];
+    public Block[]  Effectors  = [];
+    public Block[]  Binders    = [];
+    public string[] Textures   = [];
+    public Block[]  Models     = [];
 
     public bool Valid
         => true;

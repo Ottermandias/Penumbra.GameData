@@ -1,7 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
@@ -21,14 +21,14 @@ public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logg
         IDataManager dataManager)
     {
         // TODO
-        var glassesSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets2.Glasses>(dataManager.Language)!;
-        return glassesSheet.Where(s => s.Name.RawData.Length > 0)
+        var glassesSheet = dataManager.GetExcelSheet<Glasses>(dataManager.Language);
+        return glassesSheet.Where(s => s.Name.ByteLength > 0)
             .ToFrozenDictionary(s => (ushort)s.RowId, FromBonusItem);
     }
 
-    private static PseudoEquipItem FromBonusItem(Lumina.Excel.GeneratedSheets2.Glasses bonusItem)
+    private static PseudoEquipItem FromBonusItem(Glasses bonusItem)
     {
-        var name            = bonusItem.Name.ToDalamudString().ToString();
+        var name            = bonusItem.Name.ToString();
         var id              = (CustomItemId)new BonusItemId((ushort)bonusItem.RowId);
         var icon            = new IconId((uint)bonusItem.Icon);
         var model           = new PrimaryId((ushort)bonusItem.Unknown_70_7);

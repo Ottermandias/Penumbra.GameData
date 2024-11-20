@@ -45,8 +45,8 @@ public class IdentificationDrawer(
             t => _modelCharas.TryGetValue(t.RowId, out var names)
                 ? string.Join(", ", names.Select(n => n.Name).Distinct())
                 : t.RowId.ToString());
-        DrawLuminaDict("Emotes",  ref _emoteFilter,  _emotes,  e => e.Name.ToDalamudString().TextValue);
-        DrawLuminaDict("Actions", ref _actionFilter, _actions, a => a.Name.ToDalamudString().TextValue);
+        DrawLuminaDict("Emotes",  ref _emoteFilter,  _emotes,  e => e.Name.ExtractText());
+        DrawLuminaDict("Actions", ref _actionFilter, _actions, a => a.Name.ExtractText());
     }
 
     // Input

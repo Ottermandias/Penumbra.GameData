@@ -128,7 +128,7 @@ public readonly unsafe struct Actor : IEquatable<Actor>
         => (CustomizeArray*)&AsCharacter->DrawData.CustomizeData;
 
     public ref CrestFlag CrestBitfield
-        => ref *(CrestFlag*)&AsCharacter->FreeCompanyCrestBitfield;
+        => ref *(CrestFlag*)&AsCharacter->DrawData.FreeCompanyCrestBitfield;
 
     public override string ToString()
         => $"0x{Address:X}";

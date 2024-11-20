@@ -19,11 +19,11 @@ public class ItemDataDrawer(ItemData _data) : IGameDataDrawer
     /// <inheritdoc/>
     public void Draw()
     {
-        DebugUtility.DrawNameTable("All Items (Main)", ref _itemFilter, true,
+        DebugUtility.DrawNameTable($"All Items (Main, {_data.Primary.Count})###AllItemsMain", ref _itemFilter, true,
             _data.AllItems(true).Select(p => ((ulong)p.Item1.Id,
                     $"{p.Item2.Name} ({(p.Item2.SecondaryId == 0 ? p.Item2.Armor().ToString() : p.Item2.Weapon().ToString())})"))
                 .OrderBy(p => p.Item1));
-        DebugUtility.DrawNameTable("All Items (Off)", ref _itemFilter, true,
+        DebugUtility.DrawNameTable($"All Items (Off), {_data.Secondary.Count})###AllItemsOff", ref _itemFilter, true,
             _data.AllItems(false).Select(p => ((ulong)p.Item1.Id,
                     $"{p.Item2.Name} ({(p.Item2.SecondaryId == 0 ? p.Item2.Armor().ToString() : p.Item2.Weapon().ToString())})"))
                 .OrderBy(p => p.Item1));

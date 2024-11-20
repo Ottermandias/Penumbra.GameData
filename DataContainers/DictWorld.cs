@@ -1,8 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
@@ -19,24 +18,24 @@ public sealed class DictWorld(IDalamudPluginInterface pluginInterface, Logger lo
     private static IReadOnlyDictionary<ushort, string> CreateWorldData(IDataManager gameData)
     {
         var sheet = gameData.GetExcelSheet<World>()!;
-        var dict  = new Dictionary<ushort, string>((int)sheet.RowCount);
+        var dict  = new Dictionary<ushort, string>((int)sheet.Count);
         foreach (var w in sheet.Where(IsValid))
-            dict.TryAdd((ushort)w.RowId, string.Intern(w.Name.ToDalamudString().TextValue));
+            dict.TryAdd((ushort)w.RowId, string.Intern(w.Name.ExtractText()));
         return dict.ToFrozenDictionary();
     }
 
     private static bool IsValid(World world)
     {
-        if (world.Name.RawData.IsEmpty)
+        if (world.Name.IsEmpty)
             return false;
 
-        if (world.DataCenter.Row is 0)
+        if (world.DataCenter.RowId is 0)
             return false;
 
         if (world.IsPublic)
             return true;
 
-        return char.IsUpper((char)world.Name.RawData[0]);
+        return char.IsUpper((char)world.Name.Data.Span[0]);
     }
 
     /// <inheritdoc/>

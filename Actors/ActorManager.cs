@@ -56,9 +56,9 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
     }
 
     private void OnLogin()
-        => _homeWorld = _clientState.LocalPlayer?.HomeWorld.Id ?? _homeWorld;
+        => _homeWorld = _clientState.LocalPlayer?.HomeWorld.RowId ?? _homeWorld;
 
-    private void OnLogout()
+    private void OnLogout(int type, int code)
         => _homeWorld = 0;
 
     /// <inheritdoc cref="ActorResolver.GetCurrentPlayer"/>

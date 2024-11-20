@@ -1,6 +1,5 @@
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
-using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using OtterGui.Services;
 using Penumbra.GameData.Actors;
@@ -222,35 +221,17 @@ public sealed class ObjectIdentification(
         if (key.Length > 0 && _actions.TryGetValue(key, out var actions) && actions.Count > 0)
         {
             foreach (var action in actions)
-                set[$"Action: {action.Name.ToDalamudString()}"] = new IdentifiedAction(action);
+                set[$"Action: {action.Name.ExtractText()}"] = new IdentifiedAction(action);
             ret = true;
         }
 
         if (fileName.Length > 0 && _emotes.TryGetValue(fileName, out var emotes) && emotes.Count > 0)
         {
             foreach (var emote in emotes)
-                set[$"Emote: {emote.Name.ToDalamudString()}"] = new IdentifiedEmote(emote);
+                set[$"Emote: {emote.Name.ExtractText()}"] = new IdentifiedEmote(emote);
             ret = true;
         }
 
         return ret;
-    }
-
-    /// <summary> Currently unused. </summary>
-    public static unsafe ulong KeyFromCharacterBase(CharacterBase* drawObject)
-    {
-        var type = (*(delegate* unmanaged<CharacterBase*, uint>**)drawObject)[Offsets.DrawObjectGetModelTypeVfunc](drawObject);
-        var unk  = (ulong)*((byte*)drawObject + Offsets.DrawObjectModelUnk1) << 8;
-        return type switch
-        {
-            1 => type | unk,
-            2 => type | unk | ((ulong)*(ushort*)((byte*)drawObject + Offsets.DrawObjectModelUnk3) << 16),
-            3 => type
-              | unk
-              | ((ulong)*(ushort*)((byte*)drawObject + Offsets.DrawObjectModelUnk2) << 16)
-              | ((ulong)**(ushort**)((byte*)drawObject + Offsets.DrawObjectModelUnk4) << 32)
-              | ((ulong)**(ushort**)((byte*)drawObject + Offsets.DrawObjectModelUnk3) << 40),
-            _ => 0u,
-        };
     }
 }

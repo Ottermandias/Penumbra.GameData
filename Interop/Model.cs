@@ -120,26 +120,6 @@ public readonly unsafe struct Model : IEquatable<Model>
                 new StainIds(offhand.AsWeapon->Stain0, offhand.AsWeapon->Stain1)));
     }
 
-    /// <summary> Obtain the mainhand and offhand and their data by guesstimating which child object is which. </summary>
-    public (Model Mainhand, Model Offhand, CharacterWeapon MainData, CharacterWeapon OffData) GetWeapons()
-    {
-        var (first, second, count) = GetChildrenWeapons();
-        switch (count)
-        {
-            case 0: return (Null, Null, CharacterWeapon.Empty, CharacterWeapon.Empty);
-            case 1:
-                return (first, Null, new CharacterWeapon(first.AsWeapon->ModelSetId, first.AsWeapon->SecondaryId,
-                    (Variant)first.AsWeapon->Variant, new StainIds(first.AsWeapon->Stain0, first.AsWeapon->Stain1)), CharacterWeapon.Empty);
-            default:
-                var (main, off) = DetermineMainhand(first, second);
-                var mainData = new CharacterWeapon(main.AsWeapon->ModelSetId, main.AsWeapon->SecondaryId, (Variant)main.AsWeapon->Variant,
-                    new StainIds(main.AsWeapon->Stain0, main.AsWeapon->Stain1));
-                var offData = new CharacterWeapon(off.AsWeapon->ModelSetId, off.AsWeapon->SecondaryId, (Variant)off.AsWeapon->Variant,
-                    new StainIds(off.AsWeapon->Stain0, off.AsWeapon->Stain1));
-                return (main, off, mainData, offData);
-        }
-    }
-
     /// <summary> Obtain the mainhand and offhand and their data by using the drawdata container from the corresponding actor. </summary>
     public (Model Mainhand, Model Offhand, CharacterWeapon MainData, CharacterWeapon OffData) GetWeapons(Actor actor)
     {
@@ -161,38 +141,6 @@ public readonly unsafe struct Model : IEquatable<Model>
         else
             off = Null;
         return (main, off, mainData, offData);
-    }
-
-    private (Model, Model, int) GetChildrenWeapons()
-    {
-        Span<Model> weapons = [Null, Null];
-        var         count   = 0;
-
-        if (!Valid || AsDrawObject->Object.ChildObject == null)
-            return (weapons[0], weapons[1], count);
-
-        Model starter  = AsDrawObject->Object.ChildObject;
-        var   iterator = starter;
-        do
-        {
-            if (iterator.IsWeapon)
-                weapons[count++] = iterator;
-            if (count == 2)
-                return (weapons[0], weapons[1], count);
-
-            iterator = iterator.AsDrawObject->Object.NextSiblingObject;
-        } while (iterator.Address != starter.Address);
-
-        return (weapons[0], weapons[1], count);
-    }
-
-    /// <summary> I don't know a safe way to do this but in experiments this worked.
-    /// The first uint at +0x8 was set to non-zero for the mainhand and zero for the offhand. </summary>
-    private static (Model Mainhand, Model Offhand) DetermineMainhand(Model first, Model second)
-    {
-        var discriminator1 = *(ulong*)(first.Address + 0x10);
-        var discriminator2 = *(ulong*)(second.Address + 0x10);
-        return discriminator1 == 0 && discriminator2 != 0 ? (second, first) : (first, second);
     }
 
     public override string ToString()

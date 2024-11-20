@@ -2,7 +2,7 @@ using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
@@ -28,7 +28,7 @@ public sealed class DictEmote(IDalamudPluginInterface pluginInterface, Logger lo
         // Do not parse tmbs multiple times.
         var seenTmbs = new ConcurrentDictionary<string, TmbFile>();
 
-        Parallel.ForEach(sheet.Where(n => n.Name.RawData.Length > 0), options, ProcessEmote);
+        Parallel.ForEach(sheet.Where(n => n.Name.ByteLength > 0), options, ProcessEmote);
 
         // Add some specific emotes by known keys.
         var sit = sheet.GetRow(50)!;
@@ -58,9 +58,9 @@ public sealed class DictEmote(IDalamudPluginInterface pluginInterface, Logger lo
             var tmbs      = new Queue<string>(8);
 
             // Queue all timelines.
-            foreach (var timeline in emote.ActionTimeline.Where(t => t.Row != 0 && t.Value != null).Select(t => t.Value!))
+            foreach (var timeline in emote.ActionTimeline.Where(t => t.RowId != 0 && t.ValueNullable.HasValue).Select(t => t.Value))
             {
-                var key = timeline.Key.ToDalamudString().TextValue;
+                var key = timeline.Key.ExtractText();
                 tmbs.Enqueue(GamePaths.Vfx.ActionTmb(key));
                 AddEmote(Path.GetFileName(key) + ".pap", emote);
             }

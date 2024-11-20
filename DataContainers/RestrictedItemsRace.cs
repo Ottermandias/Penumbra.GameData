@@ -1,8 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OtterGui.Log;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -20,15 +19,15 @@ public sealed class RestrictedItemsRace(IDalamudPluginInterface pluginInterface,
     {
         var ret = RaceGenderGroup.Where(c => c is not 0 and not uint.MaxValue).ToHashSet();
 
-        var items      = gameData.GetExcelSheet<Item>()!;
-        var categories = gameData.GetExcelSheet<EquipRaceCategory>(gameData.Language)!;
+        var items      = gameData.GetExcelSheet<Item>();
+        var categories = gameData.GetExcelSheet<EquipRaceCategory>(gameData.Language);
         foreach (var item in items.Where(i => i.EquipRestriction > 3))
         {
             if (ret.Contains((uint)item.ModelMain))
                 continue;
 
             log.Information(
-                $"{item.RowId:D5} {item.Name.ToDalamudString().TextValue} has unknown restriction group {categories.GetRow(item.EquipRestriction)!.RowId:D2}.");
+                $"{item.RowId:D5} {item.Name} has unknown restriction group {categories.GetRow(item.EquipRestriction).RowId:D2}.");
         }
 
         return ret.ToFrozenSet();
