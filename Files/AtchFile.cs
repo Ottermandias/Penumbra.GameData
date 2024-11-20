@@ -56,7 +56,7 @@ public class AtchFile : IWritable
         {
             var name = r.ReadByteString(r.Position);
             r.Skip(name.Length + 1);
-            Entries.Add(new AtchEntry { Name = ByteString.FromSpanUnsafe(name, true, null, true).Clone() });
+            Entries.Add(new AtchEntry { Name = ByteString.FromSpanUnsafe(name, true, null, true).Revert() });
         }
 
         var currentUlong = 0ul;
@@ -97,7 +97,9 @@ public class AtchFile : IWritable
         w.Write((ushort)firstEntry.States.Count);
         foreach (var entry in Entries)
         {
-            w.Write(entry.Name.Span);
+            // Write reversed.
+            for (var i = entry.Name.Length - 1; i >= 0; --i)
+                w.Write(entry.Name[i]);
             w.Write((byte)0);
         }
 
