@@ -1,6 +1,4 @@
-﻿using Penumbra.String;
-
-namespace Penumbra.GameData.Files.Utility;
+﻿namespace Penumbra.GameData.Files.Utility;
 
 public class StringPool : IDisposable
 {
@@ -89,7 +87,7 @@ public class StringPool : IDisposable
         return (newOffset, bytes.Length);
     }
 
-    public int FindOrAddString(ByteString str)
+    public int FindOrAddString(ReadOnlySpan<byte> str)
     {
         var dataSpan = AsSpan();
         foreach (var offset in StartingOffsets)
@@ -115,7 +113,7 @@ public class StringPool : IDisposable
         Data.Seek(0L, SeekOrigin.End);
         var newOffset = (int)Data.Position;
         StartingOffsets.Add(newOffset);
-        Data.Write(str.Span);
+        Data.Write(str);
         Data.WriteByte(0);
         return newOffset;
     }

@@ -1,153 +1,98 @@
 using OtterGui;
+using Penumbra.GameData.Enums;
+using Penumbra.GameData.Files.AtchStructs;
 using Penumbra.GameData.Files.Utility;
-using Penumbra.String;
 
 namespace Penumbra.GameData.Files;
 
 public class AtchFile : IWritable
 {
-    public record struct AtchState(ByteString Bone, float Scale, Vector3 Offset, Vector3 Rotation)
-    {
-        public static AtchState Read(ref SpanBinaryReader reader)
-        {
-            var stringOffset = reader.ReadInt32();
-            var boneName     = reader.ReadByteString(stringOffset);
-            var scale        = reader.ReadSingle();
-            var offsetX      = reader.ReadSingle();
-            var offsetY      = reader.ReadSingle();
-            var offsetZ      = reader.ReadSingle();
-            var rotationX    = reader.ReadSingle();
-            var rotationY    = reader.ReadSingle();
-            var rotationZ    = reader.ReadSingle();
-            return new AtchState
-            {
-                Bone     = ByteString.FromSpanUnsafe(boneName, true, null, true).Clone(),
-                Scale    = scale,
-                Offset   = new Vector3(offsetX,   offsetY,   offsetZ),
-                Rotation = new Vector3(rotationX, rotationY, rotationZ),
-            };
-        }
-    }
+    public const int BitFieldSize = 32;
 
-    public record AtchEntry
-    {
-        public          ByteString      Name      = ByteString.Empty;
-        public readonly List<AtchState> States    = [];
-        public          bool            Accessory = false;
+    public readonly List<AtchPoint> Points;
 
-        public void ReadStates(ref SpanBinaryReader reader, ushort numStates)
-        {
-            States.Clear();
-            States.EnsureCapacity(numStates);
-            for (var i = 0; i < numStates; ++i)
-                States.Add(AtchState.Read(ref reader));
-        }
-    }
-
-    public readonly List<AtchEntry> Entries;
-
-    public AtchFile(ReadOnlySpan<byte> data)
+    public unsafe AtchFile(ReadOnlySpan<byte> data)
     {
         var r          = new SpanBinaryReader(data);
+        var numPoints  = r.ReadUInt16();
         var numEntries = r.ReadUInt16();
-        var numStates  = r.ReadUInt16();
-        Entries = new List<AtchEntry>(numEntries);
-        for (var i = 0; i < numEntries; ++i)
+        Points = new List<AtchPoint>(numPoints);
+        for (var i = 0; i < numPoints; ++i)
+            Points.Add(new AtchPoint { Type = (AtchType)r.ReadUInt32() });
+
+        var bitfield = stackalloc ulong[BitFieldSize / 8];
+        for (var i = 0; i < BitFieldSize / 8; ++i)
+            bitfield[i] = r.ReadUInt64();
+
+        for (var i = 0; i < numPoints; ++i)
         {
-            var name = r.ReadByteString(r.Position);
-            r.Skip(name.Length + 1);
-            Entries.Add(new AtchEntry { Name = ByteString.FromSpanUnsafe(name, true, null, true).Revert() });
+            var bitIdx   = i & 0x3F;
+            var ulongIdx = i >> 6;
+            Points[i].Accessory = ((bitfield[ulongIdx] >> bitIdx) & 1) == 1;
         }
 
-        var currentUlong = 0ul;
-        for (var i = 0; i < numEntries; ++i)
-        {
-            var bitIdx = i & 0x3F;
-            if (bitIdx == 0)
-                currentUlong = r.ReadUInt64();
-
-            Entries[i].Accessory = ((currentUlong >> bitIdx) & 1) == 1;
-        }
-
-        var numBytes  = BitOperations.RoundUpToPowerOf2(numEntries) >> 3;
-        var readBytes = (numEntries + 63) >> 3;
-        var padding   = (int)(numBytes - readBytes);
-        r.Skip(padding);
-
-        foreach (var entry in Entries)
-            entry.ReadStates(ref r, numStates);
+        foreach (var entry in Points)
+            entry.ReadStates(ref r, numEntries);
     }
 
+    public AtchPoint? GetPoint(AtchType type)
+        => Points.FirstOrDefault(p => p.Type == type);
+
+    public ref AtchEntry GetEntry(AtchType type, ushort entryIndex)
+    {
+        if (GetPoint(type) is not { } point)
+            throw new IndexOutOfRangeException();
+        if (point.Entries.Length <= entryIndex)
+            throw new IndexOutOfRangeException();
+
+        return ref point.Entries[entryIndex];
+    }
+
+    public AtchFile Clone()
+        => new(this);
+
+    private AtchFile(AtchFile clone)
+        => Points = clone.Points.Select(p => new AtchPoint(p)).ToList();
 
     public bool Valid
-        => Entries.Count > 0 && Entries.All(e => e.Name.Length > 0 && e.States.Count == Entries[0].States.Count);
+        => Points.Count > 0 && Points.All(e => e.Type != 0 && e.Entries.Length == Points[0].Entries.Length);
 
-    public byte[] Write()
+    public unsafe MemoryStream Write()
     {
-        using var ms = new MemoryStream();
-        using var w  = new BinaryWriter(ms);
-        w.Write((ushort)Entries.Count);
-        if (Entries.Count == 0)
+        var       ms = new MemoryStream();
+        using var w  = new BinaryWriter(ms, Encoding.UTF8, true);
+        w.Write((ushort)Points.Count);
+        if (Points.Count == 0)
         {
             w.Write((ushort)0);
-            return ms.ToArray();
+            return ms;
         }
 
-        var firstEntry = Entries[0];
-        w.Write((ushort)firstEntry.States.Count);
-        foreach (var entry in Entries)
-        {
-            // Write reversed.
-            for (var i = entry.Name.Length - 1; i >= 0; --i)
-                w.Write(entry.Name[i]);
-            w.Write((byte)0);
-        }
+        var firstEntry = Points[0];
+        w.Write((ushort)firstEntry.Entries.Length);
+        foreach (var entry in Points)
+            w.Write((uint)entry.Type);
 
-        switch (ms.Position & 3)
+        Span<byte> bitfield = stackalloc byte[BitFieldSize];
+        foreach (var (entry, i) in Points.WithIndex())
         {
-            case 3:
-                w.Write((byte)0);
-                break;
-            case 2:
-                w.Write((ushort)0);
-                break;
-            case 1:
-                w.Write((ushort)0);
-                w.Write((byte)0);
-                break;
-        }
-
-        var currentUlong = 0ul;
-        foreach (var (entry, i) in Entries.WithIndex())
-        {
-            var bitIdx = i & 0x3F;
+            var bitIdx  = i & 0x7;
+            var byteIdx = i >> 3;
             if (entry.Accessory)
-                currentUlong |= 1ul << bitIdx;
-            if (bitIdx == 0x3F)
-            {
-                w.Write(currentUlong);
-                currentUlong = 0;
-            }
+                bitfield[byteIdx] |= (byte)(1 << bitIdx);
         }
 
-        if ((Entries.Count & 0x3F) != 0x3F)
-            w.Write(currentUlong);
+        w.Write(bitfield);
 
-        var numBytes     = BitOperations.RoundUpToPowerOf2((uint)Entries.Count) >> 3;
-        var writtenBytes = (uint)(Entries.Count + 63) >> 3;
-        var paddingLongs = (numBytes - writtenBytes) >> 3;
-        for (var i = 0; i < paddingLongs; ++i)
-            w.Write((ulong)0);
-
-        var stringStart = ms.Position + 32 * Entries.Count * firstEntry.States.Count;
+        var stringStart = ms.Position + 32 * Points.Count * firstEntry.Entries.Length;
         var pool        = new StringPool();
-        foreach (var entry in Entries)
+        foreach (var entry in Points)
         {
-            if (entry.States.Count != firstEntry.States.Count)
+            if (entry.Entries.Length != firstEntry.Entries.Length)
                 throw new Exception(
-                    $".atch file is invalid: different number of states in entry {entry.Name} compared to first entry {firstEntry.Name}.");
+                    $".atch file is invalid: different number of entries in point {entry.Type} compared to first point {firstEntry.Type}.");
 
-            foreach (var state in entry.States)
+            foreach (var state in entry.Entries)
             {
                 var offset = pool.FindOrAddString(state.Bone);
                 w.Write((uint)(offset + stringStart));
@@ -162,6 +107,20 @@ public class AtchFile : IWritable
         }
 
         pool.WriteTo(ms);
+        var remainder = ms.Position % 64;
+        if (remainder != 0)
+        {
+            var padding = 64 - remainder;
+            for (var i = 0; i < padding; ++i)
+                ms.Write((byte)0);
+        }
+
+        return ms;
+    }
+
+    byte[] IWritable.Write()
+    {
+        using var ms = Write();
         return ms.ToArray();
     }
 }
