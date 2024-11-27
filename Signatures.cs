@@ -141,6 +141,8 @@ public static class Sigs
     public const string CalculateHeight = "E8 ?? ?? ?? FF 48 8B 0D ?? ?? ?? ?? 0F 28 F0";
 
     public const string CrestChange          = "E8 ?? ?? ?? ?? 48 8B 55 ?? 49 8D 8E";
+    // Inlined in this, but still called in 4 others.
+    public const string CrestChangeCaller    = "48 89 5C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 44 0F B6 B9"; 
     public const string SetUnlockLinkValue   = "48 83 EC ?? 8B C2 83 E0";
     public const string RequestGlamourPlates = "E8 ?? ?? ?? ?? 66 90 44 89 74 24";
 
