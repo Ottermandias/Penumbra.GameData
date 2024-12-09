@@ -41,15 +41,20 @@ public static class DataUtility
     public static string ToTitleCaseExtended(in ReadOnlySeString s, sbyte article)
     {
         if (article == 1)
-            return string.Intern(s.ToString());
+            return string.Intern(s.ExtractText().Replace("\u00AD", string.Empty));
 
-        var sb        = new StringBuilder(s.ToString());
+        var sb        = new StringBuilder(s.ExtractText());
         var lastSpace = true;
         for (var i = 0; i < sb.Length; ++i)
         {
             if (sb[i] == ' ')
             {
                 lastSpace = true;
+            }
+            // Remove soft hyphens.
+            else if (sb[i] == '\u00AD')
+            {
+                sb.Remove(i--, 1);
             }
             else if (lastSpace)
             {

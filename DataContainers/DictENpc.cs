@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using Dalamud.Game;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
@@ -11,13 +12,14 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches ENpcId to names. </summary>
 public sealed class DictENpc(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : NameDictionary(pluginInterface, log, gameData, "ENpcs", 7, () => CreateENpcData(gameData))
+    : NameDictionary(pluginInterface, log, gameData, "ENpcs", 8, () => CreateENpcData(gameData))
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateENpcData(IDataManager gameData)
     {
-        var sheet = gameData.GetExcelSheet<ENpcResident>(gameData.Language)!;
-        var dict  = new Dictionary<uint, string>((int) sheet.Count);
+        //var sheet = gameData.GetExcelSheet<ENpcResident>(gameData.Language);
+        var sheet = gameData.GetExcelSheet<ENpcResident>(ClientLanguage.French);
+        var dict  = new Dictionary<uint, string>(sheet.Count);
         foreach (var n in sheet.Where(e => e.Singular.ByteLength > 0))
             dict.TryAdd(n.RowId, DataUtility.ToTitleCaseExtended(n.Singular, n.Article));
         return dict.ToFrozenDictionary();
