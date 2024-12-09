@@ -47,12 +47,12 @@ public static class DataUtility
         var lastSpace = true;
         for (var i = 0; i < sb.Length; ++i)
         {
-            if (sb[i] == ' ')
+            if (sb[i] is ' ')
             {
                 lastSpace = true;
             }
             // Remove soft hyphens.
-            else if (sb[i] == '\u00AD')
+            else if (sb[i] is '\u00AD' or '\u00A0')
             {
                 sb.Remove(i--, 1);
             }

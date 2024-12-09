@@ -17,8 +17,7 @@ public sealed class DictENpc(IDalamudPluginInterface pluginInterface, Logger log
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateENpcData(IDataManager gameData)
     {
-        //var sheet = gameData.GetExcelSheet<ENpcResident>(gameData.Language);
-        var sheet = gameData.GetExcelSheet<ENpcResident>(ClientLanguage.French);
+        var sheet = gameData.GetExcelSheet<ENpcResident>(gameData.Language);
         var dict  = new Dictionary<uint, string>(sheet.Count);
         foreach (var n in sheet.Where(e => e.Singular.ByteLength > 0))
             dict.TryAdd(n.RowId, DataUtility.ToTitleCaseExtended(n.Singular, n.Article));
