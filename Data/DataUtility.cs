@@ -47,19 +47,25 @@ public static class DataUtility
         var lastSpace = true;
         for (var i = 0; i < sb.Length; ++i)
         {
-            if (sb[i] is ' ')
+            switch (sb[i])
             {
-                lastSpace = true;
-            }
-            // Remove soft hyphens.
-            else if (sb[i] is '\u00AD' or '\u00A0')
-            {
-                sb.Remove(i--, 1);
-            }
-            else if (lastSpace)
-            {
-                lastSpace = false;
-                sb[i]     = char.ToUpperInvariant(sb[i]);
+                case ' ':
+                    lastSpace = true;
+                    break;
+                // Remove soft hyphens.
+                case '\u00AD' or '\u00A0':
+                    sb.Remove(i--, 1);
+                    break;
+                default:
+                {
+                    if (lastSpace)
+                    {
+                        lastSpace = false;
+                        sb[i]     = char.ToUpperInvariant(sb[i]);
+                    }
+
+                    break;
+                }
             }
         }
 
