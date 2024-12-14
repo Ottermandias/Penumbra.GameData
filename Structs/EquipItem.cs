@@ -114,7 +114,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
     public static EquipItem FromArmor(in Item item)
     {
         var type            = item.ToEquipType();
-        var name            = item.Name.ExtractText();
+        var name            = item.Name.ExtractTextExtended();
         var id              = item.RowId;
         var icon            = item.Icon;
         var model           = (PrimaryId)item.ModelMain;
@@ -141,7 +141,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
     public static EquipItem FromMainhand(in Item item)
     {
         var type            = item.ToEquipType();
-        var name            = item.Name.ExtractText();
+        var name            = item.Name.ExtractTextExtended();
         var id              = item.RowId;
         var icon            = item.Icon;
         var model           = (PrimaryId)item.ModelMain;
@@ -157,7 +157,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
     public static EquipItem FromOffhand(Item item)
     {
         var type            = item.ToEquipType().ValidOffhand();
-        var name            = item.Name.ExtractText() + type.OffhandTypeSuffix();
+        var name            = item.Name.ExtractTextExtended() + type.OffhandTypeSuffix();
         var id              = item.RowId;
         var icon            = item.Icon;
         var model           = (PrimaryId)item.ModelSub;

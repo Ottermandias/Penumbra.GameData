@@ -1,5 +1,6 @@
 using Dalamud.Interface;
 using Dalamud.Utility;
+using Penumbra.GameData.Data;
 
 namespace Penumbra.GameData.Structs;
 
@@ -49,7 +50,7 @@ public readonly struct Stain
 
     /// <summary> Create a Stain from the sheet data. </summary>
     public Stain(Lumina.Excel.Sheets.Stain stain)
-        : this(stain.Name.ExtractText(), SeColorToRgba(stain.Color), (StainId)stain.RowId, stain.Unknown1)
+        : this(stain.Name.ExtractTextExtended(), SeColorToRgba(stain.Color), (StainId)stain.RowId, stain.Unknown1)
     { }
 
     /// <summary> Simple constructor for all data. </summary>

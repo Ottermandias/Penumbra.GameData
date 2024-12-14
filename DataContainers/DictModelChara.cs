@@ -19,7 +19,7 @@ public sealed class DictModelChara(
     DictBNpcNames bNpcNames,
     NameDicts nameDicts)
     : DataSharer<IReadOnlyList<IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>>>(pluginInterface, log, "ModelObjectDict",
-            ClientLanguage.English, 3,
+            ClientLanguage.English, Version.DictModelChara,
             () => CreateModelObjects(gameData, bNpcNames, nameDicts),
             System.Threading.Tasks.Task.WhenAll(nameDicts.Awaiter, bNpcNames.Awaiter)),
         IReadOnlyDictionary<ModelCharaId, IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>>

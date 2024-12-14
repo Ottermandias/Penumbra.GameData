@@ -10,7 +10,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A list to efficiently identify character models. </summary>
 public sealed class IdentificationListModels(IDalamudPluginInterface pi, IDataManager gameData, Logger log)
-    : KeyList<ModelChara>(pi, log, "ModelIdentification", gameData.Language, 8, () => CreateModelList(gameData), ToKey, ValidKey, ValueKeySelector)
+    : KeyList<ModelChara>(pi, log, "ModelIdentification", gameData.Language, Version.IdentificationListModels, () => CreateModelList(gameData), ToKey, ValidKey, ValueKeySelector)
 {
 
     /// <summary> Find all models affected by the given set of input data. </summary>

@@ -2,6 +2,7 @@ using Dalamud.Utility;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using OtterGui.Log;
+using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.DataContainers.Bases;
@@ -31,7 +32,7 @@ public static class GenderRestrictedItems
             AddEmperor(item);
 
             log.Warning(
-                $"{item.RowId:D5} {item.Name.ExtractText()} is restricted to {(restriction == 2 ? "male" : "female")} characters but is not known, redirected to Emperor. {item.EquipSlotCategory.RowId}");
+                $"{item.RowId:D5} {item.Name.ExtractTextExtended()} is restricted to {(restriction == 2 ? "male" : "female")} characters but is not known, redirected to Emperor. {item.EquipSlotCategory.RowId}");
         }
 
         if (unhandled > 0)
@@ -92,7 +93,7 @@ public static class GenderRestrictedItems
 
         if (sourceRow.EquipRestriction != restriction)
         {
-            log.Warning($"{sourceRow.Name.ExtractText()} is not restricted anymore.");
+            log.Warning($"{sourceRow.Name.ExtractTextExtended()} is not restricted anymore.");
             return;
         }
 
@@ -100,13 +101,13 @@ public static class GenderRestrictedItems
         var targetSlot = ((EquipSlot)targetRow.EquipSlotCategory.RowId).ToSlot();
         if (!sourceSlot.IsAccessory() && !sourceSlot.IsEquipment())
         {
-            log.Warning($"{sourceRow.Name.ExtractText()} is not equippable to a known slot.");
+            log.Warning($"{sourceRow.Name.ExtractTextExtended()} is not equippable to a known slot.");
             return;
         }
 
         if (sourceSlot != targetSlot)
         {
-            log.Warning($"{sourceRow.Name.ExtractText()} and {targetRow.Name.ExtractText()} are not compatible.");
+            log.Warning($"{sourceRow.Name.ExtractTextExtended()} and {targetRow.Name.ExtractTextExtended()} are not compatible.");
             return;
         }
 

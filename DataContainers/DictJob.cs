@@ -14,7 +14,7 @@ public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
     public DictJob(IDataManager gameData)
     {
         var stopwatch = Stopwatch.StartNew();
-        _jobs = gameData.GetExcelSheet<ClassJob>()!
+        _jobs = gameData.GetExcelSheet<ClassJob>()
             .Where(j => j.Abbreviation.ByteLength > 0)
             .ToFrozenDictionary(j => (JobId)j.RowId, j => new Job(j));
 

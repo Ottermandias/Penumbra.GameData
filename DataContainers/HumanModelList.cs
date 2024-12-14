@@ -10,7 +10,7 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A set of data about which ModelCharaIds represent human models. </summary>
 public sealed class HumanModelList(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<Tuple<BitArray, int>>(pluginInterface, log, "HumanModels", gameData.Language, 4, () => GetValidHumanModels(gameData))
+    : DataSharer<Tuple<BitArray, int>>(pluginInterface, log, "HumanModels", gameData.Language, Version.HumanModelList, () => GetValidHumanModels(gameData))
 {
     /// <summary> Whether the given ID represents a human model. </summary>
     public bool IsHuman(ModelCharaId modelId)

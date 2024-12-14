@@ -13,8 +13,7 @@ namespace Penumbra.GameData.DataContainers;
 /// <summary> A dictionary that maps GlassesIds to Glasses. </summary>
 public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<ushort, PseudoEquipItem>>(pluginInterface, log, "BonusItems",
-        gameData.Language, 2,
-        () => CreateGlassesData(gameData)), IReadOnlyDictionary<BonusItemId, EquipItem>
+        gameData.Language, Version.DictBonusItems, () => CreateGlassesData(gameData)), IReadOnlyDictionary<BonusItemId, EquipItem>
 {
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<ushort, PseudoEquipItem> CreateGlassesData(
@@ -28,7 +27,7 @@ public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logg
 
     private static PseudoEquipItem FromBonusItem(Glasses bonusItem)
     {
-        var name            = bonusItem.Name.ToString();
+        var name            = bonusItem.Name.ExtractTextExtended();
         var id              = (CustomItemId)new BonusItemId((ushort)bonusItem.RowId);
         var icon            = new IconId((uint)bonusItem.Icon);
         var model           = new PrimaryId((ushort)bonusItem.Unknown_70_7);

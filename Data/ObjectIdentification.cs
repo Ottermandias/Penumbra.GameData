@@ -221,14 +221,14 @@ public sealed class ObjectIdentification(
         if (key.Length > 0 && _actions.TryGetValue(key, out var actions) && actions.Count > 0)
         {
             foreach (var action in actions)
-                set[$"Action: {action.Name.ExtractText()}"] = new IdentifiedAction(action);
+                set[$"Action: {action.Name.ExtractTextExtended()}"] = new IdentifiedAction(action);
             ret = true;
         }
 
         if (fileName.Length > 0 && _emotes.TryGetValue(fileName, out var emotes) && emotes.Count > 0)
         {
             foreach (var emote in emotes)
-                set[$"Emote: {emote.Name.ExtractText()}"] = new IdentifiedEmote(emote);
+                set[$"Emote: {emote.Name.ExtractTextExtended()}"] = new IdentifiedEmote(emote);
             ret = true;
         }
 
