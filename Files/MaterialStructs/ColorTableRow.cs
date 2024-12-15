@@ -19,7 +19,7 @@ namespace Penumbra.GameData.Files.MaterialStructs;
 /// </code>
 /// </summary>
 [InlineArray(NumVec4 * Halves)]
-public struct ColorTableRow : IEquatable<ColorTableRow>
+public struct ColorTableRow : IEquatable<ColorTableRow>, ILegacyColorRow
 {
     public const int NumVec4 = 8;
     public const int Halves  = 4;
@@ -74,6 +74,13 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
         set => this[3] = value;
     }
 
+    // This does a legacy interpretation of the new structures.
+    Half ILegacyColorRow.Shininess
+    {
+        get => Scalar3;
+        set => Scalar3 = value;
+    }
+
     public HalfColor SpecularColor
     {
         get => new(((ReadOnlySpan<Half>)this)[4], this[5], this[6]);
@@ -89,6 +96,13 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
     {
         get => this[7];
         set => this[7] = value;
+    }
+
+    // This does a legacy interpretation of the new structures.
+    Half ILegacyColorRow.SpecularMask
+    {
+        get => Scalar7;
+        set => Scalar7 = value;
     }
 
     public HalfColor EmissiveColor
@@ -335,6 +349,9 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
     }
 
     public ColorTableRow(in LegacyColorTableRow oldRow)
+        => UpgradeFrom(oldRow);
+
+    public void UpgradeFrom(in LegacyColorTableRow oldRow)
     {
         DiffuseColor  = oldRow.DiffuseColor;
         Scalar3       = oldRow.Shininess;
@@ -344,6 +361,39 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
         TileIndex     = oldRow.TileIndex;
         TileAlpha     = Half.One;
         TileTransform = oldRow.TileTransform;
+    }
+
+    public void ConvertFromCharacterLegacy()
+    {
+        // This does approximations that are likely not quite correct but that give a reasonable initial guess.
+        // From there, the creator can then tweak values by eye.
+
+        SpecularColor *= Scalar7;
+
+        Roughness = (Half)RoughnessFromShininess((float)Scalar3);
+
+        Scalar3       = Half.One;
+        Scalar7       = Half.Zero;
+        Scalar11      = Half.One;
+        SheenRate     = (Half)0.1f;
+        SheenTintRate = (Half)0.2f;
+        SheenAperture = (Half)5.0f;
+    }
+
+    public static float RoughnessFromShininess(float shininess)
+    {
+        // Solves for Roughness from Shininess using -6 R^2 + 12 R = 6.25 - 0.75 log2(S).
+        // The RHS is the "reflection mip from shininess" formula from the old shaders.
+        // The LHS is the "reflection mip from roughness" formula from the new shaders.
+        var mip = MathF.FusedMultiplyAdd(-0.75f, MathF.Log2(shininess), 6.25f);
+        return 1.0f - MathF.Sqrt(MathF.Max(0.0f, MathF.FusedMultiplyAdd(-1.0f / 6.0f, mip, 1.0f)));
+    }
+
+    public static float ShininessFromRoughness(float roughness)
+    {
+        // Solves from Shininess from Roughness using the same equation as above.
+        var mip = MathF.FusedMultiplyAdd(-6.0f, roughness, 12.0f) * roughness;
+        return MathF.Pow(2.0f, MathF.FusedMultiplyAdd(-4.0f / 3.0f, mip, 25.0f / 3.0f));
     }
 
     public override readonly bool Equals([NotNullWhen(true)] object? obj)

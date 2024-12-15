@@ -15,11 +15,15 @@ namespace Penumbra.GameData.Files.MaterialStructs;
 /// </code>
 /// </summary>
 [InlineArray(NumVec4 * Halves)]
-public struct LegacyColorTableRow : IEquatable<LegacyColorTableRow>
+public struct LegacyColorTableRow : IEquatable<LegacyColorTableRow>, ILegacyColorRow
 {
     public const int NumVec4 = 4;
     public const int Halves  = 4;
     public const int Size    = NumVec4 * Halves * 2;
+
+    /// <summary> The effective maximum value of <see cref="Shininess"/>. Going beyond that has no effect. </summary>
+    /// <remarks> This is the least <see cref="Half"/> greater than or equal to <c>Pow(2.0, 25.0 / 3.0)</c>. </remarks>
+    public static readonly Half EffectiveMaxShininess = (Half)322.8f;
 
     private Half _element0;
 
@@ -85,6 +89,9 @@ public struct LegacyColorTableRow : IEquatable<LegacyColorTableRow>
         set => this[11] = (Half)((value + 0.5f) / 64f);
     }
 
+    readonly Half IColorRow.TileAlpha
+        => Half.One;
+
     public HalfMatrix2x2 TileTransform
     {
         get => new(this[12], this[13], this[14], this[15]);
@@ -135,6 +142,9 @@ public struct LegacyColorTableRow : IEquatable<LegacyColorTableRow>
     }
 
     public LegacyColorTableRow(in ColorTableRow row)
+        => DowngradeFrom(row);
+
+    public void DowngradeFrom(in ColorTableRow row)
     {
         DiffuseColor  = row.DiffuseColor;
         SpecularMask  = row.Scalar7;

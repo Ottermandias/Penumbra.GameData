@@ -41,3 +41,8 @@ public interface IColorTable
     /// <returns> Whether something actually changed. </returns>
     bool SetDefaultRow(int i);
 }
+
+public interface IColorTable<TRow> : IColorTable, IEnumerable<TRow> where TRow : unmanaged
+{
+    public ref TRow this[int i] { get; }
+}

@@ -1,7 +1,7 @@
 namespace Penumbra.GameData.Files.MaterialStructs;
 
 /// <inheritdoc cref="ColorTableRow"/>
-public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>
+public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>, ILegacyColorDyeRow
 {
     public const int  Size = 4;
     private      uint _data;
@@ -42,10 +42,24 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>
         set => _data = value ? _data | 0x0008u : _data & ~0x0008u;
     }
 
+    // This does a legacy interpretation of the new structures.
+    bool ILegacyColorDyeRow.Shininess
+    {
+        readonly get => Scalar3;
+        set => Scalar3 = value;
+    }
+
     public bool Metalness
     {
         readonly get => (_data & 0x0010) != 0;
         set => _data = value ? _data | 0x0010u : _data & ~0x0010u;
+    }
+
+    // This does a legacy interpretation of the new structures.
+    bool ILegacyColorDyeRow.SpecularMask
+    {
+        readonly get => Metalness;
+        set => Metalness = value;
     }
 
     public bool Roughness
@@ -87,10 +101,13 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>
     public bool SphereMapMask
     {
         readonly get => (_data & 0x0800) != 0;
-        set => _data = value ? _data | 0x0800u : _data & ~0x0200u;
+        set => _data = value ? _data | 0x0800u : _data & ~0x0800u;
     }
 
     public ColorDyeTableRow(in LegacyColorDyeTableRow oldRow)
+        => UpgradeFrom(oldRow);
+
+    public void UpgradeFrom(in LegacyColorDyeTableRow oldRow)
     {
         Template      = oldRow.Template;
         DiffuseColor  = oldRow.DiffuseColor;
@@ -98,6 +115,16 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>
         EmissiveColor = oldRow.EmissiveColor;
         Scalar3       = oldRow.Shininess;
         Metalness     = oldRow.SpecularMask;
+    }
+
+    public void ConvertFromCharacterLegacy()
+    {
+        if (Template != 0)
+            Template += 1000;
+
+        Metalness = false;
+        Roughness = Scalar3;
+        Scalar3 = false;
     }
 
     public override readonly bool Equals([NotNullWhen(true)] object? obj)
