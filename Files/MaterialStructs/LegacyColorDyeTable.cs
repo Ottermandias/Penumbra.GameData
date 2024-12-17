@@ -14,9 +14,14 @@ public sealed class LegacyColorDyeTable : IEnumerable<LegacyColorDyeTableRow>, I
     public const int NumRows = 16;
     public const int Size    = NumRows * LegacyColorDyeTableRow.Size;
 
-    int IColorDyeTable.RowSize => LegacyColorDyeTableRow.Size;
-    int IColorDyeTable.Height  => NumRows;
-    int IColorDyeTable.Size    => Size;
+    int IColorDyeTable.RowSize
+        => LegacyColorDyeTableRow.Size;
+
+    int IColorDyeTable.Height
+        => NumRows;
+
+    int IColorDyeTable.Size
+        => Size;
 
     private Table _rowData;
 
@@ -56,6 +61,12 @@ public sealed class LegacyColorDyeTable : IEnumerable<LegacyColorDyeTableRow>, I
         return true;
     }
 
+    public bool SpanSizeCheck(ReadOnlySpan<byte> span)
+        => span.Length == LegacyColorDyeTableRow.Size;
+
+    public ulong ToMask(IColorDyeTable.ValueTypes mask)
+        => (ulong)mask;
+
     public LegacyColorDyeTable()
         => SetDefault();
 
@@ -78,7 +89,8 @@ public sealed class LegacyColorDyeTable : IEnumerable<LegacyColorDyeTableRow>, I
                     _rowData[i] = table[i];
                 break;
             }
-            default: SetDefault();
+            default:
+                SetDefault();
                 break;
         }
     }

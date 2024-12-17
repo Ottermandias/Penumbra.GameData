@@ -26,9 +26,9 @@ public partial class MtrlFile : IWritable, ICloneable
         get => AdditionalData.Length switch
         {
             0 => default,
-            1 => new(AdditionalData[0]),
-            2 => new(AdditionalData[0] | ((uint)AdditionalData[1] << 8)),
-            3 => new(AdditionalData[0] | ((uint)AdditionalData[1] << 8) | ((uint)AdditionalData[1] << 16)),
+            1 => new TableFlags(AdditionalData[0]),
+            2 => new TableFlags(AdditionalData[0] | ((uint)AdditionalData[1] << 8)),
+            3 => new TableFlags(AdditionalData[0] | ((uint)AdditionalData[1] << 8) | ((uint)AdditionalData[1] << 16)),
             _ => GetTableFlagsRef(),
         };
         set

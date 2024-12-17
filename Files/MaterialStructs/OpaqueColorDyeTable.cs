@@ -31,6 +31,7 @@ internal sealed class OpaqueColorDyeTable : IColorDyeTable
         HeightLog = (byte)BitOperations.Log2((uint)other.Height);
         if (other.Height != Height)
             throw new ArgumentException($"The source color dye table must have a power of 2 of rows.");
+
         Data = new byte[other.Size];
         other.AsBytes().CopyTo(AsBytes());
     }
@@ -46,6 +47,12 @@ internal sealed class OpaqueColorDyeTable : IColorDyeTable
 
     public bool SetDefaultRow(int i)
         => throw new NotSupportedException();
+
+    public bool SpanSizeCheck(ReadOnlySpan<byte> span)
+        => false;
+
+    public ulong ToMask(IColorDyeTable.ValueTypes mask)
+        => (ulong)mask;
 
     /// <summary>
     /// Attempts to read a color dye table from the given reader.

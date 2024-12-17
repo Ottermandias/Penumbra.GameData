@@ -61,6 +61,12 @@ public sealed class ColorDyeTable : IEnumerable<ColorDyeTableRow>, IColorDyeTabl
         return true;
     }
 
+    public bool SpanSizeCheck(ReadOnlySpan<byte> span)
+        => span.Length == ColorDyeTableRow.Size;
+
+    public ulong ToMask(IColorDyeTable.ValueTypes mask)
+        => (ulong)mask;
+
     public ColorDyeTable()
         => SetDefault();
 

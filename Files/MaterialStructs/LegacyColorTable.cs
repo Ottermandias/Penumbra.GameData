@@ -16,11 +16,20 @@ public sealed class LegacyColorTable : IEnumerable<LegacyColorTableRow>, IColorT
     public const int NumRows = 16;
     public const int Size    = NumRows * LegacyColorTableRow.Size;
 
-    int IColorTable.Width   => LegacyColorTableRow.NumVec4;
-    int IColorTable.RowSize => LegacyColorTableRow.Size;
-    int IColorTable.Height  => NumRows;
-    int IColorTable.Size    => Size;
-    byte IColorTable.DimensionLogs => 0;
+    int IColorTable.Width
+        => LegacyColorTableRow.NumVec4;
+
+    int IColorTable.RowSize
+        => LegacyColorTableRow.Size;
+
+    int IColorTable.Height
+        => NumRows;
+
+    int IColorTable.Size
+        => Size;
+
+    byte IColorTable.DimensionLogs
+        => 0;
 
     private Table _rowData;
 
@@ -69,6 +78,12 @@ public sealed class LegacyColorTable : IEnumerable<LegacyColorTableRow>, IColorT
         return true;
     }
 
+    public bool SpanSizeCheck(ReadOnlySpan<Half> span)
+        => span.Length == LegacyColorTableRow.NumVec4 * LegacyColorTableRow.Halves;
+
+    public ulong ToMask(IColorTable.ValueTypes mask)
+        => (ulong)mask;
+
     public bool ApplyDye(StmFile<LegacyDyePack> stm, ReadOnlySpan<StainId> stainIds, LegacyColorDyeTable dyeTable)
     {
         if (stainIds.Length == 0)
@@ -103,9 +118,7 @@ public sealed class LegacyColorTable : IEnumerable<LegacyColorTableRow>, IColorT
     }
 
     private LegacyColorTable(ref SpanBinaryReader reader)
-    {
-        _rowData = reader.Read<Table>();
-    }
+        => _rowData = reader.Read<Table>();
 
     public LegacyColorTable(ColorTable newTable)
     {
@@ -116,15 +129,11 @@ public sealed class LegacyColorTable : IEnumerable<LegacyColorTableRow>, IColorT
     public LegacyColorTable(IColorTable other)
     {
         if (other is ColorTable newTable)
-        {
             for (var i = 0; i < NumRows; ++i)
                 _rowData[i] = new LegacyColorTableRow(newTable[i]);
-        }
         else if (other is LegacyColorTable table)
-        {
             for (var i = 0; i < NumRows; ++i)
                 _rowData[i] = table[i];
-        }
         else
             SetDefault();
     }
@@ -148,5 +157,5 @@ public sealed class LegacyColorTable : IEnumerable<LegacyColorTableRow>, IColorT
     /// If the reader doesn't hold enough data, nothing will be read, and this will return a default table.
     /// </summary>
     public static LegacyColorTable TryReadFrom(ref SpanBinaryReader reader)
-        => reader.Remaining >= Size ? new(ref reader) : new();
+        => reader.Remaining >= Size ? new LegacyColorTable(ref reader) : new LegacyColorTable();
 }

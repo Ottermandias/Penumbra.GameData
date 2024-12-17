@@ -80,6 +80,12 @@ public sealed class ColorTable : IEnumerable<ColorTableRow>, IColorTable
         return true;
     }
 
+    public bool SpanSizeCheck(ReadOnlySpan<Half> span)
+        => span.Length == ColorTableRow.NumVec4 * ColorTableRow.Halves;
+
+    public ulong ToMask(IColorTable.ValueTypes mask)
+        => (ulong)mask;
+
     public bool ApplyDye(StmFile<DyePack> stm, ReadOnlySpan<StainId> stainIds, ColorDyeTable dyeTable)
     {
         if (stainIds.Length == 0)

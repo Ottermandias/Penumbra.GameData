@@ -23,7 +23,8 @@ internal sealed class OpaqueColorTable : IColorTable
     public int Size
         => 2 * Data.Length;
 
-    byte IColorTable.DimensionLogs => DimensionLogs;
+    byte IColorTable.DimensionLogs
+        => DimensionLogs;
 
     public OpaqueColorTable(byte dimensionLogs)
     {
@@ -55,6 +56,12 @@ internal sealed class OpaqueColorTable : IColorTable
 
     public bool SetDefaultRow(int i)
         => throw new NotSupportedException();
+
+    public bool SpanSizeCheck(ReadOnlySpan<Half> span)
+        => false;
+
+    public ulong ToMask(IColorTable.ValueTypes mask)
+        => (ulong)mask;
 
     public override string ToString()
     {
