@@ -25,6 +25,7 @@ public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDra
         if (!table)
             return;
 
+        ImGui.TableSetupScrollFreeze(0, 1);
         ImGui.TableSetupColumn("Name",           ImGuiTableColumnFlags.WidthFixed, 300 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn("Available",      ImGuiTableColumnFlags.WidthFixed, 55 * ImGuiHelpers.GlobalScale);
         ImGui.TableSetupColumn("Setup Time",     ImGuiTableColumnFlags.WidthFixed, 100 * ImGuiHelpers.GlobalScale);
@@ -32,7 +33,6 @@ public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDra
         ImGui.TableSetupColumn("Approx. Memory", ImGuiTableColumnFlags.WidthFixed, 100 * ImGuiHelpers.GlobalScale);
 
         ImGui.TableHeadersRow();
-        ImGui.TableSetupScrollFreeze(0, 1);
         var services = manager.GetServicesImplementing<IDataContainer>();
         services = _orderBy switch
         {
