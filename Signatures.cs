@@ -47,6 +47,9 @@ public static class Sigs
     public const string UnkMountAnimation = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 41 8B E9 45 0F B6 F8";
     public const string UnkParasolAnimation = "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B FA 4C 8B F1";
     public const string Dismount = "E9 ?? ?? ?? ?? B8 ?? ?? ?? ?? 66 44 3B F8";
+    public const string GetCachedScheduleResource = "40 53 48 83 EC ?? 44 8B 4A";
+    public const string LoadActionTmb = "E8 ?? ?? ?? ?? 48 89 43 ?? 0F B6 45";
+    public const string SchedulerResourceManagementInstance = "48 89 3D ?? ?? ?? ?? 8B C7";
 
     public const string
         ApricotListenerSoundPlay =
