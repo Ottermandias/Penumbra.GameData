@@ -35,7 +35,7 @@ public partial class MtrlFile
 
             var shaderPackageNameOffset = (ushort)strings.FindOrAddString(ShaderPackage.Name).Offset;
 
-            strings.WriteTo(stream);
+            var stringLength = strings.WriteTo(stream, 4);
 
             w.Write(AdditionalData);
             var dataSetSize = 0;
@@ -83,7 +83,7 @@ public partial class MtrlFile
 
             w.Write(ShaderPackage.ShaderValues);
 
-            WriteHeader(w, (ushort)w.BaseStream.Position, dataSetSize, (ushort)strings.Length, shaderPackageNameOffset);
+            WriteHeader(w, (ushort)w.BaseStream.Position, dataSetSize, (ushort)stringLength, shaderPackageNameOffset);
         }
 
         return stream.ToArray();

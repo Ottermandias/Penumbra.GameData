@@ -40,8 +40,20 @@ public class StringPool : IDisposable
     public ReadOnlySpan<byte> AsSpan()
         => Data.GetBuffer().AsSpan()[..(int)Data.Length];
 
-    public void WriteTo(Stream stream)
-        => Data.WriteTo(stream);
+    public int WriteTo(Stream stream, int alignment = 1)
+    {
+        Data.WriteTo(stream);
+        if (alignment <= 1)
+            return Length;
+
+        var offset = stream.Position % alignment;
+        if (offset == 0)
+            return Length;
+
+        offset = alignment - offset;
+        stream.Seek(offset, SeekOrigin.Current);
+        return Length + (int)offset;
+    }
 
     public string GetString(int offset, int length)
         => Encoding.UTF8.GetString(AsSpan().Slice(offset, length));
