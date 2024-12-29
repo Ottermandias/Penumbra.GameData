@@ -211,7 +211,7 @@ public partial class MtrlFile : IWritable, ICloneable
         ShaderPackage.Flags = r.ReadUInt32();
 
         ShaderPackage.ShaderKeys   = r.Read<ShaderKey>(shaderKeyCount).ToArray();
-        ShaderPackage.Constants    = r.Read<Constant>(constantCount).ToArray();
+        ShaderPackage.Constants    = ReadConstants(ref r, constantCount);
         ShaderPackage.Samplers     = r.Read<Sampler>(samplerCount).ToArray();
         ShaderPackage.ShaderValues = r.Read<byte>(shaderValueListSize).ToArray();
     }
@@ -271,6 +271,22 @@ public partial class MtrlFile : IWritable, ICloneable
         return ret;
     }
 
+    private static Constant[] ReadConstants(ref SpanBinaryReader r, int count)
+    {
+        var ret = new Constant[count];
+        for (var i = 0; i < count; ++i)
+        {
+            ret[i].Id         = r.ReadUInt32();
+            ret[i].ByteOffset = r.ReadUInt16();
+            ret[i].ByteSize   = r.ReadUInt16();
+
+            // Prevent garbage collecting constants that were in the original file.
+            ret[i].Pinned = true;
+        }
+
+        return ret;
+    }
+
     private bool CheckTextures()
         => Textures.All(texture => texture.Path.Contains('/'));
 
@@ -299,6 +315,9 @@ public partial class MtrlFile : IWritable, ICloneable
         public uint   Id;
         public ushort ByteOffset;
         public ushort ByteSize;
+
+        /// <summary> Whether to preserve this constant after a garbage collection even if it has its default value. </summary>
+        public bool Pinned;
     }
 
     public struct ShaderPackageData : ICloneable
