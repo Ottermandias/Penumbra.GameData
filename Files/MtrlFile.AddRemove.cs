@@ -128,6 +128,9 @@ public partial class MtrlFile
     {
         static bool ShallKeepConstant(MtrlFile mtrl, ShpkFile shpk, Constant constant)
         {
+            if (constant.Pinned)
+                return true;
+
             if ((constant.ByteOffset & 0x3) != 0 || (constant.ByteSize & 0x3) != 0)
                 return true;
 
