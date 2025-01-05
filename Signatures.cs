@@ -125,6 +125,10 @@ public static class Sigs
     public const string ModelRendererOnRenderMaterial = "E8 ?? ?? ?? ?? 44 0F B7 28";
     public const string ModelRendererUnkFunc          = "E8 ?? ?? ?? ?? 41 0F B6 46 ?? C0 E8";
 
+    // RenderTargetHdrEnabler
+    public const string RenderTargetManagerInitialize = "40 55 53 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ?? 48 8B 1D";
+    public const string DeviceCreateTexture2D         = "E8 ?? ?? ?? ?? 48 89 07 48 8D 7F 20";
+
     // Job service
     public const string ChangeJob = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 44 0F B6 FA";
 
