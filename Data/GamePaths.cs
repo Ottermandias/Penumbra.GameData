@@ -305,6 +305,15 @@ public static partial class GamePaths
                 char suffix2 = '\0')
                 => $"chara/accessory/a{accessoryId.Id:D4}/texture/v{variant.Id:D2}_c{raceCode.ToRaceCode()}a{accessoryId.Id:D4}_{slot.ToSuffix()}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
         }
+
+        public static partial class Avfx
+        {
+            [GeneratedRegex(@"chara/accessory/a(?'id'\d{4})/vfx/eff/ve(?'variant'\d{4})\.avfx", Flags2)]
+            public static partial Regex Regex();
+
+            public static string Path(PrimaryId equipId, byte effectId)
+                => $"chara/accessory/a{equipId.Id:D4}/vfx/eff/ve{effectId:D4}.avfx";
+        }
     }
 
     public static partial class Skeleton
