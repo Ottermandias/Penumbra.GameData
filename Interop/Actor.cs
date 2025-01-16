@@ -23,7 +23,7 @@ public readonly unsafe struct Actor : IEquatable<Actor>
         => (Character*)Address;
 
     public bool Valid
-        => Address != nint.Zero;
+        => Address != nint.Zero && AsObject->VirtualTable != null;
 
     public bool IsPlayer
         => Valid && AsObject->ObjectKind is ObjectKind.Pc;
