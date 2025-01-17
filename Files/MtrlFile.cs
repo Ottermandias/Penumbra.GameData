@@ -48,7 +48,7 @@ public partial class MtrlFile : IWritable, ICloneable
         if (AdditionalData.Length < 4)
             Array.Resize(ref AdditionalData, 4);
 
-        return ref MemoryMarshal.Cast<byte, TableFlags>(AdditionalData)[0];
+        return ref MemoryMarshal.Cast<byte, TableFlags>(AdditionalData.AsSpan())[0];
     }
 
     public bool MigrateToDawntrail()
