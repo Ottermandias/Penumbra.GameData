@@ -59,7 +59,9 @@ public static class Sigs
     public const string FootStepSound                  = "89 54 24 ?? 55 57 41 54 41 55 41 56";
 
     // PathResolver.DrawObjectState
-    public const string EnableDraw = "E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 33 45 33 C0";
+    public const string EnableDraw     = "E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 33 45 33 C0";
+    public const string SetupPlayerNpc = "E8 ?? ?? ?? ?? 48 C7 40 ?? ?? ?? ?? ?? 48 8B 4B";
+    public const string ConstructCutsceneCharacter = "48 89 5C 24 ?? 56 48 83 EC ?? 48 8B F1 45 33 C0";
 
     // PathResolver.Meta
     public const string UpdateModel       = "48 8B ?? 56 48 83 ?? ?? ?? B9";
