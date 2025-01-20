@@ -23,9 +23,11 @@ public static class UtilityFunctions
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static T? FirstOrNull<T>(this IEnumerable<T> values, Func<T, bool> predicate) where T : struct
     {
-        foreach(var val in values)
+        foreach (var val in values)
+        {
             if (predicate(val))
                 return val;
+        }
 
         return null;
     }
@@ -59,6 +61,20 @@ public static class UtilityFunctions
         Array.Copy(array, newArray,       offset);
         Array.Copy(array, offset + count, newArray, offset, newArray.Length - offset);
         return newArray;
+    }
+
+    /// <summary> Pad a number to the nearest equal-or-greater multiple of another number. </summary>
+    /// <param name="value"> The value to pad. </param>
+    /// <param name="padToMultiple"> The value the result needs to be a multiple of. </param>
+    /// <returns> The smallest multiple of <paramref name="padToMultiple"/> that is greater or equal to <paramref name="value"/>. </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static int PadToMultiple(this int value, int padToMultiple)
+    {
+        var quotient = Math.DivRem(value, padToMultiple, out var remainder);
+        if (remainder == 0)
+            return value;
+
+        return (quotient + 1) * padToMultiple;
     }
 
     /// <summary> Reinterprets some memory as another type. </summary>
