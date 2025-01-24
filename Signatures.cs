@@ -15,6 +15,9 @@ public static class Sigs
 
     public const string ReadSqPack = "40 56 41 56 48 83 EC ?? 0F BE 02";
 
+    // The actual name of this function is unknown but it's related to updating async resource load states.
+    public const string UpdateResourceState = "E8 ?? ?? ?? ?? EB ?? 48 8D 4E ?? FF 15";
+
     // ResourceLoader.TexMdl
     public const string CheckFileState   = "E8 ?? ?? ?? ?? 48 85 C0 74 ?? 4C 8B C8";
     public const string LoadTexFileLocal = "48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 49 8B F0 44 88 4C 24 20";
