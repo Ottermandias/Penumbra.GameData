@@ -444,6 +444,9 @@ public static partial class GamePaths
 
             [GeneratedRegex(@"chara/human/c(?'race'\d{4})/obj/(?'type'[a-z]+)/(?'typeabr'[a-z])(?'id'\d{4})/texture", Flags2)]
             public static partial Regex FolderRegex();
+
+            public static string DecalPath(string slot, PrimaryId id)
+                => $"chara/common/texture/decal_{slot}/_decal_{id.Id}.tex";
         }
     }
 
