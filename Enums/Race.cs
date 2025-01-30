@@ -238,6 +238,10 @@ public static class RaceEnumExtensions
             _                       => subRace.ToName(),
         };
 
+    /// <summary> Correct the byte value of gender back to the game's byte value. </summary>
+    public static byte ToGameByte(this Gender gender)
+        => (byte) ((byte)gender - 1);
+
     /// <summary> Check if a clan and race agree. </summary>
     public static bool FitsRace(this SubRace subRace, Race race)
         => subRace.ToRace() == race;
