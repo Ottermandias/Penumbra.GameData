@@ -405,7 +405,7 @@ public static class RaceEnumExtensions
 public static partial class Names
 {
     /// <summary> Convert a given padded race code from a file path to its combined GenderRace. </summary>
-    public static GenderRace GenderRaceFromCode(string code)
+    public static GenderRace GenderRaceFromCode(ReadOnlySpan<char> code)
         => code switch
         {
             "0101" => MidlanderMale,

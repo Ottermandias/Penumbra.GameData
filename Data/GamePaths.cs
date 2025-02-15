@@ -21,7 +21,7 @@ public static partial class GamePaths
     {
         var match = RaceCodeParser().Match(path);
         return match.Success
-            ? Names.GenderRaceFromCode(match.Groups["racecode"].Value)
+            ? Names.GenderRaceFromCode(match.Groups["racecode"].ValueSpan)
             : GenderRace.Unknown;
     }
 
@@ -478,6 +478,15 @@ public static partial class GamePaths
 
         [GeneratedRegex(@"chara[\/]human[\/]c0101[\/]animation[\/]a0001[\/][^\s]+?[\/](?'key'[^\s]+?)\.pap", RegexOptions.IgnoreCase | Flags2)]
         public static partial Regex Pap();
+    }
+
+    public static partial class Atch
+    {
+        [GeneratedRegex(@"chara[\/]xls[\/]attachOffset[\/]c(?'racecode'\d{4})\.atch", RegexOptions.IgnoreCase | Flags2)]
+        public static partial Regex Regex();
+
+        public static string Path(GenderRace gr)
+            => $"chara/xls/attachOffset/c{gr.ToRaceCode()}.atch";
     }
 
     public static partial class Shader
