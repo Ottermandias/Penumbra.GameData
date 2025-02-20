@@ -32,7 +32,7 @@ public partial class MdlFile : IWritable
     }
 
     // Raw data to write back.
-    public uint   Version = 0x01000005;
+    public uint   Version = V6;
     public float  Radius;
     public float  ModelClipOutDistance;
     public float  ShadowClipOutDistance;
