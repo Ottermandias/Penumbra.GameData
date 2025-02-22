@@ -124,7 +124,7 @@ public unsafe ref struct SpanBinaryReader
         if (position + count > Length)
             throw new EndOfStreamException();
 
-        return new SpanBinaryReader(ref Unsafe.Add(ref _pos, position), count);
+        return new SpanBinaryReader(ref Unsafe.Add(ref _start, position), count);
     }
 
     /// <summary>
