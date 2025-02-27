@@ -61,7 +61,7 @@ public sealed class DictEmote(IDalamudPluginInterface pluginInterface, Logger lo
             foreach (var timeline in emote.ActionTimeline.Where(t => t.RowId != 0 && t.ValueNullable.HasValue).Select(t => t.Value))
             {
                 var key = timeline.Key.ExtractText();
-                tmbs.Enqueue(GamePaths.Vfx.ActionTmb(key));
+                tmbs.Enqueue(GamePaths.Tmb.Action(key));
                 AddEmote(Path.GetFileName(key) + ".pap", emote);
             }
 

@@ -17,6 +17,8 @@ public enum CustomizationType : byte
     DecalEquip,
     Skin,
     Etc,
+    Skeleton,
+    Physics,
 }
 
 public static class CustomizationTypeEnumExtension

@@ -34,7 +34,7 @@ public sealed class ObjectIdentification(
     public void Identify(IDictionary<string, IIdentifiedObjectData?> set, string path)
     {
         var extension = Path.GetExtension(path).ToLowerInvariant();
-        if (extension is ".pap" or ".tmb" or ".scd" or ".avfx")
+        if (extension is ".pap" or ".tmb")
             if (IdentifyVfx(set, path))
                 return;
 
@@ -181,11 +181,11 @@ public sealed class ObjectIdentification(
                         break;
                     default:
                     {
-                        var customizationString = race == ModelRace.Unknown
-                         || info.BodySlot == BodySlot.Unknown
-                         || info.CustomizationType == CustomizationType.Unknown
+                        var customizationString = race is ModelRace.Unknown
+                         || info.BodySlot is BodySlot.Unknown
+                         || info.CustomizationType is CustomizationType.Unknown
                                 ? "Customization: Unknown"
-                                : $"Customization: {race.ToName()} {gender.ToName()} {info.BodySlot} ({info.CustomizationType}) {info.PrimaryId}";
+                                : $"Customization: {race.ToName()} {gender.ToName()} {CompareBodyCustomization(info)} {info.PrimaryId}";
                         set.UpdateCountOrSet(customizationString, () => info.BodySlot switch
                         {
                             BodySlot.Hair => IdentifiedCustomization.Hair(race, gender, (CustomizeValue)info.PrimaryId.Id),
@@ -200,6 +200,19 @@ public sealed class ObjectIdentification(
 
                 break;
         }
+    }
+
+    private string CompareBodyCustomization(GameObjectInfo info)
+    {
+        return (info.BodySlot, info.CustomizationType) switch
+        {
+            (BodySlot.Hair, CustomizationType.Hair) or
+                (BodySlot.Face, CustomizationType.Face) or
+                (BodySlot.Tail, CustomizationType.Tail) or
+                (BodySlot.Body, CustomizationType.Body) or
+                (BodySlot.Ear, CustomizationType.Ear) => info.BodySlot.ToString(),
+            _ => $"{info.BodySlot} ({info.CustomizationType})",
+        };
     }
 
     /// <summary> Identify and parse VFX identities. </summary>

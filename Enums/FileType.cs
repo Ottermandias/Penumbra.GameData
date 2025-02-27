@@ -18,6 +18,8 @@ public enum FileType : byte
     Shader,
     Font,
     Environment,
+    Skeleton,
+    Physics,
 }
 
 public static partial class Names
@@ -42,5 +44,9 @@ public static partial class Names
         new KeyValuePair<string, FileType>(".shcd", FileType.Shader),
         new KeyValuePair<string, FileType>(".fdt",  FileType.Font),
         new KeyValuePair<string, FileType>(".envb", FileType.Environment),
+        new KeyValuePair<string, FileType>(".eid",  FileType.Skeleton),
+        new KeyValuePair<string, FileType>(".sklb", FileType.Skeleton),
+        new KeyValuePair<string, FileType>(".skp",  FileType.Skeleton),
+        new KeyValuePair<string, FileType>(".phyb", FileType.Physics),
     ]);
 }

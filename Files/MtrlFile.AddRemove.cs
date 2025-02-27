@@ -6,7 +6,7 @@ namespace Penumbra.GameData.Files;
 
 public partial class MtrlFile
 {
-    public const string DummyTexturePath    = GamePaths.Tex.DummyPath;
+    public const string DummyTexturePath    = GamePaths.Tex.Dummy;
     public const uint   DefaultSamplerFlags = 0x000F8340u;
 
     public int FindConstant(uint id)

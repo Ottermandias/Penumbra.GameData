@@ -11,6 +11,7 @@ public enum BodySlot : byte
     Tail,
     Body,
     Ear,
+    Head,
 }
 
 public static class BodySlotEnumExtension
@@ -24,6 +25,7 @@ public static class BodySlotEnumExtension
             BodySlot.Hair => "hair",
             BodySlot.Body => "body",
             BodySlot.Tail => "tail",
+            BodySlot.Head => "met",
             _             => throw new InvalidEnumArgumentException(),
         };
 
@@ -36,6 +38,7 @@ public static class BodySlotEnumExtension
             BodySlot.Tail => 't',
             BodySlot.Body => 'b',
             BodySlot.Ear  => 'z',
+            BodySlot.Head => 'm',
             _             => throw new InvalidEnumArgumentException(),
         };
 
@@ -56,5 +59,6 @@ public static partial class Names
 {
     /// <summary> A dictionary converting path suffices into BodySlot. </summary>
     public static readonly IReadOnlyDictionary<string, BodySlot> StringToBodySlot =
-        Enum.GetValues<BodySlot>().Skip(1).ToFrozenDictionary(e => e.ToSuffix(), e => e);
+        Enum.GetValues<BodySlot>().Skip(1).Select(s => (s.ToSuffix(), s)).Append(("base", BodySlot.Body))
+            .ToFrozenDictionary(p => p.Item1, p => p.Item2);
 }

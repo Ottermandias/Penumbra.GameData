@@ -1,4 +1,5 @@
 using Dalamud.Game;
+using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Structs;
@@ -18,6 +19,15 @@ public struct GameObjectInfo : IComparable
             GenderRace = gr,
             Variant    = variant,
             EquipSlot  = slot,
+        };
+
+    public static GameObjectInfo GearEffect(ObjectType type, PrimaryId id, Variant variant)
+        => new()
+        {
+            FileType   = FileType.Vfx,
+            ObjectType = type,
+            PrimaryId  = id,
+            Variant    = variant,
         };
 
     /// <summary> Weapon paths contain up to a file type, primary ID, secondary ID and variant. </summary>
