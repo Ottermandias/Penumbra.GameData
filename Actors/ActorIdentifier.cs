@@ -107,17 +107,31 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
             case IdentifierType.Player:
             {
                 var parts = name.Split(' ', 3);
-                return parts.Length == 2 ? $"{parts[0][0]}. {parts[1][0]}." : $"{parts[0][0]}. {parts[1][0]}. {parts[2]}";
+                return parts.Length switch
+                {
+                    2 => $"{parts[0][0]}. {parts[1][0]}.",
+                    3 => $"{parts[0][0]}. {parts[1][0]}. {parts[2]}",
+                    _ => $"ERROR ({name})",
+                };
             }
             case IdentifierType.Owned:
             {
                 var parts = name.Split(' ', 3);
-                return parts[2][0] == '(' ? $"{parts[0][0]}. {parts[1][0]}. {parts[2]}" : $"{parts[0][0]}. {parts[1][0]}.'s {parts[2]}";
+                return parts.Length switch
+                {
+                    3 when parts[2][0] is '(' => $"{parts[0][0]}. {parts[1][0]}. {parts[2]}",
+                    3                         => $"{parts[0][0]}. {parts[1][0]}.'s {parts[2]}",
+                    _                         => $"ERROR ({name})",
+                };
             }
             case IdentifierType.Retainer:
             {
                 var parts = name.Split(' ', 2);
-                return $"{parts[0][0]}. {parts[1]}";
+                return parts.Length switch
+                {
+                    2 => $"{parts[0][0]}. {parts[1]}",
+                    _ => $"ERROR ({name})",
+                };
             }
         }
 
