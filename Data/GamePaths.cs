@@ -326,6 +326,8 @@ public static partial class GamePaths
 
         public static partial class Sklb
         {
+            public const string MaterialAnimationSkeletonPath = "chara/common/animation/skl_material.sklb";
+
             public static string Path(GenderRace raceCode, string slot, PrimaryId slotId)
                 => $"chara/human/c{raceCode.ToRaceCode()}/skeleton/{slot}/{slot[0]}{slotId.Id:D4}/skl_c{raceCode.ToRaceCode()}{slot[0]}{slotId.Id:D4}.sklb";
         }
