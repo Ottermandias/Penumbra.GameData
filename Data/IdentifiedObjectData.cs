@@ -22,7 +22,8 @@ public interface IIdentifiedObjectData
 
     public bool FilteredOut(string key, LowerString filter);
 
-    public ChangedItemIcon Icon { get; }
+    public ChangedItemIcon Icon  { get; }
+    public int             Count { get; set; }
 }
 
 public static class IdentifiedObjectExtensions
@@ -120,14 +121,25 @@ public static class IdentifiedObjectExtensions
             FullEquipType.Glasses         => ChangedItemIcon.Head,
             _                             => ChangedItemIcon.Unknown,
         };
+
+    public static void UpdateCountOrSet<T>(this IDictionary<string, IIdentifiedObjectData?> dict, string key, Func<T?> generate)
+        where T : IIdentifiedObjectData
+    {
+        if (dict.TryGetValue(key, out var data) && data != null)
+            ++data.Count;
+        else
+            dict[key] = generate();
+    }
 }
 
-public sealed class IdentifiedItem(EquipItem item) : IIdentifiedObjectData
+public sealed class IdentifiedItem(EquipItem item, int count = 1) : IIdentifiedObjectData
 {
     public EquipItem Item = item;
 
     public object ToInternalObject()
         => Item;
+
+    public int Count { get; set; } = count;
 
     public (ChangedItemType Type, uint Id) ToApiObject()
     {
@@ -156,22 +168,24 @@ public sealed class IdentifiedItem(EquipItem item) : IIdentifiedObjectData
         => ((PrimaryId)id, (Variant)(id >> 16), (FullEquipType)(id >> 24));
 }
 
-public sealed class IdentifiedCustomization : IIdentifiedObjectData
+public sealed class IdentifiedCustomization(int count = 1) : IIdentifiedObjectData
 {
     public ModelRace      Race   = ModelRace.Unknown;
     public Gender         Gender = Gender.Unknown;
     public CustomizeIndex Type;
     public CustomizeValue Value;
 
-    public static IdentifiedCustomization FacePaint(CustomizeValue value)
-        => new()
+    public int Count { get; set; } = count;
+
+    public static IdentifiedCustomization FacePaint(CustomizeValue value, int count = 1)
+        => new(count)
         {
             Type  = CustomizeIndex.FacePaint,
             Value = value,
         };
 
-    public static IdentifiedCustomization Hair(ModelRace race, Gender gender, CustomizeValue value)
-        => new()
+    public static IdentifiedCustomization Hair(ModelRace race, Gender gender, CustomizeValue value, int count = 1)
+        => new(count)
         {
             Race   = race,
             Gender = gender,
@@ -179,8 +193,8 @@ public sealed class IdentifiedCustomization : IIdentifiedObjectData
             Value  = value,
         };
 
-    public static IdentifiedCustomization Tail(ModelRace race, Gender gender, CustomizeValue value)
-        => new()
+    public static IdentifiedCustomization Tail(ModelRace race, Gender gender, CustomizeValue value, int count = 1)
+        => new(count)
         {
             Race   = race,
             Gender = gender,
@@ -188,8 +202,8 @@ public sealed class IdentifiedCustomization : IIdentifiedObjectData
             Value  = value,
         };
 
-    public static IdentifiedCustomization Ears(ModelRace race, Gender gender, CustomizeValue value)
-        => new()
+    public static IdentifiedCustomization Ears(ModelRace race, Gender gender, CustomizeValue value, int count = 1)
+        => new(count)
         {
             Race   = race,
             Gender = gender,
@@ -197,8 +211,8 @@ public sealed class IdentifiedCustomization : IIdentifiedObjectData
             Value  = value,
         };
 
-    public static IdentifiedCustomization Face(ModelRace race, Gender gender, CustomizeValue value)
-        => new()
+    public static IdentifiedCustomization Face(ModelRace race, Gender gender, CustomizeValue value, int count = 1)
+        => new(count)
         {
             Race   = race,
             Gender = gender,
@@ -235,6 +249,12 @@ public sealed class IdentifiedCounter(int counter = 1) : IIdentifiedObjectData
 {
     public int Counter = counter;
 
+    public int Count
+    {
+        get => Counter;
+        set => Counter = value;
+    }
+
     public static IdentifiedCounter operator +(IdentifiedCounter lhs, IdentifiedCounter rhs)
         => new(lhs.Counter + rhs.Counter);
 
@@ -257,9 +277,11 @@ public sealed class IdentifiedCounter(int counter = 1) : IIdentifiedObjectData
         => ChangedItemIcon.Unknown;
 }
 
-public sealed class IdentifiedModel(ModelChara model) : IIdentifiedObjectData
+public sealed class IdentifiedModel(ModelChara model, int count = 1) : IIdentifiedObjectData
 {
     public readonly ModelChara Model = model;
+
+    public int Count { get; set; } = count;
 
     public object ToInternalObject()
         => Model;
@@ -285,9 +307,11 @@ public sealed class IdentifiedModel(ModelChara model) : IIdentifiedObjectData
         };
 }
 
-public sealed class IdentifiedAction(Action action) : IIdentifiedObjectData
+public sealed class IdentifiedAction(Action action, int count = 1) : IIdentifiedObjectData
 {
     public readonly Action Action = action;
+
+    public int Count { get; set; } = count;
 
     public object ToInternalObject()
         => Action;
@@ -308,9 +332,11 @@ public sealed class IdentifiedAction(Action action) : IIdentifiedObjectData
         => ChangedItemIcon.Action;
 }
 
-public sealed class IdentifiedEmote(Emote emote) : IIdentifiedObjectData
+public sealed class IdentifiedEmote(Emote emote, int count = 1) : IIdentifiedObjectData
 {
     public readonly Emote Emote = emote;
+
+    public int Count { get; set; } = count;
 
     public object ToInternalObject()
         => Emote;

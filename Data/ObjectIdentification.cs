@@ -84,7 +84,7 @@ public sealed class ObjectIdentification(
         var slot  = info.EquipSlot is EquipSlot.LFinger ? EquipSlot.RFinger : info.EquipSlot;
         var items = _equipmentIdentification.Between(info.PrimaryId, slot, info.Variant);
         foreach (var item in items)
-            set[item.Name] = new IdentifiedItem(item);
+            set.UpdateCountOrSet(item.Name, () => new IdentifiedItem(item));
     }
 
     /// <summary> Find and add all weapons affected by <paramref name="info"/>. </summary>
@@ -92,7 +92,7 @@ public sealed class ObjectIdentification(
     {
         var items = _weaponIdentification.Between(info.PrimaryId, info.SecondaryId, info.Variant);
         foreach (var item in items)
-            set[item.Name] = new IdentifiedItem(item);
+            set.UpdateCountOrSet(item.Name, () => new IdentifiedItem(item));
     }
 
     /// <summary> Find and add all models affected by <paramref name="info"/>. </summary>
@@ -107,17 +107,8 @@ public sealed class ObjectIdentification(
         {
             var objectList = _modelCharaToObjects[model.RowId];
             foreach (var (name, kind, _) in objectList)
-                set[$"{name} ({kind.ToName()})"] = new IdentifiedModel(model);
+                set.UpdateCountOrSet($"{name} ({kind.ToName()})", () => new IdentifiedModel(model));
         }
-    }
-
-    /// <summary> Identities that only count their appearances store a counter value, increment or set that. </summary>
-    private static void AddCounterString(IDictionary<string, IIdentifiedObjectData?> set, string data)
-    {
-        if (set.TryGetValue(data, out var obj) && obj is IdentifiedCounter counter)
-            ++counter.Counter;
-        else
-            set[data] = new IdentifiedCounter();
     }
 
     /// <summary> Identify and add a game object info. </summary>
@@ -127,14 +118,14 @@ public sealed class ObjectIdentification(
         switch (info.FileType)
         {
             case FileType.Sound:
-                AddCounterString(set, FileType.Sound.ToString());
+                set.UpdateCountOrSet(FileType.Sound.ToString(), () => new IdentifiedCounter());
                 return;
             case FileType.Animation:
             case FileType.Pap:
-                AddCounterString(set, FileType.Animation.ToString());
+                set.UpdateCountOrSet(FileType.Animation.ToString(), () => new IdentifiedCounter());
                 return;
             case FileType.Shader:
-                AddCounterString(set, FileType.Shader.ToString());
+                set.UpdateCountOrSet(FileType.Shader.ToString(), () => new IdentifiedCounter());
                 return;
         }
 
@@ -148,7 +139,7 @@ public sealed class ObjectIdentification(
             case ObjectType.World:
             case ObjectType.Housing:
             case ObjectType.Font:
-                AddCounterString(set, info.ObjectType.ToString());
+                set.UpdateCountOrSet(info.ObjectType.ToString(), () => new IdentifiedCounter());
                 break;
             // We can differentiate icons by ID.
             case ObjectType.Icon:
@@ -179,8 +170,8 @@ public sealed class ObjectIdentification(
                         set[$"Customization: {raceString}{genderString}Skin Textures"] = null;
                         break;
                     case CustomizationType.DecalFace:
-                        set[$"Customization: Face Decal {info.PrimaryId}"] =
-                            IdentifiedCustomization.FacePaint((CustomizeValue)info.PrimaryId.Id);
+                        set.UpdateCountOrSet($"Customization: Face Decal {info.PrimaryId}",
+                            () => IdentifiedCustomization.FacePaint((CustomizeValue)info.PrimaryId.Id));
                         break;
                     case CustomizationType.Iris when race == ModelRace.Unknown:
                         set["Customization: All Eyes (Catchlight)"] = null;
@@ -195,14 +186,14 @@ public sealed class ObjectIdentification(
                          || info.CustomizationType == CustomizationType.Unknown
                                 ? "Customization: Unknown"
                                 : $"Customization: {race.ToName()} {gender.ToName()} {info.BodySlot} ({info.CustomizationType}) {info.PrimaryId}";
-                        set[customizationString] = info.BodySlot switch
+                        set.UpdateCountOrSet(customizationString, () => info.BodySlot switch
                         {
                             BodySlot.Hair => IdentifiedCustomization.Hair(race, gender, (CustomizeValue)info.PrimaryId.Id),
                             BodySlot.Tail => IdentifiedCustomization.Tail(race, gender, (CustomizeValue)info.PrimaryId.Id),
                             BodySlot.Ear  => IdentifiedCustomization.Ears(race, gender, (CustomizeValue)info.PrimaryId.Id),
                             BodySlot.Face => IdentifiedCustomization.Face(race, gender, (CustomizeValue)info.PrimaryId.Id),
                             _             => null,
-                        };
+                        });
                         break;
                     }
                 }
@@ -221,14 +212,14 @@ public sealed class ObjectIdentification(
         if (key.Length > 0 && _actions.TryGetValue(key, out var actions) && actions.Count > 0)
         {
             foreach (var action in actions)
-                set[$"Action: {action.Name.ExtractTextExtended()}"] = new IdentifiedAction(action);
+                set.UpdateCountOrSet($"Action: {action.Name.ExtractTextExtended()}", () => new IdentifiedAction(action));
             ret = true;
         }
 
         if (fileName.Length > 0 && _emotes.TryGetValue(fileName, out var emotes) && emotes.Count > 0)
         {
             foreach (var emote in emotes)
-                set[$"Emote: {emote.Name.ExtractTextExtended()}"] = new IdentifiedEmote(emote);
+                set.UpdateCountOrSet($"Emote: {emote.Name.ExtractTextExtended()}", () => new IdentifiedEmote(emote));
             ret = true;
         }
 
