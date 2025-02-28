@@ -42,10 +42,10 @@ public static class IdentifiedObjectExtensions
             _ => (ChangedItemType.Unknown, 0),
         };
 
-    public static bool IsFilteredOut(this IIdentifiedObjectData? data, string key, LowerString filter)
+    public static bool IsFilteredOut(this IIdentifiedObjectData data, string key, LowerString filter)
         => data?.FilteredOut(key, filter) ?? !filter.IsContained(key);
 
-    public static ChangedItemIcon GetIcon(this IIdentifiedObjectData? data)
+    public static ChangedItemIcon GetIcon(this IIdentifiedObjectData data)
         => data?.Icon ?? ChangedItemIcon.Unknown;
 
     public static ChangedItemIcon GetCategoryIcon(this FullEquipType type)
@@ -122,10 +122,10 @@ public static class IdentifiedObjectExtensions
             _                             => ChangedItemIcon.Unknown,
         };
 
-    public static void UpdateCountOrSet<T>(this IDictionary<string, IIdentifiedObjectData?> dict, string key, Func<T?> generate)
+    public static void UpdateCountOrSet<T>(this IDictionary<string, IIdentifiedObjectData> dict, string key, Func<T> generate)
         where T : IIdentifiedObjectData
     {
-        if (dict.TryGetValue(key, out var data) && data != null)
+        if (dict.TryGetValue(key, out var data))
             ++data.Count;
         else
             dict[key] = generate();
@@ -243,6 +243,29 @@ public sealed class IdentifiedCustomization(int count = 1) : IIdentifiedObjectDa
 
     public ChangedItemIcon Icon
         => ChangedItemIcon.Customization;
+}
+
+public sealed class IdentifiedName(int count = 1) : IIdentifiedObjectData
+{
+    public object? ToInternalObject()
+        => null;
+
+    public (ChangedItemType Type, uint Id) ToApiObject()
+        => (ChangedItemType.None, 0);
+
+    public string ToName(string key)
+        => key;
+
+    public string AdditionalData
+        => string.Empty;
+
+    public bool FilteredOut(string key, LowerString filter)
+        => !filter.IsContained(key);
+
+    public ChangedItemIcon Icon
+        => ChangedItemIcon.Unknown;
+
+    public int Count { get; set; } = count;
 }
 
 public sealed class IdentifiedCounter(int counter = 1) : IIdentifiedObjectData

@@ -31,7 +31,7 @@ public sealed class ObjectIdentification(
     /// <summary> Identify all affected game identities using <paramref name="path"/> and add those items to <paramref name="set"/>, </summary>
     /// <param name="set"> The set to add identities to. </param>
     /// <param name="path"> The path to parse and identify. </param>
-    public void Identify(IDictionary<string, IIdentifiedObjectData?> set, string path)
+    public void Identify(IDictionary<string, IIdentifiedObjectData> set, string path)
     {
         var extension = Path.GetExtension(path).ToLowerInvariant();
         if (extension is ".pap" or ".tmb")
@@ -45,9 +45,9 @@ public sealed class ObjectIdentification(
     /// <summary> Identify all affected game identities using <paramref name="path"/> and return them. </summary>
     /// <param name="path"> The path to parse and identify. </param>
     /// <returns> A dictionary of affected game identities. </returns>
-    public Dictionary<string, IIdentifiedObjectData?> Identify(string path)
+    public Dictionary<string, IIdentifiedObjectData> Identify(string path)
     {
-        Dictionary<string, IIdentifiedObjectData?> ret = [];
+        Dictionary<string, IIdentifiedObjectData> ret = [];
         Identify(ret, path);
         return ret;
     }
@@ -79,7 +79,7 @@ public sealed class ObjectIdentification(
     }
 
     /// <summary> Find and add all equipment pieces affected by <paramref name="info"/>. </summary>
-    private void FindEquipment(IDictionary<string, IIdentifiedObjectData?> set, GameObjectInfo info)
+    private void FindEquipment(IDictionary<string, IIdentifiedObjectData> set, GameObjectInfo info)
     {
         var slot  = info.EquipSlot is EquipSlot.LFinger ? EquipSlot.RFinger : info.EquipSlot;
         var items = _equipmentIdentification.Between(info.PrimaryId, slot, info.Variant);
@@ -88,7 +88,7 @@ public sealed class ObjectIdentification(
     }
 
     /// <summary> Find and add all weapons affected by <paramref name="info"/>. </summary>
-    private void FindWeapon(IDictionary<string, IIdentifiedObjectData?> set, GameObjectInfo info)
+    private void FindWeapon(IDictionary<string, IIdentifiedObjectData> set, GameObjectInfo info)
     {
         var items = _weaponIdentification.Between(info.PrimaryId, info.SecondaryId, info.Variant);
         foreach (var item in items)
@@ -96,7 +96,7 @@ public sealed class ObjectIdentification(
     }
 
     /// <summary> Find and add all models affected by <paramref name="info"/>. </summary>
-    private void FindModel(IDictionary<string, IIdentifiedObjectData?> set, GameObjectInfo info)
+    private void FindModel(IDictionary<string, IIdentifiedObjectData> set, GameObjectInfo info)
     {
         var type = info.ObjectType.ToModelType();
         if (type is 0 or CharacterBase.ModelType.Weapon)
@@ -112,7 +112,7 @@ public sealed class ObjectIdentification(
     }
 
     /// <summary> Identify and add a game object info. </summary>
-    private void IdentifyParsed(IDictionary<string, IIdentifiedObjectData?> set, GameObjectInfo info)
+    private void IdentifyParsed(IDictionary<string, IIdentifiedObjectData> set, GameObjectInfo info)
     {
         // Some file types are only counted.
         switch (info.FileType)
@@ -143,7 +143,7 @@ public sealed class ObjectIdentification(
                 break;
             // We can differentiate icons by ID.
             case ObjectType.Icon:
-                set[$"Icon: {info.IconId}"] = null;
+                set.UpdateCountOrSet($"Icon: {info.IconId}", () => new IdentifiedName());
                 break;
             // Demihumans and monsters affect models
             case ObjectType.DemiHuman:
@@ -167,17 +167,17 @@ public sealed class ObjectIdentification(
                 switch (info.CustomizationType)
                 {
                     case CustomizationType.Skin:
-                        set[$"Customization: {raceString}{genderString}Skin Textures"] = null;
+                        set.UpdateCountOrSet($"Customization: {raceString}{genderString}Skin Textures", () => new IdentifiedName());
                         break;
                     case CustomizationType.DecalFace:
                         set.UpdateCountOrSet($"Customization: Face Decal {info.PrimaryId}",
                             () => IdentifiedCustomization.FacePaint((CustomizeValue)info.PrimaryId.Id));
                         break;
                     case CustomizationType.Iris when race == ModelRace.Unknown:
-                        set["Customization: All Eyes (Catchlight)"] = null;
+                        set.UpdateCountOrSet("Customization: All Eyes (Catchlight)", () => new IdentifiedName());
                         break;
                     case CustomizationType.DecalEquip:
-                        set[$"Equipment Decal {info.PrimaryId}"] = null;
+                        set.UpdateCountOrSet("Equipment Decal {info.PrimaryId}", () => new IdentifiedName());
                         break;
                     default:
                     {
@@ -192,7 +192,7 @@ public sealed class ObjectIdentification(
                             BodySlot.Tail => IdentifiedCustomization.Tail(race, gender, (CustomizeValue)info.PrimaryId.Id),
                             BodySlot.Ear  => IdentifiedCustomization.Ears(race, gender, (CustomizeValue)info.PrimaryId.Id),
                             BodySlot.Face => IdentifiedCustomization.Face(race, gender, (CustomizeValue)info.PrimaryId.Id),
-                            _             => null,
+                            _             => (IIdentifiedObjectData)new IdentifiedName(),
                         });
                         break;
                     }
@@ -216,7 +216,7 @@ public sealed class ObjectIdentification(
     }
 
     /// <summary> Identify and parse VFX identities. </summary>
-    private bool IdentifyVfx(IDictionary<string, IIdentifiedObjectData?> set, string path)
+    private bool IdentifyVfx(IDictionary<string, IIdentifiedObjectData> set, string path)
     {
         var key      = _gamePathParser.VfxToKey(path);
         var fileName = Path.GetFileName(path);
