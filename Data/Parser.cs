@@ -134,7 +134,7 @@ public static partial class Parser
 
     public static partial class Accessory
     {
-        private const string Prefix = $@"chara/equipment/a(?'{Groups.PrimaryId}'\d{{4}})";
+        private const string Prefix = $@"chara/accessory/a(?'{Groups.PrimaryId}'\d{{4}})";
         private const string Repeat = $@"c(?'{Groups.RaceCode}'\d{{4}})a\k'{Groups.PrimaryId}'";
         private const string Slot   = $"(?'{Groups.Slot}'[a-z]{{3}})";
 
