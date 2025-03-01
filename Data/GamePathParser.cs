@@ -235,12 +235,12 @@ public class GamePathParser(Logger log) : IService
     private static GameObjectInfo HandleWeapon(FileType fileType, GroupCollection groups)
     {
         var weaponId = ushort.Parse(groups[Parser.Groups.PrimaryId].Value);
-        var setId    = ushort.Parse(groups[Parser.Groups.SecondaryId].Value);
+        var bodyId   = ushort.Parse(groups[Parser.Groups.SecondaryId].Value);
         if (fileType is FileType.Imc or FileType.Model or FileType.Skeleton or FileType.Physics)
-            return GameObjectInfo.Weapon(fileType, setId, weaponId);
+            return GameObjectInfo.Weapon(fileType, weaponId, bodyId);
 
         var variant = byte.Parse(groups[Parser.Groups.Variant].Value);
-        return GameObjectInfo.Weapon(fileType, setId, weaponId, variant);
+        return GameObjectInfo.Weapon(fileType, weaponId, bodyId, variant);
     }
 
     private static GameObjectInfo HandleMonster(FileType fileType, GroupCollection groups)
