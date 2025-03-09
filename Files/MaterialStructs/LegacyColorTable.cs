@@ -49,7 +49,7 @@ public sealed class LegacyColorTable : IEnumerable<LegacyColorTableRow>, IColorT
         => MemoryMarshal.AsBytes(_rowData[..]);
 
     public Span<Half> AsHalves()
-        => MemoryMarshal.Cast<LegacyColorTableRow, Half>(_rowData);
+        => MemoryMarshal.Cast<LegacyColorTableRow, Half>((Span<LegacyColorTableRow>)_rowData);
 
     public Span<byte> RowAsBytes(int i)
         => MemoryMarshal.AsBytes(_rowData[i][..]);

@@ -51,7 +51,7 @@ public sealed class ColorTable : IEnumerable<ColorTableRow>, IColorTable
         => MemoryMarshal.AsBytes(_rowData[..]);
 
     public Span<Half> AsHalves()
-        => MemoryMarshal.Cast<ColorTableRow, Half>(_rowData);
+        => MemoryMarshal.Cast<ColorTableRow, Half>((Span<ColorTableRow>)_rowData);
 
     public Span<byte> RowAsBytes(int i)
         => MemoryMarshal.AsBytes(_rowData[i][..]);
