@@ -48,7 +48,7 @@ public static partial class Parser
     public static partial class Monster
     {
         private const string Prefix = $@"chara/monster/m(?'{Groups.PrimaryId}'\d{{4}})/obj/body/b(?'{Groups.SecondaryId}'\d{{4}})";
-        private const string Repeat = $@"m\k'{Groups.PrimaryId}'b\k'{Groups.SecondaryId}'";
+        private const string Repeat = $@"m\k'{Groups.PrimaryId}'e\k'{Groups.SecondaryId}'";
 
         [GeneratedRegex($@"{Prefix}/b\k'{Groups.SecondaryId}'\.imc", Flags1)]
         public static partial Regex Imc();
@@ -90,22 +90,23 @@ public static partial class Parser
     public static partial class DemiHuman
     {
         private const string Prefix = $@"chara/demihuman/d(?'{Groups.PrimaryId}'\d{{4}})/obj/equipment/e(?'{Groups.SecondaryId}'\d{{4}})";
-        private const string Repeat = $@"d\k'{Groups.PrimaryId}'b\k'{Groups.SecondaryId}'";
+        private const string RepeatB = $@"d\k'{Groups.PrimaryId}'b\k'{Groups.SecondaryId}'";
+        private const string RepeatE = $@"d\k'{Groups.PrimaryId}'e\k'{Groups.SecondaryId}'";
         private const string Slot   = $"(?'{Groups.Slot}'[a-z]{{3}});";
 
         [GeneratedRegex($@"{Prefix}/e\k'{Groups.SecondaryId}'\.imc", Flags1)]
         public static partial Regex Imc();
 
-        [GeneratedRegex($@"{Prefix}/model/{Repeat}_{Slot}\.mdl", Flags1)]
+        [GeneratedRegex($@"{Prefix}/model/{RepeatE}_{Slot}\.mdl", Flags1)]
         public static partial Regex Mdl();
 
-        [GeneratedRegex($@"{Prefix}/material/v(?'{Groups.Variant}'\d{{4}})/mt_{Repeat}_{Slot}_[a-z]+\.mtrl", Flags1)]
+        [GeneratedRegex($@"{Prefix}/material/v(?'{Groups.Variant}'\d{{4}})/mt_{RepeatE}_{Slot}_[a-z]+\.mtrl", Flags1)]
         public static partial Regex Mtrl();
 
-        [GeneratedRegex($@"{Prefix}/texture/v(?'{Groups.Variant}'\d{{2}})_{Repeat}_{Slot}(_[a-z])?_[a-z]\.tex", Flags1)]
+        [GeneratedRegex($@"{Prefix}/texture/v(?'{Groups.Variant}'\d{{2}})_{RepeatE}_{Slot}(_[a-z])?_[a-z]\.tex", Flags1)]
         public static partial Regex Tex();
 
-        [GeneratedRegex($@"chara/demihuman/d(?'{Groups.PrimaryId}'\d{{4}})/skeleton/base/b(?'{Groups.SecondaryId}'\d{{4}})/(eid|skl|phy)_{Repeat}\.(eid|sklb|phyb|skp)", Flags1)]
+        [GeneratedRegex($@"chara/demihuman/d(?'{Groups.PrimaryId}'\d{{4}})/skeleton/base/b(?'{Groups.SecondaryId}'\d{{4}})/(eid|skl|phy)_{RepeatB}\.(eid|sklb|phyb|skp)", Flags1)]
         public static partial Regex Skeleton();
     }
 
@@ -168,10 +169,10 @@ public static partial class Parser
         [GeneratedRegex($@"{Prefix}/model/{Repeat}_{Slot}\.mdl", Flags1)]
         public static partial Regex Mdl();
 
-        [GeneratedRegex($@"{Prefix}/material(/v(?'{Groups.Variant}'\d{{4}}))?/mt_{Repeat}(.*?_ {Slot})?_[a-z]+(?:_[^.]*)?\.mtrl", Flags1)]
+        [GeneratedRegex($@"{Prefix}/material(/v(?'{Groups.Variant}'\d{{4}}))?/mt_{Repeat}(.*?_{Slot})?_[a-z]+(?:_[^.]*)?\.mtrl", Flags1)]
         public static partial Regex Mtrl();
 
-        [GeneratedRegex($@"{Prefix}/texture/(?'{Groups.Minus}'(--)?)(v_{Variant})?{Repeat}(_{Slot})?(_[a-z])?_[a-z]\.tex", Flags1)]
+        [GeneratedRegex($@"{Prefix}/texture/(?'{Groups.Minus}'(--)?)(v{Variant}_)?{Repeat}(_{Slot})?(_[a-z])?_[a-z]\.tex", Flags1)]
         public static partial Regex Tex();
 
 
@@ -193,7 +194,7 @@ public static partial class Parser
         [GeneratedRegex($@"chara[\/]action[\/](?'{Groups.ActionKey}'[^\s]+?)\.tmb", RegexOptions.IgnoreCase | Flags2)]
         public static partial Regex Tmb();
 
-        [GeneratedRegex($@"chara[\/]human[\/]c0101[\/]animation[\/]a0001[\/][^\s]+?[\/](?'{Groups.ActionKey}'[^\s]+?)\.pap",
+        [GeneratedRegex($@"chara[\/]human[\/]c\d{{4}}[\/]animation[\/][a-z]\d{{4}}[\/][^\s]+?[\/](?'{Groups.ActionKey}'[^\s]+?)\.pap",
             RegexOptions.IgnoreCase | Flags2)]
         public static partial Regex Pap();
 
