@@ -177,7 +177,7 @@ public sealed class ObjectIdentification(
                         set.UpdateCountOrSet("Customization: All Eyes (Catchlight)", () => new IdentifiedName());
                         break;
                     case CustomizationType.DecalEquip:
-                        set.UpdateCountOrSet("Equipment Decal {info.PrimaryId}", () => new IdentifiedName());
+                        set.UpdateCountOrSet($"Equipment Decal {info.PrimaryId}", () => new IdentifiedName());
                         break;
                     default:
                     {
