@@ -48,7 +48,7 @@ public static partial class Parser
     public static partial class Monster
     {
         private const string Prefix = $@"chara/monster/m(?'{Groups.PrimaryId}'\d{{4}})/obj/body/b(?'{Groups.SecondaryId}'\d{{4}})";
-        private const string Repeat = $@"m\k'{Groups.PrimaryId}'e\k'{Groups.SecondaryId}'";
+        private const string Repeat = $@"m\k'{Groups.PrimaryId}'b\k'{Groups.SecondaryId}'";
 
         [GeneratedRegex($@"{Prefix}/b\k'{Groups.SecondaryId}'\.imc", Flags1)]
         public static partial Regex Imc();
