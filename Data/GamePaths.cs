@@ -236,9 +236,31 @@ public static class GamePaths
               + $"c{raceCode.ToRaceCode()}{slot.ToAbbreviation()}{slotId.Id:D4}{(type != CustomizationType.Unknown ? $"_{type.ToSuffix()}" : string.Empty)}{(suffix2 != '\0' ? $"_{suffix2}" : string.Empty)}_{suffix1}.tex";
 
 
-        public const string LegacyDecal = "chara/common/texture/decal_equip/_stigma.tex";
-        public const string Transparent = "chara/common/texture/transparent.tex";
-        public const string Dummy       = "common/graphics/texture/dummy.tex";
+        public const string LegacyDecal   = "chara/common/texture/decal_equip/_stigma.tex";
+        public const string Transparent   = "chara/common/texture/transparent.tex";
+        public const string Dummy         = "common/graphics/texture/dummy.tex";
+        public const string TileOrbArray  = "chara/common/texture/tile_orb_array.tex";
+        public const string TileNormArray = "chara/common/texture/tile_norm_array.tex";
+        public const string SphereDArray  = "chara/common/texture/sphere_d_array.tex";
+
+        public const int TileOrbArrayCrc32  = unchecked((int)0x946D97B8u);
+        public const int TileNormArrayCrc32 = unchecked((int)0xCD07EB85u);
+        public const int SphereDArrayCrc32  = unchecked((int)0xF97FB20Bu);
+
+        public static readonly Utf8GamePath LegacyDecalUtf8 =
+            Utf8GamePath.FromString(LegacyDecal, out var p) ? p : Utf8GamePath.Empty;
+
+        public static readonly Utf8GamePath TransparentUtf8 =
+            Utf8GamePath.FromString(Transparent, out var p) ? p : Utf8GamePath.Empty;
+
+        public static readonly Utf8GamePath TileOrbArrayUtf8 =
+            Utf8GamePath.FromString(TileOrbArray, out var p) ? p : Utf8GamePath.Empty;
+
+        public static readonly Utf8GamePath TileNormArrayUtf8 =
+            Utf8GamePath.FromString(TileNormArray, out var p) ? p : Utf8GamePath.Empty;
+
+        public static readonly Utf8GamePath SphereDArrayUtf8 =
+            Utf8GamePath.FromString(SphereDArray, out var p) ? p : Utf8GamePath.Empty;
 
         public static string EquipDecal(byte decalId)
             => $"chara/common/texture/decal_equip/-decal_{decalId:D3}.tex";
@@ -345,6 +367,14 @@ public static class GamePaths
     {
         public static string Customization(GenderRace raceCode, string slot, PrimaryId slotId)
             => $"chara/human/c{raceCode.ToRaceCode()}/skeleton/{slot}/{slot[0]}{slotId.Id:D4}/phy_c{raceCode.ToRaceCode()}{slot[0]}{slotId.Id:D4}.phyb";
+    }
+
+    public static class Pbd
+    {
+        public const string Path = "chara/xls/boneDeformer/human.pbd";
+
+        public static readonly Utf8GamePath PathUtf8 =
+            Utf8GamePath.FromString(Path, out var p) ? p : Utf8GamePath.Empty;
     }
 
     public static class Avfx
