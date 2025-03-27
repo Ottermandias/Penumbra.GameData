@@ -5,6 +5,27 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files;
 
+public readonly record struct StmKeyType(uint Value)
+{
+    public static implicit operator StmKeyType(int v)
+        => new((uint)v);
+
+    public static implicit operator StmKeyType(uint v)
+        => new(v);
+
+    public static implicit operator StmKeyType(ushort v)
+        => new(v);
+
+    public int Int
+        => (int)Value;
+
+    public ushort UShort
+        => (ushort)Value;
+
+    public override string ToString()
+        => Value.ToString();
+}
+
 public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
 {
     public const string LegacyPath = LegacyDyePack.DefaultStmPath;
@@ -13,7 +34,7 @@ public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
     /// <summary>
     /// All currently available dyeing templates with their IDs.
     /// </summary>
-    public readonly IReadOnlyDictionary<ushort, StainingTemplateEntry> Entries;
+    public readonly IReadOnlyDictionary<StmKeyType, StainingTemplateEntry> Entries;
 
     /// <summary>
     /// Access a specific dye pack.
@@ -21,11 +42,11 @@ public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
     /// <param name="template">The ID of the accessed template.</param>
     /// <param name="idx">The ID of the Stain.</param>
     /// <returns>The corresponding color set information or a defaulted DyePack of 0-entries.</returns>
-    public TDyePack this[ushort template, int idx]
+    public TDyePack this[StmKeyType template, int idx]
         => Entries.TryGetValue(template, out var entry) ? entry[idx] : default;
 
-    /// <inheritdoc cref="this[ushort, StainId]"/>
-    public TDyePack this[ushort template, StainId idx]
+    /// <inheritdoc cref="this[StmKeyType, StainId]"/>
+    public TDyePack this[StmKeyType template, StainId idx]
         => this[template, (int)idx.Id];
 
     /// <summary>
@@ -35,7 +56,7 @@ public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
     /// <param name="idx">The ID of the Stain.</param>
     /// <param name="dyes">On success, the corresponding color set information, otherwise a defaulted DyePack.</param>
     /// <returns>True on success, false otherwise.</returns>
-    public bool TryGetValue(ushort template, StainId idx, out TDyePack dyes)
+    public bool TryGetValue(StmKeyType template, StainId idx, out TDyePack dyes)
     {
         if (idx.Id is > 0 and <= StainingTemplateEntry.NumElements && Entries.TryGetValue(template, out var entry))
         {
@@ -47,9 +68,9 @@ public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
         return false;
     }
 
-    /// <inheritdoc cref="TryGetValue(ushort, StainId, out TDyePack)"/>
+    /// <inheritdoc cref="TryGetValue(StmKeyType, StainId, out TDyePack)"/>
     /// <returns>On success, the corresponding color set information, otherwise null.</returns>
-    public TDyePack? GetValueOrNull(ushort template, StainId idx)
+    public TDyePack? GetValueOrNull(StmKeyType template, StainId idx)
         => TryGetValue(template, idx, out var dyes) ? dyes : null;
 
     /// <summary>
@@ -82,8 +103,7 @@ public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
                 break;
             case 0x200: break;
             case 0x201: break;
-            default:
-                throw new InvalidDataException($"Unrecognized STM version v{version >> 2}.{version & 0xFF}");
+            default:    throw new InvalidDataException($"Unrecognized STM version v{version >> 2}.{version & 0xFF}");
         }
 
         if (numColors != TDyePack.ColorCount || numScalars != TDyePack.ScalarCount)
@@ -94,18 +114,18 @@ public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
             throw new InvalidOperationException(
                 $"Dye pack type {typeof(TDyePack)} has a size of {sizeof(TDyePack)} bytes, but expects {numColors} colors and {numScalars} scalars, that is {numColors * 6 + numScalars * 2} bytes");
 
-        var keys    = br.Read<ushort>(numEntries);
-        var offsets = br.Read<ushort>(numEntries); // in ushorts/halves
+        var keys    = br.Read<StmKeyType>(numEntries);
+        var offsets = br.Read<StmKeyType>(numEntries);
 
         var lengths = new int[numEntries]; // in bytes
         for (var i = 1; i < numEntries; ++i)
-            lengths[i - 1] = (offsets[i] - offsets[i - 1]) << 1;
-        lengths[numEntries - 1] = br.Remaining - (offsets[numEntries - 1] << 1);
+            lengths[i - 1] = (offsets[i].Int - offsets[i - 1].Int) << 1;
+        lengths[numEntries - 1] = br.Remaining - (offsets[numEntries - 1].Int << 1);
 
-        var entries = new Dictionary<ushort, StainingTemplateEntry>(numEntries);
+        var entries = new Dictionary<StmKeyType, StainingTemplateEntry>(numEntries);
         Entries = entries;
 
-        br.SliceFromHere(offsets[0]);
+        br.SliceFromHere(offsets[0].Int);
         for (var i = 0; i < numEntries; ++i)
             entries.Add(keys[i], new StainingTemplateEntry(br.SliceFromHere(lengths[i])));
     }

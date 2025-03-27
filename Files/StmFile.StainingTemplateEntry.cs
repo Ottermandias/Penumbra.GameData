@@ -8,9 +8,9 @@ public partial class StmFile<TDyePack>
     public readonly struct StainingTemplateEntry
     {
         /// <summary>
-        /// The number of stains is capped at 128 at the moment
+        /// The number of stains is capped at 254 at the moment
         /// </summary>
-        public const int NumElements = 128;
+        public const int NumElements = 254;
 
         // ColorTable row information for each stain.
         public readonly IReadOnlyList<HalfColor>[] Colors;
