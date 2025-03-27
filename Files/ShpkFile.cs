@@ -155,15 +155,31 @@ public partial class ShpkFile : IWritable
         var nodeCount           = r.ReadUInt32();
         var nodeAliasCount      = r.ReadUInt32();
 
-        IsLegacy = !hasMatParamDefaults && textureCount == 0;
+        if (Version >= 0x0D01)
+        {
+            // The three following fields have always been observed to be 0.
+            // It is suspected that they are geometry, domain and hull shader counts, but we do not yet know where in the file the lists themselves are.
+            // TODO Update when we know more about this.
+            var unk131 = r.ReadUInt32();
+            if (unk131 != 0)
+                throw new InvalidDataException($"Unhandled case: ShPk 13.1 unknown field A @ 0x48 is non-zero (observed value: 0x{unk131:X})");
+            unk131 = r.ReadUInt32();
+            if (unk131 != 0)
+                throw new InvalidDataException($"Unhandled case: ShPk 13.1 unknown field B @ 0x4C is non-zero (observed value: 0x{unk131:X})");
+            unk131 = r.ReadUInt32();
+            if (unk131 != 0)
+                throw new InvalidDataException($"Unhandled case: ShPk 13.1 unknown field C @ 0x50 is non-zero (observed value: 0x{unk131:X})");
+        }
+
+        IsLegacy = Version < 0x0D01 && !hasMatParamDefaults && textureCount == 0;
 
         var blobs   = data[(int)blobsOffset..(int)stringsOffset];
         var strings = new SpanBinaryReader(data[(int)stringsOffset..]);
 
         VertexShaders = ReadShaderArray(ref r, (int)vertexShaderCount, DisassembledShader.ShaderStage.Vertex, DirectXVersion, disassemble,
-            IsLegacy,                          blobs,                  ref strings);
+            Version,                           IsLegacy,               blobs,                                 ref strings);
         PixelShaders = ReadShaderArray(ref r, (int)pixelShaderCount, DisassembledShader.ShaderStage.Pixel, DirectXVersion, disassemble,
-            IsLegacy,                         blobs,                 ref strings);
+            Version,                          IsLegacy,              blobs,                                ref strings);
 
         MaterialParams = r.Read<MaterialParam>(materialParamCount).ToArray();
 
@@ -199,7 +215,7 @@ public partial class ShpkFile : IWritable
 
         Passes = [];
 
-        Nodes = ReadNodeArray(ref r, (int)nodeCount, SystemKeys.Length, SceneKeys.Length, MaterialKeys.Length, SubViewKeys.Length);
+        Nodes = ReadNodeArray(ref r, (int)nodeCount, SystemKeys.Length, SceneKeys.Length, MaterialKeys.Length, SubViewKeys.Length, Version);
 
         NodeSelectors = new Dictionary<uint, uint>(Nodes.Length + (int)nodeAliasCount);
         for (var i = 0; i < Nodes.Length; ++i)
@@ -342,7 +358,7 @@ public partial class ShpkFile : IWritable
                     continue;
 
                 usage.TryGetValue(resource.Id, out var carry);
-                carry.Item1 ??= Array.Empty<DisassembledShader.VectorComponents>();
+                carry.Item1 ??= [];
                 var combined = new DisassembledShader.VectorComponents[Math.Max(carry.Item1.Length, resource.Used.Length)];
                 for (var i = 0; i < combined.Length; ++i)
                     combined[i] = (i < carry.Item1.Length ? carry.Item1[i] : 0) | (i < resource.Used.Length ? resource.Used[i] : 0);
@@ -740,7 +756,7 @@ public partial class ShpkFile : IWritable
     private static Resource[] ReadResourceArray(ref SpanBinaryReader r, int count, ref SpanBinaryReader strings)
     {
         if (count == 0)
-            return Array.Empty<Resource>();
+            return [];
 
         var ret = new Resource[count];
         for (var i = 0; i < count; ++i)
@@ -762,10 +778,10 @@ public partial class ShpkFile : IWritable
     }
 
     private static Shader[] ReadShaderArray(ref SpanBinaryReader r, int count, DisassembledShader.ShaderStage stage, DxVersion directX,
-        bool disassemble, bool isLegacy, ReadOnlySpan<byte> blobs, ref SpanBinaryReader strings)
+        bool disassemble, uint version, bool isLegacy, ReadOnlySpan<byte> blobs, ref SpanBinaryReader strings)
     {
         if (count == 0)
-            return Array.Empty<Shader>();
+            return [];
 
         var extraHeaderSize = stage switch
         {
@@ -788,6 +804,17 @@ public partial class ShpkFile : IWritable
             var uavCount      = r.ReadUInt16();
             var textureCount  = r.ReadUInt16();
 
+            // This has always been observed to be 1 for vertex shaders and 4 for pixel shaders.
+            // TODO Update when we know more about this.
+            var unk131 = version >= 0x0D01
+                ? r.ReadUInt32()
+                : stage switch
+                {
+                    DisassembledShader.ShaderStage.Vertex => 1u,
+                    DisassembledShader.ShaderStage.Pixel  => 4u,
+                    _                                     => 0u,
+                };
+
             var rawBlob = blobs.Slice((int)blobOffset, (int)blobSize);
 
             ret[i] = new Shader
@@ -799,6 +826,7 @@ public partial class ShpkFile : IWritable
                 Samplers         = ReadResourceArray(ref r, samplerCount,  ref strings),
                 Uavs             = ReadResourceArray(ref r, uavCount,      ref strings),
                 Textures         = ReadResourceArray(ref r, textureCount,  ref strings),
+                Unk131           = unk131,
                 AdditionalHeader = rawBlob[..extraHeaderSize].ToArray(),
                 Blob             = rawBlob[extraHeaderSize..].ToArray(),
             };
@@ -810,7 +838,7 @@ public partial class ShpkFile : IWritable
     private static Key[] ReadKeyArray(ref SpanBinaryReader r, int count)
     {
         if (count == 0)
-            return Array.Empty<Key>();
+            return [];
 
         var ret = new Key[count];
         for (var i = 0; i < count; ++i)
@@ -828,10 +856,10 @@ public partial class ShpkFile : IWritable
     }
 
     private static Node[] ReadNodeArray(ref SpanBinaryReader r, int count, int systemKeyCount, int sceneKeyCount, int materialKeyCount,
-        int subViewKeyCount)
+        int subViewKeyCount, uint version)
     {
         if (count == 0)
-            return Array.Empty<Node>();
+            return [];
 
         var ret = new Node[count];
         for (var i = 0; i < count; ++i)
@@ -842,11 +870,37 @@ public partial class ShpkFile : IWritable
             {
                 Selector     = selector,
                 PassIndices  = r.Read<byte>(16).ToArray(),
+                Unk131Keys   = version >= 0x0D01 ? r.Read<uint>(2).ToArray() : [],
                 SystemKeys   = r.Read<uint>(systemKeyCount).ToArray(),
                 SceneKeys    = r.Read<uint>(sceneKeyCount).ToArray(),
                 MaterialKeys = r.Read<uint>(materialKeyCount).ToArray(),
                 SubViewKeys  = r.Read<uint>(subViewKeyCount).ToArray(),
-                Passes       = r.Read<Pass>((int)passCount).ToArray(),
+                Passes       = ReadPassArray(ref r, (int)passCount, version).ToArray(),
+            };
+
+            if (version < 0x0D01)
+                ret[i].Unk131Keys = (uint[])ret[i].SubViewKeys.Clone();
+        }
+
+        return ret;
+    }
+
+    private static Pass[] ReadPassArray(ref SpanBinaryReader r, int count, uint version)
+    {
+        if (count == 0)
+            return [];
+
+        var ret = new Pass[count];
+        for (var i = 0; i < count; ++i)
+        {
+            ret[i] = new Pass
+            {
+                Id           = r.ReadUInt32(),
+                VertexShader = r.ReadUInt32(),
+                PixelShader  = r.ReadUInt32(),
+                Unk131A      = version >= 0x0D01 ? r.ReadUInt32() : uint.MaxValue,
+                Unk131B      = version >= 0x0D01 ? r.ReadUInt32() : uint.MaxValue,
+                Unk131C      = version >= 0x0D01 ? r.ReadUInt32() : uint.MaxValue,
             };
         }
 
@@ -887,6 +941,12 @@ public partial class ShpkFile : IWritable
         public uint Id;
         public uint VertexShader;
         public uint PixelShader;
+
+        // Probably geometry, domain and hull shader indices.
+        // TODO Update when we know more about this.
+        public uint Unk131A;
+        public uint Unk131B;
+        public uint Unk131C;
     }
 
     public struct Key
@@ -900,6 +960,10 @@ public partial class ShpkFile : IWritable
     {
         public uint   Selector;
         public byte[] PassIndices;
+
+        // TODO Update when we know more about this.
+        public uint[] Unk131Keys;
+
         public uint[] SystemKeys;
         public uint[] SceneKeys;
         public uint[] MaterialKeys;

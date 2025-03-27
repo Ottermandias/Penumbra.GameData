@@ -104,6 +104,10 @@ public partial class DisassembledShader
     public enum ShaderStage : byte
     {
         Unspecified = 0,
+        Compute     = 0x43, // 'C'
+        Domain      = 0x44, // 'D'
+        Geometry    = 0x47, // 'G'
+        Hull        = 0x48, // 'H'
         Pixel       = 0x50, // 'P'
         Vertex      = 0x56, // 'V'
     }
@@ -196,11 +200,11 @@ public partial class DisassembledShader
         }
         else
         {
-            resourceBindings = Array.Empty<ResourceBinding>();
+            resourceBindings = [];
         }
 
-        inputSignature  = Array.Empty<InputOutput>();
-        outputSignature = Array.Empty<InputOutput>();
+        inputSignature  = [];
+        outputSignature = [];
     }
 
     private static void ParseSm3ResourceUsage(IReadOnlyList<ByteString> instructions, ResourceBinding[] resourceBindings)
@@ -273,13 +277,13 @@ public partial class DisassembledShader
                     Slot          = uint.Parse(binding[4][binding[4].IndexOfAny(Digits)..]),
                     Elements      = uint.Parse(binding[5]),
                     RegisterCount = type == ResourceType.Texture ? 1u : 0u,
-                    Used          = type == ResourceType.Texture ? new VectorComponents[1] : Array.Empty<VectorComponents>(),
+                    Used          = type == ResourceType.Texture ? new VectorComponents[1] : [],
                 };
             });
         }
         else
         {
-            resourceBindings = Array.Empty<ResourceBinding>();
+            resourceBindings = [];
         }
 
         if (header.TryGetValue("Buffer Definitions", out var rawBufferDefs))
@@ -321,7 +325,7 @@ public partial class DisassembledShader
         }
         else
         {
-            inputSignature = Array.Empty<InputOutput>();
+            inputSignature = [];
         }
 
         if (header.TryGetValue("Output signature", out var rawOutputSig))
@@ -331,7 +335,7 @@ public partial class DisassembledShader
         }
         else
         {
-            outputSignature = Array.Empty<InputOutput>();
+            outputSignature = [];
         }
     }
 
