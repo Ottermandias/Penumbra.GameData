@@ -20,7 +20,7 @@ public static class Sigs
 
     // ResourceLoader.TexMdl
     public const string CheckFileState   = "E8 ?? ?? ?? ?? 48 85 C0 74 ?? 4C 8B C8";
-    public const string LoadTexFileLocal = "48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 49 8B F0 44 88 4C 24 20";
+    public const string LoadTexFileLocal = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 49 8B E8 44 88 4C 24";
 
     public const string LoadMdlFileLocal =
         "48 89 5C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 48 8B 72 ?? 4C 8B EA";
@@ -49,7 +49,7 @@ public static class Sigs
     public const string ScheduleClipUpdate = "40 53 55 56 57 48 81 EC ?? ?? ?? ?? 48 8B F9";
     public const string UnkMountAnimation = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 41 8B E9 45 0F B6 F8";
     public const string UnkParasolAnimation = "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B FA 4C 8B F1";
-    public const string Dismount = "E9 ?? ?? ?? ?? B8 ?? ?? ?? ?? 66 44 3B F8";
+    public const string Dismount = "E8 ?? ?? ?? ?? 48 8B 4F ?? F6 81";
     public const string GetCachedScheduleResource = "40 53 48 83 EC ?? 44 8B 4A";
     public const string LoadActionTmb = "E8 ?? ?? ?? ?? 48 89 43 ?? 0F B6 45";
     public const string SchedulerResourceManagementInstance = "48 89 3D ?? ?? ?? ?? 8B C7";
@@ -59,7 +59,7 @@ public static class Sigs
             "41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 4D 8B F9"; // Inlined in 48 89 83 ?? ?? ?? ?? 48 8B 46 ?? 48 85 C0 
 
     public const string ApricotListenerSoundPlayCaller = "4C 8B DC 56 48 81 EC ?? ?? ?? ?? F3 0F 10 89";
-    public const string FootStepSound                  = "89 54 24 ?? 55 57 41 54 41 55 41 56";
+    public const string FootStepSound                  = "E9 ?? ?? ?? ?? 49 8B CE E8 ?? ?? ?? ?? 8B F8";
 
     // PathResolver.DrawObjectState
     public const string EnableDraw     = "E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 33 45 33 C0";
