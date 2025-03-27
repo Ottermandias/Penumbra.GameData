@@ -46,8 +46,16 @@ public partial class ShpkFile
             w.Write((uint)Nodes.Length);
             w.Write((uint)aliases.Count);
 
-            WriteShaderArray(w, VertexShaders, blobs, strings, IsLegacy);
-            WriteShaderArray(w, PixelShaders,  blobs, strings, IsLegacy);
+            if (Version >= 0x0D01)
+            {
+                // TODO Update when we know more about this.
+                w.Write(0u);
+                w.Write(0u);
+                w.Write(0u);
+            }
+
+            WriteShaderArray(w, VertexShaders, blobs, strings, Version, IsLegacy);
+            WriteShaderArray(w, PixelShaders,  blobs, strings, Version, IsLegacy);
 
             foreach (var materialParam in MaterialParams)
             {
@@ -102,6 +110,12 @@ public partial class ShpkFile
                 w.Write(node.Selector);
                 w.Write(node.Passes.Length);
                 w.Write(node.PassIndices);
+                if (Version >= 0x0D01)
+                {
+                    // TODO Update when we know more about this.
+                    foreach (var key in node.Unk131Keys)
+                        w.Write(key);
+                }
                 foreach (var key in node.SystemKeys)
                     w.Write(key);
                 foreach (var key in node.SceneKeys)
@@ -115,6 +129,13 @@ public partial class ShpkFile
                     w.Write(pass.Id);
                     w.Write(pass.VertexShader);
                     w.Write(pass.PixelShader);
+                    if (Version >= 0x0D01)
+                    {
+                        // TODO Update when we know more about this.
+                        w.Write(pass.Unk131A);
+                        w.Write(pass.Unk131B);
+                        w.Write(pass.Unk131C);
+                    }
                 }
             }
 
@@ -157,7 +178,7 @@ public partial class ShpkFile
         }
     }
 
-    private static void WriteShaderArray(BinaryWriter w, Shader[] array, MemoryStream blobs, StringPool strings, bool isLegacy)
+    private static void WriteShaderArray(BinaryWriter w, Shader[] array, MemoryStream blobs, StringPool strings, uint version, bool isLegacy)
     {
         foreach (var shader in array)
         {
@@ -175,6 +196,12 @@ public partial class ShpkFile
             w.Write((ushort)shader.Samplers.Length);
             w.Write((ushort)shader.Uavs.Length);
             w.Write((ushort)(isLegacy ? 0 : shader.Textures.Length));
+
+            if (version >= 0x0D01)
+            {
+                // TODO Update when we know more about this.
+                w.Write(shader.Unk131);
+            }
 
             WriteResourceArray(w, shader.Constants, strings);
             WriteResourceArray(w, shader.Samplers,  strings);

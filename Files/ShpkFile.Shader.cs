@@ -9,19 +9,24 @@ public partial class ShpkFile
 {
     public struct Shader
     {
-        public  bool                           IsLegacy;
-        public  DisassembledShader.ShaderStage Stage;
-        public  DxVersion                      DirectXVersion;
-        public  Resource[]                     Constants;
-        public  Resource[]                     Samplers;
-        public  Resource[]                     Uavs;
+        public bool                           IsLegacy;
+        public DisassembledShader.ShaderStage Stage;
+        public DxVersion                      DirectXVersion;
+        public Resource[]                     Constants;
+        public Resource[]                     Samplers;
+        public Resource[]                     Uavs;
+
         /// <remarks>
         /// When dealing with legacy shaders, this will always be empty, use <see cref="Samplers"/> instead.
         /// </remarks>
-        public  Resource[]                     Textures;
-        public  byte[]                         AdditionalHeader;
-        private byte[]                         _byteData;
-        private DisassembledShader?            _disassembly;
+        public Resource[] Textures;
+
+        // TODO Update when we know more about this.
+        public uint Unk131;
+
+        public  byte[]              AdditionalHeader;
+        private byte[]              _byteData;
+        private DisassembledShader? _disassembly;
 
         public ShaderKeyValueSet[]? SystemValues;
         public ShaderKeyValueSet[]? SceneValues;
