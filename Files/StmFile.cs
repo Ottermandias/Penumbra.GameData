@@ -81,6 +81,7 @@ public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
                 numScalars = 2;
                 break;
             case 0x200: break;
+            case 0x201: break;
             default:
                 throw new InvalidDataException($"Unrecognized STM version v{version >> 2}.{version & 0xFF}");
         }
