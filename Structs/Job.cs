@@ -21,11 +21,14 @@ public readonly struct Job(in ClassJob job)
         Gatherer       = 7,
     }
 
+
     /// <summary> The name of the job. </summary>
-    public readonly string Name = string.Intern(job.Name.ToString());
+    /// <remarks> They removed the name and abbreviation for Adventurer in 7.2 for some reason, so those are custom. </remarks>
+    public readonly string Name = string.Intern(job.RowId is 0 ? "Adventurer" : job.Name.ToString());
 
     /// <summary> The 3-letter abbreviation of the job. </summary>
-    public readonly string Abbreviation = string.Intern(job.Abbreviation.ToString());
+    /// <remarks> They removed the name and abbreviation for Adventurer in 7.2 for some reason, so those are custom. </remarks>
+    public readonly string Abbreviation = string.Intern(job.RowId is 0 ? "ADV" : job.Abbreviation.ToString());
 
     /// <summary> The ID of the job. </summary>
     public readonly JobId Id = (JobId)job.RowId;

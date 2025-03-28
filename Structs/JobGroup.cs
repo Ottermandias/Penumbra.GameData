@@ -35,15 +35,19 @@ public readonly struct JobGroup
     /// </summary>
     public JobGroup(ClassJobCategory group, ExcelSheet<ClassJob> jobs)
     {
-        Count  = 0;
+        Count = 0;
         Flags = 0ul;
-        Id     = (JobGroupId)group.RowId;
-        Name   = group.Name.ToString();
+        Id    = (JobGroupId)group.RowId;
+        Name  = group.Name.ToString();
 
         Debug.Assert(jobs.Count < 64, $"Number of Jobs exceeded 63 ({jobs.Count}).");
         foreach (var job in jobs)
         {
             var abbr = job.Abbreviation.ToString();
+            // They removed the Adventurer abbreviation and name in 7.2 for some reason.
+            if (job.RowId == 0)
+                abbr = "ADV";
+
             if (abbr.Length == 0)
                 continue;
 
