@@ -197,21 +197,21 @@ public partial class ShpkFile : IWritable
         var subViewKey1Default = r.ReadUInt32();
         var subViewKey2Default = r.ReadUInt32();
 
-        SubViewKeys = new Key[]
-        {
-            new()
+        SubViewKeys =
+        [
+            new Key
             {
                 Id           = 1,
                 DefaultValue = subViewKey1Default,
                 Values       = [subViewKey1Default],
             },
-            new()
+            new Key
             {
                 Id           = 2,
                 DefaultValue = subViewKey2Default,
                 Values       = [subViewKey2Default],
             },
-        };
+        ];
 
         Passes = [];
 
@@ -232,17 +232,10 @@ public partial class ShpkFile : IWritable
         _changed = false;
     }
 
-    /// <summary> Determines whether a ShPk file is a legacy one, while examining the least possible amount of data, for performance reasons. </summary>
-    /// <param name="startOfData"> At least the 48 first bytes of the file. </param>
-    /// <seealso cref="IsLegacy"/>
-    public static bool FastIsLegacy(ReadOnlySpan<byte> startOfData)
-    {
-        const int hasMatParamDefaults = 19;
-        const int textureCount        = 23;
-
-        var asShorts = MemoryMarshal.Cast<byte, ushort>(startOfData);
-        return asShorts[hasMatParamDefaults] == 0 && asShorts[textureCount] == 0;
-    }
+    /// <summary> Determines whether a ShPk file is a pre-7.2 one, while examining the least possible amount of data, for performance reasons. </summary>
+    /// <param name="startOfData"> At least the 8 first bytes of the file. </param>
+    public static bool FastIsObsolete(ReadOnlySpan<byte> startOfData)
+        => MemoryMarshal.Cast<byte, uint>(startOfData)[1] < 0x0D01;
 
     /// <summary> Extract all resource names from a ShPk file, while examining the least possible amount of data, for performance reasons. </summary>
     /// <param name="data"> The bytes of the file. </param>
