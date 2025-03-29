@@ -210,7 +210,7 @@ public partial class MtrlFile : IWritable, ICloneable
         var samplerCount        = r.ReadUInt16();
         ShaderPackage.Flags = r.ReadUInt32();
 
-        ShaderPackage.ShaderKeys   = r.Read<ShaderKey>(shaderKeyCount).ToArray();
+        ShaderPackage.ShaderKeys   = ReadShaderKeys(ref r, shaderKeyCount);
         ShaderPackage.Constants    = ReadConstants(ref r, constantCount);
         ShaderPackage.Samplers     = r.Read<Sampler>(samplerCount).ToArray();
         ShaderPackage.ShaderValues = r.Read<byte>(shaderValueListSize).ToArray();
@@ -271,6 +271,21 @@ public partial class MtrlFile : IWritable, ICloneable
         return ret;
     }
 
+    private static ShaderKey[] ReadShaderKeys(ref SpanBinaryReader r, int count)
+    {
+        var ret = new ShaderKey[count];
+        for (var i = 0; i < count; ++i)
+        {
+            ret[i].Key   = r.ReadUInt32();
+            ret[i].Value = r.ReadUInt32();
+
+            // Prevent garbage collecting keys that were in the original file.
+            ret[i].Pinned = true;
+        }
+
+        return ret;
+    }
+
     private static Constant[] ReadConstants(ref SpanBinaryReader r, int count)
     {
         var ret = new Constant[count];
@@ -308,6 +323,15 @@ public partial class MtrlFile : IWritable, ICloneable
             get => (Flags & DX11Flag) != 0;
             set => Flags = value ? (ushort)(Flags | DX11Flag) : (ushort)(Flags & ~DX11Flag);
         }
+    }
+
+    public struct ShaderKey
+    {
+        public uint Key;
+        public uint Value;
+
+        /// <summary> Whether to preserve this constant after a garbage collection even if it has its default value. </summary>
+        public bool Pinned;
     }
 
     public struct Constant

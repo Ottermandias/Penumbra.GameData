@@ -61,7 +61,7 @@ public partial class MtrlFile
 
             foreach (var key in ShaderPackage.ShaderKeys)
             {
-                w.Write(key.Category);
+                w.Write(key.Key);
                 w.Write(key.Value);
             }
 
