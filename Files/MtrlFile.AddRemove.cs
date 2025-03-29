@@ -88,8 +88,8 @@ public partial class MtrlFile
     public ref Sampler GetOrAddSampler(uint id, string defaultTexture)
         => ref GetOrAddSampler(id, defaultTexture, out _);
 
-    public int FindShaderKey(uint category)
-        => ShaderPackage.ShaderKeys.IndexOf(c => c.Category == category);
+    public int FindShaderKey(uint key)
+        => ShaderPackage.ShaderKeys.IndexOf(c => c.Key == key);
 
     public ShaderKey? GetShaderKey(uint category, out int i)
     {
@@ -100,16 +100,16 @@ public partial class MtrlFile
     public ShaderKey? GetShaderKey(uint category)
         => GetShaderKey(category, out _);
 
-    public int FindOrAddShaderKey(uint category, uint defaultValue)
+    public int FindOrAddShaderKey(uint key, uint defaultValue)
     {
-        if (UtilityFunctions.FindIndex(ShaderPackage.ShaderKeys, c => c.Category == category, out var idx))
+        if (UtilityFunctions.FindIndex(ShaderPackage.ShaderKeys, c => c.Key == key, out var idx))
             return idx;
 
         var newI = ShaderPackage.ShaderKeys.Length;
         ShaderPackage.ShaderKeys = ShaderPackage.ShaderKeys.AddItem(new ShaderKey
         {
-            Category = category,
-            Value    = defaultValue,
+            Key   = key,
+            Value = defaultValue,
         });
 
         return newI;
@@ -176,8 +176,8 @@ public partial class MtrlFile
         for (var i = ShaderPackage.ShaderKeys.Length; i-- > 0;)
         {
             var key     = ShaderPackage.ShaderKeys[i];
-            var shpkKey = shpk.GetMaterialKeyById(key.Category);
-            if (!shpkKey.HasValue || key.Value == shpkKey.Value.DefaultValue)
+            var shpkKey = shpk.GetMaterialKeyById(key.Key);
+            if (!key.Pinned && (!shpkKey.HasValue || key.Value == shpkKey.Value.DefaultValue))
                 ShaderPackage.ShaderKeys = ShaderPackage.ShaderKeys.RemoveItems(i);
         }
 
