@@ -33,12 +33,12 @@ public unsafe class ActorObjectManager : IDisposable, IReadOnlyDictionary<ActorI
         Actors           =  actors;
         _clientState     =  clientState;
         _targets         =  targets;
-        Objects.OnUpdate += OnUpdate;
+        Objects.OnUpdate += OnUpdateRequired;
     }
 
     public void Dispose()
     {
-        Objects.OnUpdate -= OnUpdate;
+        Objects.OnUpdateRequired -= OnUpdateRequired;
     }
 
     public Actor GPosePlayer
@@ -230,7 +230,7 @@ public unsafe class ActorObjectManager : IDisposable, IReadOnlyDictionary<ActorI
         }
     }
 
-    private void OnUpdate()
+    private void OnUpdateRequired()
         => _needsIdentifierUpdate = true;
 
     private IReadOnlyDictionary<ActorIdentifier, ActorData> Identifiers
