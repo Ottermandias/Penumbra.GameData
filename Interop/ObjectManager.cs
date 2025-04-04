@@ -222,6 +222,7 @@ public unsafe class ObjectManager(
         set => Value.Item2[0] = value;
     }
 
+#pragma warning disable CS8601 // Possible null reference assignment.
     public event Action OnUpdate
     {
         add => Value.Item6[0] += value;
@@ -233,6 +234,7 @@ public unsafe class ObjectManager(
         add => Value.Item6[1] += value;
         remove => Value.Item6[1] -= value;
     }
+#pragma warning restore CS8601
 
     private List<nint> InternalAvailable
     {
