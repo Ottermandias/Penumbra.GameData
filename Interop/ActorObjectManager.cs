@@ -242,7 +242,7 @@ public unsafe class ActorObjectManager : IDisposable, IReadOnlyDictionary<ActorI
         }
     }
 
-    private unsafe bool AddLobbyCharacters()
+    private bool AddLobbyCharacters()
     {
         if (_clientState.IsLoggedIn)
             return false;

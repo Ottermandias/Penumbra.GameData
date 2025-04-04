@@ -24,7 +24,10 @@ public unsafe class ObjectManager(
     : DataSharer<ShareTuple>(pi, log, "ObjectManager", ClientLanguage.English, 2, () => DefaultShareTuple(objects)), IReadOnlyCollection<Actor>
 {
     private static ShareTuple DefaultShareTuple(IObjectTable objects)
-        => new([null], [true], new List<nint>(objects.Length), new Dictionary<GameObjectId, nint>(objects.Length), new int[4], [() => { }]);
+        => new([null], [true], new List<nint>(objects.Length), new Dictionary<GameObjectId, nint>(objects.Length), new int[4], [
+            () => { },
+            () => { },
+        ]);
 
     public readonly  IObjectTable Objects  = objects;
     private readonly Actor*       _address = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
@@ -44,22 +47,20 @@ public unsafe class ObjectManager(
         _updateHook.Enable();
     }
 
-    private bool Update()
+    private void Update()
     {
         if (!framework.IsInFrameworkUpdateThread)
-            return false;
+            return;
 
         UpdateHooks();
         if (!NeedsUpdate)
-            return false;
+            return;
 
         _log.Verbose("[ObjectManager] Updating object manager.");
         NeedsUpdate = false;
 
         UpdateAvailable();
         InvokeUpdates();
-
-        return true;
     }
 
     private void InvokeUpdates()
@@ -73,6 +74,21 @@ public unsafe class ObjectManager(
             catch (Exception ex)
             {
                 _log.Error($"[ObjectManager] Error during invocation of update subscribers:\n{ex}");
+            }
+        }
+    }
+
+    private void InvokeRequiredUpdates()
+    {
+        foreach (var ac in Value.Item6[1].GetInvocationList().OfType<Action>())
+        {
+            try
+            {
+                ac.Invoke();
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"[ObjectManager] Error during invocation of required update subscribers:\n{ex}");
             }
         }
     }
@@ -212,8 +228,20 @@ public unsafe class ObjectManager(
         remove => Value.Item6[0] -= value;
     }
 
+    public event Action OnUpdateRequired
+    {
+        add => Value.Item6[1] += value;
+        remove => Value.Item6[1] -= value;
+    }
+
     private List<nint> InternalAvailable
-        => Value.Item3;
+    {
+        get
+        {
+            Update();
+            return Value.Item3;
+        }
+    }
 
     private Dictionary<GameObjectId, nint> InternalIdDict
         => Value.Item4;
@@ -228,12 +256,8 @@ public unsafe class ObjectManager(
     public Actor ById(GameObjectId id)
     {
         Update();
-        return ByIdWithoutUpdate(id);
+        return InternalIdDict.GetValueOrDefault(id, nint.Zero);
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public Actor ByIdWithoutUpdate(GameObjectId id)
-        => InternalIdDict.GetValueOrDefault(id, nint.Zero);
 
     public Actor CompanionParent(Actor companion)
         => this[companion.Index.Index - 1];
@@ -268,7 +292,13 @@ public unsafe class ObjectManager(
         => GetEnumerator();
 
     public int Count
-        => InternalAvailable.Count;
+    {
+        get
+        {
+            Update();
+            return InternalAvailable.Count;
+        }
+    }
 
     protected override void Dispose(bool _)
     {
@@ -285,5 +315,6 @@ public unsafe class ObjectManager(
     {
         _updateHook!.Original(manager);
         NeedsUpdate = true;
+        InvokeRequiredUpdates();
     }
 }
