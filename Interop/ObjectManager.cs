@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Hooking;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
@@ -11,27 +12,57 @@ using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Interop;
 
-public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFramework framework, IObjectTable objects)
-    : DataSharer<Tuple<DateTime[], List<nint>, Dictionary<GameObjectId, nint>, int[]>>(pi, log, "Penumbra.ObjectManager",
-        ClientLanguage.English, 1,
-        () => new Tuple<DateTime[], List<nint>, Dictionary<GameObjectId, nint>, int[]>(
-            [DateTime.UnixEpoch],
+public unsafe class ObjectManager(
+    IDalamudPluginInterface pi,
+    IGameInteropProvider interop,
+    Logger log,
+    IFramework framework,
+    IObjectTable objects)
+    : DataSharer<Tuple<object?[], bool[], List<nint>, Dictionary<GameObjectId, nint>, int[]>>(pi, log, "ObjectManager",
+        ClientLanguage.English, 2,
+        () => new Tuple<object?[], bool[], List<nint>, Dictionary<GameObjectId, nint>, int[]>(
+            [null],
+            [true],
             new List<nint>(objects.Length),
             new Dictionary<GameObjectId, nint>(objects.Length), new int[4])), IReadOnlyCollection<Actor>
 {
-    public readonly  IObjectTable Objects  = objects;
-    private readonly Actor*       _address = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
+    public readonly  IObjectTable                      Objects  = objects;
+    private readonly Actor*                            _address = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
+    private          Hook<UpdateObjectArraysDelegate>? _updateHook;
+    private readonly Logger                            _log = log;
+
+    private void UpdateHooks()
+    {
+        if (HookOwner is not null)
+            return;
+
+        NeedsUpdate = true;
+        HookOwner   = this;
+        _updateHook?.Dispose();
+        _log.Debug("[ObjectManager] Moving object table hook owner to this.");
+        _updateHook = interop.HookFromSignature<UpdateObjectArraysDelegate>("40 57 48 83 EC ?? 48 89 5C 24 ?? 33 DB", UpdateObjectArraysDetour);
+        _updateHook.Enable();
+    }
+
+    private delegate void UpdateObjectArraysDelegate(GameObjectManager* manager);
+
+    private void UpdateObjectArraysDetour(GameObjectManager* manager)
+    {
+        _updateHook!.Original(manager);
+        NeedsUpdate = true;
+    }
 
     public virtual bool Update()
     {
         if (!framework.IsInFrameworkUpdateThread)
             return false;
 
-        var frame = framework.LastUpdateUTC;
-        if (LastFrame == frame)
+        UpdateHooks();
+        if (!NeedsUpdate)
             return false;
 
-        LastFrame = frame;
+        _log.Verbose("[ObjectManager] Updating object manager.");
+        NeedsUpdate = false;
         InternalIdDict.Clear();
         InternalAvailable.Clear();
 
@@ -116,39 +147,45 @@ public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFrame
 
     protected int BnpcEnd
     {
-        get => Value.Item4[0];
-        set => Value.Item4[0] = value;
+        get => Value.Item5[0];
+        set => Value.Item5[0] = value;
     }
 
     protected int CutsceneEnd
     {
-        get => Value.Item4[1];
-        set => Value.Item4[1] = value;
+        get => Value.Item5[1];
+        set => Value.Item5[1] = value;
     }
 
     protected int SpecialEnd
     {
-        get => Value.Item4[2];
-        set => Value.Item4[2] = value;
+        get => Value.Item5[2];
+        set => Value.Item5[2] = value;
     }
 
     protected int EnpcEnd
     {
-        get => Value.Item4[3];
-        set => Value.Item4[3] = value;
+        get => Value.Item5[3];
+        set => Value.Item5[3] = value;
     }
 
-    protected DateTime LastFrame
+    protected object? HookOwner
     {
         get => Value.Item1[0];
         private set => Value.Item1[0] = value;
     }
 
+    protected bool NeedsUpdate
+    {
+        get => Value.Item2[0];
+        private set => Value.Item2[0] = value;
+    }
+
     protected List<nint> InternalAvailable
-        => Value.Item2;
+        => Value.Item3;
 
     protected Dictionary<GameObjectId, nint> InternalIdDict
-        => Value.Item3;
+        => Value.Item4;
 
     public Actor this[ObjectIndex index]
         => this[(int)index.Index];
@@ -201,4 +238,11 @@ public unsafe class ObjectManager(IDalamudPluginInterface pi, Logger log, IFrame
 
     public int Count
         => InternalAvailable.Count;
+
+    protected override void Dispose(bool _)
+    {
+        base.Dispose(_);
+        _updateHook?.Dispose();
+        HookOwner = null;
+    }
 }

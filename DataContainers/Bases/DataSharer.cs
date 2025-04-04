@@ -72,9 +72,9 @@ public abstract class DataSharer<T>(IDalamudPluginInterface pluginInterface, Log
     /// <summary> Dispose this share by relinquishing its data in Dalamud. </summary>
     public void Dispose()
     {
+        Dispose(true);
         pluginInterface.RelinquishData(Label);
         GC.SuppressFinalize(this);
-        Dispose(true);
     }
 
     /// <summary> Used if inheriting classes need to dispose resources themselves. </summary>
