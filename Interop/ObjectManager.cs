@@ -11,7 +11,9 @@ using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using ShareTuple =
     System.Tuple<object?[], bool[], System.Collections.Generic.List<nint>,
-        System.Collections.Generic.Dictionary<FFXIVClientStructs.FFXIV.Client.Game.Object.GameObjectId, nint>, int[], System.Action[]>;
+        System.Collections.Generic.Dictionary<FFXIVClientStructs.FFXIV.Client.Game.Object.GameObjectId, nint>, int[],
+        System.Collections.Concurrent.ConcurrentDictionary<System.Action, byte>,
+        System.Collections.Concurrent.ConcurrentDictionary<System.Action, byte>>;
 
 namespace Penumbra.GameData.Interop;
 
@@ -24,13 +26,10 @@ public unsafe class ObjectManager(
     : DataSharer<ShareTuple>(pi, log, "ObjectManager", ClientLanguage.English, 2, () => DefaultShareTuple(objects)), IReadOnlyCollection<Actor>
 {
     private static ShareTuple DefaultShareTuple(IObjectTable objects)
-        => new([null], [true], new List<nint>(objects.Length), new Dictionary<GameObjectId, nint>(objects.Length), new int[4], [
-            () => { },
-            () => { },
-        ]);
+        => new([null], [true], new List<nint>(objects.Length), new Dictionary<GameObjectId, nint>(objects.Length), new int[4], [], []);
 
-    public readonly  IObjectTable Objects  = objects;
-    private readonly Actor*       _address = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
+    public readonly IObjectTable Objects = objects;
+    private readonly Actor* _address = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
 
     private readonly Logger _log = log;
 
@@ -40,7 +39,7 @@ public unsafe class ObjectManager(
             return;
 
         NeedsUpdate = true;
-        HookOwner   = this;
+        HookOwner = this;
         _updateHook?.Dispose();
         _log.Debug("[ObjectManager] Moving object table hook owner to this.");
         _updateHook = interop.HookFromSignature<UpdateObjectArraysDelegate>("40 57 48 83 EC ?? 48 89 5C 24 ?? 33 DB", UpdateObjectArraysDetour);
@@ -65,7 +64,7 @@ public unsafe class ObjectManager(
 
     private void InvokeUpdates()
     {
-        foreach (var ac in Value.Item6[0].GetInvocationList().OfType<Action>())
+        foreach (var ac in Value.Item6.Keys)
         {
             try
             {
@@ -80,7 +79,7 @@ public unsafe class ObjectManager(
 
     private void InvokeRequiredUpdates()
     {
-        foreach (var ac in Value.Item6[1].GetInvocationList().OfType<Action>())
+        foreach (var ac in Value.Item7.Keys)
         {
             try
             {
@@ -149,12 +148,12 @@ public unsafe class ObjectManager(
     private readonly struct ListSlice : IReadOnlyList<Actor>
     {
         private readonly IReadOnlyList<nint> _list;
-        private readonly int                 _start;
-        private readonly int                 _count;
+        private readonly int _start;
+        private readonly int _count;
 
         public ListSlice(IReadOnlyList<nint> list, int start = 0)
         {
-            _list  = list;
+            _list = list;
             _start = start;
             _count = list.Count - start;
             if (_count < 0 || _start < 0)
@@ -163,7 +162,7 @@ public unsafe class ObjectManager(
 
         public ListSlice(IReadOnlyList<nint> list, int start, int count)
         {
-            _list  = list;
+            _list = list;
             _start = start;
             _count = count;
             if (_start < 0)
@@ -225,14 +224,14 @@ public unsafe class ObjectManager(
 #pragma warning disable CS8601 // Possible null reference assignment.
     public event Action OnUpdate
     {
-        add => Value.Item6[0] += value;
-        remove => Value.Item6[0] -= value;
+        add => Value.Item6.TryAdd(value, 0);
+        remove => Value.Item6.Remove(value, out _);
     }
 
     public event Action OnUpdateRequired
     {
-        add => Value.Item6[1] += value;
-        remove => Value.Item6[1] -= value;
+        add => Value.Item7.TryAdd(value, 0);
+        remove => Value.Item7.Remove(value, out _);
     }
 #pragma warning restore CS8601
 
@@ -277,7 +276,7 @@ public unsafe class ObjectManager(
         => Objects[index.Index] as ICharacter;
 
     protected override long ComputeMemory()
-        => DataUtility.DictionaryMemory(16,  Objects.Length)
+        => DataUtility.DictionaryMemory(16, Objects.Length)
           + DataUtility.DictionaryMemory(16, Objects.Length / 2)
           + DataUtility.ListMemory(8, Objects.Length);
 
