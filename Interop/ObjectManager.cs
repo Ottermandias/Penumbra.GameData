@@ -4,13 +4,15 @@ using Dalamud.Hooking;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using ImGuiNET;
 using OtterGui.Log;
+using OtterGui.Text;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using ShareTuple =
-    System.Tuple<object?[], bool[], System.Collections.Generic.List<nint>,
+    System.Tuple<string?[], bool[], System.Collections.Generic.List<nint>,
         System.Collections.Generic.Dictionary<FFXIVClientStructs.FFXIV.Client.Game.Object.GameObjectId, nint>, int[],
         System.Collections.Concurrent.ConcurrentDictionary<System.Action, byte>,
         System.Collections.Concurrent.ConcurrentDictionary<System.Action, byte>>;
@@ -28,10 +30,43 @@ public unsafe class ObjectManager(
     private static ShareTuple DefaultShareTuple(IObjectTable objects)
         => new([null], [true], new List<nint>(objects.Length), new Dictionary<GameObjectId, nint>(objects.Length), new int[4], [], []);
 
-    public readonly IObjectTable Objects = objects;
-    private readonly Actor* _address = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
+    public readonly  IObjectTable Objects      = objects;
+    private readonly Actor*       _address     = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
+    private readonly string       _assemblyName = $"{(Assembly.GetCallingAssembly().GetName().Name ?? "Unknown")}{Guid.NewGuid().ToString().AsSpan(0, 8)}";
 
     private readonly Logger _log = log;
+
+    public void DrawDebug()
+    {
+        using (ImUtf8.Group())
+        {
+            ImUtf8.Text("Hook Owner:");
+            ImUtf8.Text("Own Name:");
+            ImUtf8.Text("Dirty State:");
+            ImUtf8.Text("Count:");
+            ImUtf8.Text("BNPC End:");
+            ImUtf8.Text("Cutscene End:");
+            ImUtf8.Text("Special End:");
+            ImUtf8.Text("ENPC End:");
+            ImUtf8.Text("Update Subscribers:");
+            ImUtf8.Text("Update Req. Subscribers:");
+        }
+
+        ImGui.SameLine();
+        using (ImUtf8.Group())
+        {
+            ImUtf8.Text(HookOwner ?? "NULL");
+            ImUtf8.Text(_assemblyName);
+            ImUtf8.Text($"{NeedsUpdate}");
+            ImUtf8.Text($"{Count}");
+            ImUtf8.Text($"{BnpcEnd}");
+            ImUtf8.Text($"{CutsceneEnd}");
+            ImUtf8.Text($"{SpecialEnd}");
+            ImUtf8.Text($"{EnpcEnd}");
+            ImUtf8.Text($"{Value.Item6.Count}");
+            ImUtf8.Text($"{Value.Item7.Count}");
+        }
+    }
 
     private void UpdateHooks()
     {
@@ -39,7 +74,7 @@ public unsafe class ObjectManager(
             return;
 
         NeedsUpdate = true;
-        HookOwner = this;
+        HookOwner   = _assemblyName;
         _updateHook?.Dispose();
         _log.Debug("[ObjectManager] Moving object table hook owner to this.");
         _updateHook = interop.HookFromSignature<UpdateObjectArraysDelegate>(Sigs.UpdateObjectArrays, UpdateObjectArraysDetour);
@@ -148,12 +183,12 @@ public unsafe class ObjectManager(
     private readonly struct ListSlice : IReadOnlyList<Actor>
     {
         private readonly IReadOnlyList<nint> _list;
-        private readonly int _start;
-        private readonly int _count;
+        private readonly int                 _start;
+        private readonly int                 _count;
 
         public ListSlice(IReadOnlyList<nint> list, int start = 0)
         {
-            _list = list;
+            _list  = list;
             _start = start;
             _count = list.Count - start;
             if (_count < 0 || _start < 0)
@@ -162,7 +197,7 @@ public unsafe class ObjectManager(
 
         public ListSlice(IReadOnlyList<nint> list, int start, int count)
         {
-            _list = list;
+            _list  = list;
             _start = start;
             _count = count;
             if (_start < 0)
@@ -209,7 +244,7 @@ public unsafe class ObjectManager(
         set => Value.Item5[3] = value;
     }
 
-    private object? HookOwner
+    private string? HookOwner
     {
         get => Value.Item1[0];
         set => Value.Item1[0] = value;
@@ -276,7 +311,7 @@ public unsafe class ObjectManager(
         => Objects[index.Index] as ICharacter;
 
     protected override long ComputeMemory()
-        => DataUtility.DictionaryMemory(16, Objects.Length)
+        => DataUtility.DictionaryMemory(16,  Objects.Length)
           + DataUtility.DictionaryMemory(16, Objects.Length / 2)
           + DataUtility.ListMemory(8, Objects.Length);
 
@@ -305,7 +340,7 @@ public unsafe class ObjectManager(
     {
         base.Dispose(_);
         _updateHook?.Dispose();
-        if (HookOwner == this)
+        if (HookOwner == _assemblyName)
             HookOwner = null;
     }
 
