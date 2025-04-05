@@ -42,7 +42,7 @@ public unsafe class ObjectManager(
         HookOwner = this;
         _updateHook?.Dispose();
         _log.Debug("[ObjectManager] Moving object table hook owner to this.");
-        _updateHook = interop.HookFromSignature<UpdateObjectArraysDelegate>("40 57 48 83 EC ?? 48 89 5C 24 ?? 33 DB", UpdateObjectArraysDetour);
+        _updateHook = interop.HookFromSignature<UpdateObjectArraysDelegate>(Sigs.UpdateObjectArrays, UpdateObjectArraysDetour);
         _updateHook.Enable();
     }
 
@@ -316,6 +316,7 @@ public unsafe class ObjectManager(
     private void UpdateObjectArraysDetour(GameObjectManager* manager)
     {
         _updateHook!.Original(manager);
+        _log.Excessive("[ObjectManager] Update Object Arrays invoked.");
         NeedsUpdate = true;
         InvokeRequiredUpdates();
     }

@@ -3,6 +3,9 @@ namespace Penumbra.GameData;
 /// <summary> Signatures in use for Penumbra. </summary>
 public static class Sigs
 {
+    // ObjectManager
+    public const string UpdateObjectArrays = "40 57 48 83 EC ?? 48 89 5C 24 ?? 33 DB";
+
     // ResourceLoader.Debug
     public const string ResourceManager = "48 8B 0D ?? ?? ?? ?? 0F 5B F6";
 
