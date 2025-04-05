@@ -29,11 +29,11 @@ public unsafe class ActorObjectManager : IDisposable, IReadOnlyDictionary<ActorI
 
     public ActorObjectManager(ObjectManager objects, ActorManager actors, IClientState clientState, ITargetManager targets)
     {
-        Objects          =  objects;
-        Actors           =  actors;
-        _clientState     =  clientState;
-        _targets         =  targets;
-        Objects.OnUpdate += OnUpdateRequired;
+        Objects                  =  objects;
+        Actors                   =  actors;
+        _clientState             =  clientState;
+        _targets                 =  targets;
+        Objects.OnUpdateRequired += OnUpdateRequired;
     }
 
     public void Dispose()
