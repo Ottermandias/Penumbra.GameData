@@ -305,7 +305,8 @@ public unsafe class ObjectManager(
     {
         base.Dispose(_);
         _updateHook?.Dispose();
-        HookOwner = null;
+        if (HookOwner == this)
+            HookOwner = null;
     }
 
     private delegate void UpdateObjectArraysDelegate(GameObjectManager* manager);
