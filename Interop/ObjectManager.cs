@@ -30,9 +30,9 @@ public unsafe class ObjectManager(
     private static ShareTuple DefaultShareTuple(IObjectTable objects)
         => new([null], [true], new List<nint>(objects.Length), new Dictionary<GameObjectId, nint>(objects.Length), new int[4], [], []);
 
-    public readonly  IObjectTable Objects      = objects;
-    private readonly Actor*       _address     = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
-    private readonly string       _assemblyName = $"{(Assembly.GetCallingAssembly().GetName().Name ?? "Unknown")}{Guid.NewGuid().ToString().AsSpan(0, 8)}";
+    public readonly  IObjectTable Objects       = objects;
+    private readonly Actor*       _address      = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
+    private readonly string       _assemblyName = $"{log.PluginName}_{Guid.NewGuid().ToString().AsSpan(0, 8)}";
 
     private readonly Logger _log = log;
 
@@ -341,7 +341,11 @@ public unsafe class ObjectManager(
         base.Dispose(_);
         _updateHook?.Dispose();
         if (HookOwner == _assemblyName)
-            HookOwner = null;
+        {
+            HookOwner   = null;
+            NeedsUpdate = true;
+            InvokeRequiredUpdates();
+        }
     }
 
     private delegate void UpdateObjectArraysDelegate(GameObjectManager* manager);
