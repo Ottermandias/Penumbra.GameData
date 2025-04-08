@@ -5,7 +5,7 @@ public static class Version
     // Groups
     public const int GlobalOffset          = 0;
     public const int UsesExtractTextOffset = 0;
-    public const int UsesTitleCaseOffset   = 0 + UsesExtractTextOffset;
+    public const int UsesTitleCaseOffset   = 1 + UsesExtractTextOffset;
 
     // Misc
     public const int DictActionOffset = 9;
