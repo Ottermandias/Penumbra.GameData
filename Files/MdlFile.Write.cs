@@ -1,5 +1,5 @@
 using Lumina.Data.Parsing;
-using OtterGui;
+using OtterGui.Extensions;
 using Penumbra.GameData.Files.ModelStructs;
 
 namespace Penumbra.GameData.Files;

@@ -1,4 +1,4 @@
-using OtterGui;
+using OtterGui.Extensions;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Files.AtchStructs;
 using Penumbra.GameData.Files.Utility;

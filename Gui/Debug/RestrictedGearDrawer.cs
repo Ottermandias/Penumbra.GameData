@@ -1,6 +1,7 @@
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using OtterGui;
+using OtterGui.Extensions;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers;
 using Penumbra.GameData.Enums;
