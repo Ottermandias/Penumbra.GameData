@@ -19,7 +19,7 @@ public sealed class DictOrnament(IDalamudPluginInterface pluginInterface, Logger
         var sheet = gameData.GetExcelSheet<Ornament>(gameData.Language)!;
         var dict  = new Dictionary<uint, string>((int)sheet.Count);
         foreach (var o in sheet.Where(o => o.Singular.ByteLength > 0))
-            dict.TryAdd(o.RowId, DataUtility.ToTitleCaseExtended(o.Singular, o.Article));
+            dict.TryAdd(o.RowId, DataUtility.ToTitleCaseExtended(o.Singular, gameData.Language));
         return dict.ToFrozenDictionary();
     }
 
