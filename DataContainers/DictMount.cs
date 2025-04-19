@@ -16,7 +16,7 @@ public sealed class DictMount(IDalamudPluginInterface pluginInterface, Logger lo
     /// <summary> Create the data. </summary>
     private static IReadOnlyDictionary<uint, string> CreateMountData(IDataManager gameData)
     {
-        var sheet = gameData.GetExcelSheet<Mount>(gameData.Language)!;
+        var sheet = gameData.GetExcelSheet<Mount>(gameData.Language);
         var dict  = new Dictionary<uint, string>(sheet.Count);
         // Add some custom data.
         dict.TryAdd(119, "Falcon (Porter)");
@@ -28,7 +28,7 @@ public sealed class DictMount(IDalamudPluginInterface pluginInterface, Logger lo
         {
             if (m.Singular.ByteLength > 0 && m.Order >= 0)
             {
-                dict.TryAdd(m.RowId, DataUtility.ToTitleCaseExtended(m.Singular, m.Article));
+                dict.TryAdd(m.RowId, DataUtility.ToTitleCaseExtended(m.Singular, gameData.Language));
             }
             else if (m.Unknown1.ByteLength > 0)
             {
