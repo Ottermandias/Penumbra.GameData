@@ -1,4 +1,4 @@
-using OtterGui;
+using OtterGui.Extensions;
 
 namespace Penumbra.GameData;
 

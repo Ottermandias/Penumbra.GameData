@@ -40,6 +40,9 @@ public sealed class ColorDyeTable : IEnumerable<ColorDyeTableRow>, IColorDyeTabl
     public Span<byte> AsBytes()
         => MemoryMarshal.AsBytes(_rowData[..]);
 
+    public Span<ColorDyeTableRow> AsRows()
+        => _rowData;
+
     public Span<byte> RowAsBytes(int i)
         => MemoryMarshal.AsBytes(new Span<ColorDyeTableRow>(ref _rowData[i]));
 
@@ -93,9 +96,7 @@ public sealed class ColorDyeTable : IEnumerable<ColorDyeTableRow>, IColorDyeTabl
                     _rowData[i] = table[i];
                 break;
             }
-            default:
-                SetDefault();
-                break;
+            default: SetDefault(); break;
         }
     }
 
