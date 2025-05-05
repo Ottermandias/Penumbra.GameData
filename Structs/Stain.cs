@@ -1,5 +1,4 @@
 using Dalamud.Interface;
-using Dalamud.Utility;
 using Penumbra.GameData.Data;
 
 namespace Penumbra.GameData.Structs;
