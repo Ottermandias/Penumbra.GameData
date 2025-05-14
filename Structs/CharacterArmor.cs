@@ -3,7 +3,7 @@ namespace Penumbra.GameData.Structs;
 /// <summary> A packed struct representing the model data for a piece of armor or accessory. </summary>
 /// <param name="set"> The primary ID. </param>
 /// <param name="variant"> The variant. </param>
-/// <param name="stain1"> The Stain ID. </param>
+/// <param name="stains"> The Stain ID. </param>
 [StructLayout(LayoutKind.Explicit, Size = 8)]
 public struct CharacterArmor(PrimaryId set, Variant variant, StainIds stains) : IEquatable<CharacterArmor>
 {

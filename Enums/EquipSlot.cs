@@ -94,6 +94,27 @@ public static class EquipSlotExtensions
     public static uint ToIndex(this HumanSlot slot)
         => (uint)slot;
 
+    public static bool ToSlotIndex(this HumanSlot slot, out int index)
+    {
+        (var ret, index) = slot switch
+        {
+            HumanSlot.Head    => (true, 0),
+            HumanSlot.Body    => (true, 1),
+            HumanSlot.Hands   => (true, 2),
+            HumanSlot.Legs    => (true, 3),
+            HumanSlot.Feet    => (true, 4),
+            HumanSlot.Ears    => (true, 5),
+            HumanSlot.Neck    => (true, 6),
+            HumanSlot.Wrists  => (true, 7),
+            HumanSlot.RFinger => (true, 8),
+            HumanSlot.LFinger => (true, 9),
+            HumanSlot.Glasses => (true, 10),
+            (HumanSlot)17     => (true, 11),
+            _                 => (false, -1),
+        };
+        return ret;
+    }
+
     public static HumanSlot ToHumanSlot(this EquipSlot slot)
         => slot switch
         {

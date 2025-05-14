@@ -89,6 +89,25 @@ public readonly unsafe struct Model : IEquatable<Model>
     public CharacterArmor GetArmor(EquipSlot slot)
         => ((CharacterArmor*)&AsHuman->Head)[slot.ToIndex()];
 
+    /// <summary> Only valid for humans. </summary>
+    public CharacterArmor GetArmorChanged(HumanSlot slot)
+    {
+        if (!slot.ToSlotIndex(out var index))
+            return CharacterArmor.Empty;
+
+        var changed = (ChangedEquipData*)AsHuman->ChangedEquipData;
+        if (changed is not null)
+        {
+            ref var item = ref changed[index];
+
+            return index < 10
+                ? new CharacterArmor(item.Model,      item.Variant,      item.Stains)
+                : new CharacterArmor(item.BonusModel, item.BonusVariant, StainIds.None);
+        }
+
+        return ((CharacterArmor*)(&AsHuman->Head))[index];
+    }
+
     public CharacterArmor GetBonus(BonusItemFlag slot)
         => ((CharacterArmor*)&AsHuman->Glasses0)[slot.ToIndex()];
 
