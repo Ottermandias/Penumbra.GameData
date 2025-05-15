@@ -34,20 +34,21 @@ public enum EquipSlot : byte
 
 public enum HumanSlot : uint
 {
-    Head    = 0,
-    Body    = 1,
-    Hands   = 2,
-    Legs    = 3,
-    Feet    = 4,
-    Ears    = 5,
-    Neck    = 6,
-    Wrists  = 7,
-    RFinger = 8,
-    LFinger = 9,
-    Hair    = 10,
-    Face    = 11,
-    Ear     = 12,
-    Glasses = 16,
+    Head     = 0,
+    Body     = 1,
+    Hands    = 2,
+    Legs     = 3,
+    Feet     = 4,
+    Ears     = 5,
+    Neck     = 6,
+    Wrists   = 7,
+    RFinger  = 8,
+    LFinger  = 9,
+    Hair     = 10,
+    Face     = 11,
+    Ear      = 12,
+    Glasses  = 16,
+    UnkBonus = 17,
 
     Unknown = uint.MaxValue,
 }
@@ -98,22 +99,66 @@ public static class EquipSlotExtensions
     {
         (var ret, index) = slot switch
         {
-            HumanSlot.Head    => (true, 0),
-            HumanSlot.Body    => (true, 1),
-            HumanSlot.Hands   => (true, 2),
-            HumanSlot.Legs    => (true, 3),
-            HumanSlot.Feet    => (true, 4),
-            HumanSlot.Ears    => (true, 5),
-            HumanSlot.Neck    => (true, 6),
-            HumanSlot.Wrists  => (true, 7),
-            HumanSlot.RFinger => (true, 8),
-            HumanSlot.LFinger => (true, 9),
-            HumanSlot.Glasses => (true, 10),
-            (HumanSlot)17     => (true, 11),
-            _                 => (false, -1),
+            HumanSlot.Head     => (true, 0),
+            HumanSlot.Body     => (true, 1),
+            HumanSlot.Hands    => (true, 2),
+            HumanSlot.Legs     => (true, 3),
+            HumanSlot.Feet     => (true, 4),
+            HumanSlot.Ears     => (true, 5),
+            HumanSlot.Neck     => (true, 6),
+            HumanSlot.Wrists   => (true, 7),
+            HumanSlot.RFinger  => (true, 8),
+            HumanSlot.LFinger  => (true, 9),
+            HumanSlot.Glasses  => (true, 10),
+            HumanSlot.UnkBonus => (true, 11),
+            _                  => (false, -1),
         };
         return ret;
     }
+
+    public static string ToName(this HumanSlot slot)
+    {
+        return slot switch
+        {
+            HumanSlot.Head     => EquipSlot.Head.ToName(),
+            HumanSlot.Body     => EquipSlot.Body.ToName(),
+            HumanSlot.Hands    => EquipSlot.Hands.ToName(),
+            HumanSlot.Legs     => EquipSlot.Legs.ToName(),
+            HumanSlot.Feet     => EquipSlot.Feet.ToName(),
+            HumanSlot.Ears     => EquipSlot.Ears.ToName(),
+            HumanSlot.Neck     => EquipSlot.Neck.ToName(),
+            HumanSlot.Wrists   => EquipSlot.Wrists.ToName(),
+            HumanSlot.RFinger  => EquipSlot.RFinger.ToName(),
+            HumanSlot.LFinger  => EquipSlot.LFinger.ToName(),
+            HumanSlot.Glasses  => BonusItemFlag.Glasses.ToName(),
+            HumanSlot.UnkBonus => "Unk Bonus",
+            HumanSlot.Hair     => BodySlot.Hair.ToString(),
+            HumanSlot.Face     => BodySlot.Face.ToString(),
+            HumanSlot.Ear      => BodySlot.Ear.ToString(),
+            _                  => "Unknown",
+        };
+    }
+
+    public static object? ToSpecificEnum(this HumanSlot slot)
+        => slot switch
+        {
+            HumanSlot.Head     => EquipSlot.Head,
+            HumanSlot.Body     => EquipSlot.Body,
+            HumanSlot.Hands    => EquipSlot.Hands,
+            HumanSlot.Legs     => EquipSlot.Legs,
+            HumanSlot.Feet     => EquipSlot.Feet,
+            HumanSlot.Ears     => EquipSlot.Ears,
+            HumanSlot.Neck     => EquipSlot.Neck,
+            HumanSlot.Wrists   => EquipSlot.Wrists,
+            HumanSlot.RFinger  => EquipSlot.RFinger,
+            HumanSlot.LFinger  => EquipSlot.LFinger,
+            HumanSlot.Glasses  => BonusItemFlag.Glasses,
+            HumanSlot.UnkBonus => BonusItemFlag.UnkSlot,
+            HumanSlot.Hair     => BodySlot.Hair,
+            HumanSlot.Face     => BodySlot.Face,
+            HumanSlot.Ear      => BodySlot.Ear,
+            _                  => null,
+        };
 
     public static HumanSlot ToHumanSlot(this EquipSlot slot)
         => slot switch
