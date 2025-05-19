@@ -218,7 +218,7 @@ public readonly record struct SecondaryId(ushort Id)
 }
 
 [JsonConverter(typeof(Converter))]
-public readonly record struct PrimaryId(ushort Id) : IComparisonOperators<PrimaryId, PrimaryId, bool>
+public readonly record struct PrimaryId(ushort Id) : IComparisonOperators<PrimaryId, PrimaryId, bool>, IComparable<PrimaryId>
 {
     public static implicit operator PrimaryId(ushort id)
         => new(id);
@@ -247,6 +247,9 @@ public readonly record struct PrimaryId(ushort Id) : IComparisonOperators<Primar
             JsonSerializer serializer)
             => serializer.Deserialize<ushort>(reader);
     }
+
+    public int CompareTo(PrimaryId other)
+        => Id.CompareTo(other.Id);
 }
 
 [JsonConverter(typeof(Converter))]

@@ -108,6 +108,29 @@ public readonly unsafe struct Model : IEquatable<Model>
         return ((CharacterArmor*)(&AsHuman->Head))[index];
     }
 
+    public PrimaryId GetModelId(HumanSlot slot)
+    {
+        return slot switch
+        {
+            HumanSlot.Head     => GetArmorChanged(slot).Set,
+            HumanSlot.Body     => GetArmorChanged(slot).Set,
+            HumanSlot.Hands    => GetArmorChanged(slot).Set,
+            HumanSlot.Legs     => GetArmorChanged(slot).Set,
+            HumanSlot.Feet     => GetArmorChanged(slot).Set,
+            HumanSlot.Ears     => GetArmorChanged(slot).Set,
+            HumanSlot.Neck     => GetArmorChanged(slot).Set,
+            HumanSlot.Wrists   => GetArmorChanged(slot).Set,
+            HumanSlot.RFinger  => GetArmorChanged(slot).Set,
+            HumanSlot.LFinger  => GetArmorChanged(slot).Set,
+            HumanSlot.Hair     => AsHuman->Customize.Hairstyle,
+            HumanSlot.Face     => AsHuman->Customize.Face,
+            HumanSlot.Ear      => AsHuman->Customize.TailShape,
+            HumanSlot.Glasses  => GetArmorChanged(slot).Set,
+            HumanSlot.UnkBonus => GetArmorChanged(slot).Set,
+            _                  => 0,
+        };
+    }
+
     public CharacterArmor GetBonus(BonusItemFlag slot)
         => ((CharacterArmor*)&AsHuman->Glasses0)[slot.ToIndex()];
 
