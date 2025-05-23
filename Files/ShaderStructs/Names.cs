@@ -295,6 +295,7 @@ public static class Names
             "GeometryInstancingOn",
             "GetInstancingData_Bush",
             "GetNoInstancingData_Bush",
+            "Outline",
             "SUB_VIEW_CUBE_0",
             "SUB_VIEW_MAIN",
             "SUB_VIEW_ROOF",
