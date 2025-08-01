@@ -194,10 +194,6 @@ public static class GenderRestrictedItems
         new(16138, 16143, 3), // Makai Priest's Fingerless Gloves           <-> Makai Priestess's Fingerless Gloves
         new(16139, 16144, 3), // Makai Priest's Slops                       <-> Makai Priestess's Skirt
         new(16140, 16145, 3), // Makai Priest's Boots                       <-> Makai Priestess's Longboots
-        new(16588, 16592, 3), // Far Eastern Gentleman's Hat                <-> Far Eastern Beauty's Hairpin
-        new(16589, 16593, 3), // Far Eastern Gentleman's Robe               <-> Far Eastern Beauty's Robe
-        new(16590, 16594, 3), // Far Eastern Gentleman's Haidate            <-> Far Eastern Beauty's Koshita
-        new(16591, 16595, 3), // Far Eastern Gentleman's Boots              <-> Far Eastern Beauty's Boots
         new(17204, 17209, 3), // Common Makai Mauler's Facemask             <-> Common Makai Manhandler's Facemask
         new(17205, 17210, 3), // Common Makai Mauler's Oilskin              <-> Common Makai Manhandler's Jerkin
         new(17206, 17211, 3), // Common Makai Mauler's Fingerless Gloves    <-> Common Makai Manhandler's Fingerless Glove
