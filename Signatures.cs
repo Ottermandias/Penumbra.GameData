@@ -1,3 +1,6 @@
+using Dalamud.Game;
+using OtterGui.Log;
+
 namespace Penumbra.GameData;
 
 /// <summary> Signatures in use for Penumbra. </summary>
@@ -10,7 +13,7 @@ public static class Sigs
     public const string ResourceManager = "48 8B 0D ?? ?? ?? ?? 0F 5B F6";
 
     // ResourceLoader.Replacement
-    public const string GetResourceSync  = "E8 ?? ?? ?? ?? 48 8B D8 8B C7";
+    public const string GetResourceSync  = "E8 ?? ?? ?? ?? 48 8B C8 8B C3 F0 0F C0 81";
     public const string GetResourceAsync = "E8 ?? ?? ?? 00 48 8B D8 EB ?? F0 FF 83 ?? ?? 00 00";
 
     public const string ReadFile =
@@ -43,18 +46,21 @@ public static class Sigs
         "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8D 05 ?? ?? ?? ?? 48 8B D9 48 89 01 48 8D 05 ?? ?? ?? ?? 48 89 81 ?? ?? ?? ?? 48 81 C1";
 
     // Shapes.AttributeHooks
-    public const string UpdateAttributes = "E8 ?? ?? ?? ?? C7 86 ?? ?? ?? ?? ?? ?? ?? ?? 48 83 C4";
+    public const string UpdateAttributes = "E8 ?? ?? ?? ?? 33 C0 89 86 ?? ?? ?? ?? 48 8B 8C 24";
 
     // PathResolver.AnimationState
-    public const string LoadTimelineResources = "E8 ?? ?? ?? ?? 83 7F ?? ?? 75 ?? 0F B6 87 ?? ?? ?? ?? A8";
+    public const string LoadTimelineResources      = "E8 ?? ?? ?? ?? 83 7F ?? ?? 75 ?? 0F B6 87 ?? ?? ?? ?? A8";
     public const string CharacterBaseLoadAnimation = "E8 ?? ?? ?? ?? BA ?? ?? ?? ?? 48 8B CB 44 8B C2 E8 ?? ?? ?? ?? 33 C0";
-    public const string LoadSomePap = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 41 8B D9 89 51";
-    public const string LoadSomeAction = "E8 ?? ?? ?? ?? C6 83 ?? ?? ?? ?? ?? 8B 8E";
-    public const string LoadCharacterVfx = "E8 ?? ?? ?? ?? 48 85 FF 48 8D 97";
-    public const string LoadAreaVfx = "E8 ?? ?? ?? ?? 0F 28 74 24 ?? 48 89 43";
-    public const string ScheduleClipUpdate = "40 53 55 56 57 48 81 EC ?? ?? ?? ?? 48 8B F9";
-    public const string UnkMountAnimation = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 41 8B E9 45 0F B6 F8";
-    public const string UnkParasolAnimation = "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B FA 4C 8B F1";
+    public const string LoadSomePap                = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 41 8B D9 89 51";
+    public const string LoadSomeAction             = "E8 ?? ?? ?? ?? C6 83 ?? ?? ?? ?? ?? 8B 8E";
+    public const string LoadCharacterVfx           = "E8 ?? ?? ?? ?? 48 85 FF 48 8D 97";
+    public const string LoadAreaVfx                = "E8 ?? ?? ?? ?? 0F 28 74 24 ?? 48 89 43";
+    public const string ScheduleClipUpdate         = "40 53 55 56 57 48 81 EC ?? ?? ?? ?? 48 8B F9";
+
+    public const string UnkMountAnimation =
+        "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 54 41 56 41 57 48 83 EC ?? 45 8B F9";
+
+    public const string UnkParasolAnimation = "E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 48 8B CE E8 ?? ?? ?? ?? 84 C0 0F 84 ?? ?? ?? ?? 41 83 BC 24";
     public const string Dismount = "E8 ?? ?? ?? ?? 48 8B 4F ?? F6 81";
     public const string GetCachedScheduleResource = "40 53 48 83 EC ?? 44 8B 4A";
     public const string LoadActionTmb = "E8 ?? ?? ?? ?? 48 89 43 ?? 0F B6 45";
@@ -73,21 +79,21 @@ public static class Sigs
     public const string ConstructCutsceneCharacter = "48 89 5C 24 ?? 56 48 83 EC ?? 48 8B F1 45 33 C0";
 
     // PathResolver.Meta
-    public const string UpdateModel       = "48 8B ?? 56 48 83 ?? ?? ?? B9";
+    public const string UpdateModel       = "E8 ?? ?? ?? ?? 45 84 FF 4C 8B 7C 24 ?? 74 ?? 80 A7";
     public const string SetupVisor        = "E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 0F 57 FF";
     public const string RspSetupCharacter = "88 54 24 ?? 48 89 4C 24 ?? 53 55 56 57 41 54 41 55 41 57";
-    public const string ChangeCustomize   = "E8 ?? ?? ?? ?? 66 44 89 A5";
+    public const string UpdateDrawData    = "E8 ?? ?? ?? ?? 66 45 89 A6";
 
     public const string GetEqdpAccessoryEntry = "E8 ?? ?? ?? ?? 41 BF ?? ?? ?? ?? 83 FB";
     public const string GetEqdpEquipEntry     = "E8 ?? ?? ?? ?? 85 DB 75 ?? F6 45";
     public const string GetEqpEntry           = "E8 ?? ?? ?? ?? 48 8B 87 ?? ?? ?? ?? 41 BC";
-    public const string FindEstEntry          = "E8 ?? ?? ?? ?? B9 ?? ?? ?? ?? 66 3B C1 74 ?? 0F B7 C8";
+    public const string FindEstEntry          = "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 41 0F B7 C0";
     public const string GetGmpEntry           = "E8 ?? ?? ?? ?? 48 8B 44 24 ?? 0F 57 C9";
     public const string GetRspBust            = "E8 ?? ?? ?? ?? 8B 48 ?? F2 0F 10 38";
     public const string GetRspHeight          = "E8 ?? ?? ?? ?? 66 0F 6E CD 48 8D 44 24";
     public const string GetRspTail            = "E8 ?? ?? ?? ?? F3 0F 11 46 ?? 83 FD";
-    public const string AtchCaller1           = "E8 ?? ?? ?? ?? 41 8B D6 48 8B CB E8 ?? ?? ?? ?? F3 0F 10 15";
-    public const string AtchCaller2           = "E8 ?? ?? ?? ?? 48 8B 8F ?? ?? ?? ?? 84 C0 74 ?? 8B D6";
+    public const string AtchCaller1           = "E8 ?? ?? ?? ?? 8B D3 49 8B CC E8 ?? ?? ?? ?? F3 0F 10 15";
+    public const string AtchCaller2           = "E8 ?? ?? ?? ?? 48 8B 8E ?? ?? ?? ?? 84 C0 74 ?? 8B D5";
 
     // PathResolver.PathState
     public const string HumanVTable = "48 8D 05 ?? ?? ?? ?? 48 89 03 89 8B";
@@ -108,7 +114,7 @@ public static class Sigs
     public const string LoadMtrlShpk =
         "48 89 5C 24 ?? 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 44 0F B7 89";
 
-    public const string ApricotResourceLoad = "48 89 5C 24 ?? 57 48 83 EC ?? 41 0F B6 F8 48 8B D9 40 80 FF";
+    public const string ApricotResourceLoad = "48 89 74 24 ?? 57 48 83 EC ?? 41 0F B6 F0 48 8B F9 40 80 FE";
 
     // CharacterUtility
     public const string CharacterUtility       = "48 8B 05 ?? ?? ?? ?? 83 B9";
@@ -127,10 +133,10 @@ public static class Sigs
         "41 55 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 4C 8B E9 48 83 C1";
 
     // ModelResourceHandleUtility
-    public const string GetMaterialFileNameBySlot = "E8 ?? ?? ?? ?? 44 8B CD 48 89 44 24 ?? 41 B8";
+    public const string GetMaterialFileNameBySlot = "48 8B 81 ?? ?? ?? ?? 8B D2 44 0F B7 04 ?? 48 C7 C0";
 
     // ModelRenderer
-    public const string RenderManager = "48 8B 0D ?? ?? ?? ?? B0";
+    public const string RenderManager = "48 03 2D ?? ?? ?? ?? 0F";
 
     // ShaderReplacementFixer
     public const string ModelRendererOnRenderMaterial = "E8 ?? ?? ?? ?? 44 0F B7 28";
@@ -154,27 +160,75 @@ public static class Sigs
     public const string TextureResourceHandleVTable =
         "48 8D 05 ?? ?? ?? ?? 48 8B D9 48 89 01 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 ?? E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 ?? E8 ?? ?? ?? ?? 48 8B CB";
 
-    public const string UpdateOrnament = "E8 ?? ?? ?? ?? F3 0F 10 4D ?? 0F 57 D2";
+    public const string UpdateOrnament = "E8 ?? ?? ?? ?? F3 0F 10 4E ?? 0F 57 D2";
 
     public const string PrepareColorSet = "E8 ?? ?? ?? ?? 49 89 04 ?? 49 83 C5";
-    public const string UpdateColorSets = "89 54 24 ?? 56 41 56 41 57";
+    public const string UpdateColorSets = "89 54 24 ?? 55 56 41 56 48 81 EC";
 
     public const string CalculateHeight = "E8 ?? ?? ?? FF 48 8B 0D ?? ?? ?? ?? 0F 28 F0";
 
-    public const string CrestChange = "E8 ?? ?? ?? ?? 48 8B 55 ?? 49 8D 8E";
+    public const string SetFreeCompanyCrestBitfield = "E8 ?? ?? ?? ?? 48 8B 55 ?? 48 8B CE E8";
 
     // Inlined in this, but still called in 4 others.
     public const string CrestChangeCaller =
         "48 89 5C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 44 0F B6 B9";
 
     public const string SetUnlockLinkValue   = "48 83 EC ?? 8B C2 83 E0";
-    public const string RequestGlamourPlates = "E8 ?? ?? ?? ?? 66 90 44 89 74 24";
+    public const string RequestGlamourPlates = "E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 48 8D 44 24 ?? 8B CF 66 66 0F 1F 84 ?? 00 00 00 00 89 28";
 
     // Pap redirection
-    public const string LoadAlwaysResidentMotionPacks          = "E8 ?? ?? ?? FF 48 8B D0 48 8B CE E8 ?? ?? ?? 00 48 8B 4C 24";
-    public const string LoadWeaponDependentResidentMotionPacks = "E8 ?? ?? ?? FF 48 8B D0 48 8D 8F ?? ?? 00 00 E8 ?? ?? ?? 00 48 8B";
-    public const string LoadInitialResidentMotionPacks         = "E8 ?? ?? ?? FF 48 8B 5D ?? 48 8B 7D ?? 48 3B DF";
-    public const string LoadMotionPacks                        = "E8 ?? ?? ?? 00 48 8B 44 24 ?? 49 89 04 24";
-    public const string LoadMotionPacks2                       = "E8 ?? ?? ?? 00 48 8B 44 24 ?? 48 89 03";
-    public const string LoadMigratoryMotionPack                = "E9 ?? ?? ?? 00 8B 84 24 ?? ?? 00 00 48 8D";
+    public const string LoadAlwaysResidentMotionPacks =
+        "E8 ?? ?? ?? ?? 48 8B D0 48 8D 8E ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 4C 24 ?? 48 8B BC 24 ?? ?? ?? ?? 48 85 C9";
+
+    public const string LoadWeaponDependentResidentMotionPacks =
+        "E8 ?? ?? ?? ?? 48 8B D0 48 8D 8E ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 4C 24 ?? 48 8B BC 24 ?? ?? ?? ?? 48 8B 5C 24";
+
+    public const string LoadInitialResidentMotionPacks = "E8 ?? ?? ?? FF 48 8B 5D ?? 48 8B 7D ?? 48 3B DF";
+    public const string LoadMotionPacks                = "E8 ?? ?? ?? 00 48 8B 44 24 ?? 49 89 04 24";
+    public const string LoadMotionPacks2               = "E8 ?? ?? ?? 00 48 8B 44 24 ?? 48 89 03";
+    public const string LoadMigratoryMotionPack        = "E9 ?? ?? ?? 00 8B 84 24 ?? ?? 00 00 48 8D";
+
+    [Conditional("DEBUG")]
+    public static void TestSignatures(ISigScanner scanner, Logger log)
+    {
+        var fields = typeof(Sigs).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+            .Where(f => f is { IsLiteral: true, IsInitOnly: false } && f.FieldType == typeof(string));
+        var missingSignatures = false;
+        foreach (var field in fields)
+        {
+            if (field.GetRawConstantValue() is not string value)
+            {
+                log.Error($"[Signature] {field.Name}: Could not get value for field.");
+                missingSignatures = true;
+                continue;
+            }
+
+            try
+            {
+                var results = scanner.ScanAllText(value);
+                switch (results.Length)
+                {
+                    case 0:
+                        log.Error($"[Signature] {field.Name} ({value}): Not found.");
+                        missingSignatures = true;
+                        break;
+                    case 1: 
+                        log.Information($"[Signature] {field.Name} ({value}): Match found.");
+                        continue;
+                    default:
+                        log.Error($"[Signature] {field.Name} ({value}): Multiple matches.");
+                        missingSignatures = true;
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error($"[Signature] {field.Name} ({value}): Unknown Error - {ex.Message}");
+                missingSignatures = true;
+            }
+        }
+
+        if (missingSignatures)
+            throw new Exception("Missing Signatures!");
+    }
 }
