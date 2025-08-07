@@ -99,7 +99,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
         if (!_clientState.IsPvPExcludingDen)
             return false;
 
-        var addon = (AtkUnitBase*)_gameGui.GetAddonByName("PvPMap");
+        var addon = (AtkUnitBase*)_gameGui.GetAddonByName("PvPMap").Address;
         if (addon == null || addon->IsVisible)
             return false;
 
