@@ -189,15 +189,13 @@ public readonly unsafe struct Model : IEquatable<Model>
     public override string ToString()
         => $"0x{Address:X}";
 
-    // TODO ClientStructify
     public bool VieraEarsVisible
     {
-        get => (((byte*)AsCharacterBase)[0x93] & 0x80) is 0;
+        get => !AsCharacterBase->HideVieraEars;
         set
         {
-            *((byte*)AsCharacterBase + 0x93) =
-                (byte)(value ? *((byte*)AsCharacterBase + 0x93) & ~0x80 : *((byte*)AsCharacterBase + 0x93) | 0x80);
-            *((byte*)AsCharacterBase + 0x94) |= 0x01;
+            AsCharacterBase->HideVieraEars     = !value;
+            AsCharacterBase->VieraEarsChanging = true;
         }
     }
 }
