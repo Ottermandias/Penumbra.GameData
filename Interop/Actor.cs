@@ -143,6 +143,13 @@ public readonly unsafe struct Actor : IEquatable<Actor>
             ? AsCharacter->Effects.StatusEffects | EffectContainer.StatusEffect.IsGPoseWet
             : AsCharacter->Effects.StatusEffects & ~EffectContainer.StatusEffect.IsGPoseWet;
     }
+
+    // TODO: Clientstructify
+    public bool ShowVieraEars
+    {
+        get => (AsCharacter->DrawData.Flags2 & 0x20) == 0;
+        set => AsCharacter->DrawData.Flags2 = (byte)(value ? AsCharacter->DrawData.Flags2 & ~0x20 : AsCharacter->DrawData.Flags2 | 0x20);
+    }
 }
 
 public enum OnlineStatus : byte

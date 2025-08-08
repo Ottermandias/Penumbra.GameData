@@ -1,4 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -187,4 +188,16 @@ public readonly unsafe struct Model : IEquatable<Model>
 
     public override string ToString()
         => $"0x{Address:X}";
+
+    // TODO ClientStructify
+    public bool VieraEarsVisible
+    {
+        get => (((byte*)AsCharacterBase)[0x93] & 0x80) is 0;
+        set
+        {
+            *((byte*)AsCharacterBase + 0x93) =
+                (byte)(value ? *((byte*)AsCharacterBase + 0x93) & ~0x80 : *((byte*)AsCharacterBase + 0x93) | 0x80);
+            *((byte*)AsCharacterBase + 0x94) |= 0x01;
+        }
+    }
 }
