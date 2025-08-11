@@ -26,4 +26,7 @@ public struct ChangedEquipData
 
     [FieldOffset(22)]
     public GenderRace GenderRace;
+
+    [FieldOffset(24)]
+    public nint Unknown;
 }
