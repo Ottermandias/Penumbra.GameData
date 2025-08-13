@@ -1,0 +1,21 @@
+attribute "fs_serializer";
+
+namespace Penumbra.GameData.Files;
+
+table EpbdEntry {
+    ChildRaceCode: uint32;
+    ParentRaceCode: uint32;
+    Unknown: [uint32];
+    Pbd: [uint8];
+}
+
+table ExtendedPbd (fs_serializer) {
+    Epbd1: uint32;
+    Epbd2: uint32;
+    PbdList: [EpbdEntry];
+}
+
+table Unknown {}
+
+file_identifier "EPBD";
+root_type ExtendedPbd;

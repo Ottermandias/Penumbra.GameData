@@ -1,3 +1,5 @@
+using FlatSharp;
+using Penumbra.GameData.Files.PackStructs;
 using Penumbra.GameData.Files.Utility;
 
 namespace Penumbra.GameData.Files;
@@ -102,13 +104,22 @@ public partial class PbdFile
 
             foreach (var entry in RacialTree)
                 writer.Write(entry);
+
+            foreach (var blob in deformerBlobs)
+                stream.Write(blob);
+
+            if ((stream.Length & 16) != 0)
+                stream.Write(new byte[16 - (stream.Length & 15)]);
+
+            if (EpbdData is not null)
+            {
+                var size  = ExtendedPbd.Serializer.GetMaxSize(EpbdData);
+                var data  = new byte[size];
+                ExtendedPbd.Serializer.WithSettings(s => s.DisableSharedStrings());
+                var bytes = ExtendedPbd.Serializer.Write(data, EpbdData);
+                Pack.Write(writer, ExtendedType, 1, data.AsSpan(0, bytes));
+            }
         }
-
-        foreach (var blob in deformerBlobs)
-            stream.Write(blob);
-
-        if ((stream.Length & 16) != 0)
-            stream.Write(new byte[16 - (stream.Length & 15)]);
 
         return stream.ToArray();
     }

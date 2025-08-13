@@ -51,7 +51,7 @@ public unsafe ref struct SpanBinaryReader
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public T Read<T>() where T : unmanaged
+    public T Read<T>() where T : unmanaged, allows ref struct
     {
         var size = Unsafe.SizeOf<T>();
         if (Remaining < size)

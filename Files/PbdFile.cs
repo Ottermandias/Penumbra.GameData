@@ -1,11 +1,16 @@
+using FlatSharp;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Files.Utility;
+using ArrayInputBuffer = FlatSharp.ArrayInputBuffer;
+using FlatBufferDeserializationOption = FlatSharp.FlatBufferDeserializationOption;
 
 namespace Penumbra.GameData.Files;
 
 public partial class PbdFile : IWritable
 {
+    public const uint ExtendedType = 'E' | ((uint)'P' << 8) | ((uint)'B' << 16) | ((uint)'D' << 24);
+
     public struct Deformer
     {
         public GenderRace     GenderRace;
@@ -23,8 +28,9 @@ public partial class PbdFile : IWritable
         public short DeformerIndex;
     }
 
-    public Deformer[]  Deformers;
-    public TreeEntry[] RacialTree;
+    public Deformer[]   Deformers;
+    public TreeEntry[]  RacialTree;
+    public ExtendedPbd? EpbdData;
 
     public Deformer this[GenderRace genderRace]
     {
@@ -58,6 +64,10 @@ public partial class PbdFile : IWritable
         RacialTree = new TreeEntry[entryCount];
         for (var i = 0; i < entryCount; ++i)
             RacialTree[i] = reader.Read<TreeEntry>();
+
+        var packReader = new PackReader(data);
+        if (packReader.TryGetPrior(ExtendedType, out var extendedData))
+            EpbdData = ExtendedPbd.Serializer.Parse(extendedData.Data.ToArray(), FlatBufferDeserializationOption.GreedyMutable);
     }
 
     /// <summary> Gets the parent gender/race according to this PBD file. </summary>
