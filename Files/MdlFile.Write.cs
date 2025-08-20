@@ -86,7 +86,7 @@ public partial class MdlFile
         w.Write(Flags3);
         w.Write(BgChangeMaterialIndex);
         w.Write(BgCrestChangeMaterialIndex);
-        w.Write(Unknown6);
+        w.Write((byte)NeckMorphs.Length);
         w.Write(BoneTableSum());
         w.Write(Unknown8);
         w.Write(Unknown9);

@@ -27,7 +27,7 @@ public unsafe struct ModelHeader
     public        byte                   Flags3;
     public        byte                   BGChangeMaterialIndex;
     public        byte                   BGCrestChangeMaterialIndex;
-    public        byte                   Unknown6;
+    public        byte                   NeckMorphCount;
     public        ushort                 BoneTableArrayCountTotal;
     public        ushort                 Unknown8;
     public        ushort                 Unknown9;

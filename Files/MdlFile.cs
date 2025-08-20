@@ -1,5 +1,6 @@
 using Lumina.Data;
 using Lumina.Extensions;
+using Penumbra.GameData.Files.ModelStructs;
 using static Lumina.Data.Parsing.MdlStructs;
 using MeshStruct = Penumbra.GameData.Files.ModelStructs.MeshStruct;
 
@@ -40,7 +41,6 @@ public partial class MdlFile : IWritable
     public byte   BgCrestChangeMaterialIndex;
     public ushort CullingGridCount;
     public byte   Flags3;
-    public byte   Unknown6;
     public ushort Unknown8;
     public ushort Unknown9;
 
@@ -72,6 +72,7 @@ public partial class MdlFile : IWritable
     public ShapeValueStruct[]             ShapeValues            = [];
     public TerrainShadowMeshStruct[]      TerrainShadowMeshes    = [];
     public TerrainShadowSubmeshStruct[]   TerrainShadowSubMeshes = [];
+    public NeckMorphStruct[]              NeckMorphs             = [];
     public LodStruct[]                    Lods                   = [];
     public ExtraLodStruct[]               ExtraLods              = [];
     public ushort[]                       SubMeshBoneMap         = [];
@@ -240,7 +241,6 @@ public partial class MdlFile : IWritable
         ShadowClipOutDistance      = modelHeader.ShadowClipOutDistance;
         CullingGridCount           = modelHeader.CullingGridCount;
         Flags3                     = modelHeader.Flags3;
-        Unknown6                   = modelHeader.Unknown6;
         Unknown8                   = modelHeader.Unknown8;
         Unknown9                   = modelHeader.Unknown9;
         BgChangeMaterialIndex      = modelHeader.BGChangeMaterialIndex;
