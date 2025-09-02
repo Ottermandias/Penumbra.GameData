@@ -1,44 +1,62 @@
-﻿using Dalamud.Bindings.ImGui;
-using OtterGui;
-using OtterGui.Raii;
+﻿using ImSharp;
 using Penumbra.GameData.DataContainers;
-using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Gui.Debug;
 
 /// <summary> Draw either all collected or just the valid job groups. </summary>
-public class DictJobGroupDrawer(DictJobGroup _jobGroups, DictJob _jobs) : IGameDataDrawer
+public class DictJobGroupDrawer(DictJobGroup jobGroups, DictJob jobs) : IGameDataDrawer
 {
     /// <inheritdoc/>
-    public string Label
-        => "Valid Job Groups";
+    public ReadOnlySpan<byte> Label
+        => "Valid Job Groups"u8;
 
     private bool _showAll;
 
     /// <inheritdoc/>
     public void Draw()
     {
-        ImGui.Checkbox("Show All Job Groups", ref _showAll);
+        if (Im.Checkbox("Show All Job Groups"u8, ref _showAll))
+            CacheManager.Instance.SetCustomDirty(Im.Id.Current);
 
-        using var table = ImRaii.Table("##groups", 4, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg);
+        using var table = Im.Table.Begin("##groups"u8, 4, TableFlags.SizingFixedFit | TableFlags.RowBackground);
         if (!table)
             return;
 
-        var enumerable = _showAll
-            ? _jobGroups.AllJobGroups.Select(g => (g.Id.Id.ToString("D3"), g.Name, g.Count.ToString(), JobStrings(g)))
-            : _jobGroups.Select(g => (g.Key.Id.ToString("D3"), g.Value.Name, g.Value.Count.ToString(), JobStrings(g.Value)));
-
-        foreach (var (id, group, count, jobs) in enumerable)
+        var cache = CacheManager.Instance.GetOrCreateCache(Im.Id.Current, () => new Cache(this, jobGroups, jobs));
+        foreach (var (id, group, count, jobList) in cache.Data)
         {
-            ImGuiUtil.DrawTableColumn(id);
-            ImGuiUtil.DrawTableColumn(group);
-            ImGuiUtil.DrawTableColumn(count);
-            ImGuiUtil.DrawTableColumn(jobs);
+            table.DrawColumn(id);
+            table.DrawColumn(group);
+            table.DrawColumn(count);
+            table.DrawColumn(jobList);
         }
     }
 
-    private string JobStrings(JobGroup group)
-        => string.Join(", ", group.Iterate().Select(j => $"{_jobs[j].Abbreviation} ({_jobs[j].Id.Id})"));
+    private sealed class Cache(DictJobGroupDrawer parent, DictJobGroup jobGroups, DictJob jobs) : BasicCache
+    {
+        public readonly List<(StringU8, StringU8, StringU8, StringU8)> Data = [];
+
+        public override void Update()
+        {
+            var customDirty = CustomDirty;
+            Dirty = IManagedCache.DirtyFlags.Clean;
+            if (!customDirty)
+                return;
+
+            Data.Clear();
+            var enumerable = parent._showAll
+                ? jobGroups.AllJobGroups
+                : jobGroups.Values;
+            foreach (var group in enumerable)
+            {
+                var idString    = new StringU8($"{group.Id.Id:D3}");
+                var countString = new StringU8($"{group.Count}");
+                var jobsString = StringU8.Join(", "u8,
+                    group.Iterate().Select(j => new StringU8($"{jobs[j].Abbreviation} ({jobs[j].Id.Id})").ToList()));
+                Data.Add((idString, group.Name, countString, jobsString));
+            }
+        }
+    }
 
     /// <inheritdoc/>
     public bool Disabled

@@ -1,5 +1,5 @@
-using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
+using ImSharp;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Gui;
@@ -38,8 +38,8 @@ public static class ModelInput
     {
         var ret      = false;
         var intValue = (int)primaryId.Id;
-        ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
-        if (ImGui.InputInt("##SetId", ref intValue, 0, 0))
+        Im.Item.SetNextWidth(100 * Im.Style.GlobalScale);
+        if (Im.Input.Scalar("##SetId"u8, ref intValue))
         {
             var value = (PrimaryId)(ushort)Math.Clamp(intValue, 0, ushort.MaxValue);
             ret       = primaryId.Id != intValue;
@@ -48,10 +48,10 @@ public static class ModelInput
 
         if (withWeapon)
         {
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
+            Im.Line.SameInner();
+            Im.Item.SetNextWidth(100 * ImGuiHelpers.GlobalScale);
             intValue = secondaryId.Id;
-            if (ImGui.InputInt("##TypeId", ref intValue, 0, 0))
+            if (Im.Input.Scalar("##TypeId"u8, ref intValue))
             {
                 var value = (SecondaryId)(ushort)Math.Clamp(intValue, 0, ushort.MaxValue);
                 ret         = secondaryId.Id != intValue;
@@ -59,10 +59,10 @@ public static class ModelInput
             }
         }
 
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
+        Im.Line.SameInner();
+        Im.Item.SetNextWidth(100 * ImGuiHelpers.GlobalScale);
         intValue = variant.Id;
-        if (ImGui.InputInt("##Variant", ref intValue, 0, 0))
+        if (Im.Input.Scalar("##Variant"u8, ref intValue))
         {
             var value = (Variant)(ushort)Math.Clamp(intValue, 0, byte.MaxValue);
             ret     = variant.Id != intValue;

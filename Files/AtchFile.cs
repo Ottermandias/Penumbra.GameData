@@ -1,5 +1,3 @@
-using OtterGui.Extensions;
-using Penumbra.GameData.Enums;
 using Penumbra.GameData.Files.AtchStructs;
 using Penumbra.GameData.Files.Utility;
 
@@ -74,7 +72,7 @@ public class AtchFile : IWritable
             w.Write((uint)entry.Type);
 
         Span<byte> bitfield = stackalloc byte[BitFieldSize];
-        foreach (var (entry, i) in Points.WithIndex())
+        foreach (var (i, entry) in Points.Index())
         {
             var bitIdx  = i & 0x7;
             var byteIdx = i >> 3;

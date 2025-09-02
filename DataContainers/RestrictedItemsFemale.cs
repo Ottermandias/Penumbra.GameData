@@ -2,7 +2,7 @@ using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using OtterGui.Log;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -22,14 +22,14 @@ public sealed class RestrictedItemsFemale(IDalamudPluginInterface pluginInterfac
         if (gender is Gender.Female or Gender.FemaleNpc)
             return (false, armor);
 
-        var needle = armor.Set.Id | (uint)armor.Variant.Id << 16 | (uint)slot.ToSlot() << 24;
+        var needle = armor.Set.Id | ((uint)armor.Variant.Id << 16) | ((uint)slot.ToSlot() << 24);
         if (Value.TryGetValue(needle, out var newValue))
             return (true, new CharacterArmor((ushort)newValue, (byte)(newValue >> 16), armor.Stains));
         return (false, armor);
     }
 
     /// <summary> Create the data. </summary>
-    private static IReadOnlyDictionary<uint, uint> CreateItems(Logger log, IDataManager gameData)
+    private static FrozenDictionary<uint, uint> CreateItems(Logger log, IDataManager gameData)
     {
         var ret = new Dictionary<uint, uint>(128);
         var items = gameData.GetExcelSheet<Item>();

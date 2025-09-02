@@ -1,7 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using OtterGui.Services;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Structs;
 

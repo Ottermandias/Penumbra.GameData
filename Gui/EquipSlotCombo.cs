@@ -1,5 +1,4 @@
-using Dalamud.Bindings.ImGui;
-using OtterGui.Text;
+using ImSharp;
 using Penumbra.GameData.Enums;
 
 namespace Penumbra.GameData.Gui;
@@ -14,24 +13,24 @@ public static class EquipSlotCombo
     /// /// <param name="width"> The width of the selection preview, if 0, it is sized to fit the longest value. </param>
     /// <returns> True on change, false otherwise. </returns>
     /// <remarks> This only contains the 12 slots visible on the model, i.e. weapons, equipment and accessories. </remarks>
-    public static bool Draw(string label, string tooltip, ref EquipSlot slot, float width = 0)
+    public static bool Draw(Utf8StringHandler<LabelStringHandlerBuffer> label, ReadOnlySpan<byte> tooltip, ref EquipSlot slot, float width = 0)
     {
         if (width == 0)
-            width = ImUtf8.CalcTextSize(EquipSlot.OffHand.ToName()).X + ImGui.GetFrameHeightWithSpacing();
-        ImGui.SetNextItemWidth(width);
-        using var combo = ImUtf8.Combo(label, slot.ToName());
+            width = Im.Font.CalculateSize(EquipSlot.OffHand.ToNameU8()).X + Im.Style.FrameHeightWithSpacing;
+        Im.Item.SetNextWidth(width);
+        using var combo = Im.Combo.Begin(label, slot.ToNameU8());
         var       ret   = false;
         if (combo)
             foreach (var tmpSlot in EquipSlotExtensions.FullSlots)
             {
-                if (ImUtf8.Selectable(tmpSlot.ToName(), tmpSlot == slot) && slot != tmpSlot)
+                if (Im.Selectable(tmpSlot.ToNameU8(), tmpSlot == slot) && slot != tmpSlot)
                 {
                     slot = tmpSlot;
                     ret  = true;
                 }
             }
 
-        ImUtf8.HoverTooltip(tooltip);
+        Im.Tooltip.OnHover(tooltip);
         return ret;
     }
 }

@@ -1,7 +1,4 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility.Raii;
-using OtterGui;
-using OtterGui.Extensions;
+using ImSharp;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers;
 using Penumbra.GameData.Enums;
@@ -10,15 +7,15 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.Gui.Debug;
 
 /// <summary> Draw a resolver for restricted gear. </summary>
-public class RestrictedGearDrawer(RestrictedGear _restrictedGear, RestrictedItemsMale _male, RestrictedItemsFemale _female) : IGameDataDrawer
+public class RestrictedGearDrawer(RestrictedGear restrictedGear, RestrictedItemsMale male, RestrictedItemsFemale female) : IGameDataDrawer
 {
     /// <inheritdoc/>
-    public string Label
-        => "Restricted Gear Data";
+    public ReadOnlySpan<byte> Label
+        => "Restricted Gear Data"u8;
 
     /// <inheritdoc/>
     public bool Disabled
-        => !_restrictedGear.Finished;
+        => !restrictedGear.Finished;
 
     private CharacterArmor _resolveArmor;
 
@@ -27,15 +24,14 @@ public class RestrictedGearDrawer(RestrictedGear _restrictedGear, RestrictedItem
     {
         DrawResolver();
         DrawRacialData();
-        DrawDictData("Male-Restricted Sets",   _male.Value);
-        DrawDictData("Female-Restricted Sets", _female.Value);
+        DrawDictData("Male-Restricted Sets"u8,   male.Value);
+        DrawDictData("Female-Restricted Sets"u8, female.Value);
     }
 
     /// <summary> Draw input and result for resolving restricted models. </summary>
     private void DrawResolver()
     {
-        ImGui.AlignTextToFramePadding();
-        ImGui.TextUnformatted("Resolve Model");
+        ImEx.TextFrameAligned("Resolve Model"u8);
         ModelInput.DrawArmorInput(ref _resolveArmor);
         foreach (var race in Enum.GetValues<Race>().Skip(1))
         {
@@ -44,9 +40,9 @@ public class RestrictedGearDrawer(RestrictedGear _restrictedGear, RestrictedItem
             {
                 foreach (var slot in EquipSlotExtensions.EqdpSlots)
                 {
-                    var (replaced, model) = _restrictedGear.ResolveRestricted(_resolveArmor, slot, race, gender);
+                    var (replaced, model) = restrictedGear.ResolveRestricted(_resolveArmor, slot, race, gender);
                     if (replaced)
-                        ImGui.TextUnformatted($"{race.ToName()} - {gender} - {slot.ToName()} resolves to {model}.");
+                        Im.Text($"{race.ToName()} - {gender} - {slot.ToName()} resolves to {model}.");
                 }
             }
         }
@@ -54,33 +50,33 @@ public class RestrictedGearDrawer(RestrictedGear _restrictedGear, RestrictedItem
 
     private static void DrawRacialData()
     {
-        using var tree = ImRaii.TreeNode("Race-Restricted Sets");
+        using var tree = Im.Tree.Node("Race-Restricted Sets"u8);
         if (!tree)
             return;
 
-        using var table = ImRaii.Table("race", 4, ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit);
+        using var table = Im.Table.Begin("race"u8, 4, TableFlags.RowBackground | TableFlags.SizingFixedFit);
         if (!table)
             return;
 
-        foreach (var (value, idx) in RestrictedItemsRace.RaceGenderGroup.WithIndex())
+        foreach (var (idx, value) in RestrictedItemsRace.RaceGenderGroup.Index())
         {
             var armor  = new CharacterArmor((PrimaryId)(value & 0xFFFF), (Variant)(value >> 16), StainIds.None);
             var gender = idx % 2 == 0 ? Gender.Male : Gender.Female;
             var race   = (Race)(idx / 2 + 1);
-            ImGuiUtil.DrawTableColumn(race.ToName());
-            ImGuiUtil.DrawTableColumn(gender.ToName());
-            ImGuiUtil.DrawTableColumn(armor.Set.Id.ToString());
-            ImGuiUtil.DrawTableColumn(armor.Variant.Id.ToString());
+            table.DrawColumn(race.ToNameU8());
+            table.DrawColumn(gender.ToNameU8());
+            table.DrawColumn($"{armor.Set.Id}");
+            table.DrawColumn($"{armor.Variant.Id}");
         }
     }
 
-    private static void DrawDictData(string name, IReadOnlyDictionary<uint, uint> dict)
+    private static void DrawDictData(ReadOnlySpan<byte> name, IReadOnlyDictionary<uint, uint> dict)
     {
-        using var tree = ImRaii.TreeNode(name);
+        using var tree = Im.Tree.Node(name);
         if (!tree)
             return;
 
-        using var table = ImRaii.Table("table", 5, ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit);
+        using var table = Im.Table.Begin("table"u8, 5, TableFlags.RowBackground | TableFlags.SizingFixedFit);
         if (!table)
             return;
 
@@ -89,11 +85,11 @@ public class RestrictedGearDrawer(RestrictedGear _restrictedGear, RestrictedItem
             var armor  = new CharacterArmor((PrimaryId)(value & 0xFFFF),       (Variant)(value >> 16),       StainIds.None);
             var armor2 = new CharacterArmor((PrimaryId)(replacement & 0xFFFF), (Variant)(replacement >> 16), StainIds.None);
             var slot   = (EquipSlot)(value >> 24);
-            ImGuiUtil.DrawTableColumn(slot.ToName());
-            ImGuiUtil.DrawTableColumn(armor.Set.Id.ToString());
-            ImGuiUtil.DrawTableColumn(armor.Variant.Id.ToString());
-            ImGuiUtil.DrawTableColumn(armor2.Set.Id.ToString());
-            ImGuiUtil.DrawTableColumn(armor2.Variant.Id.ToString());
+            table.DrawColumn(slot.ToNameU8());
+            table.DrawColumn($"{armor.Set.Id}");
+            table.DrawColumn($"{armor.Variant.Id}");
+            table.DrawColumn($"{armor2.Set.Id}");
+            table.DrawColumn($"{armor2.Variant.Id}");
         }
     }
 }

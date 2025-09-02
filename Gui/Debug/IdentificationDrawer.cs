@@ -1,35 +1,32 @@
-using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
-using OtterGui;
-using OtterGui.Raii;
+using Dalamud.Interface.Utility.Raii;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
-using ImGuiClip = OtterGui.ImGuiClip;
 
 namespace Penumbra.GameData.Gui.Debug;
 
 /// <summary> Draw all data associated to identification and resolvers. </summary>
 public class IdentificationDrawer(
-    ObjectIdentification _identifier,
-    GamePathParser _gamePathParser,
-    DictAction _actions,
-    DictEmote _emotes,
-    DictModelChara _modelCharas,
-    IdentificationListEquipment _equipment,
-    IdentificationListWeapons _weapons,
-    IdentificationListModels _models) : IGameDataDrawer
+    ObjectIdentification identifier,
+    GamePathParser gamePathParser,
+    DictAction actions,
+    DictEmote emotes,
+    DictModelChara modelCharas,
+    IdentificationListEquipment equipment,
+    IdentificationListWeapons weapons,
+    IdentificationListModels models) : IGameDataDrawer
 {
     /// <inheritdoc/>
-    public string Label
-        => "Object Identification";
+    public ReadOnlySpan<byte> Label
+        => "Object Identification"u8;
 
     /// <inheritdoc/>
     public bool Disabled
-        => !_identifier.Finished;
+        => !identifier.Finished;
 
 
     /// <inheritdoc/>
@@ -38,14 +35,14 @@ public class IdentificationDrawer(
         DrawParser();
         DrawIdentifier();
         DrawDictModelChara();
-        DrawIdentificationList("Equipment List", ref _equipmentFrom, ref _equipmentTo, ref _equipmentFilter, _equipment, t => t.Item1);
-        DrawIdentificationList("Weapon List",    ref _weaponsFrom,   ref _weaponsTo,   ref _weaponsFilter,   _weapons,   t => t.Item1);
-        DrawIdentificationList("Model List", ref _modelsFrom, ref _modelsTo, ref _modelFilter, _models,
-            t => _modelCharas.TryGetValue(t.RowId, out var names)
+        DrawIdentificationList("Equipment List", ref _equipmentFrom, ref _equipmentTo, ref _equipmentFilter, equipment, t => t.Item1);
+        DrawIdentificationList("Weapon List",    ref _weaponsFrom,   ref _weaponsTo,   ref _weaponsFilter,   weapons,   t => t.Item1);
+        DrawIdentificationList("Model List", ref _modelsFrom, ref _modelsTo, ref _modelFilter, models,
+            t => modelCharas.TryGetValue(t.RowId, out var names)
                 ? string.Join(", ", names.Select(n => n.Name).Distinct())
                 : t.RowId.ToString());
-        DrawLuminaDict("Emotes",  ref _emoteFilter,  _emotes,  e => e.Name.ExtractTextExtended());
-        DrawLuminaDict("Actions", ref _actionFilter, _actions, a => a.Name.ExtractTextExtended());
+        DrawLuminaDict("Emotes",  ref _emoteFilter,  emotes,  e => e.Name.ExtractTextExtended());
+        DrawLuminaDict("Actions", ref _actionFilter, actions, a => a.Name.ExtractTextExtended());
     }
 
     // Input
@@ -75,10 +72,10 @@ public class IdentificationDrawer(
         ImGui.SameLine();
         ImGui.SetNextItemWidth(300 * ImGuiHelpers.GlobalScale);
         ImGui.InputTextWithHint("##gamePath", "Enter game path...", ref _gamePath, 256);
-        var fileInfo = _gamePathParser.GetFileInfo(_gamePath);
+        var fileInfo = gamePathParser.GetFileInfo(_gamePath);
         ImGui.TextUnformatted(
             $"{fileInfo.ObjectType} {fileInfo.EquipSlot} {fileInfo.PrimaryId} {fileInfo.SecondaryId} {fileInfo.Variant} {fileInfo.BodySlot} {fileInfo.CustomizationType}");
-        Text(string.Join("\n", _identifier.Identify(_gamePath).Keys));
+        Text(string.Join("\n", identifier.Identify(_gamePath).Keys));
     }
 
     /// <summary> Draw an equip item identifier. </summary>
@@ -91,7 +88,7 @@ public class IdentificationDrawer(
         ImGui.SameLine();
         ModelInput.DrawWeaponInput(ref _weapon);
 
-        var items = _identifier.Identify(_weapon.Skeleton, _weapon.Weapon, _weapon.Variant, _slot);
+        var items = identifier.Identify(_weapon.Skeleton, _weapon.Weapon, _weapon.Variant, _slot);
         foreach (var item in items)
             Text(item.Name);
     }
@@ -195,7 +192,7 @@ public class IdentificationDrawer(
     private void DrawDictModelChara()
     {
         DebugUtility.DrawNameTable("Model Chara List", ref _modelCharaFilter, true,
-            _modelCharas.Select(kvp => ((ulong)kvp.Key.Id, string.Join(", ", kvp.Value.Select(n => n.Name).Distinct()))));
+            modelCharas.Select(kvp => ((ulong)kvp.Key.Id, string.Join(", ", kvp.Value.Select(n => n.Name).Distinct()))));
     }
 
     /// <summary> Draw text only if it is not empty. </summary>

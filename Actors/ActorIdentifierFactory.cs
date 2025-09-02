@@ -1,9 +1,8 @@
 using System.Collections.Frozen;
-using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using OtterGui;
+using ImSharp;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -41,7 +40,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
 
         ImGui.Bullet();
         ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("P", typeColor), (" | ", keyColor), ("[Player Name]@<World Name>", nameColor));
+        ImEx.DrawColoredText(("P", typeColor), (" | ", keyColor), ("[Player Name]@<World Name>", nameColor));
 
         ImGui.Bullet();
         ImGui.SameLine();

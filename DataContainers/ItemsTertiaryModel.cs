@@ -1,7 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using OtterGui.Log;
+using Luna;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 
@@ -18,7 +18,7 @@ public sealed class ItemsTertiaryModel(
         itemsSecondaries.Awaiter)
 {
     /// <summary> Create data by taking only the tertiary models for all items. </summary>
-    private static IReadOnlyDictionary<ulong, PseudoEquipItem> CreateGauntlets(ItemsByType items,
+    private static FrozenDictionary<ulong, PseudoEquipItem> CreateGauntlets(ItemsByType items,
         ItemsSecondaryModel itemsSecondaries)
     {
         var gauntlets = items.Value[(int)FullEquipType.Hands]

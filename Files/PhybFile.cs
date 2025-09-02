@@ -1,10 +1,9 @@
-using OtterGui.Extensions;
 using Penumbra.GameData.Files.PhybStructs;
 using Penumbra.GameData.Files.Utility;
 
 namespace Penumbra.GameData.Files;
 
-public partial class PhybFile
+public class PhybFile
 {
     public const uint MagicExtendedDataPost = 0x4B434150u;
     public const uint MagicExtendedDataPre  = 0x42485045u;
@@ -14,9 +13,9 @@ public partial class PhybFile
 
     public PhybCollision       Collision;
     public List<PhybSimulator> Simulators = [];
-    public PhybExtendedData?   Extended   = null;
+    public PhybExtendedData?   Extended;
 
-    public unsafe PhybFile(ReadOnlySpan<byte> data)
+    public PhybFile(ReadOnlySpan<byte> data)
     {
         var r = new SpanBinaryReader(data);
         Version  = r.ReadUInt32();
@@ -26,7 +25,7 @@ public partial class PhybFile
         Collision = PhybCollision.Read(data[(int)collisionOffset..(int)simOffset]);
 
         // Check for extended data
-        Extended = PhybExtendedData.Read(data, out var extendedOffset, out var extendedLength);
+        Extended = PhybExtendedData.Read(data, out var extendedOffset, out _);
         var simSize = extendedOffset - simOffset;
         if (simSize > 0)
         {
@@ -77,7 +76,7 @@ public partial class PhybFile
 
         var chainPos  = w.BaseStream.Position;
         var numChains = 0;
-        foreach (var (simulator, idx) in Simulators.WithIndex())
+        foreach (var (idx, simulator) in Simulators.Index())
         {
             numChains       += simulator.Chains.Count;
             offsets[idx, 2] =  simulator.Chains.Count > 0 ? (uint)(w.BaseStream.Position - sectionPos) : 0u;
@@ -93,14 +92,14 @@ public partial class PhybFile
 
         // Unsure if collisions need to go here.
         var chainOffsets = new (uint Collisions, uint Nodes)[numChains];
-        foreach (var (chain, idx) in Simulators.SelectMany(s => s.Chains).WithIndex())
+        foreach (var (idx, chain) in Simulators.SelectMany(s => s.Chains).Index())
         {
             chainOffsets[idx].Collisions = chain.Collisions.Count > 0 ? (uint)(w.BaseStream.Position - sectionPos) : 0u;
             foreach (var collision in chain.Collisions)
                 w.Write(collision);
         }
 
-        foreach (var (chain, idx) in Simulators.SelectMany(s => s.Chains).WithIndex())
+        foreach (var (idx, chain) in Simulators.SelectMany(s => s.Chains).Index())
         {
             chainOffsets[idx].Nodes = chain.Nodes.Count > 0 ? (uint)(w.BaseStream.Position - sectionPos) : 0u;
             foreach (var node in chain.Nodes)
@@ -109,7 +108,7 @@ public partial class PhybFile
 
         var end = (int)w.BaseStream.Position;
         w.Seek((int)sectionPos, SeekOrigin.Begin);
-        foreach (var (simulator, idx) in Simulators.WithIndex())
+        foreach (var (idx, simulator) in Simulators.Index())
         {
             w.Write((byte)simulator.Collisions.Count);
             w.Write((byte)simulator.CollisionConnectors.Count);
@@ -138,7 +137,7 @@ public partial class PhybFile
 
         void WriteList<T>(Func<PhybSimulator, List<T>> select, int slot, uint filler = 0u) where T : unmanaged
         {
-            foreach (var (simulator, idx) in Simulators.WithIndex())
+            foreach (var (idx, simulator) in Simulators.Index())
             {
                 var list = select(simulator);
                 offsets[idx, slot] = list.Count > 0 ? (uint)(w.BaseStream.Position - sectionPos) : filler;

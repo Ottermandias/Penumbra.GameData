@@ -1,9 +1,5 @@
-using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
-using OtterGui;
-using OtterGui.Extensions;
-using OtterGui.Services;
+using Luna;
 
 namespace Penumbra.GameData.Gui.Debug;
 
@@ -11,8 +7,8 @@ namespace Penumbra.GameData.Gui.Debug;
 public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDrawer
 {
     /// <inheritdoc/>
-    public string Label
-        => "Diagnostics";
+    public ReadOnlySpan<byte> Label
+        => "Diagnostics"u8;
 
     private string _filter = string.Empty;
     private int    _orderBy;

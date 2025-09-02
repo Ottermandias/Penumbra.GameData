@@ -191,6 +191,21 @@ public static class RaceEnumExtensions
             _             => "Unknown",
         };
 
+    /// <summary> Obtain a human-readable name for Race. </summary>
+    public static ReadOnlySpan<byte> ToNameU8(this Race race)
+        => race switch
+        {
+            Race.Hyur     => "Hyur"u8,
+            Race.Elezen   => "Elezen"u8,
+            Race.Lalafell => "Lalafell"u8,
+            Race.Miqote   => "Miqo'te"u8,
+            Race.Roegadyn => "Roegadyn"u8,
+            Race.AuRa     => "Au Ra"u8,
+            Race.Hrothgar => "Hrothgar"u8,
+            Race.Viera    => "Viera"u8,
+            _             => "Unknown"u8,
+        };
+
     /// <summary> Obtain a human-readable name for Gender. </summary>
     public static string ToName(this Gender gender)
         => gender switch
@@ -200,6 +215,17 @@ public static class RaceEnumExtensions
             Gender.MaleNpc   => "Male (Child)",
             Gender.FemaleNpc => "Female (Child)",
             _                => "Unknown",
+        };
+
+    /// <summary> Obtain a human-readable name for Gender. </summary>
+    public static ReadOnlySpan<byte> ToNameU8(this Gender gender)
+        => gender switch
+        {
+            Gender.Male      => "Male"u8,
+            Gender.Female    => "Female"u8,
+            Gender.MaleNpc   => "Male (Child)"u8,
+            Gender.FemaleNpc => "Female (Child)"u8,
+            _                => "Unknown"u8,
         };
 
     /// <summary> Obtain a human-readable name for SubRace. </summary>
@@ -225,6 +251,29 @@ public static class RaceEnumExtensions
             _                       => "Unknown",
         };
 
+    /// <summary> Obtain a human-readable name for SubRace. </summary>
+    public static ReadOnlySpan<byte> ToNameU8(this SubRace subRace)
+        => subRace switch
+        {
+            SubRace.Midlander       => "Midlander"u8,
+            SubRace.Highlander      => "Highlander"u8,
+            SubRace.Wildwood        => "Wildwood"u8,
+            SubRace.Duskwight       => "Duskwight"u8,
+            SubRace.Plainsfolk      => "Plainsfolk"u8,
+            SubRace.Dunesfolk       => "Dunesfolk"u8,
+            SubRace.SeekerOfTheSun  => "Seeker Of The Sun"u8,
+            SubRace.KeeperOfTheMoon => "Keeper Of The Moon"u8,
+            SubRace.Seawolf         => "Seawolf"u8,
+            SubRace.Hellsguard      => "Hellsguard"u8,
+            SubRace.Raen            => "Raen"u8,
+            SubRace.Xaela           => "Xaela"u8,
+            SubRace.Helion          => "Hellion"u8,
+            SubRace.Lost            => "Lost"u8,
+            SubRace.Rava            => "Rava"u8,
+            SubRace.Veena           => "Veena"u8,
+            _                       => "Unknown"u8,
+        };
+
     /// <summary> Obtain a combined name for a GenderRace in order {Race} - {Gender}. </summary>
     public static string ToName(this GenderRace genderRace)
         => GenderRaceNames.GetValueOrDefault(genderRace, "Unknown - Unknown");
@@ -238,9 +287,18 @@ public static class RaceEnumExtensions
             _                       => subRace.ToName(),
         };
 
+    /// <summary> Obtain abbreviated names for SubRace. </summary>
+    public static ReadOnlySpan<byte> ToShortNameU8(this SubRace subRace)
+        => subRace switch
+        {
+            SubRace.SeekerOfTheSun  => "Sunseeker"u8,
+            SubRace.KeeperOfTheMoon => "Moonkeeper"u8,
+            _                       => subRace.ToNameU8(),
+        };
+
     /// <summary> Correct the byte value of gender back to the game's byte value. </summary>
     public static byte ToGameByte(this Gender gender)
-        => (byte) ((byte)gender - 1);
+        => (byte)((byte)gender - 1);
 
     /// <summary> Check if a clan and race agree. </summary>
     public static bool FitsRace(this SubRace subRace, Race race)

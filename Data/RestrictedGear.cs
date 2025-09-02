@@ -1,4 +1,4 @@
-using OtterGui.Services;
+using Luna;
 using Penumbra.GameData.DataContainers;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -11,7 +11,7 @@ namespace Penumbra.GameData.Data;
 /// Gender-locked gear gets swapped to the equivalent set if it exists (most of them do), 
 /// with some items getting send to emperor's new clothes and a few funny entries.
 /// </summary>
-public sealed class RestrictedGear(RestrictedItemsRace _raceSet, RestrictedItemsMale _maleSet, RestrictedItemsFemale _femaleSet)
+public sealed class RestrictedGear(RestrictedItemsRace raceSet, RestrictedItemsMale maleSet, RestrictedItemsFemale femaleSet)
     : IAsyncService
 {
     /// <summary>
@@ -27,22 +27,22 @@ public sealed class RestrictedGear(RestrictedItemsRace _raceSet, RestrictedItems
         // Check racial gear, this does not need slots.
         if (slot.IsEquipment())
         {
-            (var raceReplace, armor) = _raceSet.Resolve(armor, race, gender);
+            (var raceReplace, armor) = raceSet.Resolve(armor, race, gender);
             if (raceReplace)
                 return (raceReplace, armor);
         }
 
         // Some items lead to the exact same model- and variant id just gender specified, 
         // so check for actual difference in the Replaced bool.
-        (var genderReplace, armor) = _maleSet.Resolve(armor, slot, race, gender);
+        (var genderReplace, armor) = maleSet.Resolve(armor, slot, race, gender);
         if (genderReplace)
             return (genderReplace, armor);
 
-        return _femaleSet.Resolve(armor, slot, race, gender);
+        return femaleSet.Resolve(armor, slot, race, gender);
     }
 
     /// <summary> Finished when all 3 data sets are finished. </summary>
-    public Task Awaiter { get; } = Task.WhenAll(_raceSet.Awaiter, _maleSet.Awaiter, _femaleSet.Awaiter);
+    public Task Awaiter { get; } = Task.WhenAll(raceSet.Awaiter, maleSet.Awaiter, femaleSet.Awaiter);
 
     /// <inheritdoc/>
     public bool Finished

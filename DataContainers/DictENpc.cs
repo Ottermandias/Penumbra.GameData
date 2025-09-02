@@ -3,7 +3,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using OtterGui.Log;
+using Luna;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 

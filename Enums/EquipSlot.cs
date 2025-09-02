@@ -276,6 +276,35 @@ public static class EquipSlotExtensions
             _                           => "Unknown",
         };
 
+    /// <summary> Translate an EquipSlotCategory into a human readable name.  </summary>
+    public static ReadOnlySpan<byte> ToNameU8(this EquipSlot value)
+        => value switch
+        {
+            EquipSlot.Head              => "Head"u8,
+            EquipSlot.Hands             => "Hands"u8,
+            EquipSlot.Legs              => "Legs"u8,
+            EquipSlot.Feet              => "Feet"u8,
+            EquipSlot.Body              => "Body"u8,
+            EquipSlot.Ears              => "Earrings"u8,
+            EquipSlot.Neck              => "Necklace"u8,
+            EquipSlot.RFinger           => "Right Ring"u8,
+            EquipSlot.LFinger           => "Left Ring"u8,
+            EquipSlot.Wrists            => "Bracelets"u8,
+            EquipSlot.MainHand          => "Primary Weapon"u8,
+            EquipSlot.OffHand           => "Secondary Weapon"u8,
+            EquipSlot.Belt              => "Belt"u8,
+            EquipSlot.BothHand          => "Primary Weapon"u8,
+            EquipSlot.HeadBody          => "Head and Body"u8,
+            EquipSlot.BodyHandsLegsFeet => "Costume"u8,
+            EquipSlot.SoulCrystal       => "Soul Crystal"u8,
+            EquipSlot.LegsFeet          => "Bottom"u8,
+            EquipSlot.FullBody          => "Costume"u8,
+            EquipSlot.BodyHands         => "Top"u8,
+            EquipSlot.BodyLegsFeet      => "Costume"u8,
+            EquipSlot.All               => "Costume"u8,
+            _                           => "Unknown"u8,
+        };
+
     /// <summary> Returns true for the 5 primary equipment slots. </summary>
     public static bool IsEquipment(this EquipSlot value)
     {

@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using Luna.Generators;
 
 namespace Penumbra.GameData.Enums;
 

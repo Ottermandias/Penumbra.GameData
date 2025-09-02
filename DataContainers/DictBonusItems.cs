@@ -2,7 +2,7 @@ using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using OtterGui.Log;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -16,7 +16,7 @@ public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Logg
         gameData.Language, Version.DictBonusItems, () => CreateGlassesData(gameData)), IReadOnlyDictionary<BonusItemId, EquipItem>
 {
     /// <summary> Create the data. </summary>
-    private static IReadOnlyDictionary<ushort, PseudoEquipItem> CreateGlassesData(
+    private static FrozenDictionary<ushort, PseudoEquipItem> CreateGlassesData(
         IDataManager dataManager)
     {
         // TODO

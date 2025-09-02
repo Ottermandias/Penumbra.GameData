@@ -1,6 +1,6 @@
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using ImSharp;
 using Lumina.Excel.Sheets;
-using OtterGui.Classes;
 using Penumbra.Api.Enums;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -20,7 +20,7 @@ public interface IIdentifiedObjectData
 
     public string AdditionalData { get; }
 
-    public bool FilteredOut(string key, LowerString filter);
+    public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter);
 
     public ChangedItemIcon Icon  { get; }
     public int             Count { get; set; }
@@ -42,10 +42,10 @@ public static class IdentifiedObjectExtensions
             _ => (ChangedItemType.Unknown, 0),
         };
 
-    public static bool IsFilteredOut(this IIdentifiedObjectData data, string key, LowerString filter)
-        => data?.FilteredOut(key, filter) ?? !filter.IsContained(key);
+    public static bool IsFilteredOut(this IIdentifiedObjectData? data, ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
+        => data?.FilteredOut(key, filter) ?? !key.Contains(filter, StringComparison.OrdinalIgnoreCase);
 
-    public static ChangedItemIcon GetIcon(this IIdentifiedObjectData data)
+    public static ChangedItemIcon GetIcon(this IIdentifiedObjectData? data)
         => data?.Icon ?? ChangedItemIcon.Unknown;
 
     public static ChangedItemIcon GetCategoryIcon(this FullEquipType type)
@@ -158,8 +158,8 @@ public sealed class IdentifiedItem(EquipItem item, int count = 1) : IIdentifiedO
     public string AdditionalData
         => Item.ModelString;
 
-    public bool FilteredOut(string key, LowerString filter)
-        => !filter.IsContained(key) && !filter.IsContained(AdditionalData);
+    public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
+        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase) && ! AdditionalData.Contains(filter);
 
     public ChangedItemIcon Icon
         => Item.Type.GetCategoryIcon();
@@ -238,8 +238,8 @@ public sealed class IdentifiedCustomization(int count = 1) : IIdentifiedObjectDa
     public string AdditionalData
         => string.Empty;
 
-    public bool FilteredOut(string key, LowerString filter)
-        => !filter.IsContained(key);
+    public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
+        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase);
 
     public ChangedItemIcon Icon
         => ChangedItemIcon.Customization;
@@ -259,8 +259,8 @@ public sealed class IdentifiedName(int count = 1) : IIdentifiedObjectData
     public string AdditionalData
         => string.Empty;
 
-    public bool FilteredOut(string key, LowerString filter)
-        => !filter.IsContained(key);
+    public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
+        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase);
 
     public ChangedItemIcon Icon
         => ChangedItemIcon.Unknown;
@@ -293,8 +293,10 @@ public sealed class IdentifiedCounter(int counter = 1) : IIdentifiedObjectData
     public string AdditionalData
         => string.Empty;
 
-    public bool FilteredOut(string key, LowerString filter)
-        => !filter.IsContained(key) && !filter.IsContained(Counter.ToString()) && !filter.IsContained(" Files Manipulating ");
+    public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
+        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase)
+         && !Counter.Contains(filter)
+         && !" Files Manipulating".Contains(filter);
 
     public ChangedItemIcon Icon
         => ChangedItemIcon.Unknown;
@@ -318,8 +320,8 @@ public sealed class IdentifiedModel(ModelChara model, int count = 1) : IIdentifi
     public string AdditionalData
         => $"({((CharacterBase.ModelType)Model.Type).ToName()} {Model.Model}-{Model.Base}-{Model.Variant})";
 
-    public bool FilteredOut(string key, LowerString filter)
-        => !filter.IsContained(key) && !filter.IsContained(AdditionalData);
+    public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
+        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase) && !AdditionalData.Contains(filter);
 
     public ChangedItemIcon Icon
         => (CharacterBase.ModelType)Model.Type switch
@@ -348,8 +350,8 @@ public sealed class IdentifiedAction(Action action, int count = 1) : IIdentified
     public string AdditionalData
         => $"({Action.RowId})";
 
-    public bool FilteredOut(string key, LowerString filter)
-        => !filter.IsContained(key) && !filter.IsContained(AdditionalData);
+    public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
+        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase) && !AdditionalData.Contains(filter);
 
     public ChangedItemIcon Icon
         => ChangedItemIcon.Action;
@@ -373,8 +375,8 @@ public sealed class IdentifiedEmote(Emote emote, int count = 1) : IIdentifiedObj
     public string AdditionalData
         => $"({Emote.RowId})";
 
-    public bool FilteredOut(string key, LowerString filter)
-        => !filter.IsContained(key) && !filter.IsContained(AdditionalData);
+    public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
+        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase) && !AdditionalData.Contains(filter);
 
     public ChangedItemIcon Icon
         => ChangedItemIcon.Emote;

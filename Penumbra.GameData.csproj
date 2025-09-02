@@ -8,6 +8,7 @@
 
     <PropertyGroup>
         <Use_DalamudPackager>false</Use_DalamudPackager>
+        <Use_Dalamud_ImGui>false</Use_Dalamud_ImGui>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,9 +17,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Luna\Luna.Generators\Luna.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\Luna\Luna\Luna.csproj" />
         <ProjectReference Include="..\Penumbra.Api\Penumbra.Api.csproj" />
         <ProjectReference Include="..\Penumbra.String\Penumbra.String.csproj" />
-        <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
     </ItemGroup>
 
     <ItemGroup>

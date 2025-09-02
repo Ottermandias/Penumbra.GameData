@@ -1,6 +1,4 @@
-﻿using OtterGui.Log;
-
-namespace Penumbra.GameData.Interop;
+﻿namespace Penumbra.GameData.Interop;
 
 /// <summary>
 /// A single actor with its label and the list of associated game objects.
@@ -27,12 +25,12 @@ public readonly struct ActorData
         Label   = string.Empty;
     }
 
-    public LazyString ToLazyString(string invalid)
+    public Lazy<string> ToLazyString(string invalid)
     {
         var objects = Objects;
         return Valid
-            ? new LazyString(() => string.Join(", ", objects.Select(o => o.ToString())))
-            : new LazyString(() => invalid);
+            ? new Lazy<string>(() => string.Join(", ", objects.Select(o => o.ToString())))
+            : new Lazy<string>(() => invalid);
     }
 
     private ActorData(List<Actor> objects, string label)

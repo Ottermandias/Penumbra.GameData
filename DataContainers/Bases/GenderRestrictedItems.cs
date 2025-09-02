@@ -1,7 +1,6 @@
-using Dalamud.Utility;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
-using OtterGui.Log;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 

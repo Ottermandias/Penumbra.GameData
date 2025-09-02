@@ -1,7 +1,6 @@
 using Dalamud.Game;
 using Dalamud.Plugin;
-using OtterGui.Extensions;
-using OtterGui.Log;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
@@ -18,10 +17,10 @@ public sealed class DictBNpcNames(IDalamudPluginInterface pluginInterface, Logge
     public IReadOnlyList<BNpcId> GetBNpcsFromName(BNpcNameId bNpcNameId)
     {
         var list = new List<BNpcId>(8);
-        foreach (var (names, bNpcId) in Value.WithIndex())
+        foreach (var (bNpcId, names) in Value.Index())
         {
             if (names.Contains(bNpcNameId.Id))
-                list.Add((BNpcId)(uint)bNpcId);
+                list.Add((uint)bNpcId);
         }
 
         return list;

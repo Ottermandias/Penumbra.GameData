@@ -1,30 +1,27 @@
-﻿using Dalamud.Bindings.ImGui;
-using OtterGui;
-using OtterGui.Raii;
+﻿using ImSharp;
 using Penumbra.GameData.DataContainers;
 
 namespace Penumbra.GameData.Gui.Debug;
 
 /// <summary> Draw all collected jobs. </summary>
-public class DictJobDrawer(DictJob _jobs) : IGameDataDrawer
+public class DictJobDrawer(DictJob jobs) : IGameDataDrawer
 {
     /// <inheritdoc/>
-    public string Label
-        => "Jobs";
-
+    public ReadOnlySpan<byte> Label
+        => "Jobs"u8;
 
     /// <inheritdoc/>
     public void Draw()
     {
-        using var table = ImRaii.Table("##jobs", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg);
+        using var table = Im.Table.Begin("##jobs"u8, 3, TableFlags.SizingFixedFit | TableFlags.RowBackground);
         if (!table)
             return;
 
-        foreach (var (id, job) in _jobs)
+        foreach (var (id, job) in jobs)
         {
-            ImGuiUtil.DrawTableColumn(id.Id.ToString("D3"));
-            ImGuiUtil.DrawTableColumn(job.Name);
-            ImGuiUtil.DrawTableColumn(job.Abbreviation);
+            table.DrawColumn($"{id.Id:D3}");
+            table.DrawColumn(job.NameU8);
+            table.DrawColumn(job.AbbreviationU8);
         }
     }
 

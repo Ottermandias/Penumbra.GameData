@@ -1,5 +1,5 @@
 using Dalamud.Plugin.Services;
-using OtterGui.Services;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Interop;

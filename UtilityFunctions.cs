@@ -1,4 +1,4 @@
-using OtterGui.Extensions;
+using Luna;
 
 namespace Penumbra.GameData;
 

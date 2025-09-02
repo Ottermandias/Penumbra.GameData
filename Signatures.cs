@@ -1,5 +1,5 @@
 using Dalamud.Game;
-using OtterGui.Log;
+using Luna;
 
 namespace Penumbra.GameData;
 
