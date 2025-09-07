@@ -55,7 +55,7 @@ public static class Version
     public const int DictBonusItemsOffset = 3;
     public const int DictBonusItems       = UsesExtractTextOffset + DictBonusItemsOffset;
 
-    public const int ItemsByTypeOffset = 2;
+    public const int ItemsByTypeOffset = 3;
     public const int ItemsByType       = DictBonusItemsOffset + UsesExtractTextOffset + ItemsByTypeOffset;
 
     public const int ItemsPrimaryModelOffset = 1;

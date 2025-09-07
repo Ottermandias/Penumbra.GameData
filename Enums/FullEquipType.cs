@@ -366,6 +366,7 @@ public static class FullEquipTypeExtensions
             EquipSlot.BodyHands         => FullEquipType.Body,
             EquipSlot.BodyLegsFeet      => FullEquipType.Body,
             EquipSlot.ChestHands        => FullEquipType.Body,
+            EquipSlot.ChestLegs         => FullEquipType.Body,
             EquipSlot.MainHand          => category.ToEquipType(mainhand),
             EquipSlot.OffHand           => category.ToEquipType(mainhand),
             EquipSlot.BothHand          => category.ToEquipType(mainhand),
