@@ -369,6 +369,12 @@ public static class GamePaths
             => $"chara/human/c{raceCode.ToRaceCode()}/skeleton/{slot}/{slot[0]}{slotId.Id:D4}/phy_c{raceCode.ToRaceCode()}{slot[0]}{slotId.Id:D4}.phyb";
     }
 
+    public static class Kdb
+    {
+        public static string Customization(GenderRace raceCode, string slot, PrimaryId slotId)
+            => $"chara/human/c{raceCode.ToRaceCode()}/skeleton/{slot}/{slot[0]}{slotId.Id:D4}/kdi_c{raceCode.ToRaceCode()}{slot[0]}{slotId.Id:D4}.kdb";
+    }
+
     public static class Pbd
     {
         public const string Path = "chara/xls/boneDeformer/human.pbd";
