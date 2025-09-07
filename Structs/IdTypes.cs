@@ -218,12 +218,14 @@ public readonly partial struct CustomItemId
         => IsBonusItem ? (BonusItemId)Id : BonusItemId.Invalid;
 
     public (PrimaryId Model, SecondaryId WeaponType, Variant Variant, FullEquipType Type) Split
-        => IsItem ? (0, 0, 0, FullEquipType.Unknown) : ((PrimaryId)Id, (SecondaryId)(Id >> 16), (Variant)(Id >> 32), (FullEquipType)(Id >> 40));
+        => IsItem
+            ? (PrimaryId.Zero, SecondaryId.Zero, Variant.Zero, FullEquipType.Unknown)
+            : ((PrimaryId)Id, (SecondaryId)(Id >> 16), (Variant)(Id >> 32), (FullEquipType)(Id >> 40));
 
     public (PrimaryId Model, Variant Variant, BonusItemFlag Slot) SplitBonus
         => (Id & (CustomFlag | BonusItemFlag)) == (CustomFlag | BonusItemFlag)
             ? ((PrimaryId)Id, (Variant)(Id >> 16), (BonusItemFlag)(Id >> 24))
-            : (0, 0, Enums.BonusItemFlag.Unknown);
+            : (PrimaryId.Zero, Variant.Zero, Enums.BonusItemFlag.Unknown);
 
     public CustomItemId(PrimaryId model, SecondaryId secondaryId, Variant variant, FullEquipType type)
         : this(model.Id | ((ulong)secondaryId.Id << 16) | ((ulong)variant.Id << 32) | ((ulong)type << 40) | CustomFlag)

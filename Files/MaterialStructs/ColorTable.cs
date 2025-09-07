@@ -51,7 +51,7 @@ public sealed class ColorTable : IEnumerable<ColorTableRow>, IColorTable
         => MemoryMarshal.AsBytes(_rowData[..]);
 
     public Span<Half> AsHalves()
-        => MemoryMarshal.Cast<ColorTableRow, Half>((Span<ColorTableRow>)_rowData);
+        => MemoryMarshal.Cast<ColorTableRow, Half>(_rowData);
 
     public Span<byte> RowAsBytes(int i)
         => MemoryMarshal.AsBytes(_rowData[i][..]);
@@ -95,7 +95,7 @@ public sealed class ColorTable : IEnumerable<ColorTableRow>, IColorTable
         for (var rowIdx = 0; rowIdx < ColorDyeTable.NumRows; ++rowIdx)
         {
             var dyeRow  = dyeTable[rowIdx];
-            var stainId = dyeRow.Channel < stainIds.Length ? stainIds[dyeRow.Channel] : 0;
+            var stainId = dyeRow.Channel < stainIds.Length ? stainIds[dyeRow.Channel] : StainId.Zero;
             if (stainId != 0 && stm.TryGetValue(dyeRow.Template, stainId, out var dyes))
                 ret |= _rowData[rowIdx].ApplyDye(dyeRow, dyes);
         }
@@ -112,7 +112,7 @@ public sealed class ColorTable : IEnumerable<ColorTableRow>, IColorTable
         for (var rowIdx = 0; rowIdx < ColorDyeTable.NumRows; ++rowIdx)
         {
             var dyeRow  = dyeTable[rowIdx];
-            var stainId = dyeRow.Channel < stainIds.Length ? stainIds[dyeRow.Channel] : 0;
+            var stainId = dyeRow.Channel < stainIds.Length ? stainIds[dyeRow.Channel] : StainId.Zero;
             if (stainId != 0 && stm.TryGetValue(dyeRow.Template, stainId, out var dyes))
                 ret |= _rowData[rowIdx].ApplyDye(dyeRow, dyes);
         }

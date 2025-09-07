@@ -1,5 +1,4 @@
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using ImSharp;
 using Lumina.Excel.Sheets;
 using Penumbra.Api.Enums;
 using Penumbra.GameData.Enums;
@@ -7,6 +6,7 @@ using Penumbra.GameData.Structs;
 using Action = Lumina.Excel.Sheets.Action;
 using Emote = Lumina.Excel.Sheets.Emote;
 using ModelChara = Lumina.Excel.Sheets.ModelChara;
+using Luna;
 
 namespace Penumbra.GameData.Data;
 
@@ -159,7 +159,7 @@ public sealed class IdentifiedItem(EquipItem item, int count = 1) : IIdentifiedO
         => Item.ModelString;
 
     public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
-        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase) && ! AdditionalData.Contains(filter);
+        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase) && ! AdditionalData.Contains(filter, StringComparison.OrdinalIgnoreCase);
 
     public ChangedItemIcon Icon
         => Item.Type.GetCategoryIcon();

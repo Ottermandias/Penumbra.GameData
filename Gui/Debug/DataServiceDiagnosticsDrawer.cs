@@ -1,4 +1,3 @@
-using Dalamud.Interface.Utility;
 using ImSharp;
 using Luna;
 
@@ -56,7 +55,7 @@ public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDra
             {
                 table.DrawColumn($"{c.Time / 1000}.{c.Time % 1000:D3} s");
                 table.DrawColumn(c.TotalCount.ToString());
-                table.DrawColumn(Functions.HumanReadableSize(c.Memory));
+                table.DrawColumn(FormattingFunctions.HumanReadableSize(c.Memory));
             }
         }
     }
