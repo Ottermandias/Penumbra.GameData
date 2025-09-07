@@ -28,8 +28,9 @@ public enum EquipSlot : byte
     BodyHands         = 20,
     BodyLegsFeet      = 21,
     ChestHands        = 22,
-    Nothing           = 23,
-    All               = 24, // Not officially existing
+    ChestLegs         = 23,
+    Nothing           = 24,
+    All               = 25, // Not officially existing
 }
 
 public enum HumanSlot : uint
@@ -180,6 +181,7 @@ public static class EquipSlotExtensions
             EquipSlot.BodyHands         => HumanSlot.Body,
             EquipSlot.BodyLegsFeet      => HumanSlot.Body,
             EquipSlot.ChestHands        => HumanSlot.Body,
+            EquipSlot.ChestLegs         => HumanSlot.Body,
             _                           => HumanSlot.Unknown,
         };
 
@@ -244,6 +246,7 @@ public static class EquipSlotExtensions
             EquipSlot.BodyHands         => EquipSlot.Body,
             EquipSlot.BodyLegsFeet      => EquipSlot.Body,
             EquipSlot.ChestHands        => EquipSlot.Body,
+            EquipSlot.ChestLegs         => EquipSlot.Body,
             _                           => EquipSlot.Unknown,
         };
 
@@ -272,6 +275,7 @@ public static class EquipSlotExtensions
             EquipSlot.FullBody          => "Costume",
             EquipSlot.BodyHands         => "Top",
             EquipSlot.BodyLegsFeet      => "Costume",
+            EquipSlot.ChestLegs         => "Body and Legs",
             EquipSlot.All               => "Costume",
             _                           => "Unknown",
         };
@@ -356,6 +360,7 @@ public static class EquipSlotExtensions
             EquipSlot.HeadBody          => true,
             EquipSlot.LegsFeet          => true,
             EquipSlot.ChestHands        => true,
+            EquipSlot.ChestLegs         => true,
             _                           => false,
         };
     }
