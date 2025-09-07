@@ -1,6 +1,4 @@
-﻿using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
-using ImSharp;
+﻿using ImSharp;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers;
 using ImGuiClip = Dalamud.Interface.Utility.ImGuiClip;
@@ -39,30 +37,30 @@ public class ActorDataDrawer(NameDicts dicts, DictBNpcNames bNpcNames) : IGameDa
         if (!tree)
             return;
 
-        var resetScroll = ImGui.InputTextWithHint("##filter", "Filter...", ref _bNpcFilter, 256);
-        var height      = ImGui.GetTextLineHeightWithSpacing() + 2 * ImGui.GetStyle().CellPadding.Y;
-        using var table = ImRaii.Table("##table", 3, ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter,
+        var resetScroll = Im.Input.Text("##filter"u8, ref _bNpcFilter, "Filter..."u8);
+        var height      = Im.Style.TextHeightWithSpacing + 2 * Im.Style.CellPadding.Y;
+        using var table = Im.Table.Begin("##table"u8, 3, TableFlags.RowBackground | TableFlags.ScrollY | TableFlags.BordersOuter,
             new Vector2(-1, 10 * height));
         if (!table)
             return;
 
         if (resetScroll)
-            ImGui.SetScrollY(0);
-        ImGui.TableSetupColumn("1", ImGuiTableColumnFlags.WidthFixed, 50 * ImGuiHelpers.GlobalScale);
-        ImGui.TableSetupColumn("2", ImGuiTableColumnFlags.WidthStretch);
-        ImGui.TableSetupColumn("3", ImGuiTableColumnFlags.WidthStretch);
-        ImGui.TableNextColumn();
+            Im.Scroll.Y = 0;
+        table.SetupColumn("1"u8, TableColumnFlags.WidthFixed, 50 * Im.Style.GlobalScale);
+        table.SetupColumn("2"u8, TableColumnFlags.WidthStretch);
+        table.SetupColumn("3"u8, TableColumnFlags.WidthStretch);
+        table.NextColumn();
         var skips = ImGuiClip.GetNecessarySkips(height);
-        ImGui.TableNextRow();
+        table.NextRow();
         var data = dicts.BNpcs.Select(kvp => (kvp.Key, kvp.Key.Id.ToString("D5"), kvp.Value));
         var remainder = ImGuiClip.FilteredClippedDraw(data, skips,
             p => p.Item2.Contains(_bNpcFilter) || p.Value.Contains(_bNpcFilter, StringComparison.OrdinalIgnoreCase),
             p =>
             {
-                ImGuiUtil.DrawTableColumn(p.Item2);
-                ImGuiUtil.DrawTableColumn(p.Value);
+                Im.Table.DrawColumn(p.Item2);
+                Im.Table.DrawColumn(p.Value);
                 var bNpcs = bNpcNames.GetBNpcsFromName(p.Key.BNpcNameId);
-                ImGuiUtil.DrawTableColumn(string.Join(", ", bNpcs.Select(b => b.Id.ToString())));
+                Im.Table.DrawColumn(string.Join(", ", bNpcs.Select(b => b.Id.ToString())));
             });
         ImGuiClip.DrawEndDummy(remainder, height);
     }

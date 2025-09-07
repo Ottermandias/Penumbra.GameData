@@ -67,7 +67,7 @@ public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
         => _jobs.ContainsKey(key);
 
     /// <inheritdoc/>
-    public bool TryGetValue(JobId key, out Job value)
+    public bool TryGetValue(JobId key, [NotNullWhen(true)] out Job? value)
         => _jobs.TryGetValue(key, out value);
 
     /// <inheritdoc/>

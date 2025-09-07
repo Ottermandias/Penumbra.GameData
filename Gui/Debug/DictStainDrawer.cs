@@ -30,19 +30,19 @@ public class DictStainDrawer(DictStain stains) : IGameDataDrawer
         if (resetScroll)
             Im.Scroll.Y = 0;
 
-        var       cache   = CacheManager.Instance.GetOrCreateCache(Im.Id.Current, () => new Cache(this, stains, _filter));
-        using var clipper = new Im.ListClipper(cache.Count, height);
-        foreach (var (item, _) in clipper.Iterate(cache))
-        {
-            table.DrawColumn(item.Id);
-            table.NextColumn();
-            ImEx.ColorFrame(item.Stain.RgbaColor);
-            table.DrawColumn(item.Name);
-            table.DrawColumn(item.Data);
-        }
+        //var       cache   = CacheManager.Instance.GetOrCreateCache(Im.Id.Current, () => new Cache(this, stains, _filter));
+        //using var clipper = new Im.ListClipper(cache.Count, height);
+        //foreach (var (item, _) in clipper.Iterate(cache))
+        //{
+        //    table.DrawColumn(item.Id);
+        //    table.NextColumn();
+        //    ImEx.ColorFrame(item.Stain.RgbaColor);
+        //    table.DrawColumn(item.Name);
+        //    table.DrawColumn(item.Data);
+        //}
     }
 
-    private readonly record struct CachedStain(StringU8 Id, StringU8 Data, Stain Stain, StringU8 Name, string IdU16)
+    private record CachedStain(StringU8 Id, StringU8 Data, Stain Stain, StringU8 Name, string IdU16)
     {
         public CachedStain(Stain stain)
             : this(new StringU8($"{stain.RowIndex.Id:D3}"),
@@ -62,9 +62,17 @@ public class DictStainDrawer(DictStain stains) : IGameDataDrawer
             => item.Stain.Name;
     }
 
-    private sealed class Cache(DictStainDrawer parent, DictStain stains, Filter filter) : BasicFilterCache<CachedStain>(filter)
-    {
-        protected override IEnumerable<CachedStain> GetItems()
-            => stains.Select(s => new CachedStain(s.Value));
-    }
+    //private sealed class Cache : FilterCache<CachedStain>
+    //{
+    //    private readonly DictStain _stains;
+    //
+    //    public Cache(DictStainDrawer parent, DictStain stains, Filter filter)
+    //    {
+    //        _stains = stains;
+    //        Filter  = filter;
+    //    }
+    //
+    //    protected override IEnumerable<CachedStain> GetItems()
+    //        => _stains.Select(s => new CachedStain(s.Value));
+    //}
 }

@@ -20,8 +20,8 @@ public class DictJobDrawer(DictJob jobs) : IGameDataDrawer
         foreach (var (id, job) in jobs)
         {
             table.DrawColumn($"{id.Id:D3}");
-            table.DrawColumn(job.NameU8);
-            table.DrawColumn(job.AbbreviationU8);
+            table.DrawColumn(job.Name);
+            table.DrawColumn(job.Abbreviation);
         }
     }
 

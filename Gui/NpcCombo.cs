@@ -1,44 +1,35 @@
 using Dalamud.Utility;
-using Luna;
-using OtterGui.Widgets;
+using ImSharp;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Gui;
 
 /// <summary> A combo to select an NPC of a specific type. </summary>
-/// <param name="label"> The label for the combo. </param>
-/// <param name="names"> The dictionary of NPC names to use. </param>
-/// <param name="log"> A logger. </param>
-public sealed class NpcCombo(string label, NameDictionary names, Logger log)
-    // On creation, group NPCs by their name so that every name represents all IDs that share it.
-    // Then sort by that name using the comparer that prioritizes alphanumerics before special symbols.
-    : FilterComboCache<(string Name, NpcId[] Ids)>(() => names
-        .GroupBy(kvp => kvp.Value)
-        .Select(g => (g.Key, g
-            .Select(g => g.Key)
-            .ToArray()))
-        .OrderBy(g => g.Key, Comparer)
-        .ToList(), MouseWheelType.None, log)
+public sealed class NpcCombo(NameDictionary names) : SimpleFilterCombo<(string, NpcId[])>(SimpleFilterType.Partwise)
 {
-    /// <summary> Just print the name. </summary>
-    protected override string ToString((string Name, NpcId[] Ids) obj)
-        => obj.Name;
+    /// <inheritdoc/>
+    public override StringU8 DisplayString(in (string, NpcId[]) value)
+        => new(value.Item1);
 
-    /// <summary> Draw a selectable of the name and display a tooltip on hover showing all the associated NPC IDs. </summary>
-    protected override bool DrawSelectable(int globalIdx, bool selected)
-    {
-        var (name, ids) = Items[globalIdx];
-        var ret = ImGui.Selectable(name, selected);
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(string.Join('\n', ids.Select(i => i.ToString())));
+    /// <inheritdoc/>
+    public override string FilterString(in (string, NpcId[]) value)
+        => value.Item1 + '\0' + string.Join('\0', value.Item2);
 
-        return ret;
-    }
+    /// <inheritdoc/>
+    public override StringU8 Tooltip(in (string, NpcId[]) value)
+        => StringU8.Join((byte)'\n', value.Item2);
 
-    /// <summary> Invoke normal Draw. </summary>
-    public bool Draw(float width)
-        => Draw(label, CurrentSelection.Name, string.Empty, width, ImGui.GetTextLineHeightWithSpacing());
+    /// <summary>
+    /// On creation, group NPCs by their name so that every name represents all IDs that share it.
+    /// Then sort by that name using the comparer that prioritizes alphanumerics before special symbols.
+    /// </summary>
+    public override IEnumerable<(string, NpcId[])> GetBaseItems()
+        => names.GroupBy(kvp => kvp.Value)
+            .Select(g => (g.Key, g.Select(g => g.Key).ToArray()))
+            .OrderBy(g => g.Key, Comparer)
+            .ToList();
+
 
     /// <summary> Compare strings in a way that letters and numbers are sorted before any special symbols. </summary>
     private class NameComparer : IComparer<string>

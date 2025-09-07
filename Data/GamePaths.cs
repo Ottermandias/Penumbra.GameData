@@ -168,7 +168,7 @@ public static class GamePaths
                 case GenderRace.HrothgarFemale:
                 case GenderRace.HrothgarMaleNpc:
                 case GenderRace.HrothgarFemaleNpc:
-                    var folder = CustomizationFolder(raceCode, BodySlot.Tail, 1, variant == Variant.None ? 1 : variant);
+                    var folder = CustomizationFolder(raceCode, BodySlot.Tail, 1, variant == Variant.None ? (Variant)1 : variant);
                     actualSlotId = 1;
                     return $"{folder}{fileName}";
                 default:
