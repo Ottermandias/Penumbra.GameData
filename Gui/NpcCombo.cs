@@ -6,8 +6,24 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.Gui;
 
 /// <summary> A combo to select an NPC of a specific type. </summary>
-public sealed class NpcCombo(NameDictionary names) : SimpleFilterCombo<(string, NpcId[])>(SimpleFilterType.Partwise)
+public sealed class NpcCombo : SimpleFilterCombo<(string Name, NpcId[] Ids)>
 {
+    public readonly  StringU8                   Label;
+    private          (string Name, NpcId[] Ids) _selected = (string.Empty, []);
+    private readonly NameDictionary             _names;
+
+    /// <summary> A combo to select an NPC of a specific type. </summary>
+    public NpcCombo(StringU8 label, NameDictionary names)
+        : base(SimpleFilterType.Partwise)
+    {
+        Label           = label;
+        _names          = names;
+        AllowMouseWheel = MouseWheelType.Control;
+    }
+
+    public (string Name, NpcId[] Ids) Selected
+        => _selected;
+
     /// <inheritdoc/>
     public override StringU8 DisplayString(in (string, NpcId[]) value)
         => new(value.Item1);
@@ -20,12 +36,18 @@ public sealed class NpcCombo(NameDictionary names) : SimpleFilterCombo<(string, 
     public override StringU8 Tooltip(in (string, NpcId[]) value)
         => StringU8.Join((byte)'\n', value.Item2);
 
+    protected override bool IsSelected(SimpleCacheItem<(string Name, NpcId[] Ids)> item, int globalIndex)
+        => item.Item.Name == _selected.Name;
+
+    public bool Draw(float width)
+        => Draw(Label, ref _selected, ""u8, width);
+
     /// <summary>
     /// On creation, group NPCs by their name so that every name represents all IDs that share it.
     /// Then sort by that name using the comparer that prioritizes alphanumerics before special symbols.
     /// </summary>
     public override IEnumerable<(string, NpcId[])> GetBaseItems()
-        => names.GroupBy(kvp => kvp.Value)
+        => _names.GroupBy(kvp => kvp.Value)
             .Select(g => (g.Key, g.Select(g => g.Key).ToArray()))
             .OrderBy(g => g.Key, Comparer)
             .ToList();
