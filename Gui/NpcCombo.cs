@@ -34,7 +34,12 @@ public sealed class NpcCombo : SimpleFilterCombo<(string Name, NpcId[] Ids)>
 
     /// <inheritdoc/>
     public override StringU8 Tooltip(in (string, NpcId[]) value)
-        => StringU8.Join((byte)'\n', value.Item2);
+    {
+        if (value.Item2.Length <= 16)
+            return StringU8.Join((byte)'\n', value.Item2);
+
+        return StringU8.Join((byte)'\n', value.Item2.Take(16)) + new StringU8($"\nAnd {value.Item2.Length - 16} Others...");
+    }
 
     protected override bool IsSelected(SimpleCacheItem<(string Name, NpcId[] Ids)> item, int globalIndex)
         => item.Item.Name == _selected.Name;
