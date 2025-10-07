@@ -25,7 +25,7 @@ public static class Sigs
     public const string UpdateResourceState = "E8 ?? ?? ?? ?? EB ?? 48 8D 4E ?? FF 15";
 
     // ResourceLoader.TexMdl
-    public const string CheckFileState   = "48 89 5C 24 ?? 48 89 6C 24 ?? 57 48 83 EC ?? 80 3A";
+    public const string CheckFileState   = "E8 ?? ?? ?? ?? 48 85 C0 74 ?? 4C 8B C8 44 0F B6 C5";
     public const string LoadTexFileLocal = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 49 8B E8 44 88 4C 24";
 
     public const string LoadMdlFileLocal =
