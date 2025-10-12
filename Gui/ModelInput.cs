@@ -1,4 +1,3 @@
-using Dalamud.Interface.Utility;
 using ImSharp;
 using Penumbra.GameData.Structs;
 
@@ -38,7 +37,7 @@ public static class ModelInput
     {
         var ret      = false;
         var intValue = (int)primaryId.Id;
-        Im.Item.SetNextWidth(100 * Im.Style.GlobalScale);
+        Im.Item.SetNextWidthScaled(100);
         if (Im.Input.Scalar("##SetId"u8, ref intValue))
         {
             var value = (PrimaryId)(ushort)Math.Clamp(intValue, 0, ushort.MaxValue);
@@ -49,7 +48,7 @@ public static class ModelInput
         if (withWeapon)
         {
             Im.Line.SameInner();
-            Im.Item.SetNextWidth(100 * ImGuiHelpers.GlobalScale);
+            Im.Item.SetNextWidthScaled(100);
             intValue = secondaryId.Id;
             if (Im.Input.Scalar("##TypeId"u8, ref intValue))
             {
@@ -60,7 +59,7 @@ public static class ModelInput
         }
 
         Im.Line.SameInner();
-        Im.Item.SetNextWidth(100 * ImGuiHelpers.GlobalScale);
+        Im.Item.SetNextWidthScaled(100);
         intValue = variant.Id;
         if (Im.Input.Scalar("##Variant"u8, ref intValue))
         {

@@ -68,7 +68,7 @@ public class IdentificationDrawer(
     {
         ImEx.TextFrameAligned("Parse Game Path"u8);
         Im.Line.SameInner();
-        Im.Item.SetNextWidth(300 * Im.Style.GlobalScale);
+        Im.Item.SetNextWidthScaled(300);
         Im.Input.Text("##gamePath"u8, ref _gamePath, "Enter game path..."u8);
         var fileInfo = gamePathParser.GetFileInfo(_gamePath);
         Im.Text(
