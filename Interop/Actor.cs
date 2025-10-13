@@ -1,5 +1,6 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using ImSharp;
 using Penumbra.GameData.Actors;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -54,6 +55,18 @@ public readonly unsafe struct Actor : IEquatable<Actor>
 
     public ByteString Utf8Name
         => Valid ? new ByteString(AsObject->Name) : ByteString.Empty;
+
+    public ReadOnlySpan<byte> StoredName()
+    {
+        if (!Valid || AsObject->Name[0] is 0)
+            return "Unknown"u8;
+
+        var nullTerminator = AsObject->Name.IndexOf((byte)0);
+        if (nullTerminator == -1)
+            return AsObject->Name;
+
+        return AsObject->Name[..nullTerminator];
+    }
 
     /// <summary> Does not check for validity. </summary>
     public ushort HomeWorld
