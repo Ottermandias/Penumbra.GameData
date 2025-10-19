@@ -176,6 +176,22 @@ public static class RaceEnumExtensions
             _                    => Race.Unknown.ToName(),
         };
 
+    /// <summary> Obtain a human-readable name for a ModelRace. </summary>
+    public static ReadOnlySpan<byte> ToNameU8(this ModelRace modelRace)
+        => modelRace switch
+        {
+            ModelRace.Midlander  => SubRace.Midlander.ToNameU8(),
+            ModelRace.Highlander => SubRace.Highlander.ToNameU8(),
+            ModelRace.Elezen     => Race.Elezen.ToNameU8(),
+            ModelRace.Lalafell   => Race.Lalafell.ToNameU8(),
+            ModelRace.Miqote     => Race.Miqote.ToNameU8(),
+            ModelRace.Roegadyn   => Race.Roegadyn.ToNameU8(),
+            ModelRace.AuRa       => Race.AuRa.ToNameU8(),
+            ModelRace.Hrothgar   => Race.Hrothgar.ToNameU8(),
+            ModelRace.Viera      => Race.Viera.ToNameU8(),
+            _                    => Race.Unknown.ToNameU8(),
+        };
+
     /// <summary> Obtain a human-readable name for Race. </summary>
     public static string ToName(this Race race)
         => race switch
