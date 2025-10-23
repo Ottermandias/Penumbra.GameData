@@ -112,7 +112,7 @@ public unsafe class ObjectManager(
         }
     }
 
-    private void InvokeRequiredUpdates()
+    public void InvokeRequiredUpdates()
     {
         foreach (var ac in Value.Item7.Keys)
         {
