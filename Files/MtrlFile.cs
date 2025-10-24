@@ -1,7 +1,7 @@
 using Lumina.Data.Parsing;
+using Luna;
 using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Files.StainMapStructs;
-using Penumbra.GameData.Files.Utility;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files;
