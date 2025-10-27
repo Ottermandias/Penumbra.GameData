@@ -38,76 +38,110 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
 
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("P"u8,        typeColor), new ImEx.ColorText(" | "u8, keyColor),
-            new ImEx.ColorText("[Player Name]@<World Name>"u8, nameColor));
+        ImEx.TextMultiColored("P"u8, typeColor)
+            .Then(" | "u8,                        keyColor)
+            .Then("[Player Name]@<World Name>"u8, nameColor)
+            .End();
 
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("R"u8, typeColor), new ImEx.ColorText(" | "u8, keyColor),
-            new ImEx.ColorText("[Retainer Name]"u8,     nameColor));
+        ImEx.TextMultiColored("R"u8, typeColor)
+            .Then(" | "u8,             keyColor)
+            .Then("[Retainer Name]"u8, nameColor)
+            .End();
 
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("N"u8, typeColor), new ImEx.ColorText(" | "u8,    keyColor),
-            new ImEx.ColorText("[NPC Type]"u8,          npcTypeColor), new ImEx.ColorText(" : "u8, keyColor),
-            new ImEx.ColorText("[Npc Name]"u8,          npcNameColor));
+        var text = ImEx.TextMultiColored("N"u8, typeColor)
+            .Then(" | "u8,        keyColor)
+            .Then("[NPC Type]"u8, npcTypeColor)
+            .Then(" : "u8,        keyColor)
+            .Then("[Npc Name]"u8, npcNameColor);
+
         if (withIndex)
-        {
-            Im.Line.Same(0, 0);
-            ImEx.TextMultiColored(new ImEx.ColorText("@"u8, keyColor), new ImEx.ColorText("<Object Index>"u8, indexColor));
-        }
+            text.Then("@"u8, keyColor)
+                .Then("<Object Index>"u8, indexColor)
+                .End();
+        else
+            text.End();
 
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("All [] or <> brackets are not to be included but are for placeholders, all"u8),
-            new ImEx.ColorText(" bright blue key symbols"u8, keyColor), new ImEx.ColorText(" are relevant."u8));
+        ImEx.TextMultiColored("All [] or <> brackets are not to be included but are for placeholders, all"u8)
+            .Then(" bright blue key symbols"u8, keyColor)
+            .Then(" are relevant."u8)
+            .End();
 
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("O"u8,        typeColor), new ImEx.ColorText(" | "u8,    keyColor),
-            new ImEx.ColorText("[NPC Type]"u8,                 npcTypeColor), new ImEx.ColorText(" : "u8, keyColor),
-            new ImEx.ColorText("[Npc Name]"u8,                 npcNameColor), new ImEx.ColorText(" | "u8, keyColor),
-            new ImEx.ColorText("[Player Name]@<World Name>"u8, nameColor));
+        ImEx.TextMultiColored("O"u8, typeColor)
+            .Then(" | "u8,                        keyColor)
+            .Then("[NPC Type]"u8,                 npcTypeColor)
+            .Then(" : "u8,                        keyColor)
+            .Then("[Npc Name]"u8,                 npcNameColor)
+            .Then(" | "u8,                        keyColor)
+            .Then("[Player Name]@<World Name>"u8, nameColor)
+            .End();
 
         Im.Line.New();
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("[P]"u8, typeColor), new ImEx.ColorText("layer, "u8), new ImEx.ColorText("[R]"u8, typeColor),
-            new ImEx.ColorText("etainer, "u8), new ImEx.ColorText("[N]"u8, typeColor), new ImEx.ColorText("PC, or "u8),
-            new ImEx.ColorText("[O]"u8, typeColor), new ImEx.ColorText("wned describe the identifier type."u8));
+        ImEx.TextMultiColored("[P]"u8, typeColor)
+            .Then("layer, "u8)
+            .Then("[R]"u8, typeColor)
+            .Then("etainer, "u8)
+            .Then("[N]"u8, typeColor)
+            .Then("PC, or "u8)
+            .Then("[O]"u8, typeColor)
+            .Then("wned describe the identifier type."u8)
+            .End();
 
         Im.Line.New();
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("[Player Name]"u8, nameColor), new ImEx.ColorText(" and "u8),
-            new ImEx.ColorText("[Retainer Name]"u8,                 nameColor),
-            new ImEx.ColorText(" must agree with naming rules."u8));
+        ImEx.TextMultiColored("[Player Name]"u8, nameColor)
+            .Then(" and "u8)
+            .Then("[Retainer Name]"u8, nameColor)
+            .Then(" must agree with naming rules."u8)
+            .End();
 
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("<World Name>"u8, nameColor), new ImEx.ColorText(" is optional ("u8),
-            new ImEx.ColorText("Any World"u8,                      nameColor),
-            new ImEx.ColorText(" when not provided), but must be a valid world otherwise."u8));
+        ImEx.TextMultiColored("<World Name>"u8, nameColor)
+            .Then(" is optional ("u8)
+            .Then("Any World"u8, nameColor)
+            .Then(" when not provided), but must be a valid world otherwise."u8)
+            .End();
 
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("[NPC Type]"u8, npcTypeColor), new ImEx.ColorText(" can be "u8),
-            new ImEx.ColorText("[M]"u8, npcTypeColor), new ImEx.ColorText("ount, "u8), new ImEx.ColorText("[C]"u8, npcTypeColor),
-            new ImEx.ColorText("ompanion, "u8), new ImEx.ColorText("[A]"u8, npcTypeColor), new ImEx.ColorText("ccessory, "u8),
-            new ImEx.ColorText("[E]"u8, npcTypeColor), new ImEx.ColorText("vent NPC, or"u8), new ImEx.ColorText("[B]"u8, npcTypeColor),
-            new ImEx.ColorText("attle NPC."u8));
+        ImEx.TextMultiColored("[NPC Type]"u8, npcTypeColor)
+            .Then(" can be "u8)
+            .Then("[M]"u8, npcTypeColor)
+            .Then("ount, "u8)
+            .Then("[C]"u8, npcTypeColor)
+            .Then("ompanion, "u8)
+            .Then("[A]"u8, npcTypeColor)
+            .Then("ccessory, "u8)
+            .Then("[E]"u8, npcTypeColor)
+            .Then("vent NPC, or"u8)
+            .Then("[B]"u8, npcTypeColor)
+            .Then("attle NPC."u8)
+            .End();
 
         Im.Bullet();
         Im.Line.Same();
-        ImEx.TextMultiColored(new ImEx.ColorText("[NPC Name]"u8, npcNameColor),
-            new ImEx.ColorText(" must be a valid, known NPC name for the chosen type."u8));
+        ImEx.TextMultiColored("[NPC Name]"u8, npcNameColor)
+            .Then(" must be a valid, known NPC name for the chosen type."u8)
+            .End();
 
         if (withIndex)
         {
             Im.Bullet();
             Im.Line.Same();
-            ImEx.TextMultiColored(new ImEx.ColorText("<Object Index>"u8, indexColor),
-                new ImEx.ColorText(" is optional and must be a non-negative index into the object table."u8));
+            ImEx.TextMultiColored("<Object Index>"u8, indexColor)
+                .Then(" is optional and must be a non-negative index into the object table."u8)
+                .End();
         }
     }
 
@@ -347,7 +381,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
         for (var i = 1; i < part.Length; ++i)
         {
             var current = part[i];
-            if (current is not ('\'' or '-' or (>= 'a' and <= 'z')))
+            if (current is not ('\'' or '-' or >= 'a' and <= 'z'))
                 return false;
 
             // Hyphens can not be used in succession, after or before apostrophes or as the last symbol.
@@ -378,7 +412,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
         for (var i = 1; i < part.Length; ++i)
         {
             var current = part[i];
-            if (current is not ((byte)'\'' or (byte)'-' or (>= (byte)'a' and <= (byte)'z')))
+            if (current is not ((byte)'\'' or (byte)'-' or >= (byte)'a' and <= (byte)'z'))
                 return false;
 
             // Hyphens can not be used in succession, after or before apostrophes or as the last symbol.
