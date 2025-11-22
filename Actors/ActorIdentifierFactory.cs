@@ -243,12 +243,27 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         return new ActorIdentifier(IdentifierType.Player, ObjectKind.Player, homeWorld, 0, name);
     }
 
+    /// <summary> Create a player from name and home world, bypassing SE naming validation. </summary>
+    internal ActorIdentifier CreatePlayerUnchecked(ByteString name, WorldId homeWorld)
+    {
+        if (!VerifyWorld(homeWorld))
+            return ActorIdentifier.Invalid;
+ 
+        return new ActorIdentifier(IdentifierType.Player, ObjectKind.Player, homeWorld, 0, name);
+    }
+ 
     /// <summary> Create a retainer from name and retainer type. Input is checked for correctness. </summary>
     public ActorIdentifier CreateRetainer(ByteString name, ActorIdentifier.RetainerType type)
     {
         if (!VerifyRetainerName(name.Span))
             return ActorIdentifier.Invalid;
 
+        return new ActorIdentifier(IdentifierType.Retainer, ObjectKind.Retainer, type, 0, name);
+    }
+    
+    /// <summary> Create a retainer from name and retainer type, bypassing SE naming validation. </summary>
+    internal ActorIdentifier CreateRetainerUnchecked(ByteString name, ActorIdentifier.RetainerType type)
+    {
         return new ActorIdentifier(IdentifierType.Retainer, ObjectKind.Retainer, type, 0, name);
     }
 

@@ -62,23 +62,37 @@ public static class ActorIdentifierJson
         {
             case IdentifierType.Player:
             {
-                var name      = ByteString.FromStringUnsafe(data[nameof(ActorIdentifier.PlayerName)]?.ToObject<string>(), false);
+                var rawName   = data[nameof(ActorIdentifier.PlayerName)]?.ToObject<string>();
+                var name      = ByteString.FromStringUnsafe(rawName, false);
                 var homeWorld = data[nameof(ActorIdentifier.HomeWorld)]?.ToObject<ushort>() ?? 0;
+                // If the stored name contains wildcard patterns, bypass SE name verification.
+                if (!string.IsNullOrEmpty(rawName) && rawName.Contains('*'))
+                    return actorManager.CreatePlayerUnchecked(name, homeWorld);
+
                 return actorManager.CreatePlayer(name, homeWorld);
             }
             case IdentifierType.Retainer:
             {
-                var name = ByteString.FromStringUnsafe(data[nameof(ActorIdentifier.PlayerName)]?.ToObject<string>(), false);
+                var rawName      = data[nameof(ActorIdentifier.PlayerName)]?.ToObject<string>();
+                var name         = ByteString.FromStringUnsafe(rawName, false);
                 var retainerType = data[nameof(ActorIdentifier.Retainer)]?.ToObject<ActorIdentifier.RetainerType>()
                  ?? ActorIdentifier.RetainerType.Both;
+                if (!string.IsNullOrEmpty(rawName) && rawName.Contains('*'))
+                    return actorManager.CreateRetainerUnchecked(name, retainerType);
+
                 return actorManager.CreateRetainer(name, retainerType);
             }
             case IdentifierType.Owned:
             {
-                var name      = ByteString.FromStringUnsafe(data[nameof(ActorIdentifier.PlayerName)]?.ToObject<string>(), false);
+                var rawName   = data[nameof(ActorIdentifier.PlayerName)]?.ToObject<string>();
+                var name      = ByteString.FromStringUnsafe(rawName, false);
                 var homeWorld = data[nameof(ActorIdentifier.HomeWorld)]?.ToObject<ushort>() ?? 0;
                 var kind      = data[nameof(ActorIdentifier.Kind)]?.ToObject<ObjectKind>() ?? ObjectKind.CardStand;
                 var dataId    = data[nameof(ActorIdentifier.DataId)]?.ToObject<uint>() ?? 0;
+                // If the owner name contains wildcard patterns, bypass SE name verification.
+                if (!string.IsNullOrEmpty(rawName) && rawName.Contains('*'))
+                    return actorManager.CreateIndividualUnchecked(IdentifierType.Owned, name, homeWorld, kind, dataId);
+
                 return actorManager.CreateOwned(name, homeWorld, kind, dataId);
             }
             case IdentifierType.Special:

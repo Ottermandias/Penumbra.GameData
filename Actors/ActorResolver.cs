@@ -24,6 +24,28 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
                 ObjectKind.None, uint.MaxValue);
     }
 
+    /// <summary> Get a player identifier without SE name validation, using resolver when appropriate. </summary>
+    public ActorIdentifier GetPlayerUnchecked(ActorIdentifierFactory factory, ByteString name, WorldId world)
+    {
+        // If name is empty, try to resolve a current or inspected player to get more accurate data.
+        if (name.IsEmpty)
+        {
+            var current = GetCurrentPlayer(factory);
+            if (current.IsValid)
+                return current;
+
+            var inspect = GetInspectPlayer(factory);
+            if (inspect.IsValid)
+                return inspect;
+        }
+
+        return factory.CreatePlayerUnchecked(name, world);
+    }
+
+    /// <summary> Get a retainer identifier without SE name validation. </summary>
+    public ActorIdentifier GetRetainerUnchecked(ActorIdentifierFactory factory, ByteString name, ActorIdentifier.RetainerType type)
+        => factory.CreateRetainerUnchecked(name, type);
+
     /// <summary> Obtain an identifier for the currently inspected player. </summary>
     public ActorIdentifier GetInspectPlayer(ActorIdentifierFactory factory)
     {
