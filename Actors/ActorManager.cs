@@ -92,11 +92,11 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
         => _resolver.GetGlamourPlayer(this);
 
     /// <inheritdoc cref="ActorResolver.GetPlayerUnchecked(ActorIdentifierFactory,ByteString,WorldId)" />
-    public ActorIdentifier CreatePlayerUnchecked(ByteString name, WorldId homeWorld)
+    public new ActorIdentifier CreatePlayerUnchecked(ByteString name, WorldId homeWorld)
         => _resolver.GetPlayerUnchecked(this, name, homeWorld);
 
     /// <inheritdoc cref="ActorResolver.GetRetainerUnchecked(ActorIdentifierFactory,ByteString,ActorIdentifier.RetainerType)" />
-    public ActorIdentifier CreateRetainerUnchecked(ByteString name, ActorIdentifier.RetainerType type)
+    public new ActorIdentifier CreateRetainerUnchecked(ByteString name, ActorIdentifier.RetainerType type)
         => _resolver.GetRetainerUnchecked(this, name, type);
 
     /// <summary> Use stored data to convert an ActorIdentifier to a string with more accurate data. </summary>
