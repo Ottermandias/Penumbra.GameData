@@ -186,7 +186,7 @@ public class IdentificationDrawer(
     /// <summary> Draw all collected model character to names. </summary>
     private void DrawDictModelChara()
     {
-        DebugUtility.DrawNameTable("Model Chara List", ref _modelCharaFilter, true,
+        DebugUtility.DrawNameTable("Model Chara List"u8, ref _modelCharaFilter, true,
             modelCharas.Select(kvp => ((ulong)kvp.Key.Id, string.Join(", ", kvp.Value.Select(n => n.Name).Distinct()))));
     }
 

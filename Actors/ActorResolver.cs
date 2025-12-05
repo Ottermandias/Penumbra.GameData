@@ -12,12 +12,15 @@ using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 namespace Penumbra.GameData.Actors;
 
 /// <summary> Handles resolving specific situations and actors to actor identifiers. </summary>
-internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _objects, IClientState _clientState)
+internal sealed unsafe class ActorResolver(IGameGui gameGui, ObjectManager objects, IClientState clientState)
 {
+    /// <summary> The object manager to use. </summary>
+    public readonly ObjectManager Objects = objects;
+
     /// <summary> Obtain an identifier for the current player. </summary>
     public ActorIdentifier GetCurrentPlayer(ActorIdentifierFactory factory)
     {
-        var address = _objects[0];
+        var address = Objects[0];
         return !address.Valid
             ? ActorIdentifier.Invalid
             : factory.CreateIndividualUnchecked(IdentifierType.Player, address.Utf8Name, address.AsCharacter->HomeWorld,
@@ -27,7 +30,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     /// <summary> Obtain an identifier for the currently inspected player. </summary>
     public ActorIdentifier GetInspectPlayer(ActorIdentifierFactory factory)
     {
-        var addon = _gameGui.GetAddonByName("CharacterInspect");
+        var addon = gameGui.GetAddonByName("CharacterInspect");
         return addon == nint.Zero
             ? ActorIdentifier.Invalid
             : factory.CreatePlayer(InspectName, InspectWorldId);
@@ -70,10 +73,10 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     public bool ResolveMahjongPlayer(ActorIdentifierFactory factory, ScreenActor type, out ActorIdentifier id)
     {
         id = ActorIdentifier.Invalid;
-        if (_clientState.TerritoryType != 831 && _gameGui.GetAddonByName("EmjIntro") == nint.Zero)
+        if (clientState.TerritoryType != 831 && gameGui.GetAddonByName("EmjIntro") == nint.Zero)
             return false;
 
-        var obj = _objects[(int)type];
+        var obj = Objects[(int)type];
         if (!obj.Valid)
             return false;
 
@@ -96,14 +99,14 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     public bool ResolvePvPBannerPlayer(ActorIdentifierFactory factory, ScreenActor type, out ActorIdentifier id)
     {
         id = ActorIdentifier.Invalid;
-        if (!_clientState.IsPvPExcludingDen)
+        if (!clientState.IsPvPExcludingDen)
             return false;
 
-        var addon = (AtkUnitBase*)_gameGui.GetAddonByName("PvPMap").Address;
+        var addon = (AtkUnitBase*)gameGui.GetAddonByName("PvPMap").Address;
         if (addon == null || addon->IsVisible)
             return false;
 
-        var obj = _objects[(int)type];
+        var obj = Objects[(int)type];
         if (!obj.Valid)
             return false;
 
@@ -132,7 +135,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     /// <summary> Obtain an identifier for glamour interface if it is open. </summary>
     public ActorIdentifier GetGlamourPlayer(ActorIdentifierFactory factory)
     {
-        var addon = _gameGui.GetAddonByName("MiragePrismMiragePlate");
+        var addon = gameGui.GetAddonByName("MiragePrismMiragePlate");
         return addon == nint.Zero ? ActorIdentifier.Invalid : GetCurrentPlayer(factory);
     }
 
@@ -147,7 +150,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     /// <summary> Check if a screen actor at a given index has the same customizations (up to height) as the given character, and return an identifier for the potential owner. </summary>
     private bool SearchPlayerCustomize(ActorIdentifierFactory factory, Actor character, ObjectIndex idx, out ActorIdentifier id)
     {
-        var other = _objects[idx];
+        var other = Objects[idx];
         if (!other.Valid || !CustomizeArray.ScreenActorEquals(character.Customize, other.Customize))
         {
             id = ActorIdentifier.Invalid;
@@ -172,7 +175,7 @@ internal sealed unsafe class ActorResolver(IGameGui _gameGui, ObjectManager _obj
     {
         for (var i = 0; i < ObjectIndex.CutsceneStart.Index; i += 2)
         {
-            var obj = _objects[i];
+            var obj = Objects[i];
             if (obj.IsPlayer && Compare(gameObject, obj))
                 return factory.FromObject(obj, out _, false, true, false);
         }

@@ -1,65 +1,149 @@
+using ImSharp;
+using Luna.Generators;
 using static Penumbra.GameData.Enums.GenderRace;
 
 namespace Penumbra.GameData.Enums;
 
 /// <summary> Available character races for players. </summary>
+[NamedEnum]
 public enum Race : byte
 {
+    [Name("Unknown")]
     Unknown,
+
+    [Name("Hyur")]
     Hyur,
+
+    [Name("Elezen")]
     Elezen,
+
+    [Name("Lalafell")]
     Lalafell,
+
+    [Name("Miqo'te")]
     Miqote,
+
+    [Name("Roegadyn")]
     Roegadyn,
+
+    [Name("Au Ra")]
     AuRa,
+
+    [Name("Hrothgar")]
     Hrothgar,
+
+    [Name("Viera")]
     Viera,
 }
 
 /// <summary> Available character genders. </summary>
+[NamedEnum]
 public enum Gender : byte
 {
+    [Name("Unknown")]
     Unknown,
+
+    [Name("Male")]
     Male,
+
+    [Name("Female")]
     Female,
+
+    [Name("Male (Child)")]
     MaleNpc,
+
+    [Name("Female (Child)")]
     FemaleNpc,
 }
 
 /// <summary> Available model races, which includes Highlanders as a separate model base to Midlanders. </summary>
+[NamedEnum]
 public enum ModelRace : byte
 {
+    [Name("Unknown")]
     Unknown,
+
+    [Name("Midlander")]
     Midlander,
+
+    [Name("Highlander")]
     Highlander,
+
+    [Name("Elezen")]
     Elezen,
+
+    [Name("Lalafell")]
     Lalafell,
+
+    [Name("Miqo'te")]
     Miqote,
+
+    [Name("Roegadyn")]
     Roegadyn,
+
+    [Name("Au Ra")]
     AuRa,
+
+    [Name("Hrothgar")]
     Hrothgar,
+
+    [Name("Viera")]
     Viera,
 }
 
 /// <summary> Available sub-races or clans for player characters. </summary>
+[NamedEnum]
 public enum SubRace : byte
 {
+    [Name("Unknown")]
     Unknown,
+
+    [Name("Midlander")]
     Midlander,
+
+    [Name("Highlander")]
     Highlander,
+
+    [Name("Wildwood")]
     Wildwood,
+
+    [Name("Duskwight")]
     Duskwight,
+
+    [Name("Plainsfolk")]
     Plainsfolk,
+
+    [Name("Dunesfolk")]
     Dunesfolk,
+
+    [Name("Seeker of the Sun")]
     SeekerOfTheSun,
+
+    [Name("Keeper of the Moon")]
     KeeperOfTheMoon,
+
+    [Name("Seawolf")]
     Seawolf,
+
+    [Name("Hellsguard")]
     Hellsguard,
+
+    [Name("Raen")]
     Raen,
+
+    [Name("Xaela")]
     Xaela,
+
+    [Name("Hellion")]
     Helion,
+
+    [Name("Lost")]
     Lost,
+
+    [Name("Rava")]
     Rava,
+
+    [Name("Veena")]
     Veena,
 }
 
@@ -113,10 +197,16 @@ public enum GenderRace : ushort
 
 public static class RaceEnumExtensions
 {
-    private static readonly Dictionary<GenderRace, string> GenderRaceNames = Enum.GetValues<GenderRace>().ToDictionary(g => g, g =>
+    private static readonly Dictionary<GenderRace, string> GenderRaceNamesU16 = Enum.GetValues<GenderRace>().ToDictionary(g => g, g =>
     {
         var (gender, race) = g.Split();
         return $"{race.ToName()} - {gender.ToName()}";
+    });
+
+    private static readonly Dictionary<GenderRace, StringU8> GenderRaceNamesU8 = Enum.GetValues<GenderRace>().ToDictionary(g => g, g =>
+    {
+        var (gender, race) = g.Split();
+        return new StringU8($"{race.ToNameU8()} - {gender.ToNameU8()}");
     });
 
     /// <summary> Convert a ModelRace to a Race, i.e. Midlander and Highlander to Hyur. </summary>
@@ -160,139 +250,13 @@ public static class RaceEnumExtensions
             _                       => Race.Unknown,
         };
 
-    /// <summary> Obtain a human-readable name for a ModelRace. </summary>
-    public static string ToName(this ModelRace modelRace)
-        => modelRace switch
-        {
-            ModelRace.Midlander  => SubRace.Midlander.ToName(),
-            ModelRace.Highlander => SubRace.Highlander.ToName(),
-            ModelRace.Elezen     => Race.Elezen.ToName(),
-            ModelRace.Lalafell   => Race.Lalafell.ToName(),
-            ModelRace.Miqote     => Race.Miqote.ToName(),
-            ModelRace.Roegadyn   => Race.Roegadyn.ToName(),
-            ModelRace.AuRa       => Race.AuRa.ToName(),
-            ModelRace.Hrothgar   => Race.Hrothgar.ToName(),
-            ModelRace.Viera      => Race.Viera.ToName(),
-            _                    => Race.Unknown.ToName(),
-        };
-
-    /// <summary> Obtain a human-readable name for a ModelRace. </summary>
-    public static ReadOnlySpan<byte> ToNameU8(this ModelRace modelRace)
-        => modelRace switch
-        {
-            ModelRace.Midlander  => SubRace.Midlander.ToNameU8(),
-            ModelRace.Highlander => SubRace.Highlander.ToNameU8(),
-            ModelRace.Elezen     => Race.Elezen.ToNameU8(),
-            ModelRace.Lalafell   => Race.Lalafell.ToNameU8(),
-            ModelRace.Miqote     => Race.Miqote.ToNameU8(),
-            ModelRace.Roegadyn   => Race.Roegadyn.ToNameU8(),
-            ModelRace.AuRa       => Race.AuRa.ToNameU8(),
-            ModelRace.Hrothgar   => Race.Hrothgar.ToNameU8(),
-            ModelRace.Viera      => Race.Viera.ToNameU8(),
-            _                    => Race.Unknown.ToNameU8(),
-        };
-
-    /// <summary> Obtain a human-readable name for Race. </summary>
-    public static string ToName(this Race race)
-        => race switch
-        {
-            Race.Hyur     => "Hyur",
-            Race.Elezen   => "Elezen",
-            Race.Lalafell => "Lalafell",
-            Race.Miqote   => "Miqo'te",
-            Race.Roegadyn => "Roegadyn",
-            Race.AuRa     => "Au Ra",
-            Race.Hrothgar => "Hrothgar",
-            Race.Viera    => "Viera",
-            _             => "Unknown",
-        };
-
-    /// <summary> Obtain a human-readable name for Race. </summary>
-    public static ReadOnlySpan<byte> ToNameU8(this Race race)
-        => race switch
-        {
-            Race.Hyur     => "Hyur"u8,
-            Race.Elezen   => "Elezen"u8,
-            Race.Lalafell => "Lalafell"u8,
-            Race.Miqote   => "Miqo'te"u8,
-            Race.Roegadyn => "Roegadyn"u8,
-            Race.AuRa     => "Au Ra"u8,
-            Race.Hrothgar => "Hrothgar"u8,
-            Race.Viera    => "Viera"u8,
-            _             => "Unknown"u8,
-        };
-
-    /// <summary> Obtain a human-readable name for Gender. </summary>
-    public static string ToName(this Gender gender)
-        => gender switch
-        {
-            Gender.Male      => "Male",
-            Gender.Female    => "Female",
-            Gender.MaleNpc   => "Male (Child)",
-            Gender.FemaleNpc => "Female (Child)",
-            _                => "Unknown",
-        };
-
-    /// <summary> Obtain a human-readable name for Gender. </summary>
-    public static ReadOnlySpan<byte> ToNameU8(this Gender gender)
-        => gender switch
-        {
-            Gender.Male      => "Male"u8,
-            Gender.Female    => "Female"u8,
-            Gender.MaleNpc   => "Male (Child)"u8,
-            Gender.FemaleNpc => "Female (Child)"u8,
-            _                => "Unknown"u8,
-        };
-
-    /// <summary> Obtain a human-readable name for SubRace. </summary>
-    public static string ToName(this SubRace subRace)
-        => subRace switch
-        {
-            SubRace.Midlander       => "Midlander",
-            SubRace.Highlander      => "Highlander",
-            SubRace.Wildwood        => "Wildwood",
-            SubRace.Duskwight       => "Duskwight",
-            SubRace.Plainsfolk      => "Plainsfolk",
-            SubRace.Dunesfolk       => "Dunesfolk",
-            SubRace.SeekerOfTheSun  => "Seeker Of The Sun",
-            SubRace.KeeperOfTheMoon => "Keeper Of The Moon",
-            SubRace.Seawolf         => "Seawolf",
-            SubRace.Hellsguard      => "Hellsguard",
-            SubRace.Raen            => "Raen",
-            SubRace.Xaela           => "Xaela",
-            SubRace.Helion          => "Hellion",
-            SubRace.Lost            => "Lost",
-            SubRace.Rava            => "Rava",
-            SubRace.Veena           => "Veena",
-            _                       => "Unknown",
-        };
-
-    /// <summary> Obtain a human-readable name for SubRace. </summary>
-    public static ReadOnlySpan<byte> ToNameU8(this SubRace subRace)
-        => subRace switch
-        {
-            SubRace.Midlander       => "Midlander"u8,
-            SubRace.Highlander      => "Highlander"u8,
-            SubRace.Wildwood        => "Wildwood"u8,
-            SubRace.Duskwight       => "Duskwight"u8,
-            SubRace.Plainsfolk      => "Plainsfolk"u8,
-            SubRace.Dunesfolk       => "Dunesfolk"u8,
-            SubRace.SeekerOfTheSun  => "Seeker Of The Sun"u8,
-            SubRace.KeeperOfTheMoon => "Keeper Of The Moon"u8,
-            SubRace.Seawolf         => "Seawolf"u8,
-            SubRace.Hellsguard      => "Hellsguard"u8,
-            SubRace.Raen            => "Raen"u8,
-            SubRace.Xaela           => "Xaela"u8,
-            SubRace.Helion          => "Hellion"u8,
-            SubRace.Lost            => "Lost"u8,
-            SubRace.Rava            => "Rava"u8,
-            SubRace.Veena           => "Veena"u8,
-            _                       => "Unknown"u8,
-        };
-
     /// <summary> Obtain a combined name for a GenderRace in order {Race} - {Gender}. </summary>
     public static string ToName(this GenderRace genderRace)
-        => GenderRaceNames.GetValueOrDefault(genderRace, "Unknown - Unknown");
+        => GenderRaceNamesU16.GetValueOrDefault(genderRace, "Unknown - Unknown");
+
+    /// <summary> Obtain a combined name for a GenderRace in order {Race} - {Gender}. </summary>
+    public static ReadOnlySpan<byte> ToNameU8(this GenderRace genderRace)
+        => GenderRaceNamesU8.TryGetValue(genderRace, out var ret) ? ret : "Unknown - Unknown"u8;
 
     /// <summary> Obtain abbreviated names for SubRace. </summary>
     public static string ToShortName(this SubRace subRace)

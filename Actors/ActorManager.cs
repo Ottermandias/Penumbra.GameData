@@ -56,7 +56,7 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
     }
 
     private void OnLogin()
-        => _homeWorld = _clientState.LocalPlayer?.HomeWorld.RowId ?? _homeWorld;
+        => _homeWorld = _resolver.Objects[0].IsCharacter ? _resolver.Objects[0].HomeWorld : _homeWorld;
 
     private void OnLogout(int type, int code)
         => _homeWorld = 0;
