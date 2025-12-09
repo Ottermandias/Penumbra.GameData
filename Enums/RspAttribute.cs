@@ -1,26 +1,57 @@
+using Luna.Generators;
+
 namespace Penumbra.GameData.Enums;
 
 /// <summary> All available racial scaling parameters. </summary>
+[NamedEnum]
 public enum RspAttribute : byte
 {
+    [Name("Male Minimum Size")]
     MaleMinSize,
+
+    [Name("Male Maximum Size")]
     MaleMaxSize,
+
+    [Name("Female Minimum Size")]
     MaleMinTail,
+
+    [Name("Female Maximum Size")]
     MaleMaxTail,
+
+    [Name("Bust Minimum X-Axis")]
     FemaleMinSize,
+
+    [Name("Bust Maximum X-Axis")]
     FemaleMaxSize,
+
+    [Name("Bust Minimum Y-Axis")]
     FemaleMinTail,
+
+    [Name("Bust Maximum Y-Axis")]
     FemaleMaxTail,
+
+    [Name("Bust Minimum Z-Axis")]
     BustMinX,
+
+    [Name("Bust Maximum Z-Axis")]
     BustMinY,
+
+    [Name("Male Minimum Tail Length")]
     BustMinZ,
+
+    [Name("Male Maximum Tail Length")]
     BustMaxX,
+
+    [Name("Female Minimum Tail Length")]
     BustMaxY,
+
+    [Name("Female Maximum Tail Length")]
     BustMaxZ,
+
     NumAttributes,
 }
 
-public static class RspAttributeExtensions
+public static partial class RspAttributeExtensions
 {
     /// <summary> For which gender a certain racial scaling parameter is available. </summary>
     public static Gender ToGender(this RspAttribute attribute)
@@ -41,26 +72,5 @@ public static class RspAttributeExtensions
             RspAttribute.BustMaxY      => Gender.Female,
             RspAttribute.BustMaxZ      => Gender.Female,
             _                          => Gender.Unknown,
-        };
-
-    /// <summary> Human-readable names for all racial scaling parameters. </summary>
-    public static string ToFullString(this RspAttribute attribute)
-        => attribute switch
-        {
-            RspAttribute.MaleMinSize   => "Male Minimum Size",
-            RspAttribute.MaleMaxSize   => "Male Maximum Size",
-            RspAttribute.FemaleMinSize => "Female Minimum Size",
-            RspAttribute.FemaleMaxSize => "Female Maximum Size",
-            RspAttribute.BustMinX      => "Bust Minimum X-Axis",
-            RspAttribute.BustMaxX      => "Bust Maximum X-Axis",
-            RspAttribute.BustMinY      => "Bust Minimum Y-Axis",
-            RspAttribute.BustMaxY      => "Bust Maximum Y-Axis",
-            RspAttribute.BustMinZ      => "Bust Minimum Z-Axis",
-            RspAttribute.BustMaxZ      => "Bust Maximum Z-Axis",
-            RspAttribute.MaleMinTail   => "Male Minimum Tail Length",
-            RspAttribute.MaleMaxTail   => "Male Maximum Tail Length",
-            RspAttribute.FemaleMinTail => "Female Minimum Tail Length",
-            RspAttribute.FemaleMaxTail => "Female Maximum Tail Length",
-            _                          => throw new InvalidEnumArgumentException(),
         };
 }
