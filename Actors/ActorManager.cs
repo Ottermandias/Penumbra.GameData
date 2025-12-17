@@ -17,6 +17,7 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
 
     private readonly ActorResolver _resolver;
     private readonly IClientState  _clientState;
+    private readonly IPlayerState  _playerState;
     private          uint          _homeWorld;
 
 
@@ -42,11 +43,13 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
         ObjectManager objects,
         IClientState clientState,
         IGameGui gameGui,
-        CutsceneResolver toParentIdx)
+        CutsceneResolver toParentIdx, 
+        IPlayerState playerState)
         : base(objects, framework, data, toParentIdx)
     {
         Data         = data;
         _clientState = clientState;
+        _playerState = playerState;
         _resolver    = new ActorResolver(gameGui, objects, clientState);
         // Set the static manager if it is unset.
         ActorIdentifierExtensions.Manager ??= this;
@@ -56,7 +59,7 @@ public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncSe
     }
 
     private void OnLogin()
-        => _homeWorld = _clientState.LocalPlayer?.HomeWorld.RowId ?? _homeWorld;
+        => _homeWorld = _playerState.HomeWorld.RowId;
 
     private void OnLogout(int type, int code)
         => _homeWorld = 0;
