@@ -1,4 +1,4 @@
-<Project Sdk="Dalamud.NET.Sdk/13.1.0">
+<Project Sdk="Dalamud.NET.Sdk/14.0.1">
     <PropertyGroup>
         <AssemblyTitle>Penumbra.GameData</AssemblyTitle>
         <Product>Penumbra</Product>
