@@ -21,7 +21,7 @@ public sealed class RestrictedItemsRace(IDalamudPluginInterface pluginInterface,
 
         var items      = gameData.GetExcelSheet<Item>();
         var categories = gameData.GetExcelSheet<EquipRaceCategory>(gameData.Language);
-        foreach (var item in items.Where(i => i.EquipRestriction > 3))
+        foreach (var item in items.Where(i => i is { EquipRestriction: > 3, ModelMain: not 0 }))
         {
             if (ret.Contains((uint)item.ModelMain))
                 continue;
