@@ -1,20 +1,59 @@
-﻿namespace Penumbra.GameData.Enums;
+﻿using Luna.Generators;
+
+namespace Penumbra.GameData.Enums;
 
 /// <summary> Flags for all theoretically available crest positions. </summary>
 [Flags]
+[NamedEnum("ToLabel")]
+[TooltipEnum]
 public enum CrestFlag : ushort
 {
-    OffHand  = 0x0001,
-    Head     = 0x0002,
-    Body     = 0x0004,
-    Hands    = 0x0008,
-    Legs     = 0x0010,
-    Feet     = 0x0020,
-    Ears     = 0x0040,
-    Neck     = 0x0080,
-    Wrists   = 0x0100,
-    RFinger  = 0x0200,
-    LFinger  = 0x0400,
+    [Name("Shield")]
+    [Tooltip("Shield Crest")]
+    OffHand = 0x0001,
+
+    [Name("Head")]
+    [Tooltip("Head Crest")]
+    Head = 0x0002,
+
+    [Name("Chest")]
+    [Tooltip("Chest Crest")]
+    Body = 0x0004,
+
+    [Name("Gauntlets")]
+    [Tooltip("Gauntlets Crest")]
+    Hands = 0x0008,
+
+    [Name("Pants")]
+    [Tooltip("Pants Crest")]
+    Legs = 0x0010,
+
+    [Name("Boots")]
+    [Tooltip("Boots Crest")]
+    Feet = 0x0020,
+
+    [Name("Earrings")]
+    [Tooltip("Earrings Crest")]
+    Ears = 0x0040,
+
+    [Name("Necklace")]
+    [Tooltip("Necklace Crest")]
+    Neck = 0x0080,
+
+    [Name("Bracelet")]
+    [Tooltip("Bracelet Crest")]
+    Wrists = 0x0100,
+
+    [Name("Right Ring")]
+    [Tooltip("Right Ring Crest")]
+    RFinger = 0x0200,
+
+    [Name("Left Ring")]
+    [Tooltip("Left Ring Crest")]
+    LFinger = 0x0400,
+
+    [Name("Weapon")]
+    [Tooltip("Weapon Crest")]
     MainHand = 0x0800,
 }
 
@@ -84,24 +123,5 @@ public static class CrestExtensions
             EquipSlot.RFinger  => CrestFlag.RFinger,
             EquipSlot.LFinger  => CrestFlag.LFinger,
             _                  => 0,
-        };
-
-    /// <summary> Get a human-readable  name for a crest flag.</summary>
-    public static string ToLabel(this CrestFlag flag)
-        => flag switch
-        {
-            CrestFlag.Head     => "Head",
-            CrestFlag.Body     => "Chest",
-            CrestFlag.Hands    => "Gauntlets",
-            CrestFlag.Legs     => "Pants",
-            CrestFlag.Feet     => "Boot",
-            CrestFlag.Ears     => "Earrings",
-            CrestFlag.Neck     => "Necklace",
-            CrestFlag.Wrists   => "Bracelet",
-            CrestFlag.RFinger  => "Right Ring",
-            CrestFlag.LFinger  => "Left Ring",
-            CrestFlag.MainHand => "Weapon",
-            CrestFlag.OffHand  => "Shield",
-            _                  => string.Empty,
         };
 }
