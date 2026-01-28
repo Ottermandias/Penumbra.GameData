@@ -1,4 +1,6 @@
-﻿namespace Penumbra.GameData.Enums;
+﻿using ImSharp;
+
+namespace Penumbra.GameData.Enums;
 
 /// <summary> All options that can be configured for humans via the customize array. </summary>
 public enum CustomizeIndex : byte
@@ -104,45 +106,45 @@ public static class CustomizationExtensions
 
 
     /// <summary> Get the human-readable name for a customization option. </summary>
-    public static string ToDefaultName(this CustomizeIndex customizeIndex)
+    public static ReadOnlySpan<byte> ToDefaultName(this CustomizeIndex customizeIndex)
         => customizeIndex switch
         {
-            CustomizeIndex.Race              => "Race",
-            CustomizeIndex.Gender            => "Gender",
-            CustomizeIndex.BodyType          => "Body Type",
-            CustomizeIndex.Height            => "Height",
-            CustomizeIndex.Clan              => "Clan",
-            CustomizeIndex.Face              => "Head Style",
-            CustomizeIndex.Hairstyle         => "Hair Style",
-            CustomizeIndex.Highlights        => "Enable Highlights",
-            CustomizeIndex.SkinColor         => "Skin Color",
-            CustomizeIndex.EyeColorRight     => "Right Eye",
-            CustomizeIndex.HairColor         => "Hair Color",
-            CustomizeIndex.HighlightsColor   => "Highlights Color",
-            CustomizeIndex.TattooColor       => "Feature Color",
-            CustomizeIndex.Eyebrows          => "Eyebrow Style",
-            CustomizeIndex.EyeColorLeft      => "Left Eye",
-            CustomizeIndex.EyeShape          => "Small Pupils",
-            CustomizeIndex.Nose              => "Nose Style",
-            CustomizeIndex.Jaw               => "Jaw Style",
-            CustomizeIndex.Mouth             => "Mouth Style",
-            CustomizeIndex.MuscleMass        => "Muscle Tone",
-            CustomizeIndex.TailShape         => "Tail Shape",
-            CustomizeIndex.BustSize          => "Bust Size",
-            CustomizeIndex.FacePaint         => "Face Paint",
-            CustomizeIndex.FacePaintColor    => "Face Paint Color",
-            CustomizeIndex.LipColor          => "Lip Color",
-            CustomizeIndex.FacialFeature1    => "Facial Feature 1",
-            CustomizeIndex.FacialFeature2    => "Facial Feature 2",
-            CustomizeIndex.FacialFeature3    => "Facial Feature 3",
-            CustomizeIndex.FacialFeature4    => "Facial Feature 4",
-            CustomizeIndex.FacialFeature5    => "Facial Feature 5",
-            CustomizeIndex.FacialFeature6    => "Facial Feature 6",
-            CustomizeIndex.FacialFeature7    => "Facial Feature 7",
-            CustomizeIndex.LegacyTattoo      => "Legacy Tattoo",
-            CustomizeIndex.SmallIris         => "Small Iris",
-            CustomizeIndex.Lipstick          => "Enable Lipstick",
-            CustomizeIndex.FacePaintReversed => "Reverse Face Paint",
-            _                                => string.Empty,
+            CustomizeIndex.Race              => "Race"u8,
+            CustomizeIndex.Gender            => "Gender"u8,
+            CustomizeIndex.BodyType          => "Body Type"u8,
+            CustomizeIndex.Height            => "Height"u8,
+            CustomizeIndex.Clan              => "Clan"u8,
+            CustomizeIndex.Face              => "Head Style"u8,
+            CustomizeIndex.Hairstyle         => "Hair Style"u8,
+            CustomizeIndex.Highlights        => "Enable Highlights"u8,
+            CustomizeIndex.SkinColor         => "Skin Color"u8,
+            CustomizeIndex.EyeColorRight     => "Right Eye"u8,
+            CustomizeIndex.HairColor         => "Hair Color"u8,
+            CustomizeIndex.HighlightsColor   => "Highlights Color"u8,
+            CustomizeIndex.TattooColor       => "Feature Color"u8,
+            CustomizeIndex.Eyebrows          => "Eyebrow Style"u8,
+            CustomizeIndex.EyeColorLeft      => "Left Eye"u8,
+            CustomizeIndex.EyeShape          => "Small Pupils"u8,
+            CustomizeIndex.Nose              => "Nose Style"u8,
+            CustomizeIndex.Jaw               => "Jaw Style"u8,
+            CustomizeIndex.Mouth             => "Mouth Style"u8,
+            CustomizeIndex.MuscleMass        => "Muscle Tone"u8,
+            CustomizeIndex.TailShape         => "Tail Shape"u8,
+            CustomizeIndex.BustSize          => "Bust Size"u8,
+            CustomizeIndex.FacePaint         => "Face Paint"u8,
+            CustomizeIndex.FacePaintColor    => "Face Paint Color"u8,
+            CustomizeIndex.LipColor          => "Lip Color"u8,
+            CustomizeIndex.FacialFeature1    => "Facial Feature 1"u8,
+            CustomizeIndex.FacialFeature2    => "Facial Feature 2"u8,
+            CustomizeIndex.FacialFeature3    => "Facial Feature 3"u8,
+            CustomizeIndex.FacialFeature4    => "Facial Feature 4"u8,
+            CustomizeIndex.FacialFeature5    => "Facial Feature 5"u8,
+            CustomizeIndex.FacialFeature6    => "Facial Feature 6"u8,
+            CustomizeIndex.FacialFeature7    => "Facial Feature 7"u8,
+            CustomizeIndex.LegacyTattoo      => "Legacy Tattoo"u8,
+            CustomizeIndex.SmallIris         => "Small Iris"u8,
+            CustomizeIndex.Lipstick          => "Enable Lipstick"u8,
+            CustomizeIndex.FacePaintReversed => "Reverse Face Paint"u8,
+            _                                => StringU8.Empty,
         };
 }

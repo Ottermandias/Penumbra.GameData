@@ -1,4 +1,6 @@
-﻿namespace Penumbra.GameData.Interop;
+﻿using Luna;
+
+namespace Penumbra.GameData.Interop;
 
 /// <summary>
 /// A single actor with its label and the list of associated game objects.
@@ -25,12 +27,12 @@ public readonly struct ActorData
         Label   = string.Empty;
     }
 
-    public Lazy<string> ToLazyString(string invalid)
+    public LazyString ToLazyString(string invalid)
     {
         var objects = Objects;
         return Valid
-            ? new Lazy<string>(() => string.Join(", ", objects.Select(o => o.ToString())))
-            : new Lazy<string>(() => invalid);
+            ? new LazyString(() => string.Join(", ", objects.Select(o => o.ToString())))
+            : new LazyString(invalid);
     }
 
     private ActorData(List<Actor> objects, string label)
