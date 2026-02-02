@@ -1,4 +1,5 @@
-﻿using Luna.Generators;
+﻿using ImSharp;
+using Luna.Generators;
 
 namespace Penumbra.GameData.Enums;
 
@@ -75,7 +76,7 @@ public static class CrestExtensions
     public const CrestFlag AllRelevant = CrestFlag.Head | CrestFlag.Body | CrestFlag.OffHand;
 
     /// <summary> A set of the crest flags in use by the game. </summary>
-    public static readonly IReadOnlyList<CrestFlag> AllRelevantSet = Enum.GetValues<CrestFlag>().Where(f => AllRelevant.HasFlag(f)).ToArray();
+    public static readonly IReadOnlyList<CrestFlag> AllRelevantSet = CrestFlag.Values.Where(f => AllRelevant.HasFlag(f)).ToArray();
 
     /// <summary> An internally used index that assigns consecutive numbers to the crest flags in use. </summary>
     public static int ToInternalIndex(this CrestFlag flag)

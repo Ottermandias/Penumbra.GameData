@@ -1,5 +1,6 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using ImSharp;
 using Lumina.Excel.Sheets;
 using Luna;
 using Penumbra.GameData.DataContainers.Bases;
@@ -17,7 +18,7 @@ public sealed class ItemsByType(IDalamudPluginInterface pi, Logger log, IDataMan
     /// <summary> Create the data. </summary>
     private static IReadOnlyList<PseudoEquipItem>[] CreateItems(IDataManager dataManager, DictBonusItems bonusItems)
     {
-        var tmp = Enum.GetValues<FullEquipType>().Select(_ => new List<EquipItem>(1024)).ToArray();
+        var tmp = FullEquipType.Values.Select(_ => new List<EquipItem>(1024)).ToArray();
 
         var itemSheet = dataManager.GetExcelSheet<Item>(dataManager.Language)!;
         // Take all items with actual names.
@@ -29,10 +30,10 @@ public sealed class ItemsByType(IDalamudPluginInterface pi, Logger log, IDataMan
             if (type.IsWeapon() || type.IsTool())
             {
                 var mh = EquipItem.FromMainhand(item);
-                if (item.ModelMain != 0)
+                if (item.ModelMain is not 0)
                     tmp[(int)type].Add(mh);
 
-                if (item.ModelSub == 0)
+                if (item.ModelSub is 0)
                     continue;
 
                 // The game uses a hack for fist weapons where they have a tertiary gauntlet model in the secondary slot,
@@ -62,7 +63,7 @@ public sealed class ItemsByType(IDalamudPluginInterface pi, Logger log, IDataMan
             tmp[(int)item.Type].Add(item);
 
         var ret = new IReadOnlyList<PseudoEquipItem>[tmp.Length];
-        ret[0] = Array.Empty<PseudoEquipItem>();
+        ret[0] = [];
         // Order all collected items, plug it into the list and shrink to fit to arrays.
         for (var i = 1; i < tmp.Length; ++i)
             ret[i] = tmp[i].OrderBy(item => item.Name).Select(s => (PseudoEquipItem)s).ToArray();
@@ -108,7 +109,7 @@ public sealed class ItemsByType(IDalamudPluginInterface pi, Logger log, IDataMan
 
     /// <inheritdoc/>
     public IEnumerable<FullEquipType> Keys
-        => Enum.GetValues<FullEquipType>().Skip(1);
+        => FullEquipType.Values.Skip(1);
 
     /// <inheritdoc/>
     public IEnumerable<IReadOnlyList<EquipItem>> Values

@@ -52,7 +52,7 @@ public class DictJobGroupDrawer(DictJobGroup jobGroups, DictJob jobs) : IGameDat
                 var idString    = new StringU8($"{group.Id.Id:D3}");
                 var countString = new StringU8($"{group.Count}");
                 var jobsString = StringU8.Join(", "u8,
-                    group.Iterate().Select(j => new StringU8($"{jobs[j].Abbreviation} ({jobs[j].Id.Id})").ToList()));
+                    group.Iterate().Where(j => j != 0).Select(j => new StringU8($"{jobs[j].Abbreviation} ({jobs[j].Id.Id})")));
                 Data.Add((idString, group.Name, countString, jobsString));
             }
         }

@@ -1,3 +1,4 @@
+using ImSharp;
 using Lumina.Excel.Sheets;
 
 namespace Penumbra.GameData.Enums;
@@ -545,26 +546,26 @@ public static class FullEquipTypeExtensions
 
     /// <summary> A list of all weapon types. </summary>
     public static readonly IReadOnlyList<FullEquipType> WeaponTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.IsWeapon()).Except([FullEquipType.UnknownMainhand])
+        = FullEquipType.Values.Where(v => v.IsWeapon()).Except([FullEquipType.UnknownMainhand])
             .ToArray();
 
     /// <summary> A list of all tool types, including offhands. </summary>
     public static readonly IReadOnlyList<FullEquipType> ToolTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.IsTool()).ToArray();
+        = FullEquipType.Values.Where(v => v.IsTool()).ToArray();
 
     /// <summary> A list of all equipment types. </summary>
     public static readonly IReadOnlyList<FullEquipType> EquipmentTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.IsEquipment()).ToArray();
+        = FullEquipType.Values.Where(v => v.IsEquipment()).ToArray();
 
     /// <summary> A list of all accessory types. </summary>
     public static readonly IReadOnlyList<FullEquipType> AccessoryTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.IsAccessory()).ToArray();
+        = FullEquipType.Values.Where(v => v.IsAccessory()).ToArray();
 
     /// <summary> A list of all inferred offhand types. </summary>
     public static readonly IReadOnlyList<FullEquipType> OffhandTypes
-        = Enum.GetValues<FullEquipType>().Where(IsOffhandType).ToArray();
+        = FullEquipType.Values.Where(IsOffhandType).ToArray();
 
     /// <summary> A list of all inferred offhand types. </summary>
     public static readonly IReadOnlyList<FullEquipType> BonusTypes
-        = Enum.GetValues<FullEquipType>().Where(IsBonus).ToArray();
+        = FullEquipType.Values.Where(IsBonus).ToArray();
 }

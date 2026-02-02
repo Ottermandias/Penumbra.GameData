@@ -1,6 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using ImSharp;
 using Luna;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -15,7 +16,7 @@ public sealed class ItemsPrimaryModel(IDalamudPluginInterface pi, Logger log, ID
     private static FrozenDictionary<ulong, PseudoEquipItem> CreateMainItems(ItemsByType items)
     {
         var dict = new Dictionary<ulong, PseudoEquipItem>(1024 * 16);
-        foreach (var type in Enum.GetValues<FullEquipType>().Where(v => !FullEquipTypeExtensions.OffhandTypes.Contains(v)))
+        foreach (var type in FullEquipType.Values.Where(v => !FullEquipTypeExtensions.OffhandTypes.Contains(v)))
         {
             var list = items.Value[(int)type];
             if (type is FullEquipType.Hands)

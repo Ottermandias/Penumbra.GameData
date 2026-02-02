@@ -1,3 +1,4 @@
+using ImSharp;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
 
@@ -27,7 +28,7 @@ public class ItemDataDrawer(ItemData data) : IGameDataDrawer
             data.AllItems(false).Select(p => ((ulong)p.Item1.Id,
                     $"{p.Item2.Name} ({(p.Item2.SecondaryId == 0 ? p.Item2.Armor().ToString() : p.Item2.Weapon().ToString())})"))
                 .OrderBy(p => p.Item1));
-        foreach (var type in Enum.GetValues<FullEquipType>().Skip(1))
+        foreach (var type in FullEquipType.Values.Skip(1))
         {
             DebugUtility.DrawNameTable(type.ToName(), ref _itemFilter, true,
                 data.ByType[type]

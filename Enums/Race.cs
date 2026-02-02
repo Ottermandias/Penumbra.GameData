@@ -197,13 +197,13 @@ public enum GenderRace : ushort
 
 public static class RaceEnumExtensions
 {
-    private static readonly Dictionary<GenderRace, string> GenderRaceNamesU16 = Enum.GetValues<GenderRace>().ToDictionary(g => g, g =>
+    private static readonly Dictionary<GenderRace, string> GenderRaceNamesU16 = GenderRace.Values.ToDictionary(g => g, g =>
     {
         var (gender, race) = g.Split();
         return $"{race.ToName()} - {gender.ToName()}";
     });
 
-    private static readonly Dictionary<GenderRace, StringU8> GenderRaceNamesU8 = Enum.GetValues<GenderRace>().ToDictionary(g => g, g =>
+    private static readonly Dictionary<GenderRace, StringU8> GenderRaceNamesU8 = GenderRace.Values.ToDictionary(g => g, g =>
     {
         var (gender, race) = g.Split();
         return new StringU8($"{race.ToNameU8()} - {gender.ToNameU8()}");

@@ -46,7 +46,7 @@ public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDra
 
             var finished = c is not IAsyncService a || a.Finished;
             table.DrawColumn(c.Name);
-            table.DrawColumn(finished.ToString());
+            table.DrawColumn($"{finished}");
             if (!finished)
             {
                 table.NextRow();
@@ -54,7 +54,7 @@ public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDra
             else
             {
                 table.DrawColumn($"{c.Time / 1000}.{c.Time % 1000:D3} s");
-                table.DrawColumn(c.TotalCount.ToString());
+                table.DrawColumn($"{c.TotalCount}");
                 table.DrawColumn(FormattingFunctions.HumanReadableSize(c.Memory));
             }
         }

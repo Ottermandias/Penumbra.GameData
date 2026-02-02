@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using ImSharp;
 using Luna.Generators;
 
 namespace Penumbra.GameData.Enums;
@@ -368,10 +369,10 @@ public static partial class EquipSlotExtensions
     }
 
     /// <summary> A list of all primary equipment pieces. </summary>
-    public static readonly IReadOnlyList<EquipSlot> EquipmentSlots = Enum.GetValues<EquipSlot>().Where(e => e.IsEquipment()).ToArray();
+    public static readonly IReadOnlyList<EquipSlot> EquipmentSlots = EquipSlot.Values.Where(e => e.IsEquipment()).ToArray();
 
     /// <summary> A list of all secondary equipment pieces. </summary>
-    public static readonly IReadOnlyList<EquipSlot> AccessorySlots = Enum.GetValues<EquipSlot>().Where(e => e.IsAccessory()).ToArray();
+    public static readonly IReadOnlyList<EquipSlot> AccessorySlots = EquipSlot.Values.Where(e => e.IsAccessory()).ToArray();
 
     /// <summary> A list of all primary and secondary equipment pieces. </summary>
     public static readonly IReadOnlyList<EquipSlot> EqdpSlots = EquipmentSlots.Concat(AccessorySlots).ToArray();

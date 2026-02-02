@@ -33,7 +33,7 @@ public class RestrictedGearDrawer(RestrictedGear restrictedGear, RestrictedItems
     {
         ImEx.TextFrameAligned("Resolve Model"u8);
         ModelInput.DrawArmorInput(ref _resolveArmor);
-        foreach (var race in Enum.GetValues<Race>().Skip(1))
+        foreach (var race in Race.Values.Skip(1))
         {
             ReadOnlySpan<Gender> genders = [Gender.Male, Gender.Female];
             foreach (var gender in genders)
