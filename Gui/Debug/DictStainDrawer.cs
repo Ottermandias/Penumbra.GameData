@@ -42,23 +42,21 @@ public class DictStainDrawer(DictStain stains) : IGameDataDrawer
         //}
     }
 
-    private record CachedStain(StringU8 Id, StringU8 Data, Stain Stain, StringU8 Name, string IdU16)
+    private record CachedStain(StringU8 Id, StringU8 Data, Stain Stain)
     {
         public CachedStain(Stain stain)
             : this(new StringU8($"{stain.RowIndex.Id:D3}"),
                 new StringU8($"#{stain.R:X2}{stain.G:X2}{stain.B:X2}{(stain.Gloss ? ", Glossy" : string.Empty)}"),
-                stain,
-                new StringU8(stain.Name),
-                $"{stain.RowIndex.Id:D3}")
+                stain)
         { }
     }
 
-    private sealed class Filter : TextFilterBase<CachedStain>
+    private sealed class Filter : Utf8FilterBase<CachedStain>
     {
         public override bool WouldBeVisible(in CachedStain item, int globalIndex)
-            => Text.Length is 0 || item.Stain.Name.Contains(Text, Comparison) || item.IdU16.Contains(Text, Comparison);
+            => Text.Length is 0 || item.Stain.Name.ContainsCaseInsensitive(Text) || item.Id.ContainsCaseInsensitive(Text);
 
-        protected override string ToFilterString(in CachedStain item, int globalIndex)
+        protected override ReadOnlySpan<byte> ToFilterString(in CachedStain item, int globalIndex)
             => item.Stain.Name;
     }
 

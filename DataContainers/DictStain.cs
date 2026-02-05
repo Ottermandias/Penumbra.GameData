@@ -1,6 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using ImSharp;
 using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
@@ -10,25 +11,27 @@ namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps StainIds to Stains. </summary>
 public sealed class DictStain(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
-    : DataSharer<IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)>>(pluginInterface, log, "Stains", gameData.Language, Version.DictStain,
+    : DataSharer<IReadOnlyDictionary<byte, (ReadOnlyMemory<byte> Name, uint Dye, bool Gloss)>>(pluginInterface, log, "Stains",
+        gameData.Language, Version.DictStain,
         () => CreateStainData(gameData)), IReadOnlyDictionary<StainId, Stain>
 {
     /// <summary> Create the data. </summary>
-    private static IReadOnlyDictionary<byte, (string Name, uint Dye, bool Gloss)> CreateStainData(IDataManager dataManager)
+    private static IReadOnlyDictionary<byte, (ReadOnlyMemory<byte> Name, uint Dye, bool Gloss)> CreateStainData(IDataManager dataManager)
     {
         var stainSheet = dataManager.GetExcelSheet<Lumina.Excel.Sheets.Stain>(dataManager.Language);
         return stainSheet.Where(s => s.Color != 0 && s.Name.ByteLength > 0)
             .ToFrozenDictionary(s => (byte)s.RowId, s =>
             {
                 var stain = new Stain(s);
-                return (stain.Name, stain.RgbaColor, stain.Gloss);
+                return (stain.Name.Memory, stain.RgbaColor.Color, stain.Gloss);
             });
     }
 
     /// <inheritdoc/>
     public IEnumerator<KeyValuePair<StainId, Stain>> GetEnumerator()
         => Value.Select(kvp
-                => new KeyValuePair<StainId, Stain>(new StainId(kvp.Key), new Stain(kvp.Value.Name, kvp.Value.Dye, kvp.Key, kvp.Value.Gloss)))
+                => new KeyValuePair<StainId, Stain>(new StainId(kvp.Key),
+                    new Stain(StringU8.CreateUnchecked(kvp.Value.Name), kvp.Value.Dye, kvp.Key, kvp.Value.Gloss)))
             .GetEnumerator();
 
     /// <inheritdoc/>
@@ -52,7 +55,7 @@ public sealed class DictStain(IDalamudPluginInterface pluginInterface, Logger lo
             return false;
         }
 
-        value = new Stain(data.Name, data.Dye, key.Id, data.Gloss);
+        value = new Stain(StringU8.CreateUnchecked(data.Name), data.Dye, key.Id, data.Gloss);
         return true;
     }
 
@@ -66,7 +69,7 @@ public sealed class DictStain(IDalamudPluginInterface pluginInterface, Logger lo
 
     /// <inheritdoc/>
     public IEnumerable<Stain> Values
-        => Value.Select(kvp => new Stain(kvp.Value.Name, kvp.Value.Dye, kvp.Key, kvp.Value.Gloss));
+        => Value.Select(kvp => new Stain(StringU8.CreateUnchecked(kvp.Value.Name), kvp.Value.Dye, kvp.Key, kvp.Value.Gloss));
 
     /// <inheritdoc/>
     protected override long ComputeMemory()
