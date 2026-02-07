@@ -33,6 +33,8 @@ public enum AtchType : uint
 
     [Name("Katana")]
     Katana = ((uint)'2' << 16) | ((uint)'k' << 8) | 't',
+
+    [Name(Omit: true)]
     Unknown2kz = ((uint)'2' << 16) | ((uint)'k' << 8) | 'z',
 
     [Name("Rapier")]
@@ -79,33 +81,59 @@ public enum AtchType : uint
 
     [Name("Carpenter (AWO)")]
     CarpenterAwo = ((uint)'a' << 16) | ((uint)'w' << 8) | 'o',
+
+    [Name(Omit: true)]
     UnknownAtr = ((uint)'a' << 16) | ((uint)'t' << 8) | 'r',
+
+    [Name(Omit: true)]
     UnknownAvt = ((uint)'a' << 16) | ((uint)'v' << 8) | 't',
 
     [Name("Aetherotransformer (Machinist)")]
     Aetherotransformer = ((uint)'b' << 16) | ((uint)'a' << 8) | 'g',
-    UnknownBl2 = ((uint)'b' << 16) | ((uint)'l' << 8) | '2',
-    UnknownBld = ((uint)'b' << 16) | ((uint)'l' << 8) | 'd',
+
+    [Name("Twinblade (Left Hand)")]
+    Bl2 = ((uint)'b' << 16) | ((uint)'l' << 8) | '2',
+
+    [Name("Twinblade (Right Hand)")]
+    Bld = ((uint)'b' << 16) | ((uint)'l' << 8) | 'd',
+
+    [Name(Omit: true)]
     UnknownBll = ((uint)'b' << 16) | ((uint)'l' << 8) | 'l',
+
+    [Name(Omit: true)]
     UnknownBrs = ((uint)'b' << 16) | ((uint)'r' << 8) | 's',
 
     [Name("Chakrams")]
     Chakrams = ((uint)'c' << 16) | ((uint)'h' << 8) | 'k',
+
+    [Name(Omit: true)]
     UnknownClb = ((uint)'c' << 16) | ((uint)'l' << 8) | 'b',
 
     [Name("Gloves")]
     Gloves = ((uint)'c' << 16) | ((uint)'l' << 8) | 'g',
+
+    [Name(Omit: true)]
     UnknownCls = ((uint)'c' << 16) | ((uint)'l' << 8) | 's', // Linked to axes
 
     [Name("Claws")]
     Claws = ((uint)'c' << 16) | ((uint)'l' << 8) | 'w',
+
+    [Name(Omit: true)]
     UnknownCol = ((uint)'c' << 16) | ((uint)'o' << 8) | 'l',
+
+    [Name(Omit: true)]
     UnknownCor = ((uint)'c' << 16) | ((uint)'o' << 8) | 'r',
+
+    [Name(Omit: true)]
     UnknownCos = ((uint)'c' << 16) | ((uint)'o' << 8) | 's',
 
     [Name("Cardholder")]
     Cardholder = ((uint)'c' << 16) | ((uint)'r' << 8) | 'd',
+
+    [Name(Omit: true)]
     UnknownCrr = ((uint)'c' << 16) | ((uint)'r' << 8) | 'r',
+
+    [Name(Omit: true)]
     UnknownCrt = ((uint)'c' << 16) | ((uint)'r' << 8) | 't',
 
     [Name("Carpenter (CSL)")]
@@ -122,10 +150,20 @@ public enum AtchType : uint
 
     [Name("Shroud (Reaper)")]
     ReaperShroud = ((uint)'e' << 16) | ((uint)'b' << 8) | 'z',
+
+    [Name(Omit: true)]
     UnknownEgp = ((uint)'e' << 16) | ((uint)'g' << 8) | 'p',
+
+    [Name(Omit: true)]
     UnknownElg = ((uint)'e' << 16) | ((uint)'l' << 8) | 'g',
+
+    [Name(Omit: true)]
     UnknownFcb = ((uint)'f' << 16) | ((uint)'c' << 8) | 'b',
+
+    [Name(Omit: true)]
     UnknownFch = ((uint)'f' << 16) | ((uint)'c' << 8) | 'h',
+
+    [Name(Omit: true)]
     UnknownFdr = ((uint)'f' << 16) | ((uint)'d' << 8) | 'r',
 
     [Name("Fisher (FHA)")]
@@ -148,12 +186,26 @@ public enum AtchType : uint
 
     [Name("Fist Weapons")]
     FistWeapons = ((uint)'f' << 16) | ((uint)'s' << 8) | 'w',
+
+    [Name(Omit: true)]
     UnknownFud = ((uint)'f' << 16) | ((uint)'u' << 8) | 'd',
+
+    [Name(Omit: true)]
     UnknownGdb = ((uint)'g' << 16) | ((uint)'d' << 8) | 'b',
+
+    [Name(Omit: true)]
     UnknownGdh = ((uint)'g' << 16) | ((uint)'d' << 8) | 'h',
+
+    [Name(Omit: true)]
     UnknownGdl = ((uint)'g' << 16) | ((uint)'d' << 8) | 'l',
+
+    [Name(Omit: true)]
     UnknownGdr = ((uint)'g' << 16) | ((uint)'d' << 8) | 'r',
+
+    [Name(Omit: true)]
     UnknownGdt = ((uint)'g' << 16) | ((uint)'d' << 8) | 't',
+
+    [Name(Omit: true)]
     UnknownGdw = ((uint)'g' << 16) | ((uint)'d' << 8) | 'w',
 
     [Name("Deployable (Machinist)")]
@@ -161,9 +213,11 @@ public enum AtchType : uint
 
     [Name("Diadem Cannon")]
     DiademCannon = ((uint)'g' << 16) | ((uint)'s' << 8) | 'r', // unsure
+
+    [Name(Omit: true)]
     UnknownGun = ((uint)'g' << 16) | ((uint)'u' << 8) | 'n',
 
-    [Name("")]
+    [Name(Omit: true)]
     UnknownHel = ((uint)'h' << 16) | ((uint)'e' << 8) | 'l',
 
     [Name("Blacksmith / Armorer")]
@@ -177,11 +231,17 @@ public enum AtchType : uint
 
     [Name("Katana Sheathe")]
     KatanaSheathe = ((uint)'k' << 16) | ((uint)'s' << 8) | 'h',
+
+    [Name(Omit: true)]
     UnknownLet = ((uint)'l' << 16) | ((uint)'e' << 8) | 't',
+
+    [Name(Omit: true)]
     UnknownLpr = ((uint)'l' << 16) | ((uint)'p' << 8) | 'r', // Linked to 1923
 
     [Name("Goldsmith (MLT)")]
     GoldsmithMlt = ((uint)'m' << 16) | ((uint)'l' << 8) | 't',
+
+    [Name(Omit: true)]
     UnknownMmc = ((uint)'m' << 16) | ((uint)'m' << 8) | 'c',
 
     [Name("Alchemist (MRB)")]
@@ -198,7 +258,11 @@ public enum AtchType : uint
 
     [Name("Weaver (NDL)")]
     WeaverNdl = ((uint)'n' << 16) | ((uint)'d' << 8) | 'l',
+
+    [Name(Omit: true)]
     UnknownNik = ((uint)'n' << 16) | ((uint)'i' << 8) | 'k', // Linked to Nier pod
+    
+    [Name(Omit:true)]
     UnknownNjd = ((uint)'n' << 16) | ((uint)'j' << 8) | 'd',
 
     [Name("Botanist (NPH)")]
@@ -206,13 +270,23 @@ public enum AtchType : uint
 
     [Name("Focus (Redmage)")]
     Focus = ((uint)'o' << 16) | ((uint)'r' << 8) | 'b',
+
+    [Name(Omit: true)]
     UnknownOum = ((uint)'o' << 16) | ((uint)'u' << 8) | 'm',
+    
+    [Name(Omit:true)]
     UnknownPen = ((uint)'p' << 16) | ((uint)'e' << 8) | 'n', // Linked to daggers
 
     [Name("Pickaxe")]
     Pickaxe = ((uint)'p' << 16) | ((uint)'i' << 8) | 'c',
+
+    [Name(Omit: true)]
     UnknownPlt = ((uint)'p' << 16) | ((uint)'l' << 8) | 't',
+    
+    [Name(Omit:true)]
     UnknownPra = ((uint)'p' << 16) | ((uint)'r' << 8) | 'a',
+    
+    [Name(Omit:true)]
     UnknownPrc = ((uint)'p' << 16) | ((uint)'r' << 8) | 'c',
 
     [Name("Leatherworker (PRF)")]
@@ -220,20 +294,32 @@ public enum AtchType : uint
 
     [Name("Quiver (Bard)")]
     Quiver = ((uint)'q' << 16) | ((uint)'v' << 8) | 'r',
+
+    [Name(Omit: true)]
     UnknownRap = ((uint)'r' << 16) | ((uint)'a' << 8) | 'p',
 
     [Name("Rabbit Medium (Ninja)")]
     NinjaRabbit = ((uint)'r' << 16) | ((uint)'b' << 8) | 't',
+
+    [Name(Omit: true)]
     UnknownRec = ((uint)'r' << 16) | ((uint)'e' << 8) | 'c',
 
     [Name("Cane")]
     Cane = ((uint)'r' << 16) | ((uint)'o' << 8) | 'd',
+    
+    [Name(Omit:true)]
     UnknownRop = ((uint)'r' << 16) | ((uint)'o' << 8) | 'p',
+
+    [Name(Omit: true)]
     UnknownRp1 = ((uint)'r' << 16) | ((uint)'o' << 8) | '1',
 
     [Name("Saw")]
     Saw = ((uint)'s' << 16) | ((uint)'a' << 8) | 'w',
+    
+    [Name(Omit:true)]
     UnknownSbt = ((uint)'s' << 16) | ((uint)'b' << 8) | 't',
+
+    [Name(Omit: true)]
     UnknownSht = ((uint)'s' << 16) | ((uint)'h' << 8) | 't',
 
     [Name("Fisher (SIC)")]
@@ -250,18 +336,32 @@ public enum AtchType : uint
 
     [Name("Sword")]
     Sword = ((uint)'s' << 16) | ((uint)'w' << 8) | 'd',
+    
+    [Name(Omit:true)]
     UnknownSxs = ((uint)'s' << 16) | ((uint)'x' << 8) | 's',
+
+    [Name(Omit: true)]
     UnknownSxw = ((uint)'s' << 16) | ((uint)'x' << 8) | 'w',
 
     [Name("Sniper Rifle (Machinist)")]
     SniperRifle = ((uint)'s' << 16) | ((uint)'y' << 8) | 'l',
+    
+    [Name(Omit:true)]
     UnknownSyr = ((uint)'s' << 16) | ((uint)'y' << 8) | 'r',
+    
+    [Name(Omit:true)]
     UnknownSyu = ((uint)'s' << 16) | ((uint)'y' << 8) | 'u',
+    
+    [Name(Omit:true)]
     UnknownSyw = ((uint)'s' << 16) | ((uint)'y' << 8) | 'w',
+
+    [Name(Omit: true)]
     UnknownTan = ((uint)'t' << 16) | ((uint)'a' << 8) | 'n',
 
     [Name("Goldsmith (TBL)")]
     GoldsmithTbl = ((uint)'t' << 16) | ((uint)'b' << 8) | 'l',
+
+    [Name(Omit: true)]
     UnknownTcs = ((uint)'t' << 16) | ((uint)'c' << 8) | 's',
 
     [Name("Goldsmith (TGN)")]
@@ -269,15 +369,29 @@ public enum AtchType : uint
 
     [Name("Weaver (TMB)")]
     WeaverTmb = ((uint)'t' << 16) | ((uint)'m' << 8) | 'b',
+    
+    [Name(Omit:true)]
     UnknownTms = ((uint)'t' << 16) | ((uint)'m' << 8) | 's',
+    
+    [Name(Omit:true)]
     UnknownTrm = ((uint)'t' << 16) | ((uint)'r' << 8) | 'm', // Linked to Flutes
+    
+    [Name(Omit:true)]
     UnkownnTrr = ((uint)'t' << 16) | ((uint)'r' << 8) | 'r',
+    
+    [Name(Omit:true)]
     UnknownTrw = ((uint)'t' << 16) | ((uint)'r' << 8) | 'w', // Linked to Greatswords
+
+    [Name(Omit: true)]
     UnknownVln = ((uint)'t' << 16) | ((uint)'l' << 8) | 'n',
 
     [Name("Weaver (WHL)")]
     WeaverWhl = ((uint)'w' << 16) | ((uint)'h' << 8) | 'l',
+    
+    [Name(Omit:true)]
     UnknownWng = ((uint)'w' << 16) | ((uint)'n' << 8) | 'g',
+
+    [Name(Omit: true)]
     UnknownYpd = ((uint)'y' << 16) | ((uint)'p' << 8) | 'd',
 
     [Name("Armorer (YTK)")]
