@@ -15,14 +15,15 @@ public class DictJobGroupDrawer(DictJobGroup jobGroups, DictJob jobs) : IGameDat
     /// <inheritdoc/>
     public void Draw()
     {
+        var cacheId = Im.Id.Current;
         if (Im.Checkbox("Show All Job Groups"u8, ref _showAll))
-            CacheManager.Instance.SetCustomDirty(Im.Id.Current);
+            CacheManager.Instance.SetCustomDirty(cacheId);
 
         using var table = Im.Table.Begin("##groups"u8, 4, TableFlags.SizingFixedFit | TableFlags.RowBackground);
         if (!table)
             return;
 
-        var cache = CacheManager.Instance.GetOrCreateCache(Im.Id.Current, () => new Cache(this, jobGroups, jobs));
+        var cache = CacheManager.Instance.GetOrCreateCache(cacheId, () => new Cache(this, jobGroups, jobs));
         foreach (var (id, group, count, jobList) in cache.Data)
         {
             table.DrawColumn(id);

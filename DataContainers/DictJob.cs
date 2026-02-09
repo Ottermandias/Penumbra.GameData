@@ -19,10 +19,10 @@ public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
             .ToFrozenDictionary(j => (JobId)j.RowId, j => new Job(j));
 
         Ordered = _jobs.Select(kvp => (sheet.GetRow(kvp.Key.Id), kvp.Value))
-            .OrderBy(j => j.Item1.JobIndex == 0)
+            .OrderBy(j => j.Item1.JobIndex is 0)
             .ThenBy(j => j.Item1.IsLimitedJob)
-            .ThenBy(j => j.Item2.Role)
-            .Select(j => j.Item2)
+            .ThenBy(j => j.Value.Role)
+            .Select(j => j.Value)
             .ToArray();
 
         Memory = DataUtility.DictionaryMemory(32, Count)
