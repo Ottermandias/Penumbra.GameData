@@ -55,7 +55,7 @@ public readonly struct Stain
     /// <summary> Simple constructor for all data. </summary>
     internal Stain(StringU8 name, uint dye, StainId index, bool gloss)
     {
-        Name      = new StringU8(name);
+        Name      = name;
         RowIndex  = index;
         Gloss     = gloss;
         RgbaColor = dye;
