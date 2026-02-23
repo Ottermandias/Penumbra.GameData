@@ -10,6 +10,9 @@ namespace Penumbra.GameData.DataContainers;
 /// <summary> A dictionary containing all the jobs. This is rather small and simple so not shared via data share. </summary>
 public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
 {
+    /// <summary> Flags for all available jobs at once. </summary>
+    public readonly JobFlag AllAvailableJobs;
+
     /// <summary> Create jobs. </summary>
     public DictJob(IDataManager gameData)
     {
@@ -25,6 +28,7 @@ public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
             .Select(j => j.Value)
             .ToArray();
 
+        AllAvailableJobs = Ordered.Select(j => (JobFlag)(1ul << j.Id.Id)).Aggregate((f1, f2) => f1 | f2);
         Memory = DataUtility.DictionaryMemory(32, Count)
           + _jobs.Sum(kvp => kvp.Value.Name.Length + kvp.Value.Abbreviation.Length) * 2
           + DataUtility.ArrayMemory(32, Count);
