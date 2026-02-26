@@ -12,40 +12,40 @@ public enum RspAttribute : byte
     [Name("Male Maximum Size")]
     MaleMaxSize,
 
-    [Name("Female Minimum Size")]
+    [Name("Male Minimum Tail Length")]
     MaleMinTail,
 
-    [Name("Female Maximum Size")]
+    [Name("Male Maximum Tail Length")]
     MaleMaxTail,
 
-    [Name("Bust Minimum X-Axis")]
+    [Name("Female Minimum Size")]
     FemaleMinSize,
 
-    [Name("Bust Maximum X-Axis")]
+    [Name("Female Maximum Size")]
     FemaleMaxSize,
 
-    [Name("Bust Minimum Y-Axis")]
+    [Name("Female Minimum Tail Length")]
     FemaleMinTail,
 
-    [Name("Bust Maximum Y-Axis")]
+    [Name("Female Maximum Tail Length")]
     FemaleMaxTail,
 
-    [Name("Bust Minimum Z-Axis")]
+    [Name("Bust Minimum X-Axis")]
     BustMinX,
 
-    [Name("Bust Maximum Z-Axis")]
+    [Name("Bust Minimum Y-Axis")]
     BustMinY,
 
-    [Name("Male Minimum Tail Length")]
+    [Name("Bust Minimum Z-Axis")]
     BustMinZ,
 
-    [Name("Male Maximum Tail Length")]
+    [Name("Bust Maximum X-Axis")]
     BustMaxX,
 
-    [Name("Female Minimum Tail Length")]
+    [Name("Bust Maximum Y-Axis")]
     BustMaxY,
 
-    [Name("Female Maximum Tail Length")]
+    [Name("Bust Maximum Z-Axis")]
     BustMaxZ,
 
     NumAttributes,
