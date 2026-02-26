@@ -1,6 +1,5 @@
 using Dalamud.Game;
-using OtterGui.Log;
-using OtterGui.Services;
+using Luna;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 
@@ -52,7 +51,7 @@ public class GamePathParser(Logger log) : IService
 
     /// <summary> Get the key of a VFX symbol. </summary>
     /// <returns>The lower-case key or an empty string if no match is found.</returns>
-    public string VfxToKey(string path)
+    public static string VfxToKey(string path)
     {
         var match = Parser.Character.Tmb().Match(path);
         if (match.Success)
@@ -63,7 +62,7 @@ public class GamePathParser(Logger log) : IService
     }
 
     /// <summary> Obtain the ObjectType from a given path.</summary>
-    public ObjectType PathToObjectType(string path)
+    public static ObjectType PathToObjectType(string path)
     {
         if (path.Length == 0)
             return ObjectType.Unknown;

@@ -1,33 +1,32 @@
-using Dalamud.Bindings.ImGui;
-using OtterGui.Log;
-using OtterGui.Widgets;
+using ImSharp;
 using Penumbra.GameData.DataContainers;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Gui;
 
 /// <summary> A combo for selecting worlds by name, or the 'Any World' entry. </summary>
-public sealed class WorldCombo : FilterComboCache<KeyValuePair<WorldId, string>>
+public sealed class WorldCombo(DictWorld worlds) : SimpleFilterCombo<KeyValuePair<WorldId, string>>(SimpleFilterType.Text)
 {
     /// <summary> Always the first entry that can be selected. </summary>
     private const string AnyWorldString = "Any World";
 
-    /// <summary> Create a new WorldCombo. </summary>
-    /// <param name="worlds"> The dictionary of worlds. </param>
-    /// <param name="log"> A logger. </param>
-    public WorldCombo(DictWorld worlds, Logger log)
-        : base(worlds.OrderBy(kvp => kvp.Value).Prepend(new KeyValuePair<WorldId, string>(WorldId.AnyWorld, AnyWorldString)), MouseWheelType.None, log)
-    {
-        // Start with the Any World entry selected.
-        CurrentSelection    = new KeyValuePair<WorldId, string>(WorldId.AnyWorld, AnyWorldString);
-        CurrentSelectionIdx = 0;
-    }
+    private KeyValuePair<WorldId, string> _selected = new(WorldId.AnyWorld, AnyWorldString);
 
-    /// <summary> Just print the name. </summary>
-    protected override string ToString(KeyValuePair<WorldId, string> obj)
-        => obj.Value;
+    public KeyValuePair<WorldId, string> Selected
+        => _selected;
 
-    /// <summary> Simple draw invoke. </summary>
+    public override StringU8 DisplayString(in KeyValuePair<WorldId, string> value)
+        => new(value.Value);
+
+    public override string FilterString(in KeyValuePair<WorldId, string> value)
+        => value.Value;
+
+    public override IEnumerable<KeyValuePair<WorldId, string>> GetBaseItems()
+        => worlds.OrderBy(kvp => kvp.Value).Prepend(new KeyValuePair<WorldId, string>(WorldId.AnyWorld, AnyWorldString));
+
+    protected override bool IsSelected(SimpleCacheItem<KeyValuePair<WorldId, string>> item, int globalIndex)
+        => item.Item.Key == Selected.Key;
+
     public bool Draw(float width)
-        => Draw("##worldCombo", CurrentSelection.Value, string.Empty, width, ImGui.GetTextLineHeightWithSpacing());
+        => Draw("##world"u8, ref _selected, ""u8, width);
 }

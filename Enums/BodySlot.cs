@@ -1,4 +1,6 @@
 using System.Collections.Frozen;
+using ImSharp;
+using Luna.Generators;
 
 namespace Penumbra.GameData.Enums;
 
@@ -59,6 +61,6 @@ public static partial class Names
 {
     /// <summary> A dictionary converting path suffices into BodySlot. </summary>
     public static readonly IReadOnlyDictionary<string, BodySlot> StringToBodySlot =
-        Enum.GetValues<BodySlot>().Skip(1).Select(s => (s.ToSuffix(), s)).Append(("base", BodySlot.Body))
+        BodySlot.Values.Skip(1).Select(s => (s.ToSuffix(), s)).Append(("base", BodySlot.Body))
             .ToFrozenDictionary(p => p.Item1, p => p.Item2);
 }

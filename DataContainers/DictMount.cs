@@ -2,7 +2,7 @@ using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using OtterGui.Log;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
@@ -14,7 +14,7 @@ public sealed class DictMount(IDalamudPluginInterface pluginInterface, Logger lo
     : NameDictionary(pluginInterface, log, gameData, "Mounts", Version.DictMount, () => CreateMountData(gameData))
 {
     /// <summary> Create the data. </summary>
-    private static IReadOnlyDictionary<uint, string> CreateMountData(IDataManager gameData)
+    private static FrozenDictionary<uint, string> CreateMountData(IDataManager gameData)
     {
         var sheet = gameData.GetExcelSheet<Mount>(gameData.Language);
         var dict  = new Dictionary<uint, string>(sheet.Count);

@@ -3,7 +3,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using OtterGui.Log;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Structs;
@@ -25,40 +25,38 @@ public sealed class DictModelChara(
         IReadOnlyDictionary<ModelCharaId, IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>>
 {
     /// <summary> Create the data. </summary>
-    private static IReadOnlyList<IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>> CreateModelObjects(IDataManager gameData,
+    private static IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>[] CreateModelObjects(IDataManager gameData,
         DictBNpcNames bNpcNames, NameDicts nameDicts)
     {
-        var modelSheet = gameData.GetExcelSheet<ModelChara>(gameData.Language)!;
+        var modelSheet = gameData.GetExcelSheet<ModelChara>(gameData.Language);
         var bag        = new ConcurrentBag<(int ModelID, string Name, ObjectKind Kind, uint Id)>();
-        var ret = Enumerable
-            .Repeat((IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>)Array.Empty<(string Name, ObjectKind Kind, uint Id)>(),
-                (int)modelSheet.Count).ToArray();
+        var ret        = Enumerable.Repeat<IReadOnlyList<(string Name, ObjectKind Kind, uint Id)>>([], modelSheet.Count).ToArray();
 
         // Add Ornaments.
         var oTask = System.Threading.Tasks.Task.Run(() =>
         {
-            foreach (var ornament in gameData.GetExcelSheet<Ornament>(gameData.Language)!)
+            foreach (var ornament in gameData.GetExcelSheet<Ornament>(gameData.Language))
                 AddChara(ornament.Model, ObjectKind.Ornament, ornament.RowId, ornament.RowId);
         });
 
         // Add Mounts.
         var mTask = System.Threading.Tasks.Task.Run(() =>
         {
-            foreach (var mount in gameData.GetExcelSheet<Mount>(gameData.Language)!)
+            foreach (var mount in gameData.GetExcelSheet<Mount>(gameData.Language))
                 AddChara((int)mount.ModelChara.RowId, ObjectKind.MountType, mount.RowId, mount.RowId);
         });
 
         // Add Companions.
         var cTask = System.Threading.Tasks.Task.Run(() =>
         {
-            foreach (var companion in gameData.GetExcelSheet<Companion>(gameData.Language)!)
+            foreach (var companion in gameData.GetExcelSheet<Companion>(gameData.Language))
                 AddChara((int)companion.Model.RowId, ObjectKind.Companion, companion.RowId, companion.RowId);
         });
 
         // Add EventNPCs.
         var eTask = System.Threading.Tasks.Task.Run(() =>
         {
-            foreach (var eNpc in gameData.GetExcelSheet<ENpcBase>(gameData.Language)!)
+            foreach (var eNpc in gameData.GetExcelSheet<ENpcBase>(gameData.Language))
                 AddChara((int)eNpc.ModelChara.RowId, ObjectKind.EventNpc, eNpc.RowId, eNpc.RowId);
         });
 
@@ -68,7 +66,7 @@ public sealed class DictModelChara(
         };
 
         // Add all Battle NPCs by the reverse name resolving.
-        Parallel.ForEach(gameData.GetExcelSheet<BNpcBase>(gameData.Language)!.Where(b => b.RowId < bNpcNames.Count), options, bNpc =>
+        Parallel.ForEach(gameData.GetExcelSheet<BNpcBase>(gameData.Language).Where(b => b.RowId < bNpcNames.Count), options, bNpc =>
         {
             foreach (var name in bNpcNames[bNpc.RowId])
                 AddChara((int)bNpc.ModelChara.RowId, ObjectKind.BattleNpc, name.Id, bNpc.RowId);

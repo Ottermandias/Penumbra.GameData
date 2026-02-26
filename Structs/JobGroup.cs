@@ -1,4 +1,4 @@
-﻿using Dalamud.Utility;
+﻿using ImSharp;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 
@@ -18,7 +18,7 @@ public enum JobFlag : ulong
 public readonly struct JobGroup
 {
     /// <summary> The name of the group. </summary>
-    public readonly string Name;
+    public readonly StringU8 Name;
 
     /// <summary> The number of jobs contained in the group. </summary>
     public readonly int Count;
@@ -38,7 +38,7 @@ public readonly struct JobGroup
         Count = 0;
         Flags = 0ul;
         Id    = (JobGroupId)group.RowId;
-        Name  = group.Name.ToString();
+        Name  = new StringU8(group.Name.Data);
 
         Debug.Assert(jobs.Count < 64, $"Number of Jobs exceeded 63 ({jobs.Count}).");
         foreach (var job in jobs)
@@ -79,7 +79,7 @@ public readonly struct JobGroup
 
     /// <inheritdoc/>
     public override string ToString()
-        => Name;
+        => Name.ToString();
 
     /// <summary> Iterate over all jobs set in this group. </summary>
     public IEnumerable<JobId> Iterate()

@@ -1,4 +1,4 @@
-﻿using OtterGui.Log;
+﻿using Luna;
 
 namespace Penumbra.GameData.Interop;
 
@@ -32,7 +32,7 @@ public readonly struct ActorData
         var objects = Objects;
         return Valid
             ? new LazyString(() => string.Join(", ", objects.Select(o => o.ToString())))
-            : new LazyString(() => invalid);
+            : new LazyString(invalid);
     }
 
     private ActorData(List<Actor> objects, string label)

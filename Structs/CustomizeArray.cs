@@ -1,3 +1,4 @@
+using ImSharp;
 using Penumbra.GameData.Enums;
 using Penumbra.String.Functions;
 
@@ -99,7 +100,7 @@ public unsafe struct CustomizeArray : IEquatable<CustomizeArray>, IReadOnlyColle
     public static CustomizeFlag Compare(CustomizeArray lhs, CustomizeArray rhs)
     {
         CustomizeFlag ret = 0;
-        foreach (var idx in Enum.GetValues<CustomizeIndex>())
+        foreach (var idx in CustomizeIndex.Values)
         {
             var l = lhs[idx];
             var r = rhs[idx];

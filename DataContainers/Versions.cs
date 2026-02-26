@@ -11,7 +11,7 @@ public static class Version
     public const int DictActionOffset = 9;
     public const int DictAction       = GlobalOffset + DictActionOffset;
 
-    public const int DictStainOffset = 5;
+    public const int DictStainOffset = 6;
     public const int DictStain       = UsesExtractTextOffset + DictStainOffset;
 
     public const int HumanModelOffset = 5;
@@ -21,7 +21,7 @@ public static class Version
     public const int IdentificationListModels       = GlobalOffset + IdentificationListModelsOffset;
 
     // Names
-    public const int DictBNpcNamesOffset = 5;
+    public const int DictBNpcNamesOffset = 6;
     public const int DictBNpcNames       = GlobalOffset + DictBNpcNamesOffset;
 
     public const int DictCompanionOffset = 9;

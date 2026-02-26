@@ -1,8 +1,7 @@
 using System.Threading;
 using Dalamud.Game;
 using Dalamud.Plugin;
-using OtterGui.Log;
-using OtterGui.Services;
+using Luna;
 
 namespace Penumbra.GameData.DataContainers.Bases;
 

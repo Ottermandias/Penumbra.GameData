@@ -1,8 +1,7 @@
 using FlatSharp;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Enums;
-using Penumbra.GameData.Files.Utility;
-using ArrayInputBuffer = FlatSharp.ArrayInputBuffer;
 using FlatBufferDeserializationOption = FlatSharp.FlatBufferDeserializationOption;
 
 namespace Penumbra.GameData.Files;

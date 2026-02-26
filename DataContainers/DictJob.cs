@@ -1,7 +1,7 @@
 using System.Collections.Frozen;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using OtterGui.Services;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Structs;
 
@@ -10,6 +10,9 @@ namespace Penumbra.GameData.DataContainers;
 /// <summary> A dictionary containing all the jobs. This is rather small and simple so not shared via data share. </summary>
 public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
 {
+    /// <summary> Flags for all available jobs at once. </summary>
+    public readonly JobFlag AllAvailableJobs;
+
     /// <summary> Create jobs. </summary>
     public DictJob(IDataManager gameData)
     {
@@ -19,12 +22,13 @@ public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
             .ToFrozenDictionary(j => (JobId)j.RowId, j => new Job(j));
 
         Ordered = _jobs.Select(kvp => (sheet.GetRow(kvp.Key.Id), kvp.Value))
-            .OrderBy(j => j.Item1.JobIndex == 0)
+            .OrderBy(j => j.Item1.JobIndex is 0)
             .ThenBy(j => j.Item1.IsLimitedJob)
-            .ThenBy(j => j.Item2.Role)
-            .Select(j => j.Item2)
+            .ThenBy(j => j.Value.Role)
+            .Select(j => j.Value)
             .ToArray();
 
+        AllAvailableJobs = Ordered.Select(j => (JobFlag)(1ul << j.Id.Id)).Aggregate((f1, f2) => f1 | f2);
         Memory = DataUtility.DictionaryMemory(32, Count)
           + _jobs.Sum(kvp => kvp.Value.Name.Length + kvp.Value.Abbreviation.Length) * 2
           + DataUtility.ArrayMemory(32, Count);
@@ -67,7 +71,7 @@ public sealed class DictJob : IDataContainer, IReadOnlyDictionary<JobId, Job>
         => _jobs.ContainsKey(key);
 
     /// <inheritdoc/>
-    public bool TryGetValue(JobId key, out Job value)
+    public bool TryGetValue(JobId key, [NotNullWhen(true)] out Job? value)
         => _jobs.TryGetValue(key, out value);
 
     /// <inheritdoc/>

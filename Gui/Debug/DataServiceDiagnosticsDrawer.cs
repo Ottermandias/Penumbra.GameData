@@ -1,9 +1,5 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
-using OtterGui;
-using OtterGui.Extensions;
-using OtterGui.Services;
+using ImSharp;
+using Luna;
 
 namespace Penumbra.GameData.Gui.Debug;
 
@@ -11,8 +7,8 @@ namespace Penumbra.GameData.Gui.Debug;
 public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDrawer
 {
     /// <inheritdoc/>
-    public string Label
-        => "Diagnostics";
+    public ReadOnlySpan<byte> Label
+        => "Diagnostics"u8;
 
     private string _filter = string.Empty;
     private int    _orderBy;
@@ -20,20 +16,20 @@ public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDra
     /// <inheritdoc/>
     public void Draw()
     {
-        ImGui.InputTextWithHint("##filter", "Filter...", ref _filter, 64);
+        Im.Input.Text("##filter"u8, ref _filter, "Filter..."u8);
         DrawSortCombo();
-        using var table = ImRaii.Table("services", 5, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg);
+        using var table = Im.Table.Begin("services"u8, 5, TableFlags.SizingFixedFit | TableFlags.RowBackground);
         if (!table)
             return;
 
-        ImGui.TableSetupScrollFreeze(0, 1);
-        ImGui.TableSetupColumn("Name",           ImGuiTableColumnFlags.WidthFixed, 300 * ImGuiHelpers.GlobalScale);
-        ImGui.TableSetupColumn("Available",      ImGuiTableColumnFlags.WidthFixed, 55 * ImGuiHelpers.GlobalScale);
-        ImGui.TableSetupColumn("Setup Time",     ImGuiTableColumnFlags.WidthFixed, 100 * ImGuiHelpers.GlobalScale);
-        ImGui.TableSetupColumn("Total Items",    ImGuiTableColumnFlags.WidthFixed, 100 * ImGuiHelpers.GlobalScale);
-        ImGui.TableSetupColumn("Approx. Memory", ImGuiTableColumnFlags.WidthFixed, 100 * ImGuiHelpers.GlobalScale);
+        table.SetupScrollFreeze(0, 1);
+        table.SetupColumn("Name"u8,           TableColumnFlags.WidthFixed, 300 * Im.Style.GlobalScale);
+        table.SetupColumn("Available"u8,      TableColumnFlags.WidthFixed, 55 * Im.Style.GlobalScale);
+        table.SetupColumn("Setup Time"u8,     TableColumnFlags.WidthFixed, 100 * Im.Style.GlobalScale);
+        table.SetupColumn("Total Items"u8,    TableColumnFlags.WidthFixed, 100 * Im.Style.GlobalScale);
+        table.SetupColumn("Approx. Memory"u8, TableColumnFlags.WidthFixed, 100 * Im.Style.GlobalScale);
 
-        ImGui.TableHeadersRow();
+        table.HeaderRow();
         var services = manager.GetServicesImplementing<IDataContainer>();
         services = _orderBy switch
         {
@@ -49,17 +45,17 @@ public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDra
                 continue;
 
             var finished = c is not IAsyncService a || a.Finished;
-            ImGuiUtil.DrawTableColumn(c.Name);
-            ImGuiUtil.DrawTableColumn(finished.ToString());
+            table.DrawColumn(c.Name);
+            table.DrawColumn($"{finished}");
             if (!finished)
             {
-                ImGui.TableNextRow();
+                table.NextRow();
             }
             else
             {
-                ImGuiUtil.DrawTableColumn($"{c.Time / 1000}.{c.Time % 1000:D3} s");
-                ImGuiUtil.DrawTableColumn(c.TotalCount.ToString());
-                ImGuiUtil.DrawTableColumn(Functions.HumanReadableSize(c.Memory));
+                table.DrawColumn($"{c.Time / 1000}.{c.Time % 1000:D3} s");
+                table.DrawColumn($"{c.TotalCount}");
+                table.DrawColumn(FormattingFunctions.HumanReadableSize(c.Memory));
             }
         }
     }
@@ -71,16 +67,26 @@ public class DataServiceDiagnosticsDrawer(ServiceManager manager) : IGameDataDra
     /// <summary> Sort the table. </summary>
     private void DrawSortCombo()
     {
-        string[] names = ["Name", "Time", "Memory", "Items"];
-
-        using var combo = ImRaii.Combo("Sort Order", names[_orderBy]);
+        using var combo = Im.Combo.Begin("Sort Order"u8, ToName(_orderBy));
         if (!combo)
             return;
 
-        foreach (var (name, idx) in names.WithIndex())
+        foreach (var idx in Enumerable.Range(0, 4))
         {
-            if (ImGui.Selectable(name, _orderBy == idx))
+            if (Im.Selectable(ToName(idx), _orderBy == idx))
                 _orderBy = idx;
         }
+
+        return;
+
+        static ReadOnlySpan<byte> ToName(int idx)
+            => idx switch
+            {
+                0 => "Name"u8,
+                1 => "Time"u8,
+                2 => "Memory"u8,
+                3 => "Items"u8,
+                _ => ""u8,
+            };
     }
 }

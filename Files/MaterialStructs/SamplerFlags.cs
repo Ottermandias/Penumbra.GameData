@@ -1,3 +1,5 @@
+using Luna.Generators;
+
 namespace Penumbra.GameData.Files.MaterialStructs;
 
 [StructLayout(LayoutKind.Sequential)]
@@ -48,6 +50,7 @@ public struct SamplerFlags(uint flags) : IEquatable<SamplerFlags>
     public static bool operator !=(SamplerFlags left, SamplerFlags right)
         => left.Flags != right.Flags;
 
+    [NamedEnum(Utf16: false)]
     public enum TextureAddressMode : uint
     {
         Wrap   = 0,

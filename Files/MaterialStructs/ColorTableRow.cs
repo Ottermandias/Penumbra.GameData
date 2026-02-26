@@ -346,6 +346,22 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
         TileTransform = oldRow.TileTransform;
     }
 
+    public static float RoughnessFromShininess(float shininess)
+    {
+        // Solves for Roughness from Shininess using -6 R^2 + 12 R = 6.25 - 0.75 log2(S).
+        // The RHS is the "reflection mip from shininess" formula from the old shaders.
+        // The LHS is the "reflection mip from roughness" formula from the new shaders.
+        var mip = MathF.FusedMultiplyAdd(-0.75f, MathF.Log2(shininess), 6.25f);
+        return 1.0f - MathF.Sqrt(MathF.Max(0.0f, MathF.FusedMultiplyAdd(-1.0f / 6.0f, mip, 1.0f)));
+    }
+
+    public static float ShininessFromRoughness(float roughness)
+    {
+        // Solves from Shininess from Roughness using the same equation as above.
+        var mip = MathF.FusedMultiplyAdd(-6.0f, roughness, 12.0f) * roughness;
+        return MathF.Pow(2.0f, MathF.FusedMultiplyAdd(-4.0f / 3.0f, mip, 25.0f / 3.0f));
+    }
+
     public override readonly bool Equals([NotNullWhen(true)] object? obj)
         => obj is ColorTableRow other && Equals(other);
 

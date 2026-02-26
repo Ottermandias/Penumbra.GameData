@@ -1,7 +1,7 @@
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using OtterGui.Services;
+using Luna;
 using Penumbra.GameData.Actors;
 using ObjectType = Penumbra.GameData.Enums.ObjectType;
 using Penumbra.GameData.DataContainers;
@@ -10,19 +10,19 @@ namespace Penumbra.GameData.Data;
 
 /// <summary> Identify items or game objects from paths or IDs. </summary>
 public sealed class ObjectIdentification(
-    DictBNpcNames _bNpcNames,
-    DictAction _actions,
-    DictEmote _emotes,
-    DictModelChara _modelCharaToObjects,
-    IdentificationListEquipment _equipmentIdentification,
-    IdentificationListWeapons _weaponIdentification,
-    IdentificationListModels _modelIdentification,
-    GamePathParser _gamePathParser)
+    DictBNpcNames bNpcNames,
+    DictAction actions,
+    DictEmote emotes,
+    DictModelChara modelCharaToObjects,
+    IdentificationListEquipment equipmentIdentification,
+    IdentificationListWeapons weaponIdentification,
+    IdentificationListModels modelIdentification,
+    GamePathParser gamePathParser)
     : IAsyncService
 {
     /// <summary> Finished when all data tasks are finished. </summary>
-    public Task Awaiter { get; } = Task.WhenAll(_bNpcNames.Awaiter, _actions.Awaiter, _emotes.Awaiter, _modelCharaToObjects.Awaiter,
-        _equipmentIdentification.Awaiter, _weaponIdentification.Awaiter, _modelIdentification.Awaiter);
+    public Task Awaiter { get; } = Task.WhenAll(bNpcNames.Awaiter, actions.Awaiter, emotes.Awaiter, modelCharaToObjects.Awaiter,
+        equipmentIdentification.Awaiter, weaponIdentification.Awaiter, modelIdentification.Awaiter);
 
     /// <inheritdoc/>
     public bool Finished
@@ -38,7 +38,7 @@ public sealed class ObjectIdentification(
             if (IdentifyVfx(set, path))
                 return;
 
-        var info = _gamePathParser.GetFileInfo(path);
+        var info = gamePathParser.GetFileInfo(path);
         IdentifyParsed(set, info);
     }
 
@@ -61,8 +61,8 @@ public sealed class ObjectIdentification(
     public IEnumerable<EquipItem> Identify(PrimaryId primaryId, SecondaryId secondaryId, Variant variant, EquipSlot slot)
         => slot switch
         {
-            EquipSlot.MainHand or EquipSlot.OffHand => _weaponIdentification.Between(primaryId, secondaryId, variant),
-            _                                       => _equipmentIdentification.Between(primaryId, slot, variant),
+            EquipSlot.MainHand or EquipSlot.OffHand => weaponIdentification.Between(primaryId, secondaryId, variant),
+            _                                       => equipmentIdentification.Between(primaryId, slot, variant),
         };
 
     /// <summary> Identify all bonus items using the specified values. </summary>
@@ -75,14 +75,14 @@ public sealed class ObjectIdentification(
         if (primaryId.Id == 0 && variant.Id == 0)
             return [EquipItem.BonusItemNothing(slot)];
 
-        return _equipmentIdentification.Between(primaryId, slot.ToEquipSlot(), variant);
+        return equipmentIdentification.Between(primaryId, slot.ToEquipSlot(), variant);
     }
 
     /// <summary> Find and add all equipment pieces affected by <paramref name="info"/>. </summary>
     private void FindEquipment(IDictionary<string, IIdentifiedObjectData> set, GameObjectInfo info)
     {
         var slot  = info.EquipSlot is EquipSlot.LFinger ? EquipSlot.RFinger : info.EquipSlot;
-        var items = _equipmentIdentification.Between(info.PrimaryId, slot, info.Variant);
+        var items = equipmentIdentification.Between(info.PrimaryId, slot, info.Variant);
         foreach (var item in items)
             set.UpdateCountOrSet(item.Name, () => new IdentifiedItem(item));
     }
@@ -90,7 +90,7 @@ public sealed class ObjectIdentification(
     /// <summary> Find and add all weapons affected by <paramref name="info"/>. </summary>
     private void FindWeapon(IDictionary<string, IIdentifiedObjectData> set, GameObjectInfo info)
     {
-        var items = _weaponIdentification.Between(info.PrimaryId, info.SecondaryId, info.Variant);
+        var items = weaponIdentification.Between(info.PrimaryId, info.SecondaryId, info.Variant);
         foreach (var item in items)
             set.UpdateCountOrSet(item.Name, () => new IdentifiedItem(item));
     }
@@ -102,10 +102,10 @@ public sealed class ObjectIdentification(
         if (type is 0 or CharacterBase.ModelType.Weapon)
             return;
 
-        var models = _modelIdentification.Between(type, info.PrimaryId, (byte)info.SecondaryId.Id, info.Variant);
-        foreach (var model in models.Where(m => m.RowId != 0 && m.RowId < _modelCharaToObjects.Count))
+        var models = modelIdentification.Between(type, info.PrimaryId, (byte)info.SecondaryId.Id, info.Variant);
+        foreach (var model in models.Where(m => m.RowId != 0 && m.RowId < modelCharaToObjects.Count))
         {
-            var objectList = _modelCharaToObjects[model.RowId];
+            var objectList = modelCharaToObjects[model.RowId];
             foreach (var (name, kind, _) in objectList)
                 set.UpdateCountOrSet($"{name} ({kind.ToName()})", () => new IdentifiedModel(model));
         }
@@ -142,9 +142,7 @@ public sealed class ObjectIdentification(
                 set.UpdateCountOrSet(info.ObjectType.ToString(), () => new IdentifiedCounter());
                 break;
             // We can differentiate icons by ID.
-            case ObjectType.Icon:
-                set.UpdateCountOrSet($"Icon: {info.IconId}", () => new IdentifiedName());
-                break;
+            case ObjectType.Icon: set.UpdateCountOrSet($"Icon: {info.IconId}", () => new IdentifiedName()); break;
             // Demihumans and monsters affect models
             case ObjectType.DemiHuman:
             case ObjectType.Monster:
@@ -156,9 +154,7 @@ public sealed class ObjectIdentification(
                 FindEquipment(set, info);
                 break;
             // Weapons are handled separately from other equipment.
-            case ObjectType.Weapon:
-                FindWeapon(set, info);
-                break;
+            case ObjectType.Weapon: FindWeapon(set, info); break;
             // Characters can have different affected options.
             case ObjectType.Character:
                 var (gender, race) = info.GenderRace.Split();
@@ -218,20 +214,20 @@ public sealed class ObjectIdentification(
     /// <summary> Identify and parse VFX identities. </summary>
     private bool IdentifyVfx(IDictionary<string, IIdentifiedObjectData> set, string path)
     {
-        var key      = _gamePathParser.VfxToKey(path);
+        var key      = GamePathParser.VfxToKey(path);
         var fileName = Path.GetFileName(path);
         var ret      = false;
 
-        if (key.Length > 0 && _actions.TryGetValue(key, out var actions) && actions.Count > 0)
+        if (key.Length > 0 && actions.TryGetValue(key, out var foundActions) && foundActions.Count > 0)
         {
-            foreach (var action in actions)
+            foreach (var action in foundActions)
                 set.UpdateCountOrSet($"Action: {action.Name.ExtractTextExtended()}", () => new IdentifiedAction(action));
             ret = true;
         }
 
-        if (fileName.Length > 0 && _emotes.TryGetValue(fileName, out var emotes) && emotes.Count > 0)
+        if (fileName.Length > 0 && emotes.TryGetValue(fileName, out var foundEmotes) && foundEmotes.Count > 0)
         {
-            foreach (var emote in emotes)
+            foreach (var emote in foundEmotes)
                 set.UpdateCountOrSet($"Emote: {emote.Name.ExtractTextExtended()}", () => new IdentifiedEmote(emote));
             ret = true;
         }

@@ -1,5 +1,4 @@
 using Lumina.Data.Parsing;
-using OtterGui.Extensions;
 using Penumbra.GameData.Files.ModelStructs;
 
 namespace Penumbra.GameData.Files;
@@ -147,7 +146,6 @@ public partial class MdlFile
         }
     }
 
-
     private static void Write(BinaryWriter w, BoneTableStruct bone)
     {
         foreach (var index in bone.BoneIndex)
@@ -274,7 +272,7 @@ public partial class MdlFile
 
             // LoD data also includes absolute offsets, move back to their position and write out now we know how large the metadata is.
             w.Seek(lodPosition, SeekOrigin.Begin);
-            foreach (var (lod, index) in Lods.WithIndex())
+            foreach (var (index, lod) in Lods.Index())
             {
                 Write(w, lod with
                 {

@@ -1,89 +1,160 @@
+using ImSharp;
 using Lumina.Excel.Sheets;
+using Luna.Generators;
 
 namespace Penumbra.GameData.Enums;
 
 /// <summary> A full equipment type representing any type of equipment a character can wear. </summary>
+[NamedEnum]
 public enum FullEquipType : byte
 {
+    [Name(Omit: true)]
     Unknown,
 
+    [Name("Head")]
     Head,
+    [Name("Body")]
     Body,
+    [Name("Hands")]
     Hands,
+    [Name("Legs")]
     Legs,
+    [Name("Feet")]
     Feet,
 
+    [Name("Earrings")]
     Ears,
+    [Name("Necklace")]
     Neck,
+    [Name("Bracelets")]
     Wrists,
+    [Name("Ring")]
     Finger,
 
+    [Name("Fist Weapon")]
     Fists, // PGL, MNK
+    [Name("Fist Weapon (Offhand)")]
     FistsOff,
+    [Name("Sword")]
     Sword, // GLA, PLD Main
+    [Name("Axe")]
     Axe,   // MRD, WAR
+    [Name("Bow")]
     Bow,   // ARC, BRD
+    [Name("Quiver")]
     BowOff,
+    [Name("Lance")]
     Lance,   // LNC, DRG,
+    [Name("Staff")]
     Staff,   // THM, BLM, CNJ, WHM
+    [Name("Mace")]
     Wand,    // THM, BLM, CNJ, WHM Main
+    [Name("Book")]
     Book,    // ACN, SMN, SCH
+    [Name("Dagger")]
     Daggers, // ROG, NIN
+    [Name("Dagger (Offhand)")]
     DaggersOff,
+    [Name("Broadsword")]
     Broadsword, // DRK,
+    [Name("Gun")]
     Gun,        // MCH,
+    [Name("Aetherotransformer")]
     GunOff,
+    [Name("Orrery")]
     Orrery, // AST,
+    [Name("Card Holder")]
     OrreryOff,
+    [Name("Katana")]
     Katana, // SAM
+    [Name("Sheathe")]
     KatanaOff,
+    [Name("Rapier")]
     Rapier, // RDM
+    [Name("Focus")]
     RapierOff,
+    [Name("Cane")]
     Cane,     // BLU
+    [Name("Gunblade")]
     Gunblade, // GNB,
+    [Name("Glaive")]
     Glaives,  // DNC,
+    [Name("Glaive (Offhand)")]
     GlaivesOff,
+    [Name("Scythe")]
     Scythe,   // RPR,
+    [Name("Nouliths")]
     Nouliths, // SGE
+    [Name("Shield")]
     Shield,   // GLA, PLD, THM, BLM, CNJ, WHM Off
 
+    [Name("Saw")]
     Saw,             // CRP
+    [Name("Cross Pein Hammer")]
     CrossPeinHammer, // BSM
+    [Name("Raising Hammer")]
     RaisingHammer,   // ARM
+    [Name("Lapidary Hammer")]
     LapidaryHammer,  // GSM
+    [Name("Round Knife")]
     Knife,           // LTW
+    [Name("Needle")]
     Needle,          // WVR
+    [Name("Alembic")]
     Alembic,         // ALC
+    [Name("Frypan")]
     Frypan,          // CUL
+    [Name("Pickaxe")]
     Pickaxe,         // MIN
+    [Name("Hatchet")]
     Hatchet,         // BTN
+    [Name("Fishing Rod")]
     FishingRod,      // FSH
 
+    [Name("Clawhammer")]
     ClawHammer,    // CRP Off
+    [Name("File")]
     File,          // BSM Off
+    [Name("Pliers")]
     Pliers,        // ARM Off
+    [Name("Grinding Wheel")]
     GrindingWheel, // GSM Off
+    [Name("Awl")]
     Awl,           // LTW Off
+    [Name("Spinning Wheel")]
     SpinningWheel, // WVR Off
+    [Name("Mortar")]
     Mortar,        // ALC Off
+    [Name("Culinary Knife")]
     CulinaryKnife, // CUL Off
+    [Name("Sledgehammer")]
     Sledgehammer,  // MIN Off
+    [Name("Garden Scythe")]
     GardenScythe,  // BTN Off
+    [Name("Gig")]
     Gig,           // FSH Off
 
+    [Name("Brush")]
     Brush,        // PCT
+    [Name("Palette")]
     Palette,      // PCT Off
+    [Name("Twinfangs")]
     Twinfangs,    // VPR
+    [Name("Twinfangs (Offhand)")]
     TwinfangsOff, // VPR Off
+    [Name("Whip")]
     Whip,         // BMR TODO
 
+    [Name("Glasses")]
     Glasses,
 
+    [Name("Primary Weapon")]
     UnknownMainhand,
+    [Name("Secondary Weapon")]
     UnknownOffhand,
 }
 
-public static class FullEquipTypeExtensions
+public static partial class FullEquipTypeExtensions
 {
     /// <summary> Obtain the FullEquipType of an item. </summary>
     internal static FullEquipType ToEquipType(this Item item)
@@ -192,80 +263,6 @@ public static class FullEquipTypeExtensions
         {
             FullEquipType.Glasses => BonusItemFlag.Glasses,
             _                     => BonusItemFlag.Unknown,
-        };
-
-    /// <summary> Obtain a human-readable name for a FullEquipType. </summary>
-    public static string ToName(this FullEquipType type)
-        => type switch
-        {
-            FullEquipType.Head            => EquipSlot.Head.ToName(),
-            FullEquipType.Body            => EquipSlot.Body.ToName(),
-            FullEquipType.Hands           => EquipSlot.Hands.ToName(),
-            FullEquipType.Legs            => EquipSlot.Legs.ToName(),
-            FullEquipType.Feet            => EquipSlot.Feet.ToName(),
-            FullEquipType.Ears            => EquipSlot.Ears.ToName(),
-            FullEquipType.Neck            => EquipSlot.Neck.ToName(),
-            FullEquipType.Wrists          => EquipSlot.Wrists.ToName(),
-            FullEquipType.Finger          => "Ring",
-            FullEquipType.Fists           => "Fist Weapon",
-            FullEquipType.FistsOff        => "Fist Weapon (Offhand)",
-            FullEquipType.Sword           => "Sword",
-            FullEquipType.Axe             => "Axe",
-            FullEquipType.Bow             => "Bow",
-            FullEquipType.BowOff          => "Quiver",
-            FullEquipType.Lance           => "Lance",
-            FullEquipType.Staff           => "Staff",
-            FullEquipType.Wand            => "Mace",
-            FullEquipType.Book            => "Book",
-            FullEquipType.Daggers         => "Dagger",
-            FullEquipType.DaggersOff      => "Dagger (Offhand)",
-            FullEquipType.Broadsword      => "Broadsword",
-            FullEquipType.Gun             => "Gun",
-            FullEquipType.GunOff          => "Aetherotransformer",
-            FullEquipType.Orrery          => "Orrery",
-            FullEquipType.OrreryOff       => "Card Holder",
-            FullEquipType.Katana          => "Katana",
-            FullEquipType.KatanaOff       => "Sheathe",
-            FullEquipType.Rapier          => "Rapier",
-            FullEquipType.RapierOff       => "Focus",
-            FullEquipType.Cane            => "Cane",
-            FullEquipType.Gunblade        => "Gunblade",
-            FullEquipType.Glaives         => "Glaive",
-            FullEquipType.GlaivesOff      => "Glaive (Offhand)",
-            FullEquipType.Scythe          => "Scythe",
-            FullEquipType.Nouliths        => "Nouliths",
-            FullEquipType.Shield          => "Shield",
-            FullEquipType.Saw             => "Saw",
-            FullEquipType.CrossPeinHammer => "Cross Pein Hammer",
-            FullEquipType.RaisingHammer   => "Raising Hammer",
-            FullEquipType.LapidaryHammer  => "Lapidary Hammer",
-            FullEquipType.Knife           => "Round Knife",
-            FullEquipType.Needle          => "Needle",
-            FullEquipType.Alembic         => "Alembic",
-            FullEquipType.Frypan          => "Frypan",
-            FullEquipType.Pickaxe         => "Pickaxe",
-            FullEquipType.Hatchet         => "Hatchet",
-            FullEquipType.FishingRod      => "Fishing Rod",
-            FullEquipType.ClawHammer      => "Clawhammer",
-            FullEquipType.File            => "File",
-            FullEquipType.Pliers          => "Pliers",
-            FullEquipType.GrindingWheel   => "Grinding Wheel",
-            FullEquipType.Awl             => "Awl",
-            FullEquipType.SpinningWheel   => "Spinning Wheel",
-            FullEquipType.Mortar          => "Mortar",
-            FullEquipType.CulinaryKnife   => "Culinary Knife",
-            FullEquipType.Sledgehammer    => "Sledgehammer",
-            FullEquipType.GardenScythe    => "Garden Scythe",
-            FullEquipType.Gig             => "Gig",
-            FullEquipType.Brush           => "Brush",
-            FullEquipType.Palette         => "Palette",
-            FullEquipType.Twinfangs       => "Twinfangs",
-            FullEquipType.TwinfangsOff    => "Twinfangs (Offhand)",
-            FullEquipType.Whip            => "Whip",
-            FullEquipType.Glasses         => BonusItemFlag.Glasses.ToName(),
-            FullEquipType.UnknownMainhand => EquipSlot.MainHand.ToName(),
-            FullEquipType.UnknownOffhand  => EquipSlot.OffHand.ToName(),
-            _                             => "Unknown",
         };
 
     /// <summary> Return the actual equipment slot a FullEquipType will be equipped to. </summary>
@@ -545,26 +542,26 @@ public static class FullEquipTypeExtensions
 
     /// <summary> A list of all weapon types. </summary>
     public static readonly IReadOnlyList<FullEquipType> WeaponTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.IsWeapon()).Except([FullEquipType.UnknownMainhand])
+        = FullEquipType.Values.Where(v => v.IsWeapon()).Except([FullEquipType.UnknownMainhand])
             .ToArray();
 
     /// <summary> A list of all tool types, including offhands. </summary>
     public static readonly IReadOnlyList<FullEquipType> ToolTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.IsTool()).ToArray();
+        = FullEquipType.Values.Where(v => v.IsTool()).ToArray();
 
     /// <summary> A list of all equipment types. </summary>
     public static readonly IReadOnlyList<FullEquipType> EquipmentTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.IsEquipment()).ToArray();
+        = FullEquipType.Values.Where(v => v.IsEquipment()).ToArray();
 
     /// <summary> A list of all accessory types. </summary>
     public static readonly IReadOnlyList<FullEquipType> AccessoryTypes
-        = Enum.GetValues<FullEquipType>().Where(v => v.IsAccessory()).ToArray();
+        = FullEquipType.Values.Where(v => v.IsAccessory()).ToArray();
 
     /// <summary> A list of all inferred offhand types. </summary>
     public static readonly IReadOnlyList<FullEquipType> OffhandTypes
-        = Enum.GetValues<FullEquipType>().Where(IsOffhandType).ToArray();
+        = FullEquipType.Values.Where(IsOffhandType).ToArray();
 
     /// <summary> A list of all inferred offhand types. </summary>
     public static readonly IReadOnlyList<FullEquipType> BonusTypes
-        = Enum.GetValues<FullEquipType>().Where(IsBonus).ToArray();
+        = FullEquipType.Values.Where(IsBonus).ToArray();
 }

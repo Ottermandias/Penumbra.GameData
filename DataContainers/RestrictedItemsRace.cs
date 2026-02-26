@@ -2,7 +2,7 @@ using System.Collections.Frozen;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using OtterGui.Log;
+using Luna;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -21,7 +21,7 @@ public sealed class RestrictedItemsRace(IDalamudPluginInterface pluginInterface,
 
         var items      = gameData.GetExcelSheet<Item>();
         var categories = gameData.GetExcelSheet<EquipRaceCategory>(gameData.Language);
-        foreach (var item in items.Where(i => i.EquipRestriction > 3))
+        foreach (var item in items.Where(i => i is { EquipRestriction: > 3, ModelMain: not 0 }))
         {
             if (ret.Contains((uint)item.ModelMain))
                 continue;

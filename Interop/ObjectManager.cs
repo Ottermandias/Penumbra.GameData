@@ -1,12 +1,11 @@
-﻿using Dalamud.Bindings.ImGui;
-using Dalamud.Game;
+﻿using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
-using OtterGui.Log;
-using OtterGui.Text;
+using ImSharp;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -32,39 +31,39 @@ public unsafe class ObjectManager(
 
     public readonly  IObjectTable Objects       = objects;
     private readonly Actor*       _address      = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
-    private readonly string       _assemblyName = $"{log.PluginName}_{Guid.NewGuid().ToString().AsSpan(0, 8)}";
+    private readonly string       _assemblyName = $"{Logger.GlobalPluginName}_{Guid.NewGuid().ToString().AsSpan(0, 8)}";
 
     private readonly Logger _log = log;
 
     public void DrawDebug()
     {
-        using (ImUtf8.Group())
+        using (Im.Group())
         {
-            ImUtf8.Text("Hook Owner:");
-            ImUtf8.Text("Own Name:");
-            ImUtf8.Text("Dirty State:");
-            ImUtf8.Text("Count:");
-            ImUtf8.Text("BNPC End:");
-            ImUtf8.Text("Cutscene End:");
-            ImUtf8.Text("Special End:");
-            ImUtf8.Text("ENPC End:");
-            ImUtf8.Text("Update Subscribers:");
-            ImUtf8.Text("Update Req. Subscribers:");
+            Im.Text("Hook Owner:"u8);
+            Im.Text("Own Name:"u8);
+            Im.Text("Dirty State:"u8);
+            Im.Text("Count:"u8);
+            Im.Text("BNPC End:"u8);
+            Im.Text("Cutscene End:"u8);
+            Im.Text("Special End:"u8);
+            Im.Text("ENPC End:"u8);
+            Im.Text("Update Subscribers:"u8);
+            Im.Text("Update Req. Subscribers:"u8);
         }
 
-        ImGui.SameLine();
-        using (ImUtf8.Group())
+        Im.Line.Same();
+        using (Im.Group())
         {
-            ImUtf8.Text(HookOwner ?? "NULL");
-            ImUtf8.Text(_assemblyName);
-            ImUtf8.Text($"{NeedsUpdate}");
-            ImUtf8.Text($"{Count}");
-            ImUtf8.Text($"{BnpcEnd}");
-            ImUtf8.Text($"{CutsceneEnd}");
-            ImUtf8.Text($"{SpecialEnd}");
-            ImUtf8.Text($"{EnpcEnd}");
-            ImUtf8.Text($"{Value.Item6.Count}");
-            ImUtf8.Text($"{Value.Item7.Count}");
+            Im.Text(HookOwner ?? "NULL");
+            Im.Text(_assemblyName);
+            Im.Text($"{NeedsUpdate}");
+            Im.Text($"{Count}");
+            Im.Text($"{BnpcEnd}");
+            Im.Text($"{CutsceneEnd}");
+            Im.Text($"{SpecialEnd}");
+            Im.Text($"{EnpcEnd}");
+            Im.Text($"{Value.Item6.Count}");
+            Im.Text($"{Value.Item7.Count}");
         }
     }
 

@@ -1,4 +1,4 @@
-using OtterGui.Services;
+using Luna;
 using Penumbra.GameData.DataContainers;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -7,23 +7,23 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.Data;
 
 /// <summary> A service wrapper around all basic EquipItem dictionaries. </summary>
-public sealed class ItemData(ItemsByType _byType, ItemsPrimaryModel _primary, ItemsSecondaryModel _secondary, ItemsTertiaryModel _tertiary)
+public sealed class ItemData(ItemsByType byType, ItemsPrimaryModel primary, ItemsSecondaryModel secondary, ItemsTertiaryModel tertiary)
     : IAsyncService
 {
     /// <summary> Item lists ordered by type. </summary>
-    public readonly ItemsByType ByType = _byType;
+    public readonly ItemsByType ByType = byType;
 
     /// <summary> Primary models of all items. </summary>
-    public readonly ItemsPrimaryModel Primary = _primary;
+    public readonly ItemsPrimaryModel Primary = primary;
 
     /// <summary> Secondary models of all items. </summary>
-    public readonly ItemsSecondaryModel Secondary = _secondary;
+    public readonly ItemsSecondaryModel Secondary = secondary;
 
     /// <summary> Tertiary models of all items. Currently only gloves for certain fist weapons. </summary>
-    public readonly ItemsTertiaryModel Tertiary = _tertiary;
+    public readonly ItemsTertiaryModel Tertiary = tertiary;
 
     /// <summary> Finished when all item dictionaries are finished. </summary>
-    public Task Awaiter { get; } = Task.WhenAll(_byType.Awaiter, _primary.Awaiter, _secondary.Awaiter, _tertiary.Awaiter);
+    public Task Awaiter { get; } = Task.WhenAll(byType.Awaiter, primary.Awaiter, secondary.Awaiter, tertiary.Awaiter);
 
     /// <inheritdoc/>
     public bool Finished

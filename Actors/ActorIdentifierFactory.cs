@@ -1,9 +1,6 @@
 using System.Collections.Frozen;
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using OtterGui;
+using ImSharp;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.DataContainers.Bases;
 using Penumbra.GameData.Enums;
@@ -15,12 +12,12 @@ using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 namespace Penumbra.GameData.Actors;
 
 /// <summary> Creation of ActorIdentifiers. </summary>
-public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framework, NameDicts _data, CutsceneResolver _toParentIdx)
+public class ActorIdentifierFactory(ObjectManager objects, IFramework framework, NameDicts data, CutsceneResolver toParentIdx)
 {
     /// <summary> Expose the _toParentIdx function for convenience. </summary>
     /// <returns> The parent index for a cutscene object or -1 if no parent exists. </returns>
     public short ToCutsceneParent(ushort index)
-        => _toParentIdx.Invoke(index);
+        => toParentIdx.Invoke(index);
 
     /// <summary> Used in construction from user strings. </summary>
     public class IdentifierParseError(string reason) : Exception(reason);
@@ -28,9 +25,9 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
     /// <summary> Create an ImGui Tooltip for user strings. </summary>
     public static void WriteUserStringTooltip(bool withIndex)
     {
-        using var tt   = ImRaii.Tooltip();
-        using var font = ImRaii.PushFont(UiBuilder.MonoFont);
-        ImGui.TextUnformatted("Valid formats for an Identifier String are:");
+        using var tt   = Im.Tooltip.Begin();
+        using var font = Im.Font.PushMono();
+        Im.Text("Valid formats for an Identifier String are:"u8);
 
         const uint typeColor    = 0xFF40FF40;
         const uint nameColor    = 0xFF00D0D0;
@@ -39,67 +36,112 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         const uint npcNameColor = 0xFF4040FF;
         const uint indexColor   = 0xFFA0A0A0;
 
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("P", typeColor), (" | ", keyColor), ("[Player Name]@<World Name>", nameColor));
+        Im.Bullet();
+        Im.Line.Same();
+        ImEx.TextMultiColored("P"u8, typeColor)
+            .Then(" | "u8,                        keyColor)
+            .Then("[Player Name]@<World Name>"u8, nameColor)
+            .End();
 
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("R", typeColor), (" | ", keyColor), ("[Retainer Name]", nameColor));
+        Im.Bullet();
+        Im.Line.Same();
+        ImEx.TextMultiColored("R"u8, typeColor)
+            .Then(" | "u8,             keyColor)
+            .Then("[Retainer Name]"u8, nameColor)
+            .End();
 
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("N", typeColor), (" | ", keyColor), ("[NPC Type]", npcTypeColor), (" : ", keyColor),
-            ("[Npc Name]", npcNameColor));
-        if (withIndex)
-        {
-            ImGui.SameLine(0, 0);
-            ImGuiUtil.DrawColoredText(("@", keyColor), ("<Object Index>", indexColor));
-        }
-
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("All [] or <> brackets are not to be included but are for placeholders, all", 0),
-            (" bright blue key symbols", keyColor), (" are relevant.", 0));
-
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("O", typeColor), (" | ", keyColor), ("[NPC Type]", npcTypeColor), (" : ", keyColor),
-            ("[Npc Name]", npcNameColor), (" | ", keyColor), ("[Player Name]@<World Name>", nameColor));
-
-        ImGui.NewLine();
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("[P]", typeColor), ("layer, ", 0), ("[R]", typeColor), ("etainer, ", 0), ("[N]", typeColor), ("PC, or ", 0),
-            ("[O]", typeColor), ("wned describe the identifier type.", 0));
-
-        ImGui.NewLine();
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("[Player Name]", nameColor), (" and ", 0), ("[Retainer Name]", nameColor),
-            (" must agree with naming rules.", 0));
-
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("<World Name>", nameColor), (" is optional (", 0), ("Any World", nameColor),
-            (" when not provided), but must be a valid world otherwise.", 0));
-
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("[NPC Type]", npcTypeColor), (" can be ", 0), ("[M]", npcTypeColor), ("ount, ", 0), ("[C]", npcTypeColor),
-            ("ompanion, ", 0), ("[A]", npcTypeColor), ("ccessory, ", 0), ("[E]", npcTypeColor), ("vent NPC, or", 0), ("[B]", npcTypeColor),
-            ("attle NPC.", 0));
-
-        ImGui.Bullet();
-        ImGui.SameLine();
-        ImGuiUtil.DrawColoredText(("[NPC Name]", npcNameColor), (" must be a valid, known NPC name for the chosen type.", 0));
+        Im.Bullet();
+        Im.Line.Same();
+        var text = ImEx.TextMultiColored("N"u8, typeColor)
+            .Then(" | "u8,        keyColor)
+            .Then("[NPC Type]"u8, npcTypeColor)
+            .Then(" : "u8,        keyColor)
+            .Then("[Npc Name]"u8, npcNameColor);
 
         if (withIndex)
+            text.Then("@"u8, keyColor)
+                .Then("<Object Index>"u8, indexColor)
+                .End();
+        else
+            text.End();
+
+        Im.Bullet();
+        Im.Line.Same();
+        ImEx.TextMultiColored("All [] or <> brackets are not to be included but are for placeholders, all"u8)
+            .Then(" bright blue key symbols"u8, keyColor)
+            .Then(" are relevant."u8)
+            .End();
+
+        Im.Bullet();
+        Im.Line.Same();
+        ImEx.TextMultiColored("O"u8, typeColor)
+            .Then(" | "u8,                        keyColor)
+            .Then("[NPC Type]"u8,                 npcTypeColor)
+            .Then(" : "u8,                        keyColor)
+            .Then("[Npc Name]"u8,                 npcNameColor)
+            .Then(" | "u8,                        keyColor)
+            .Then("[Player Name]@<World Name>"u8, nameColor)
+            .End();
+
+        Im.Line.New();
+        Im.Bullet();
+        Im.Line.Same();
+        ImEx.TextMultiColored("[P]"u8, typeColor)
+            .Then("layer, "u8)
+            .Then("[R]"u8, typeColor)
+            .Then("etainer, "u8)
+            .Then("[N]"u8, typeColor)
+            .Then("PC, or "u8)
+            .Then("[O]"u8, typeColor)
+            .Then("wned describe the identifier type."u8)
+            .End();
+
+        Im.Line.New();
+        Im.Bullet();
+        Im.Line.Same();
+        ImEx.TextMultiColored("[Player Name]"u8, nameColor)
+            .Then(" and "u8)
+            .Then("[Retainer Name]"u8, nameColor)
+            .Then(" must agree with naming rules."u8)
+            .End();
+
+        Im.Bullet();
+        Im.Line.Same();
+        ImEx.TextMultiColored("<World Name>"u8, nameColor)
+            .Then(" is optional ("u8)
+            .Then("Any World"u8, nameColor)
+            .Then(" when not provided), but must be a valid world otherwise."u8)
+            .End();
+
+        Im.Bullet();
+        Im.Line.Same();
+        ImEx.TextMultiColored("[NPC Type]"u8, npcTypeColor)
+            .Then(" can be "u8)
+            .Then("[M]"u8, npcTypeColor)
+            .Then("ount, "u8)
+            .Then("[C]"u8, npcTypeColor)
+            .Then("ompanion, "u8)
+            .Then("[A]"u8, npcTypeColor)
+            .Then("ccessory, "u8)
+            .Then("[E]"u8, npcTypeColor)
+            .Then("vent NPC, or"u8)
+            .Then("[B]"u8, npcTypeColor)
+            .Then("attle NPC."u8)
+            .End();
+
+        Im.Bullet();
+        Im.Line.Same();
+        ImEx.TextMultiColored("[NPC Name]"u8, npcNameColor)
+            .Then(" must be a valid, known NPC name for the chosen type."u8)
+            .End();
+
+        if (withIndex)
         {
-            ImGui.Bullet();
-            ImGui.SameLine();
-            ImGuiUtil.DrawColoredText(("<Object Index>", indexColor),
-                (" is optional and must be a non-negative index into the object table.", 0));
+            Im.Bullet();
+            Im.Line.Same();
+            ImEx.TextMultiColored("<Object Index>"u8, indexColor)
+                .Then(" is optional and must be a non-negative index into the object table."u8)
+                .End();
         }
     }
 
@@ -339,7 +381,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         for (var i = 1; i < part.Length; ++i)
         {
             var current = part[i];
-            if (current is not ('\'' or '-' or (>= 'a' and <= 'z')))
+            if (current is not ('\'' or '-' or >= 'a' and <= 'z'))
                 return false;
 
             // Hyphens can not be used in succession, after or before apostrophes or as the last symbol.
@@ -370,7 +412,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         for (var i = 1; i < part.Length; ++i)
         {
             var current = part[i];
-            if (current is not ((byte)'\'' or (byte)'-' or (>= (byte)'a' and <= (byte)'z')))
+            if (current is not ((byte)'\'' or (byte)'-' or >= (byte)'a' and <= (byte)'z'))
                 return false;
 
             // Hyphens can not be used in succession, after or before apostrophes or as the last symbol.
@@ -387,7 +429,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
 
     /// <summary> Checks if the world is a valid public world or ushort.MaxValue (any world). </summary>
     public bool VerifyWorld(WorldId worldId)
-        => worldId == WorldId.AnyWorld || _data.Worlds.ContainsKey(worldId.Id);
+        => worldId == WorldId.AnyWorld || data.Worlds.ContainsKey(worldId.Id);
 
     /// <summary> Verify that the enum value is a specific actor and return the name if it is. </summary>
     public static bool VerifySpecial(ScreenActor actor)
@@ -401,7 +443,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         if (index < ObjectIndex.GPosePlayer)
             return (index.Index & 1) == 0;
         if (index > ObjectIndex.Card8)
-            return index.Index < _objects.TotalCount;
+            return index.Index < objects.TotalCount;
 
         return index < ObjectIndex.CharacterScreen;
     }
@@ -411,10 +453,10 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
     {
         return kind switch
         {
-            ObjectKind.MountType => _data.Mounts.ContainsKey(dataId.Id),
-            ObjectKind.Companion => _data.Companions.ContainsKey(dataId.Id),
-            ObjectKind.Ornament  => _data.Ornaments.ContainsKey(dataId.Id),
-            ObjectKind.BattleNpc => _data.BNpcs.ContainsKey(dataId.Id),
+            ObjectKind.MountType => data.Mounts.ContainsKey(dataId.Id),
+            ObjectKind.Companion => data.Companions.ContainsKey(dataId.Id),
+            ObjectKind.Ornament  => data.Ornaments.ContainsKey(dataId.Id),
+            ObjectKind.BattleNpc => data.BNpcs.ContainsKey(dataId.Id),
             _                    => false,
         };
     }
@@ -423,11 +465,11 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
     public bool VerifyNpcData(ObjectKind kind, NpcId dataId)
         => kind switch
         {
-            ObjectKind.MountType => _data.Mounts.ContainsKey(dataId.Id),
-            ObjectKind.Companion => _data.Companions.ContainsKey(dataId.Id),
-            ObjectKind.Ornament  => _data.Ornaments.ContainsKey(dataId.Id),
-            ObjectKind.BattleNpc => _data.BNpcs.ContainsKey(dataId.Id),
-            ObjectKind.EventNpc  => _data.ENpcs.ContainsKey(dataId.Id),
+            ObjectKind.MountType => data.Mounts.ContainsKey(dataId.Id),
+            ObjectKind.Companion => data.Companions.ContainsKey(dataId.Id),
+            ObjectKind.Ornament  => data.Ornaments.ContainsKey(dataId.Id),
+            ObjectKind.BattleNpc => data.BNpcs.ContainsKey(dataId.Id),
+            ObjectKind.EventNpc  => data.ENpcs.ContainsKey(dataId.Id),
             _                    => false,
         };
 
@@ -456,7 +498,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         var nameId = actor.AsObject->BaseId == 952 ? 780 : actor.AsCharacter->NameId;
         if (ownerId != 0xE0000000)
         {
-            owner = HandleCutscene(_objects.ById(ownerId));
+            owner = HandleCutscene(objects.ById(ownerId));
             if (!owner.Valid)
                 return ActorIdentifier.Invalid;
 
@@ -498,7 +540,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         if (MannequinIds.Contains(dataId))
         {
             var retainerName = new ByteString(actor.AsObject->Name);
-            var actualName   = _framework.IsInFrameworkUpdateThread ? new ByteString(actor.AsObject->GetName()) : ByteString.Empty;
+            var actualName   = framework.IsInFrameworkUpdateThread ? new ByteString(actor.AsObject->GetName()) : ByteString.Empty;
             if (!actualName.Equals(retainerName))
             {
                 var ident = check
@@ -520,7 +562,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private ActorIdentifier CreateCompanionFromObject(Actor actor, out Actor owner, ObjectKind kind, bool check)
     {
-        owner = HandleCutscene(_objects.CompanionParent(actor));
+        owner = HandleCutscene(objects.CompanionParent(actor));
         if (!owner.Valid)
             return ActorIdentifier.Invalid;
 
@@ -580,8 +622,8 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
         if (main.Index.Index is < (ushort)ScreenActor.CutsceneStart or >= (ushort)ScreenActor.CutsceneEnd)
             return main;
 
-        var parentIdx = _toParentIdx.Invoke(main.Index.Index);
-        var parent    = _objects[parentIdx];
+        var parentIdx = toParentIdx.Invoke(main.Index.Index);
+        var parent    = objects[parentIdx];
         return parent.Valid ? parent : main;
     }
 
@@ -615,8 +657,8 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
             throw new IdentifierParseError($"The player string {parts[0]} contains invalid symbols.");
 
         var world = parts.Length == 2
-            ? _data.ToWorldId(parts[1])
-            : ushort.MaxValue;
+            ? data.ToWorldId(parts[1])
+            : WorldId.AnyWorld;
 
         if (!VerifyWorld(world))
             throw new IdentifierParseError($"{parts[1]} is not a valid world name.");
@@ -638,19 +680,19 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
 
         return split2[0].ToLowerInvariant() switch
         {
-            "m" or "mount" => FindDataId(split3[0], _data.Mounts, out var id)
+            "m" or "mount" => FindDataId(split3[0], data.Mounts, out var id)
                 ? (ObjectKind.MountType, mountId: id, GetIndex())
                 : throw new IdentifierParseError($"Could not identify a Mount named {split2[1]}."),
-            "c" or "companion" or "minion" or "mini" => FindDataId(split3[0], _data.Companions, out var id)
+            "c" or "companion" or "minion" or "mini" => FindDataId(split3[0], data.Companions, out var id)
                 ? (ObjectKind.Companion, cId: id, GetIndex())
                 : throw new IdentifierParseError($"Could not identify a Minion named {split2[1]}."),
-            "a" or "o" or "accessory" or "ornament" => FindDataId(split3[0], _data.Ornaments, out var id)
+            "a" or "o" or "accessory" or "ornament" => FindDataId(split3[0], data.Ornaments, out var id)
                 ? (ObjectKind.Ornament, id, GetIndex())
                 : throw new IdentifierParseError($"Could not identify an Accessory named {split2[1]}."),
-            "e" or "enpc" or "eventnpc" or "event npc" => FindDataId(split3[0], _data.ENpcs, out var id)
+            "e" or "enpc" or "eventnpc" or "event npc" => FindDataId(split3[0], data.ENpcs, out var id)
                 ? (ObjectKind.EventNpc, id, GetIndex())
                 : throw new IdentifierParseError($"Could not identify an Event NPC named {split2[1]}."),
-            "b" or "bnpc" or "battlenpc" or "battle npc" => FindDataId(split3[0], _data.BNpcs, out var id)
+            "b" or "bnpc" or "battlenpc" or "battle npc" => FindDataId(split3[0], data.BNpcs, out var id)
                 ? (ObjectKind.BattleNpc, id, GetIndex())
                 : throw new IdentifierParseError($"Could not identify a Battle NPC named {split2[1]}."),
             _ => throw new IdentifierParseError($"The argument {split2[0]} is not a valid NPC Type."),
@@ -662,7 +704,7 @@ public class ActorIdentifierFactory(ObjectManager _objects, IFramework _framewor
             if (split3.Length != 2)
                 return idx;
 
-            if (ushort.TryParse(split3[1], out var intIdx) && intIdx < _objects.TotalCount)
+            if (ushort.TryParse(split3[1], out var intIdx) && intIdx < objects.TotalCount)
                 idx = intIdx;
             else
                 throw new IdentifierParseError($"Could not parse index {split3[1]} to valid Index.");

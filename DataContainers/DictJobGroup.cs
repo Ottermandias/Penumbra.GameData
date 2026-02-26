@@ -2,7 +2,7 @@ using System.Collections.Frozen;
 using Dalamud.Game;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
-using OtterGui.Services;
+using Luna;
 using Penumbra.GameData.Data;
 using Penumbra.GameData.Structs;
 
@@ -16,7 +16,7 @@ public sealed class DictJobGroup : IDataContainer, IReadOnlyDictionary<JobGroupI
     {
         var stopwatch = Stopwatch.StartNew();
         var sheet     = gameData.GetExcelSheet<ClassJobCategory>();
-        var jobs      = gameData.GetExcelSheet<ClassJob>(ClientLanguage.English)!;
+        var jobs      = gameData.GetExcelSheet<ClassJob>(ClientLanguage.English);
         AllJobGroups = sheet.Select(j => new JobGroup(j, jobs)).ToArray();
         _jobGroups   = AllJobGroups.Where(g => JobGroupIsValid(g.Id)).ToFrozenDictionary(g => g.Id, g => g);
         Memory       = DataUtility.DictionaryMemory(32, Count) + _jobGroups.Sum(kvp => kvp.Value.Name.Length) * 2 + 24 * AllJobGroups.Count;

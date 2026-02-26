@@ -1,5 +1,5 @@
 using Dalamud.Game.ClientState.Objects.Enums;
-using OtterGui.Services;
+using Luna;
 using Penumbra.GameData.DataContainers;
 using Penumbra.GameData.Structs;
 
@@ -7,35 +7,35 @@ namespace Penumbra.GameData.Data;
 
 /// <summary> A collection service for all the name dictionaries required for actor identification. </summary>
 public sealed class NameDicts(
-    DictWorld _worlds,
-    DictMount _mounts,
-    DictCompanion _companions,
-    DictOrnament _ornaments,
-    DictBNpc _bNpcs,
-    DictENpc _eNpcs)
+    DictWorld worlds,
+    DictMount mounts,
+    DictCompanion companions,
+    DictOrnament ornaments,
+    DictBNpc bNpcs,
+    DictENpc eNpcs)
     : IAsyncService
 {
     /// <summary> Worlds available for players. </summary>
-    public readonly DictWorld Worlds = _worlds;
+    public readonly DictWorld Worlds = worlds;
 
     /// <summary> Valid Mount names in title case by mount id. </summary>
-    public readonly DictMount Mounts = _mounts;
+    public readonly DictMount Mounts = mounts;
 
     /// <summary> Valid Companion names in title case by companion id. </summary>
-    public readonly DictCompanion Companions = _companions;
+    public readonly DictCompanion Companions = companions;
 
     /// <summary> Valid ornament names by id. </summary>
-    public readonly DictOrnament Ornaments = _ornaments;
+    public readonly DictOrnament Ornaments = ornaments;
 
     /// <summary> Valid BNPC names in title case by BNPC Name id. </summary>
-    public readonly DictBNpc BNpcs = _bNpcs;
+    public readonly DictBNpc BNpcs = bNpcs;
 
     /// <summary> Valid ENPC names in title case by ENPC id. </summary>
-    public readonly DictENpc ENpcs = _eNpcs;
+    public readonly DictENpc ENpcs = eNpcs;
 
     /// <summary> Finished when all name dictionaries are finished. </summary>
     public Task Awaiter { get; } =
-        Task.WhenAll(_worlds.Awaiter, _mounts.Awaiter, _companions.Awaiter, _ornaments.Awaiter, _bNpcs.Awaiter, _eNpcs.Awaiter);
+        Task.WhenAll(worlds.Awaiter, mounts.Awaiter, companions.Awaiter, ornaments.Awaiter, bNpcs.Awaiter, eNpcs.Awaiter);
 
     /// <inheritdoc/>
     public bool Finished

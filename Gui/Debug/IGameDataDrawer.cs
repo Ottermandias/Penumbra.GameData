@@ -1,4 +1,4 @@
-using OtterGui.Services;
+using Luna;
 
 namespace Penumbra.GameData.Gui.Debug;
 
@@ -6,7 +6,7 @@ namespace Penumbra.GameData.Gui.Debug;
 public interface IGameDataDrawer : IUiService
 {
     /// <summary> The name of the data collection. </summary>
-    public string Label { get; }
+    public ReadOnlySpan<byte> Label { get; }
 
     /// <summary> The draw routine. </summary>
     public void Draw();

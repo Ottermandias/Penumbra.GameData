@@ -1,19 +1,28 @@
+using Luna.Generators;
+
 namespace Penumbra.GameData.Enums;
 
 /// <summary> Bonus Equip Slots as flags, currently two. </summary>
 [Flags]
+[NamedEnum(Class: nameof(BonusExtensions))]
 public enum BonusItemFlag : byte
 {
+    [Name(Omit: true)]
     Unknown = 0x00,
+
+    [Name("Glasses")]
     Glasses = 0x01,
+
+    [Name("Bonus Slot 2")]
     UnkSlot = 0x02,
 }
 
-public static class BonusExtensions
+public static partial class BonusExtensions
 {
     public const BonusItemFlag All = BonusItemFlag.Glasses;
 
     public static readonly IReadOnlyList<BonusItemFlag> AllFlags = [BonusItemFlag.Glasses];
+
 
     public static uint ToIndex(this BonusItemFlag flag)
         => flag switch
@@ -53,14 +62,6 @@ public static class BonusExtensions
             BonusItemFlag.Glasses => EquipSlot.Head,
             BonusItemFlag.UnkSlot => EquipSlot.Unknown,
             _                     => EquipSlot.Unknown,
-        };
-
-    public static string ToName(this BonusItemFlag value)
-        => value switch
-        {
-            BonusItemFlag.Glasses => "Glasses",
-            BonusItemFlag.UnkSlot => "Bonus Slot 2",
-            _                     => "Unknown",
         };
 
     public static BonusItemFlag ToBonusSlot(this uint slot)

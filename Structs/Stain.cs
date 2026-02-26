@@ -1,4 +1,4 @@
-using Dalamud.Interface;
+using ImSharp;
 using Penumbra.GameData.Data;
 
 namespace Penumbra.GameData.Structs;
@@ -7,13 +7,13 @@ namespace Penumbra.GameData.Structs;
 public readonly struct Stain
 {
     /// <summary> An empty stain with transparent color. </summary>
-    public static readonly Stain None = new("None");
+    public static readonly Stain None = new("None"u8);
 
     /// <summary> The name of the stain. </summary>
-    public readonly string Name;
+    public readonly StringU8 Name;
 
     /// <summary> The color as RGBA32-value (alpha is always 255). </summary>
-    public readonly uint RgbaColor;
+    public readonly Rgba32 RgbaColor;
 
     /// <summary> The index of the stain in the sheet. </summary>
     public readonly StainId RowIndex;
@@ -23,22 +23,22 @@ public readonly struct Stain
 
     /// <summary> The R-value of the stain. </summary>
     public byte R
-        => (byte)(RgbaColor & 0xFF);
+        => RgbaColor.R;
 
     /// <summary> The G-value of the stain. </summary>
     public byte G
-        => (byte)((RgbaColor >> 8) & 0xFF);
+        => RgbaColor.G;
 
     /// <summary> The B-value of the stain. </summary>
     public byte B
-        => (byte)((RgbaColor >> 16) & 0xFF);
+        => RgbaColor.B;
 
     /// <summary> The approximate lumen-intensity of the stain. </summary>
     public float Intensity
     {
         get
         {
-            var vec = ColorHelpers.RgbaUintToVector4(RgbaColor);
+            var vec = RgbaColor.ToVector();
             return 2 * vec.X * vec.X + 7 * vec.Y * vec.Y + vec.Z * vec.Z;
         }
     }
@@ -49,11 +49,11 @@ public readonly struct Stain
 
     /// <summary> Create a Stain from the sheet data. </summary>
     public Stain(Lumina.Excel.Sheets.Stain stain)
-        : this(stain.Name.ExtractTextExtended(), SeColorToRgba(stain.Color), (StainId)stain.RowId, stain.IsMetallic)
+        : this(new StringU8(stain.Name.ExtractTextExtended()), SeColorToRgba(stain.Color), (StainId)stain.RowId, stain.IsMetallic)
     { }
 
     /// <summary> Simple constructor for all data. </summary>
-    internal Stain(string name, uint dye, StainId index, bool gloss)
+    internal Stain(StringU8 name, uint dye, StainId index, bool gloss)
     {
         Name      = name;
         RowIndex  = index;
@@ -62,9 +62,9 @@ public readonly struct Stain
     }
 
     /// <summary> Only used by None. </summary>
-    private Stain(string name)
+    private Stain(ReadOnlySpan<byte> name)
     {
-        Name      = name;
+        Name      = new StringU8(name);
         RowIndex  = 0;
         RgbaColor = 0;
         Gloss     = false;
