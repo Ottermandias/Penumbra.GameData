@@ -171,7 +171,7 @@ public static class Sigs
     public const string UpdateOrnament = "E8 ?? ?? ?? ?? F3 0F 10 4E ?? 0F 57 D2";
 
     public const string PrepareColorSet = "E8 ?? ?? ?? ?? 49 89 04 ?? 49 83 C5";
-    public const string UpdateColorSets = "89 54 24 ?? 55 56 41 56 48 81 EC";
+    public const string CreateNewModel = "89 54 24 ?? 55 56 41 56 48 81 EC";
 
     public const string CalculateHeight = "E8 ?? ?? ?? FF 48 8B 0D ?? ?? ?? ?? 0F 28 F0";
 
