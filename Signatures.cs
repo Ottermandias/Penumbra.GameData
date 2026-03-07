@@ -9,9 +9,6 @@ public static class Sigs
     // ObjectManager
     public const string UpdateObjectArrays = "40 57 48 83 EC ?? 48 89 5C 24 ?? 33 DB";
 
-    // ResourceLoader.Debug
-    public const string ResourceManager = "48 8B 0D ?? ?? ?? ?? 0F 5B F6";
-
     // ResourceLoader.Replacement
     public const string GetResourceSync  = "E8 ?? ?? ?? ?? 48 8B C8 8B C3 F0 0F C0 81";
     public const string GetResourceAsync = "E8 ?? ?? ?? 00 48 8B D8 EB ?? F0 FF 83 ?? ?? 00 00";
