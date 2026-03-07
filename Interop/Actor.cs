@@ -1,6 +1,7 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Penumbra.GameData.Actors;
+using Penumbra.GameData.DataContainers;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using Penumbra.String;
@@ -22,8 +23,11 @@ public readonly unsafe struct Actor : IEquatable<Actor>
     public Character* AsCharacter
         => (Character*)Address;
 
+    public bool IsHuman(HumanModelList humans)
+        => IsCharacter && humans.IsHuman(new ModelCharaId((uint)AsCharacter->ModelContainer.ModelCharaId));
+
     public bool Valid
-        => Address != nint.Zero && AsObject->VirtualTable != null;
+        => Address != nint.Zero && AsObject->VirtualTable is not null;
 
     public bool IsPlayer
         => Valid && AsObject->ObjectKind is ObjectKind.Pc;
