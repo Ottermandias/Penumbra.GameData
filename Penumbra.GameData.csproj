@@ -4,6 +4,7 @@
         <Product>Penumbra</Product>
         <Copyright>Copyright © 2025</Copyright>
         <OutputPath>bin\$(Configuration)\</OutputPath>
+        <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     </PropertyGroup>
 
     <PropertyGroup>
