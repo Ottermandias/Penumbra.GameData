@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using ImSharp;
 using Luna;
@@ -24,7 +25,7 @@ public unsafe class ObjectManager(
     Logger log,
     IFramework framework,
     IObjectTable objects)
-    : DataSharer<ShareTuple>(pi, log, "ObjectManager", ClientLanguage.English, 2, () => DefaultShareTuple(objects)), IReadOnlyCollection<Actor>
+    : DataSharer<ShareTuple>(pi, log, "ObjectManager", ClientLanguage.English, 3, () => DefaultShareTuple(objects)), IReadOnlyCollection<Actor>
 {
     private static ShareTuple DefaultShareTuple(IObjectTable objects)
         => new([null], [true], new List<nint>(objects.Length), new Dictionary<GameObjectId, nint>(objects.Length), new int[4], [], []);
@@ -75,9 +76,12 @@ public unsafe class ObjectManager(
         NeedsUpdate = true;
         HookOwner   = _assemblyName;
         _updateHook?.Dispose();
-        _log.Debug("[ObjectManager] Moving object table hook owner to this.");
+        _minionHook?.Dispose();
+        _log.Debug("[ObjectManager] Moving object table hooks owner to this.");
         _updateHook = interop.HookFromSignature<UpdateObjectArraysDelegate>(Sigs.UpdateObjectArrays, UpdateObjectArraysDetour);
+        _minionHook = interop.HookFromSignature<UpdateMinion>(Sigs.UpdateMinion, UpdateMinionDetour);
         _updateHook.Enable();
+        _minionHook.Enable();
     }
 
     private void Update()
@@ -339,6 +343,7 @@ public unsafe class ObjectManager(
     {
         base.Dispose(_);
         _updateHook?.Dispose();
+        _minionHook?.Dispose();
         if (HookOwner == _assemblyName)
         {
             HookOwner   = null;
@@ -348,8 +353,10 @@ public unsafe class ObjectManager(
     }
 
     private delegate void UpdateObjectArraysDelegate(GameObjectManager* manager);
+    private delegate byte UpdateMinion(Companion* companion, Character* owner, CompanionId id, int unk);
 
     private Hook<UpdateObjectArraysDelegate>? _updateHook;
+    private Hook<UpdateMinion>?            _minionHook;
 
     private void UpdateObjectArraysDetour(GameObjectManager* manager)
     {
@@ -357,5 +364,17 @@ public unsafe class ObjectManager(
         _log.Excessive("[ObjectManager] Update Object Arrays invoked.");
         NeedsUpdate = true;
         InvokeRequiredUpdates();
+    }
+
+    private byte UpdateMinionDetour(Companion* companion, Character* owner, CompanionId id, int unk)
+    {
+        var ret = _minionHook!.Original(companion, owner, id, unk);
+        if (ret is 0)
+            return ret;
+
+        _log.Excessive("[ObjectManager] Update Companion invoked for 0x{(ulong)companion:X}, 0x{(ulong)owner:X}, {id}, {unk} -> {ret}.");
+        NeedsUpdate = true;
+        InvokeRequiredUpdates();
+        return ret;
     }
 }

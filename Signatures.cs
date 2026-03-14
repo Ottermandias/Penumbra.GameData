@@ -8,6 +8,7 @@ public static class Sigs
 {
     // ObjectManager
     public const string UpdateObjectArrays = "40 57 48 83 EC ?? 48 89 5C 24 ?? 33 DB";
+    public const string UpdateMinion       = "E8 ?? ?? ?? ?? 84 C0 75 ?? 48 8B 4B ?? 33 FF";
 
     // ResourceLoader.Replacement
     public const string GetResourceSync  = "E8 ?? ?? ?? ?? 48 8B C8 8B C3 F0 0F C0 81";
