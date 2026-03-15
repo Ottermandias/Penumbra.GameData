@@ -66,6 +66,9 @@ public static class Names
             ShpkFile.TableSamplerName,
             ShpkFile.NormalSamplerName,
             ShpkFile.IndexSamplerName,
+            ShpkFile.DiffuseSamplerName,
+            ShpkFile.SpecularSamplerName,
+            ShpkFile.MaskSamplerName,
 
             // Special material constants
             SphereMapIndexConstantName,

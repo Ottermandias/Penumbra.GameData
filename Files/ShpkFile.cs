@@ -15,7 +15,7 @@ public partial class ShpkFile : IWritable
     public const uint TableSamplerId           = 0x2005679Fu; // g_SamplerTable is a texture filled from the mtrl's color set
     public const uint NormalSamplerId          = 0x0C5EC1F1u; // g_SamplerNormal (suffix "_norm" or "_n") is the normal map
     public const uint IndexSamplerId           = 0x565F8FD8u; // g_SamplerIndex (suffix "_id") is the texture used to address g_SamplerTable
-    public const uint SpecularSamplerId        = 0x2B99E025u; // g_SamplerSpecular (suffix "_id") is the texture used to address g_SamplerTable
+    public const uint SpecularSamplerId        = 0x2B99E025u; // g_SamplerSpecular (suffix "_s") 
     public const uint DiffuseSamplerId         = 0x115306BEu; // g_SamplerDiffuse (suffix "_d" or "_base")
     public const uint MaskSamplerId            = 0x8A4E82B6u; // g_SamplerMask (suffix "_m", "_mult" or "_mask")
 
