@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Luna;
 using Newtonsoft.Json.Linq;
 using Penumbra.GameData.Enums;
 using Penumbra.String;
@@ -44,6 +46,49 @@ public static class ActorIdentifierJson
         }
 
         return ret;
+    }
+
+    /// <summary> Write this identifier as a JSON object to the writer. </summary>
+    public static void WriteJson(this Utf8JsonWriter writer, ReadOnlySpan<byte> property, ActorIdentifier identifier)
+    {
+        writer.WriteStartObject(property);
+        writer.WriteJsonProperties(identifier);
+        writer.WriteEndObject();
+    }
+
+    /// <summary> Write the properties of this identifier to the JSON writer. </summary>
+    public static void WriteJsonProperties(this Utf8JsonWriter writer, ActorIdentifier identifier)
+    {
+        writer.WriteString("Type"u8, identifier.Type.ToString());
+        switch (identifier.Type)
+        {
+            case IdentifierType.Player:
+                writer.WriteString("PlayerName"u8, identifier.PlayerName.Span);
+                writer.WriteNumber("HomeWorld"u8, identifier.HomeWorld);
+                return;
+            case IdentifierType.Retainer:
+                writer.WriteString("PlayerName"u8, identifier.PlayerName.Span);
+                writer.WriteString("Retainer"u8,   identifier.Retainer.ToString());
+                return;
+            case IdentifierType.Owned:
+                writer.WriteString("PlayerName"u8, identifier.PlayerName.Span);
+                writer.WriteNumber("HomeWorld"u8, identifier.HomeWorld);
+                writer.WriteString("Kind"u8, identifier.Kind.ToString());
+                writer.WriteNumber("DataId"u8, identifier.DataId);
+                return;
+            case IdentifierType.Special:
+                writer.WriteString("Special"u8, ((ScreenActor)identifier.Index.Index).ToString());
+                return;
+            case IdentifierType.Npc:
+                writer.WriteString("Kind"u8, identifier.Kind.ToString());
+                writer.WriteUnsignedIfNot("Index"u8, identifier.Index.Index, ushort.MaxValue);
+                writer.WriteNumber("DataId"u8, identifier.DataId);
+                return;
+            case IdentifierType.UnkObject:
+                writer.WriteString("PlayerName"u8, identifier.PlayerName.Span);
+                writer.WriteNumber("Index"u8, identifier.Index.Index);
+                return;
+        }
     }
 
     /// <summary>
