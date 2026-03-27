@@ -40,6 +40,9 @@ public readonly partial struct NpcId
     public static implicit operator NpcId(ENpcId id)
         => new(id.Id);
 
+    public static implicit operator NpcId(BNpcId id)
+        => new(id.Id);
+
     public static implicit operator NpcId(BNpcNameId id)
         => new(id.Id);
 
@@ -53,6 +56,9 @@ public readonly partial struct NpcId
         => new(id.Id);
 
     public ENpcId ENpcId
+        => new(Id);
+
+    public BNpcId BNpcId
         => new(Id);
 
     public BNpcNameId BNpcNameId
