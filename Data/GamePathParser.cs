@@ -39,7 +39,8 @@ public class GamePathParser(Logger log) : IService
         }
         catch (Exception e)
         {
-            log.Error($"Could not parse {path}:\n{e}");
+            log.Debug($"[GamePathParser] Could not parse {path}.");
+            log.Verbose($"[GamePathParser] {e}");
         }
 
         return new GameObjectInfo
