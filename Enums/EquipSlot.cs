@@ -385,7 +385,7 @@ public static partial class EquipSlotExtensions
     ];
 
     /// <summary> A list of all equipment slots. </summary>
-    public static readonly EquipSlot[] FullSlots = [.. WeaponSlots, .. EqdpSlots];
+    public static readonly FrozenSet<EquipSlot> FullSlots = [.. WeaponSlots, .. EqdpSlots];
 }
 
 public static partial class Names

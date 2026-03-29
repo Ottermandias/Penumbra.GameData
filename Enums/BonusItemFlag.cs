@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Luna.Generators;
 
 namespace Penumbra.GameData.Enums;
@@ -21,7 +22,7 @@ public static partial class BonusExtensions
 {
     public const BonusItemFlag All = BonusItemFlag.Glasses;
 
-    public static readonly IReadOnlyList<BonusItemFlag> AllFlags = [BonusItemFlag.Glasses];
+    public static readonly FrozenSet<BonusItemFlag> AllFlags = [BonusItemFlag.Glasses];
 
 
     public static uint ToIndex(this BonusItemFlag flag)
