@@ -10,7 +10,7 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches OrnamentId to names. </summary>
-public sealed class DictOrnament(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
+public sealed class DictOrnament(IDalamudPluginInterface pluginInterface, LunaLogger log, IDataManager gameData)
     : NameDictionary(pluginInterface, log, gameData, "Ornaments", Version.DictOrnament, () => CreateOrnamentData(gameData))
 {
     /// <summary> Create the data. </summary>

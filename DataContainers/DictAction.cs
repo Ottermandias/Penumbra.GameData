@@ -8,7 +8,7 @@ using Penumbra.GameData.DataContainers.Bases;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that matches action keys to their identities. </summary>
-public sealed class DictAction(IDalamudPluginInterface pluginInterface, Logger log, IDataManager data)
+public sealed class DictAction(IDalamudPluginInterface pluginInterface, LunaLogger log, IDataManager data)
     : DictLuminaName<Lumina.Excel.Sheets.Action>(pluginInterface, log, "Actions", data.Language, Version.DictAction, () => CreateActionList(data))
 {
     /// <remarks>This is too much effort to do accurately.</remarks>>

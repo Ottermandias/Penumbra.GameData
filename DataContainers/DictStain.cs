@@ -10,7 +10,7 @@ using Penumbra.GameData.Structs;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary that maps StainIds to Stains. </summary>
-public sealed class DictStain(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
+public sealed class DictStain(IDalamudPluginInterface pluginInterface, LunaLogger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<byte, (ReadOnlyMemory<byte> Name, uint Dye, bool Gloss)>>(pluginInterface, log, "Stains",
         gameData.Language, Version.DictStain,
         () => CreateStainData(gameData)), IReadOnlyDictionary<StainId, Stain>

@@ -22,7 +22,7 @@ namespace Penumbra.GameData.Interop;
 public unsafe class ObjectManager(
     IDalamudPluginInterface pi,
     IGameInteropProvider interop,
-    Logger log,
+    LunaLogger log,
     IFramework framework,
     IObjectTable objects)
     : DataSharer<ShareTuple>(pi, log, "ObjectManager", ClientLanguage.English, 3, () => DefaultShareTuple(objects)), IReadOnlyCollection<Actor>
@@ -32,9 +32,9 @@ public unsafe class ObjectManager(
 
     public readonly  IObjectTable Objects       = objects;
     private readonly Actor*       _address      = (Actor*)Unsafe.AsPointer(ref GameObjectManager.Instance()->Objects.IndexSorted[0]);
-    private readonly string       _assemblyName = $"{Logger.GlobalPluginName}_{Guid.NewGuid().ToString().AsSpan(0, 8)}";
+    private readonly string       _assemblyName = $"{MainLogger.GlobalPluginName}_{Guid.NewGuid().ToString().AsSpan(0, 8)}";
 
-    private readonly Logger _log = log;
+    private readonly LunaLogger _log = log;
 
     public void DrawDebug()
     {

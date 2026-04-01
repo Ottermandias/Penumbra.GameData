@@ -10,7 +10,7 @@ namespace Penumbra.GameData.DataContainers;
 /// <summary> A dictionary mapping ItemIds to all primary model items. Currently only used by fist weapon gauntlets for fist weapons in range 1601-1650. This requires secondary models to be finished. </summary>
 public sealed class ItemsTertiaryModel(
     IDalamudPluginInterface pi,
-    Logger log,
+    LunaLogger log,
     IDataManager gameData,
     ItemsByType items,
     ItemsSecondaryModel itemsSecondaries)

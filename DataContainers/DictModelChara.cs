@@ -14,7 +14,7 @@ namespace Penumbra.GameData.DataContainers;
 /// <remarks> This requires <paramref name="nameDicts"/> and <paramref name="bNpcNames"/> to have finished. </remarks>
 public sealed class DictModelChara(
     IDalamudPluginInterface pluginInterface,
-    Logger log,
+    LunaLogger log,
     IDataManager gameData,
     DictBNpcNames bNpcNames,
     NameDicts nameDicts)

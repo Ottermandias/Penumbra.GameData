@@ -200,7 +200,7 @@ public static class Sigs
     public const string LoadMigratoryMotionPack = "E9 ?? ?? ?? ?? 8B 84 24 ?? ?? ?? ?? 48 8D 8C 24";
 
     [Conditional("DEBUG")]
-    public static void TestSignatures(ISigScanner scanner, Logger log)
+    public static void TestSignatures(ISigScanner scanner, LunaLogger log)
     {
         var fields = typeof(Sigs).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
             .Where(f => f is { IsLiteral: true, IsInitOnly: false } && f.FieldType == typeof(string));

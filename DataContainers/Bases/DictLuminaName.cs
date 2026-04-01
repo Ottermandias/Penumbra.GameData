@@ -16,7 +16,7 @@ namespace Penumbra.GameData.DataContainers.Bases;
 /// <param name="continuation"> Awaiter of the dependencies of the factory function. </param>
 public abstract class DictLuminaName<T>(
     IDalamudPluginInterface pluginInterface,
-    Logger log,
+    LunaLogger log,
     string name,
     ClientLanguage language,
     int version,

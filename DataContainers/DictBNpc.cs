@@ -12,7 +12,7 @@ namespace Penumbra.GameData.DataContainers;
 #pragma warning disable SeStringEvaluator
 
 /// <summary> A dictionary that matches BNpcNameId to names. </summary>
-public sealed class DictBNpc(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData, ISeStringEvaluator evaluator)
+public sealed class DictBNpc(IDalamudPluginInterface pluginInterface, LunaLogger log, IDataManager gameData, ISeStringEvaluator evaluator)
     : NameDictionary(pluginInterface, log, gameData, "BNpcs", Version.DictBNpc, () => CreateBNpcData(gameData, evaluator))
 {
     /// <summary> Create the data. </summary>

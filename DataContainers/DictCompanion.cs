@@ -12,7 +12,7 @@ namespace Penumbra.GameData.DataContainers;
 #pragma warning disable SeStringEvaluator
 
 /// <summary> A dictionary that matches CompanionId to names. </summary>
-public sealed class DictCompanion(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData, ISeStringEvaluator evaluator)
+public sealed class DictCompanion(IDalamudPluginInterface pluginInterface, LunaLogger log, IDataManager gameData, ISeStringEvaluator evaluator)
     : NameDictionary(pluginInterface, log, gameData, "Companions", Version.DictCompanion, () => CreateCompanionData(gameData, evaluator))
 {
     /// <summary> Create the data. </summary>

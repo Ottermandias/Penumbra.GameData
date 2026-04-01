@@ -12,7 +12,7 @@ using Race = Penumbra.GameData.Enums.Race;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A set of items restricted to female characters. </summary>
-public sealed class RestrictedItemsFemale(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
+public sealed class RestrictedItemsFemale(IDalamudPluginInterface pluginInterface, LunaLogger log, IDataManager gameData)
     : DataSharer<IReadOnlyDictionary<uint, uint>>(pluginInterface, log, "GenderRestrictedItemsFemale", gameData.Language, Version.RestrictedItems,
         () => CreateItems(log, gameData))
 {
@@ -29,7 +29,7 @@ public sealed class RestrictedItemsFemale(IDalamudPluginInterface pluginInterfac
     }
 
     /// <summary> Create the data. </summary>
-    private static FrozenDictionary<uint, uint> CreateItems(Logger log, IDataManager gameData)
+    private static FrozenDictionary<uint, uint> CreateItems(LunaLogger log, IDataManager gameData)
     {
         var ret = new Dictionary<uint, uint>(128);
         var items = gameData.GetExcelSheet<Item>();

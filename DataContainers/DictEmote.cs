@@ -11,11 +11,11 @@ using Penumbra.GameData.Files;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A dictionary mapping certain path keys to emote identities. </summary>
-public sealed class DictEmote(IDalamudPluginInterface pluginInterface, Logger log, IDataManager data)
+public sealed class DictEmote(IDalamudPluginInterface pluginInterface, LunaLogger log, IDataManager data)
     : DictLuminaName<Emote>(pluginInterface, log, "Emotes", data.Language, Version.DictEmote, () => CreateEmoteList(log, data))
 {
     /// <summary> Create the data. </summary>
-    private static FrozenDictionary<string, IReadOnlyList<Emote>> CreateEmoteList(Logger log, IDataManager gameData)
+    private static FrozenDictionary<string, IReadOnlyList<Emote>> CreateEmoteList(LunaLogger log, IDataManager gameData)
     {
         var sheet   = gameData.GetExcelSheet<Emote>(gameData.Language);
         var storage = new ConcurrentDictionary<string, ConcurrentBag<Emote>>();

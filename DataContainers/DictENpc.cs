@@ -12,7 +12,7 @@ namespace Penumbra.GameData.DataContainers;
 #pragma warning disable SeStringEvaluator
 
 /// <summary> A dictionary that matches ENpcId to names. </summary>
-public sealed class DictENpc(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData, ISeStringEvaluator evaluator)
+public sealed class DictENpc(IDalamudPluginInterface pluginInterface, LunaLogger log, IDataManager gameData, ISeStringEvaluator evaluator)
     : NameDictionary(pluginInterface, log, gameData, "ENpcs", Version.DictENpc, () => CreateENpcData(gameData, evaluator))
 {
     /// <summary> Create the data. </summary>

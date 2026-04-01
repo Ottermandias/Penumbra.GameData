@@ -14,7 +14,7 @@ public static class GenderRestrictedItems
     /// <param name="items"> The sheet of all items. </param>
     /// <param name="log"> A logger. </param>
     /// <param name="restriction"> The desired restriction, 1 for male, 2 for female. </param>
-    internal static void AddUnknownItems(Dictionary<uint, uint> dict, ExcelSheet<Item> items, Logger log, byte restriction)
+    internal static void AddUnknownItems(Dictionary<uint, uint> dict, ExcelSheet<Item> items, LunaLogger log, byte restriction)
     {
         var unhandled = 0;
         foreach (var item in items.Where(i => i.EquipRestriction == restriction && i.EquipSlotCategory.RowId > 0))
@@ -67,17 +67,17 @@ public static class GenderRestrictedItems
 
     /// <summary> Add a known item restricted to female characters to the dictionary. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    internal static void AddItemFemale(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, Logger log)
+    internal static void AddItemFemale(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, LunaLogger log)
         => AddItem(dict, pair, items, log, 2);
 
     /// <summary> Add a known item restricted to male characters to the dictionary. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    internal static void AddItemMale(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, Logger log)
+    internal static void AddItemMale(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, LunaLogger log)
         => AddItem(dict, pair, items, log, 1);
 
     /// <summary> Add a known item to the dictionary. </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private static void AddItem(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, Logger log, byte direction)
+    private static void AddItem(Dictionary<uint, uint> dict, RestrictedItemPair pair, ExcelSheet<Item> items, LunaLogger log, byte direction)
     {
         if ((pair.Add & direction) == 0)
             return;

@@ -12,7 +12,7 @@ namespace Penumbra.GameData.DataContainers.Bases;
 /// <param name="name"> The name and tag for the data share. </param>
 /// <param name="language"> The client language used for the data share. </param>
 /// <param name="version"> The version used for the data share. </param>
-public abstract class DataSharer<T>(IDalamudPluginInterface pluginInterface, Logger log, string name, ClientLanguage language, int version)
+public abstract class DataSharer<T>(IDalamudPluginInterface pluginInterface, LunaLogger log, string name, ClientLanguage language, int version)
     : IDisposable, IAsyncDataContainer
 {
     /// <summary> All DataSharers store a task inside Dalamud. </summary>
@@ -29,7 +29,7 @@ public abstract class DataSharer<T>(IDalamudPluginInterface pluginInterface, Log
     public bool Finished
         => Task.IsCompletedSuccessfully;
 
-    protected DataSharer(IDalamudPluginInterface pluginInterface, Logger log, string name, ClientLanguage language, int version,
+    protected DataSharer(IDalamudPluginInterface pluginInterface, LunaLogger log, string name, ClientLanguage language, int version,
         Func<T> factory, Task? continuation = null)
         : this(pluginInterface, log, name, language, version)
         => (Task, _timer) = CreateTask(factory, continuation);

@@ -11,11 +11,11 @@ using Race = Penumbra.GameData.Enums.Race;
 namespace Penumbra.GameData.DataContainers;
 
 /// <summary> A set of items restricted to specific races. </summary>
-public sealed class RestrictedItemsRace(IDalamudPluginInterface pluginInterface, Logger log, IDataManager gameData)
+public sealed class RestrictedItemsRace(IDalamudPluginInterface pluginInterface, LunaLogger log, IDataManager gameData)
     : DataSharer<IReadOnlySet<uint>>(pluginInterface, log, "RacialRestrictedItems", gameData.Language, Version.RestrictedItems, () => CreateItems(log, gameData))
 {
     /// <summary> Create the data and also warn for unknown restrictions. </summary>
-    private static FrozenSet<uint> CreateItems(Logger log, IDataManager gameData)
+    private static FrozenSet<uint> CreateItems(LunaLogger log, IDataManager gameData)
     {
         var ret = RaceGenderGroup.Where(c => c is not 0 and not uint.MaxValue).ToHashSet();
 
