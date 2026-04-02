@@ -34,6 +34,10 @@ public readonly struct ActorIdentifier : IEquatable<ActorIdentifier>
     public ActorIdentifier CreatePermanent()
         => new(Type, Kind, Index, DataId, PlayerName.IsEmpty || PlayerName.IsOwned ? PlayerName : PlayerName.Clone());
 
+    /// <summary> Return this identifier without a specified object index if it is an NPC. </summary>
+    public ActorIdentifier WithoutIndex()
+        => Type is not IdentifierType.Npc ? this : new ActorIdentifier(Type, Kind, ObjectIndex.AnyIndex, DataId, PlayerName);
+
     /// <summary> Obtain the index as ScreenActor. </summary>
     public ScreenActor Special
         => (ScreenActor)Index.Index;
