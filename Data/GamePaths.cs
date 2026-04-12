@@ -1,6 +1,5 @@
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
-using Penumbra.String;
 using Penumbra.String.Classes;
 using MtrlFile = Penumbra.GameData.Files.MtrlFile;
 

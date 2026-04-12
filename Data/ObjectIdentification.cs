@@ -1,10 +1,10 @@
-using Penumbra.GameData.Enums;
-using Penumbra.GameData.Structs;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Luna;
 using Penumbra.GameData.Actors;
-using ObjectType = Penumbra.GameData.Enums.ObjectType;
 using Penumbra.GameData.DataContainers;
+using Penumbra.GameData.Enums;
+using Penumbra.GameData.Structs;
+using ObjectType = Penumbra.GameData.Enums.ObjectType;
 
 namespace Penumbra.GameData.Data;
 

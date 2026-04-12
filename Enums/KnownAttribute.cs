@@ -1,5 +1,5 @@
-using KA = Penumbra.GameData.Enums.KnownAttribute;
 using static Penumbra.GameData.Enums.EquipSlot;
+using KA = Penumbra.GameData.Enums.KnownAttribute;
 
 namespace Penumbra.GameData.Enums;
 

@@ -1,12 +1,12 @@
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Lumina.Excel.Sheets;
+using Luna;
 using Penumbra.Api.Enums;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
 using Action = Lumina.Excel.Sheets.Action;
 using Emote = Lumina.Excel.Sheets.Emote;
 using ModelChara = Lumina.Excel.Sheets.ModelChara;
-using Luna;
 
 namespace Penumbra.GameData.Data;
 
