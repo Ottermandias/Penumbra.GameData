@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Penumbra.GameData.Structs;
 
@@ -20,7 +20,7 @@ public readonly struct GmpEntry : IEquatable<GmpEntry>
     /// <summary> Whether the visor is enabled at all. Bit 1. </summary>
     public bool Enabled
     {
-        get => (_value1 & 1) == 1;
+        get => (_value1 & 1) is 1;
         init
         {
             if (value)
@@ -33,7 +33,7 @@ public readonly struct GmpEntry : IEquatable<GmpEntry>
     /// <summary> Whether toggling the visor is animated. Bit 2.</summary>
     public bool Animated
     {
-        get => (_value1 & 2) == 2;
+        get => (_value1 & 2) is 2;
         init
         {
             if (value)
@@ -90,8 +90,29 @@ public readonly struct GmpEntry : IEquatable<GmpEntry>
         init => _value5 = (byte)((_value5 & 0x0F) | (value << 4));
     }
 
+    /// <summary> Write this entry as a JSON object. </summary>
+    /// <param name="j"> The JSON writer. </param>
+    public void WriteJson(Utf8JsonWriter j)
+    {
+        j.WriteStartObject();
+        AddToJson(j);
+        j.WriteEndObject();
+    }
+
+    /// <summary> Add the values of this entry to a JSON object without beginning or ending the object. </summary>
+    /// <param name="j"> The JSON writer. </param>
+    public void AddToJson(Utf8JsonWriter j)
+    {
+        j.WriteBoolean("Enabled"u8,  Enabled);
+        j.WriteBoolean("Animated"u8, Animated);
+        j.WriteNumber("RotationA"u8, RotationA);
+        j.WriteNumber("RotationB"u8, RotationB);
+        j.WriteNumber("RotationC"u8, RotationC);
+        j.WriteNumber("UnknownA"u8,  UnknownA);
+        j.WriteNumber("UnknownB"u8,  UnknownB);
+    }
+
     /// <summary> Both unknown parameters together. Bits 32-40 or byte 5. </summary>
-    [JsonIgnore]
     public byte UnknownTotal
     {
         get => _value5;
@@ -99,7 +120,6 @@ public readonly struct GmpEntry : IEquatable<GmpEntry>
     }
 
     /// <summary> The total value of the parameter as single 8 byte integer, the upper 3 bytes are always 0. </summary>
-    [JsonIgnore]
     public ulong Value
     {
         readonly get => _value1 | ((ulong)_value2 << 8) | ((ulong)_value3 << 16) | ((ulong)_value4 << 24) | ((ulong)_value5 << 32);
@@ -159,7 +179,7 @@ public readonly struct GmpEntry : IEquatable<GmpEntry>
         var rotA = RotationA;
         var rotB = RotationB;
         var rotC = RotationC;
-        if (rotA != 0 || rotB != 0 || rotC != 0)
+        if (rotA is not 0 || rotB is not 0 || rotC is not 0)
             sb.Append(", Rotation (")
                 .Append(rotA)
                 .Append("°, ")
@@ -170,7 +190,7 @@ public readonly struct GmpEntry : IEquatable<GmpEntry>
 
         var unkA = UnknownA;
         var unkB = UnknownB;
-        if (unkA != 0 || unkB != 0)
+        if (unkA is not 0 || unkB is not 0)
             sb.Append(", Unknown (")
                 .Append(UnknownA)
                 .Append(", ")

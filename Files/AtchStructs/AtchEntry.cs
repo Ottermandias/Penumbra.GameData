@@ -1,5 +1,5 @@
+using System.Text.Json;
 using Luna;
-using Newtonsoft.Json.Linq;
 using Penumbra.String;
 
 namespace Penumbra.GameData.Files.AtchStructs;
@@ -41,40 +41,23 @@ public unsafe struct AtchEntry : IEquatable<AtchEntry>
         }
     }
 
-    public string BoneAsString()
-        => Encoding.UTF8.GetString(Bone);
-
-    public JObject ToJson()
-        => new()
-        {
-            ["Bone"]      = BoneAsString(),
-            ["Scale"]     = Scale,
-            ["OffsetX"]   = OffsetX,
-            ["OffsetY"]   = OffsetY,
-            ["OffsetZ"]   = OffsetZ,
-            ["RotationX"] = RotationX,
-            ["RotationY"] = RotationY,
-            ["RotationZ"] = RotationZ,
-        };
-
-    public static AtchEntry? FromJson(JObject? obj)
+    public void WriteJson(Utf8JsonWriter j)
     {
-        if (obj == null)
-            return null;
+        j.WriteStartObject();
+        AddToJson(j);
+        j.WriteEndObject();
+    }
 
-        var ret  = new AtchEntry();
-        var bone = obj["Bone"]?.ToObject<string>() ?? string.Empty;
-        if (bone.Length == 0 || !ret.SetBoneName(bone))
-            return null;
-
-        ret.Scale     = obj["Scale"]?.ToObject<float>() ?? 0;
-        ret.OffsetX   = obj["OffsetX"]?.ToObject<float>() ?? 0;
-        ret.OffsetY   = obj["OffsetY"]?.ToObject<float>() ?? 0;
-        ret.OffsetZ   = obj["OffsetZ"]?.ToObject<float>() ?? 0;
-        ret.RotationX = obj["RotationX"]?.ToObject<float>() ?? 0;
-        ret.RotationY = obj["RotationY"]?.ToObject<float>() ?? 0;
-        ret.RotationZ = obj["RotationZ"]?.ToObject<float>() ?? 0;
-        return ret;
+    public void AddToJson(Utf8JsonWriter j)
+    {
+        j.WriteString("Bone"u8, Bone);
+        j.WriteNumber("Scale"u8, Scale);
+        j.WriteNumber("OffsetX"u8, OffsetX);
+        j.WriteNumber("OffsetY"u8, OffsetY);
+        j.WriteNumber("OffsetZ"u8, OffsetZ);
+        j.WriteNumber("RotationX"u8, RotationX);
+        j.WriteNumber("RotationY"u8, RotationY);
+        j.WriteNumber("RotationZ"u8, RotationZ);
     }
 
     public bool SetBoneName(ReadOnlySpan<byte> text)

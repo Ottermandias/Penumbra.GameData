@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Penumbra.GameData.Structs;
 
@@ -15,7 +15,6 @@ public readonly struct ImcEntry : IEquatable<ImcEntry>
     public byte DecalId { get; init; }
 
     /// <summary> Additional attributes and a sound ID packed. </summary>
-    [JsonIgnore]
     public readonly ushort AttributeAndSound;
 
     /// <summary> An optional VFX to use with this variant. 0 means none. </summary>
@@ -55,7 +54,6 @@ public readonly struct ImcEntry : IEquatable<ImcEntry>
         => HashCode.Combine(MaterialId, DecalId, AttributeAndSound, VfxId, MaterialAnimationId);
 
     /// <summary> A constructor to use when deserializing from JSON. </summary>
-    [JsonConstructor]
     public ImcEntry(byte materialId, byte decalId, ushort attributeMask, byte soundId, byte vfxId, byte materialAnimationId)
     {
         MaterialId          = materialId;
@@ -65,6 +63,27 @@ public readonly struct ImcEntry : IEquatable<ImcEntry>
         MaterialAnimationId = materialAnimationId;
         AttributeMask       = attributeMask;
         SoundId             = soundId;
+    }
+
+    /// <summary> Write this entry as a JSON object. </summary>
+    /// <param name="j"> The JSON writer. </param>
+    public void WriteJson(Utf8JsonWriter j)
+    {
+        j.WriteStartObject();
+        AddToJson(j);
+        j.WriteEndObject();
+    }
+
+    /// <summary> Add the values of this entry to a JSON object without beginning or ending the object. </summary>
+    /// <param name="j"> The JSON writer. </param>
+    public void AddToJson(Utf8JsonWriter j)
+    {
+        j.WriteNumber("MaterialId"u8,          MaterialId);
+        j.WriteNumber("DecalId"u8,             DecalId);
+        j.WriteNumber("VfxId"u8,               VfxId);
+        j.WriteNumber("MaterialAnimationId"u8, MaterialAnimationId);
+        j.WriteNumber("AttributeMask"u8,       AttributeMask);
+        j.WriteNumber("SoundId"u8,             SoundId);
     }
 
     public static bool operator ==(ImcEntry left, ImcEntry right)

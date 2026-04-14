@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
@@ -140,13 +141,13 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
     public StainId this[int index]
         => index == 0 ? Stain1 : Stain2;
 
-    public JObject AddToObject(JObject obj)
+    public Utf8JsonWriter AddToObject(Utf8JsonWriter j)
     {
-        obj["Stain"] = Stain1.Id;
+        j.WriteNumber("Stain"u8, Stain1.Id);
         var i = 2;
         foreach (var stain in this.Skip(1))
-            obj[$"Stain{i++}"] = stain.Id;
-        return obj;
+            j.WriteNumber($"Stain{i++}", stain.Id);
+        return j;
     }
 
     public static StainIds ParseFromObject(JObject? obj)
