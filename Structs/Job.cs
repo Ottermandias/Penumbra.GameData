@@ -9,7 +9,7 @@ namespace Penumbra.GameData.Structs;
 /// </summary>
 public sealed class Job
 {
-    internal Job(ClassJob job)
+    internal unsafe Job(ClassJob job)
     {
         Id = (JobId)job.RowId;
         Role = job.Role switch
@@ -23,8 +23,25 @@ public sealed class Job
             0 when job.PartyBonus is 7  => JobRole.Crafter,
             _                           => JobRole.Unknown,
         };
-        Name         = job.RowId is 0 ? new StringU8("Adventurer"u8) : new StringU8(job.Name.Data);
+
+        Name         = job.RowId is 0 ? new StringU8("Adventurer"u8) : GetCapitalized(job);
         Abbreviation = job.RowId is 0 ? new StringU8("ADV"u8) : new StringU8(job.Abbreviation.Data);
+    }
+
+    private static StringU8 GetCapitalized(ClassJob job)
+    {
+        Span<byte> data = stackalloc byte[128];
+        job.Name.Data.Span.CopyTo(data);
+        data[job.Name.Data.Length] = 0;
+        data                       = data[..job.Name.Data.Length];
+        data[0]                    = (byte)char.ToUpperInvariant((char)data[0]);
+        for (var i = 2; i < job.Name.Data.Length; ++i)
+        {
+            if (data[i - 1] is (byte)' ')
+                data[i] = (byte)char.ToUpperInvariant((char)data[i]);
+        }
+
+        return new StringU8(data, false);
     }
 
     public enum JobRole : byte
