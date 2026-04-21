@@ -261,8 +261,8 @@ public enum AtchType : uint
 
     [Name(Omit: true)]
     UnknownNik = ((uint)'n' << 16) | ((uint)'i' << 8) | 'k', // Linked to Nier pod
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownNjd = ((uint)'n' << 16) | ((uint)'j' << 8) | 'd',
 
     [Name("Botanist (NPH)")]
@@ -273,8 +273,8 @@ public enum AtchType : uint
 
     [Name(Omit: true)]
     UnknownOum = ((uint)'o' << 16) | ((uint)'u' << 8) | 'm',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownPen = ((uint)'p' << 16) | ((uint)'e' << 8) | 'n', // Linked to daggers
 
     [Name("Pickaxe")]
@@ -282,11 +282,11 @@ public enum AtchType : uint
 
     [Name(Omit: true)]
     UnknownPlt = ((uint)'p' << 16) | ((uint)'l' << 8) | 't',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownPra = ((uint)'p' << 16) | ((uint)'r' << 8) | 'a',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownPrc = ((uint)'p' << 16) | ((uint)'r' << 8) | 'c',
 
     [Name("Leatherworker (PRF)")]
@@ -306,8 +306,8 @@ public enum AtchType : uint
 
     [Name("Cane")]
     Cane = ((uint)'r' << 16) | ((uint)'o' << 8) | 'd',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownRop = ((uint)'r' << 16) | ((uint)'o' << 8) | 'p',
 
     [Name(Omit: true)]
@@ -315,8 +315,8 @@ public enum AtchType : uint
 
     [Name("Saw")]
     Saw = ((uint)'s' << 16) | ((uint)'a' << 8) | 'w',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownSbt = ((uint)'s' << 16) | ((uint)'b' << 8) | 't',
 
     [Name(Omit: true)]
@@ -336,8 +336,8 @@ public enum AtchType : uint
 
     [Name("Sword")]
     Sword = ((uint)'s' << 16) | ((uint)'w' << 8) | 'd',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownSxs = ((uint)'s' << 16) | ((uint)'x' << 8) | 's',
 
     [Name(Omit: true)]
@@ -345,14 +345,14 @@ public enum AtchType : uint
 
     [Name("Sniper Rifle (Machinist)")]
     SniperRifle = ((uint)'s' << 16) | ((uint)'y' << 8) | 'l',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownSyr = ((uint)'s' << 16) | ((uint)'y' << 8) | 'r',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownSyu = ((uint)'s' << 16) | ((uint)'y' << 8) | 'u',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownSyw = ((uint)'s' << 16) | ((uint)'y' << 8) | 'w',
 
     [Name(Omit: true)]
@@ -369,17 +369,17 @@ public enum AtchType : uint
 
     [Name("Weaver (TMB)")]
     WeaverTmb = ((uint)'t' << 16) | ((uint)'m' << 8) | 'b',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownTms = ((uint)'t' << 16) | ((uint)'m' << 8) | 's',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownTrm = ((uint)'t' << 16) | ((uint)'r' << 8) | 'm', // Linked to Flutes
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnkownnTrr = ((uint)'t' << 16) | ((uint)'r' << 8) | 'r',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownTrw = ((uint)'t' << 16) | ((uint)'r' << 8) | 'w', // Linked to Greatswords
 
     [Name(Omit: true)]
@@ -387,8 +387,8 @@ public enum AtchType : uint
 
     [Name("Weaver (WHL)")]
     WeaverWhl = ((uint)'w' << 16) | ((uint)'h' << 8) | 'l',
-    
-    [Name(Omit:true)]
+
+    [Name(Omit: true)]
     UnknownWng = ((uint)'w' << 16) | ((uint)'n' << 8) | 'g',
 
     [Name(Omit: true)]
@@ -400,33 +400,46 @@ public enum AtchType : uint
 
 public static partial class AtchExtensions
 {
-    public static string ToAbbreviation(this AtchType type)
-        => (uint)type > 0x00FFFFFF
-            ? $"{(char)(((uint)type >> 24) & 0xFF)}{(char)(((uint)type >> 16) & 0xFF)}{(char)(((uint)type >> 8) & 0xFF)}{(char)((uint)type & 0xFF)}"
-            : $"{(char)(((uint)type >> 16) & 0xFF)}{(char)(((uint)type >> 8) & 0xFF)}{(char)((uint)type & 0xFF)}";
-
-    public static string ToName(this AtchType type)
+    extension(AtchType type)
     {
-        var ret = type.ToKnownName();
-        return ret[0] is '_' ? type.ToAbbreviation() : ret;
-    }
+        public string ToAbbreviation()
+            => (uint)type > 0x00FFFFFF
+                ? $"{(char)(((uint)type >> 24) & 0xFF)}{(char)(((uint)type >> 16) & 0xFF)}{(char)(((uint)type >> 8) & 0xFF)}{(char)((uint)type & 0xFF)}"
+                : $"{(char)(((uint)type >> 16) & 0xFF)}{(char)(((uint)type >> 8) & 0xFF)}{(char)((uint)type & 0xFF)}";
 
-    public static ReadOnlySpan<byte> ToNameU8(this AtchType type)
-    {
-        var ret = type.ToKnownNameU8();
-        return ret[0] is (byte)'_' ? Encoding.UTF8.GetBytes(type.ToAbbreviation()) : ret;
-    }
-
-    public static AtchType FromChars(char first, char second, char third, char fourth = '\0')
-        => (AtchType)(((uint)first & 0xFF) | (((uint)second & 0xFF) << 8) | (((uint)third & 0xFF) << 16) | (((uint)fourth & 0xFF) << 24));
-
-    public static AtchType FromString(string text)
-        => text.Length switch
+        public string ToName()
         {
-            1 => FromChars(text[0], '\0',    '\0'),
-            2 => FromChars(text[1], text[0], '\0'),
-            3 => FromChars(text[2], text[1], text[0]),
-            4 => FromChars(text[3], text[2], text[1], text[0]),
-            _ => AtchType.Unknown,
-        };
+            var ret = type.ToKnownName();
+            return ret[0] is '_' ? type.ToAbbreviation() : ret;
+        }
+
+        public ReadOnlySpan<byte> ToNameU8()
+        {
+            var ret = type.ToKnownNameU8();
+            return ret[0] is (byte)'_' ? Encoding.UTF8.GetBytes(type.ToAbbreviation()) : ret;
+        }
+
+        public static AtchType FromChars(char first, char second, char third, char fourth = '\0')
+            => (AtchType)(((uint)first & 0xFF) | (((uint)second & 0xFF) << 8) | (((uint)third & 0xFF) << 16) | (((uint)fourth & 0xFF) << 24));
+
+        public static AtchType FromString(ReadOnlySpan<byte> text)
+            => text.Length switch
+            {
+                1 => FromChars((char)text[0], '\0',          '\0'),
+                2 => FromChars((char)text[1], (char)text[0], '\0'),
+                3 => FromChars((char)text[2], (char)text[1], (char)text[0]),
+                4 => FromChars((char)text[3], (char)text[2], (char)text[1], (char)text[0]),
+                _ => AtchType.Unknown,
+            };
+
+        public static AtchType FromString(ReadOnlySpan<char> text)
+            => text.Length switch
+            {
+                1 => FromChars(text[0], '\0',    '\0'),
+                2 => FromChars(text[1], text[0], '\0'),
+                3 => FromChars(text[2], text[1], text[0]),
+                4 => FromChars(text[3], text[2], text[1], text[0]),
+                _ => AtchType.Unknown,
+            };
+    }
 }
