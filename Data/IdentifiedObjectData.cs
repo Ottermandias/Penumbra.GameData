@@ -12,18 +12,18 @@ namespace Penumbra.GameData.Data;
 
 public interface IIdentifiedObjectData
 {
-    public object? ToInternalObject();
+    object? ToInternalObject();
 
-    public (ChangedItemType Type, uint Id) ToApiObject();
+    (ChangedItemType Type, uint Id) ToApiObject();
 
-    public string ToName(string key);
+    string ToName(string key);
 
-    public string AdditionalData { get; }
+    string AdditionalData { get; }
 
-    public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter);
+    bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter);
 
-    public ChangedItemIcon Icon  { get; }
-    public int             Count { get; set; }
+    ChangedItemIcon Icon  { get; }
+    int             Count { get; set; }
 }
 
 public static class IdentifiedObjectExtensions
@@ -68,8 +68,10 @@ public static class IdentifiedObjectExtensions
             FullEquipType.Bow             => ChangedItemIcon.Mainhand,
             FullEquipType.BowOff          => ChangedItemIcon.Offhand,
             FullEquipType.Lance           => ChangedItemIcon.Mainhand,
-            FullEquipType.Staff           => ChangedItemIcon.Mainhand,
+            FullEquipType.StaffWhm        => ChangedItemIcon.Mainhand,
+            FullEquipType.StaffBlm        => ChangedItemIcon.Mainhand,
             FullEquipType.Wand            => ChangedItemIcon.Mainhand,
+            FullEquipType.Scepter         => ChangedItemIcon.Mainhand,
             FullEquipType.Book            => ChangedItemIcon.Mainhand,
             FullEquipType.Daggers         => ChangedItemIcon.Mainhand,
             FullEquipType.DaggersOff      => ChangedItemIcon.Offhand,
@@ -115,7 +117,7 @@ public static class IdentifiedObjectExtensions
             FullEquipType.Palette         => ChangedItemIcon.Offhand,
             FullEquipType.Twinfangs       => ChangedItemIcon.Mainhand,
             FullEquipType.TwinfangsOff    => ChangedItemIcon.Offhand,
-            FullEquipType.Whip            => ChangedItemIcon.Mainhand,
+            FullEquipType.Handaxe         => ChangedItemIcon.Mainhand,
             FullEquipType.UnknownMainhand => ChangedItemIcon.Mainhand,
             FullEquipType.UnknownOffhand  => ChangedItemIcon.Offhand,
             FullEquipType.Glasses         => ChangedItemIcon.Head,
@@ -159,7 +161,7 @@ public sealed class IdentifiedItem(EquipItem item, int count = 1) : IIdentifiedO
         => Item.ModelString;
 
     public bool FilteredOut(ReadOnlySpan<char> key, ReadOnlySpan<char> filter)
-        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase) && ! AdditionalData.Contains(filter, StringComparison.OrdinalIgnoreCase);
+        => !key.Contains(filter, StringComparison.OrdinalIgnoreCase) && !AdditionalData.Contains(filter, StringComparison.OrdinalIgnoreCase);
 
     public ChangedItemIcon Icon
         => Item.Type.GetCategoryIcon();

@@ -67,9 +67,9 @@ public sealed class ItemData(ItemsByType byType, ItemsPrimaryModel primary, Item
         (FullEquipType.Lance, FullEquipType.Unknown, 100),
         (FullEquipType.Bow, FullEquipType.BowOff, 97),
         (FullEquipType.Wand, FullEquipType.Unknown, 100),
-        (FullEquipType.Staff, FullEquipType.Unknown, 100),
-        (FullEquipType.Wand, FullEquipType.Unknown, 100),
-        (FullEquipType.Staff, FullEquipType.Unknown, 100),
+        (FullEquipType.StaffWhm, FullEquipType.Unknown, 100),
+        (FullEquipType.Scepter, FullEquipType.Unknown, 100),
+        (FullEquipType.StaffBlm, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
@@ -91,7 +91,7 @@ public sealed class ItemData(ItemsByType byType, ItemsPrimaryModel primary, Item
         (FullEquipType.Brush, FullEquipType.Palette, 50),
         (FullEquipType.Twinfangs, FullEquipType.TwinfangsOff, 50),
         (FullEquipType.Twinfangs, FullEquipType.TwinfangsOff, 50),
-        (FullEquipType.Whip, FullEquipType.Unknown, 100), // TODO
+        (FullEquipType.Handaxe, FullEquipType.Unknown, 100), // TODO
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
@@ -174,9 +174,9 @@ public sealed class ItemData(ItemsByType byType, ItemsPrimaryModel primary, Item
         //     > 0600 and <= 0650 => FullEquipType.Bow,
         //     > 0650 and <= 0700 => FullEquipType.BowOff,
         //     > 0700 and <= 0800 => FullEquipType.Wand,
-        //     > 0800 and <= 0900 => FullEquipType.Staff,
-        //     > 0900 and <= 1000 => FullEquipType.Wand,
-        //     > 1000 and <= 1100 => FullEquipType.Staff,
+        //     > 0800 and <= 0900 => FullEquipType.StaffWhm,
+        //     > 0900 and <= 1000 => FullEquipType.Scepter,
+        //     > 1000 and <= 1100 => FullEquipType.StaffBlm,
         //     > 1500 and <= 1600 => FullEquipType.Broadsword,
         //     > 1600 and <= 1650 => FullEquipType.Fists,
         //     > 1650 and <= 1700 => FullEquipType.FistsOff,
@@ -203,7 +203,7 @@ public sealed class ItemData(ItemsByType byType, ItemsPrimaryModel primary, Item
         //     > 3050 and <= 3100 => FullEquipType.TwinfangsOff,
         //     > 3100 and <= 3150 => FullEquipType.Twinfangs,
         //     > 3150 and <= 3200 => FullEquipType.TwinfangsOff,
-        //     > 3200 and <= 3300 => FullEquipType.Whip, TODO
+        //     > 3200 and <= 3300 => FullEquipType.Handaxe, TODO
         //     > 5000 and <= 5040 => FullEquipType.Saw,
         //     > 5040 and <= 5100 => FullEquipType.ClawHammer,
         //     > 5100 and <= 5140 => FullEquipType.CrossPeinHammer,
