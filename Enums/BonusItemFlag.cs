@@ -72,4 +72,10 @@ public static partial class BonusExtensions
             1 => BonusItemFlag.UnkSlot,
             _ => BonusItemFlag.Unknown,
         };
+
+    public static CombinedItemSlotFlag ToCombinedItemSlotFlag(this BonusItemFlag value)
+        => (CombinedItemSlotFlag)(((byte)value & 0x03) << 12);
+
+    public static BonusItemFlag ToBonusItemFlag(this CombinedItemSlotFlag value)
+        => (BonusItemFlag)(((uint)value >> 12) & 0x03);
 }
