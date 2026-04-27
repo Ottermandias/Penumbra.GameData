@@ -86,7 +86,7 @@ public static partial class EquipFlagExtensions
     public const EquipFlag All = (EquipFlag)(((uint)EquipFlag.OffhandStain << 1) - 1);
 
     /// <summary> All item slot flags, including bonus items. </summary>
-    public const CombinedItemSlotFlag AllCombined = (CombinedItemSlotFlag)All | (CombinedItemSlotFlag)((byte)BonusExtensions.All << 12);
+    public const CombinedItemSlotFlag AllCombined = (CombinedItemSlotFlag)(((uint)CombinedItemSlotFlag.UnkBonus2 << 1) - 1);
 
     /// <summary> The number of available equipment flags. </summary>
     public const int NumEquipFlags = 24;
