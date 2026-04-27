@@ -136,7 +136,7 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
         => new((StainId)(value & 0xFF), (StainId)(value >> 8));
 
     public int Count
-        => 2;
+        => StainId.NumStains;
 
     public StainId this[int index]
         => index == 0 ? Stain1 : Stain2;
