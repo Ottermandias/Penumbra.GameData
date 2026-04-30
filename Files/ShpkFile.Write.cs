@@ -1,3 +1,4 @@
+using Luna;
 using Penumbra.GameData.Files.Utility;
 
 namespace Penumbra.GameData.Files;
@@ -6,7 +7,17 @@ public partial class ShpkFile
 {
     public byte[] Write()
     {
+        // Writing version 0x0E01 is not fully implemented yet as it might require recomputing NodeAliasClusters.
+        if (Version > 0x0D01)
+            throw new NotImplementedException($"Write support for version 0x{Version:X8} of the ShPk file format is not implemented yet.");
+
         if (SubViewKeys.Length != 2)
+            throw new InvalidDataException();
+
+        if (Version < 0x0D01 && (HullShaders.Length > 0 || DomainShaders.Length > 0 || GeometryShaders.Length > 0))
+            throw new InvalidDataException();
+
+        if (Version < 0x0E01 && NodeAliasClusters.Length > 0)
             throw new InvalidDataException();
 
         using var stream  = new MemoryStream();
@@ -48,14 +59,19 @@ public partial class ShpkFile
 
             if (Version >= 0x0D01)
             {
-                // TODO Update when we know more about this.
-                w.Write(0u);
-                w.Write(0u);
-                w.Write(0u);
+                w.Write((uint)HullShaders.Length);
+                w.Write((uint)DomainShaders.Length);
+                w.Write((uint)GeometryShaders.Length);
             }
 
-            WriteShaderArray(w, VertexShaders, blobs, strings, Version, IsLegacy);
-            WriteShaderArray(w, PixelShaders,  blobs, strings, Version, IsLegacy);
+            if (Version >= 0x0E01)
+                w.Write((uint)NodeAliasClusters.Length);
+
+            WriteShaderArray(w, VertexShaders,   blobs, strings, Version, IsLegacy);
+            WriteShaderArray(w, PixelShaders,    blobs, strings, Version, IsLegacy);
+            WriteShaderArray(w, HullShaders,     blobs, strings, Version, IsLegacy);
+            WriteShaderArray(w, DomainShaders,   blobs, strings, Version, IsLegacy);
+            WriteShaderArray(w, GeometryShaders, blobs, strings, Version, IsLegacy);
 
             foreach (var materialParam in MaterialParams)
             {
@@ -131,10 +147,9 @@ public partial class ShpkFile
                     w.Write(pass.PixelShader);
                     if (Version >= 0x0D01)
                     {
-                        // TODO Update when we know more about this.
-                        w.Write(pass.Unk131A);
-                        w.Write(pass.Unk131B);
-                        w.Write(pass.Unk131C);
+                        w.Write(pass.HullShader);
+                        w.Write(pass.DomainShader);
+                        w.Write(pass.GeometryShader);
                     }
                 }
             }
@@ -143,6 +158,17 @@ public partial class ShpkFile
             {
                 w.Write(alias.Key);
                 w.Write(alias.Value);
+            }
+
+            foreach (var cluster in NodeAliasClusters)
+            {
+                // See the comment next to those fields' declaration.
+                w.Write(cluster.SubViewValue2);
+                w.Write(cluster.SubViewValue1);
+                w.Write((uint)cluster.SubClusters.Length);
+                w.Write(cluster.Unk141E);
+                foreach (var subCluster in cluster.SubClusters)
+                    w.Write(in subCluster);
             }
 
             w.Write(AdditionalData);
