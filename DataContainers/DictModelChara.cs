@@ -43,7 +43,7 @@ public sealed class DictModelChara(
         var mTask = System.Threading.Tasks.Task.Run(() =>
         {
             foreach (var mount in gameData.GetExcelSheet<Mount>(gameData.Language))
-                AddChara((int)mount.ModelChara.RowId, ObjectKind.MountType, mount.RowId, mount.RowId);
+                AddChara((int)mount.ModelChara.RowId, ObjectKind.Mount, mount.RowId, mount.RowId);
         });
 
         // Add Companions.

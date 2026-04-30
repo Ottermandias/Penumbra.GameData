@@ -230,10 +230,10 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
         var kind = (ObjectKind)actor.AsObject->ObjectKind;
         return kind switch
         {
-            ObjectKind.Player    => CreatePlayerFromObject(actor, check),
+            ObjectKind.Pc        => CreatePlayerFromObject(actor, check),
             ObjectKind.BattleNpc => CreateBNpcFromObject(actor, out owner, check, allowPlayerNpc, withoutIndex),
             ObjectKind.EventNpc  => CreateENpcFromObject(actor, check, withoutIndex),
-            ObjectKind.MountType => CreateCompanionFromObject(actor, out owner, kind, check),
+            ObjectKind.Mount     => CreateCompanionFromObject(actor, out owner, kind, check),
             ObjectKind.Companion => CreateCompanionFromObject(actor, out owner, kind, check),
             ObjectKind.Ornament  => CreateCompanionFromObject(actor, out owner, kind, check),
             ObjectKind.Retainer  => CreateRetainerFromObject(actor, check),
@@ -282,7 +282,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
         if (!VerifyWorld(homeWorld) || !VerifyPlayerName(name.Span))
             return ActorIdentifier.Invalid;
 
-        return new ActorIdentifier(IdentifierType.Player, ObjectKind.Player, homeWorld, 0, name);
+        return new ActorIdentifier(IdentifierType.Player, ObjectKind.Pc, homeWorld, 0, name);
     }
 
     /// <summary> Create a retainer from name and retainer type. Input is checked for correctness. </summary>
@@ -300,7 +300,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
         if (!VerifySpecial(actor))
             return ActorIdentifier.Invalid;
 
-        return new ActorIdentifier(IdentifierType.Special, ObjectKind.Player, (ObjectIndex)(uint)actor, 0, ByteString.Empty);
+        return new ActorIdentifier(IdentifierType.Special, ObjectKind.Pc, (ObjectIndex)(uint)actor, 0, ByteString.Empty);
     }
 
     /// <summary> Create an NPC from kind and id. Input is checked for correctness. </summary>
@@ -453,7 +453,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
     {
         return kind switch
         {
-            ObjectKind.MountType => data.Mounts.ContainsKey(dataId.Id),
+            ObjectKind.Mount     => data.Mounts.ContainsKey(dataId.Id),
             ObjectKind.Companion => data.Companions.ContainsKey(dataId.Id),
             ObjectKind.Ornament  => data.Ornaments.ContainsKey(dataId.Id),
             ObjectKind.BattleNpc => data.BNpcs.ContainsKey(dataId.Id),
@@ -465,7 +465,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
     public bool VerifyNpcData(ObjectKind kind, NpcId dataId)
         => kind switch
         {
-            ObjectKind.MountType => data.Mounts.ContainsKey(dataId.Id),
+            ObjectKind.Mount     => data.Mounts.ContainsKey(dataId.Id),
             ObjectKind.Companion => data.Companions.ContainsKey(dataId.Id),
             ObjectKind.Ornament  => data.Ornaments.ContainsKey(dataId.Id),
             ObjectKind.BattleNpc => data.BNpcs.ContainsKey(dataId.Id),
@@ -606,7 +606,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
     {
         return (ObjectKind)actor.AsObject->ObjectKind switch
         {
-            ObjectKind.MountType => owner.AsCharacter->Mount.MountId,
+            ObjectKind.Mount     => owner.AsCharacter->Mount.MountId,
             ObjectKind.Ornament  => owner.AsCharacter->OrnamentData.OrnamentId,
             ObjectKind.Companion => actor.AsObject->BaseId,
             _                    => actor.AsObject->BaseId,
@@ -681,7 +681,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
         return split2[0].ToLowerInvariant() switch
         {
             "m" or "mount" => FindDataId(split3[0], data.Mounts, out var id)
-                ? (ObjectKind.MountType, mountId: id, GetIndex())
+                ? (ObjectKind.Mount, mountId: id, GetIndex())
                 : throw new IdentifierParseError($"Could not identify a Mount named {split2[1]}."),
             "c" or "companion" or "minion" or "mini" => FindDataId(split3[0], data.Companions, out var id)
                 ? (ObjectKind.Companion, cId: id, GetIndex())

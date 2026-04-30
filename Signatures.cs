@@ -99,7 +99,7 @@ public static class Sigs
     public const string AtchCaller2           = "E8 ?? ?? ?? ?? 48 8B 8E ?? ?? ?? ?? 84 C0 74 ?? 8B D5";
 
     // PathResolver.PathState
-    public const string HumanVTable = "48 8D 05 ?? ?? ?? ?? 48 89 03 89 8B";
+    public const string HumanVTable = "48 8D 05 ?? ?? ?? ?? 48 89 03 33 C0 89 8B";
 
     public const string WeaponVTable =
         "48 8D 05 ?? ?? ?? ?? 48 89 8B ?? ?? ?? ?? 48 89 03 48 8B C3 89 8B";
@@ -142,8 +142,8 @@ public static class Sigs
     public const string RenderManager = "48 03 2D ?? ?? ?? ?? 0F";
 
     // ShaderReplacementFixer
-    public const string ModelRendererOnRenderMaterial = "E8 ?? ?? ?? ?? 44 0F B7 28";
-    public const string ModelRendererUnkFunc          = "E8 ?? ?? ?? ?? 41 0F B6 46 ?? C0 E8";
+    public const string ModelRendererOnRenderMaterial = "E8 ?? ?? ?? ?? 40 38 75 ?? 74 ?? 8B 45";
+    public const string ModelRendererUnkFunc          = "E8 ?? ?? ?? ?? 41 8B 4E ?? 8B C1";
 
     // RenderTargetHdrEnabler
     public const string RenderTargetManagerInitialize = "40 55 53 56 57 41 54 41 55 41 56 41 57 48 8B EC 48 83 EC ?? 48 8B 1D";
@@ -173,7 +173,7 @@ public static class Sigs
 
     public const string CalculateHeight = "E8 ?? ?? ?? FF 48 8B 0D ?? ?? ?? ?? 0F 28 F0";
 
-    public const string SetFreeCompanyCrestBitfield = "E8 ?? ?? ?? ?? 48 8B 55 ?? 48 8B CE E8";
+    public const string SetFreeCompanyCrestBitfield = "E8 ?? ?? ?? ?? 4C 8D A6 ?? ?? ?? ?? 41 BF";
 
     // Inlined in this, but still called in 4 others.
     public const string CrestChangeCaller =
