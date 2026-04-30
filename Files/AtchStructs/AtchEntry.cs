@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Luna;
+using Newtonsoft.Json.Linq;
 using Penumbra.String;
 
 namespace Penumbra.GameData.Files.AtchStructs;
@@ -59,6 +60,42 @@ public unsafe struct AtchEntry : IEquatable<AtchEntry>
         j.WriteNumber("RotationY"u8, RotationY);
         j.WriteNumber("RotationZ"u8, RotationZ);
     }
+
+    public JObject ToJson()
+        => new()
+        {
+            ["Bone"]      = BoneAsString(),
+            ["Scale"]     = Scale,
+            ["OffsetX"]   = OffsetX,
+            ["OffsetY"]   = OffsetY,
+            ["OffsetZ"]   = OffsetZ,
+            ["RotationX"] = RotationX,
+            ["RotationY"] = RotationY,
+            ["RotationZ"] = RotationZ,
+        };
+
+    public static AtchEntry? FromJson(JObject? obj)
+    {
+        if (obj == null)
+            return null;
+
+        var ret  = new AtchEntry();
+        var bone = obj["Bone"]?.ToObject<string>() ?? string.Empty;
+        if (bone.Length == 0 || !ret.SetBoneName(bone))
+            return null;
+
+        ret.Scale     = obj["Scale"]?.ToObject<float>() ?? 0;
+        ret.OffsetX   = obj["OffsetX"]?.ToObject<float>() ?? 0;
+        ret.OffsetY   = obj["OffsetY"]?.ToObject<float>() ?? 0;
+        ret.OffsetZ   = obj["OffsetZ"]?.ToObject<float>() ?? 0;
+        ret.RotationX = obj["RotationX"]?.ToObject<float>() ?? 0;
+        ret.RotationY = obj["RotationY"]?.ToObject<float>() ?? 0;
+        ret.RotationZ = obj["RotationZ"]?.ToObject<float>() ?? 0;
+        return ret;
+    }
+
+    public string BoneAsString()
+        => Encoding.UTF8.GetString(Bone);
 
     public bool SetBoneName(ReadOnlySpan<byte> text)
     {
