@@ -52,7 +52,8 @@ public readonly struct JobGroup : IEquatable<JobGroup>
                 continue;
 
             var prop = group.GetType().GetProperty(abbr);
-            Debug.Assert(prop != null, $"Could not get job abbreviation {abbr} property.");
+            if (prop is null)
+                continue; // Could not get job abbreviation property, job is not yet implemented.
 
             if (!(bool)prop.GetValue(group)!)
                 continue;
