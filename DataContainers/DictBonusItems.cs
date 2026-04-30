@@ -30,8 +30,8 @@ public sealed class DictBonusItems(IDalamudPluginInterface pluginInterface, Luna
         var name            = bonusItem.Name.ExtractTextExtended();
         var id              = (CustomItemId)new BonusItemId((ushort)bonusItem.RowId);
         var icon            = new IconId((uint)bonusItem.Icon);
-        var model           = new PrimaryId((ushort)bonusItem.Unknown_70_7);
-        var variant         = new Variant((byte)(bonusItem.Unknown_70_7 >> 16));
+        var model           = new PrimaryId((ushort)bonusItem.Model);
+        var variant         = new Variant((byte)(bonusItem.Model >> 16));
         var type            = FullEquipType.Glasses; // TODO slot other than glasses
         var flags           = (ItemFlags)0;
         var level           = (CharacterLevel)1;

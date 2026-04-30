@@ -67,7 +67,7 @@ public sealed class NameDicts(
         name = null;
         return kind switch
         {
-            ObjectKind.MountType => Mounts.TryGetValue(dataId.MountId, out name),
+            ObjectKind.Mount     => Mounts.TryGetValue(dataId.MountId, out name),
             ObjectKind.Companion => Companions.TryGetValue(dataId.CompanionId, out name),
             ObjectKind.Ornament  => Ornaments.TryGetValue(dataId.OrnamentId, out name),
             ObjectKind.BattleNpc => BNpcs.TryGetValue(dataId.BNpcNameId, out name),

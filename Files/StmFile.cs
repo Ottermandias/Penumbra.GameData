@@ -95,7 +95,7 @@ public partial class StmFile<TDyePack> where TDyePack : unmanaged, IDyePack
         switch (version)
         {
             case 0x0101:
-                if (numColors != 0 || numScalars != 0)
+                if (numColors is not 0 || numScalars is not 0)
                     throw new InvalidDataException($"Unexpected column counts in STM v1.1 file: {numColors} colors, {numScalars} scalars");
 
                 numColors  = 3;
