@@ -15,7 +15,7 @@ public enum JobFlag : ulong
 }
 
 /// <summary> The game specifies different job groups that can contain specific jobs or not. </summary>
-public readonly struct JobGroup
+public readonly struct JobGroup : IEquatable<JobGroup>
 {
     /// <summary> The name of the group. </summary>
     public readonly StringU8 Name;
@@ -92,4 +92,19 @@ public readonly struct JobGroup
                 yield return (JobId)i;
         }
     }
+
+    public bool Equals(JobGroup other)
+        => Id.Equals(other.Id);
+
+    public override bool Equals(object? obj)
+        => obj is JobGroup other && Equals(other);
+
+    public override int GetHashCode()
+        => Id.GetHashCode();
+
+    public static bool operator ==(JobGroup left, JobGroup right)
+        => left.Equals(right);
+
+    public static bool operator !=(JobGroup left, JobGroup right)
+        => !left.Equals(right);
 }
