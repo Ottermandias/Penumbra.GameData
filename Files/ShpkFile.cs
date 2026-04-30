@@ -39,6 +39,9 @@ public partial class ShpkFile : IWritable
     public DxVersion DirectXVersion;
     public Shader[]  VertexShaders;
     public Shader[]  PixelShaders;
+    public Shader[]  HullShaders;
+    public Shader[]  DomainShaders;
+    public Shader[]  GeometryShaders;
     public uint      MaterialParamsSize;
 
     /// <remarks>
@@ -63,6 +66,7 @@ public partial class ShpkFile : IWritable
     public ShaderKeyValueSet.Universe Passes;
     public Node[]                     Nodes;
     public Dictionary<uint, uint>     NodeSelectors;
+    public NodeAliasCluster[]         NodeAliasClusters;
     public byte[]                     AdditionalData;
 
     public  bool Valid { get; private set; }
@@ -161,23 +165,17 @@ public partial class ShpkFile : IWritable
         var nodeCount           = r.ReadUInt32();
         var nodeAliasCount      = r.ReadUInt32();
 
+        var hullShaderCount       = 0u;
+        var domainShaderCount     = 0u;
+        var geometryShaderCount   = 0u;
         if (Version >= 0x0D01)
         {
-            // The three following fields have always been observed to be 0.
-            // It is suspected that they are geometry, domain and hull shader counts, but we do not yet know where in the file the lists themselves are.
-            // TODO Update when we know more about this.
-            var unk131 = r.ReadUInt32();
-            if (unk131 != 0)
-                throw new InvalidDataException($"Unhandled case: ShPk 13.1 unknown field A @ 0x48 is non-zero (observed value: 0x{unk131:X})");
-
-            unk131 = r.ReadUInt32();
-            if (unk131 != 0)
-                throw new InvalidDataException($"Unhandled case: ShPk 13.1 unknown field B @ 0x4C is non-zero (observed value: 0x{unk131:X})");
-
-            unk131 = r.ReadUInt32();
-            if (unk131 != 0)
-                throw new InvalidDataException($"Unhandled case: ShPk 13.1 unknown field C @ 0x50 is non-zero (observed value: 0x{unk131:X})");
+            hullShaderCount     = r.ReadUInt32();
+            domainShaderCount   = r.ReadUInt32();
+            geometryShaderCount = r.ReadUInt32();
         }
+
+        var nodeAliasClusterCount = Version >= 0x0E01 ? r.ReadUInt32() : 0;
 
         IsLegacy = Version < 0x0D01 && !hasMatParamDefaults && textureCount == 0;
 
@@ -188,6 +186,12 @@ public partial class ShpkFile : IWritable
             Version,                           IsLegacy,               blobs,                                 ref strings);
         PixelShaders = ReadShaderArray(ref r, (int)pixelShaderCount, DisassembledShader.ShaderStage.Pixel, DirectXVersion, disassemble,
             Version,                          IsLegacy,              blobs,                                ref strings);
+        HullShaders = ReadShaderArray(ref r, (int)hullShaderCount, DisassembledShader.ShaderStage.Hull, DirectXVersion, disassemble,
+            Version,                         IsLegacy,             blobs,                               ref strings);
+        DomainShaders = ReadShaderArray(ref r, (int)domainShaderCount, DisassembledShader.ShaderStage.Domain, DirectXVersion, disassemble,
+            Version,                           IsLegacy,               blobs,                                 ref strings);
+        GeometryShaders = ReadShaderArray(ref r, (int)geometryShaderCount, DisassembledShader.ShaderStage.Geometry, DirectXVersion, disassemble,
+            Version,                             IsLegacy,                 blobs,                                   ref strings);
 
         MaterialParams = r.Read<MaterialParam>(materialParamCount).ToArray();
 
@@ -231,19 +235,23 @@ public partial class ShpkFile : IWritable
         foreach (var alias in r.Read<NodeAlias>((int)nodeAliasCount))
             NodeSelectors.TryAdd(alias.Selector, alias.Node);
 
+        NodeAliasClusters = ReadNodeAliasClusterArray(ref r, (int)nodeAliasClusterCount);
+
         AdditionalData = r.Read<byte>((int)(blobsOffset - r.Position)).ToArray(); // This should be empty, but just in case.
 
         UpdateUsed(null);
         UpdateKeyValues();
 
-        Valid    = true;
+        // Writing version 0x0E01 is not fully implemented yet as it might require recomputing NodeAliasClusters.
+        Valid    = Version <= 0x0D01;
         _changed = false;
     }
 
-    /// <summary> Determines whether a ShPk file is a pre-7.2 one, while examining the least possible amount of data, for performance reasons. </summary>
+    /// <summary> Determines whether a ShPk file is a pre-7.5 one, while examining the least possible amount of data, for performance reasons. </summary>
     /// <param name="startOfData"> At least the 8 first bytes of the file. </param>
+    /// <remarks> As of 7.5, some Apricot shaders do not pass this check, but there are no known mods for those in existence. </remarks>
     public static bool FastIsObsolete(ReadOnlySpan<byte> startOfData)
-        => MemoryMarshal.Cast<byte, uint>(startOfData)[1] < 0x0D01;
+        => MemoryMarshal.Cast<byte, uint>(startOfData)[1] < 0x0E01;
 
     /// <summary> Extract all resource names from a ShPk file, while examining the least possible amount of data, for performance reasons. </summary>
     /// <param name="data"> The bytes of the file. </param>
@@ -811,9 +819,10 @@ public partial class ShpkFile : IWritable
                 ? r.ReadUInt32()
                 : stage switch
                 {
-                    DisassembledShader.ShaderStage.Vertex => 1u,
-                    DisassembledShader.ShaderStage.Pixel  => 4u,
-                    _                                     => 0u,
+                    DisassembledShader.ShaderStage.Vertex   => 1u,
+                    DisassembledShader.ShaderStage.Pixel    => 4u,
+                    DisassembledShader.ShaderStage.Geometry => 8u,
+                    _                                       => 0u,
                 };
 
             var rawBlob = blobs.Slice((int)blobOffset, (int)blobSize);
@@ -896,12 +905,36 @@ public partial class ShpkFile : IWritable
         {
             ret[i] = new Pass
             {
-                Id           = r.ReadUInt32(),
-                VertexShader = r.ReadUInt32(),
-                PixelShader  = r.ReadUInt32(),
-                Unk131A      = version >= 0x0D01 ? r.ReadUInt32() : uint.MaxValue,
-                Unk131B      = version >= 0x0D01 ? r.ReadUInt32() : uint.MaxValue,
-                Unk131C      = version >= 0x0D01 ? r.ReadUInt32() : uint.MaxValue,
+                Id             = r.ReadUInt32(),
+                VertexShader   = r.ReadUInt32(),
+                PixelShader    = r.ReadUInt32(),
+                HullShader     = version >= 0x0D01 ? r.ReadUInt32() : uint.MaxValue,
+                DomainShader   = version >= 0x0D01 ? r.ReadUInt32() : uint.MaxValue,
+                GeometryShader = version >= 0x0D01 ? r.ReadUInt32() : uint.MaxValue,
+            };
+        }
+
+        return ret;
+    }
+
+    private static NodeAliasCluster[] ReadNodeAliasClusterArray(ref SpanBinaryReader r, int count)
+    {
+        if (count == 0)
+            return [];
+
+        var ret = new NodeAliasCluster[count];
+        for (var i = 0; i < count; ++i)
+        {
+            // See the comment next to those fields' declaration.
+            var subViewValue2   = r.ReadUInt32();
+            var subViewValue1   = r.ReadUInt32();
+            var subClusterCount = r.ReadUInt32();
+            ret[i] = new NodeAliasCluster
+            {
+                SubViewValue2 = subViewValue2,
+                SubViewValue1 = subViewValue1,
+                Unk141E       = r.ReadUInt32(),
+                SubClusters   = r.Read<NodeAliasSubCluster>((int)subClusterCount).ToArray(),
             };
         }
 
@@ -942,12 +975,9 @@ public partial class ShpkFile : IWritable
         public uint Id;
         public uint VertexShader;
         public uint PixelShader;
-
-        // Probably geometry, domain and hull shader indices.
-        // TODO Update when we know more about this.
-        public uint Unk131A;
-        public uint Unk131B;
-        public uint Unk131C;
+        public uint HullShader;
+        public uint DomainShader;
+        public uint GeometryShader;
     }
 
     public struct Key
@@ -981,5 +1011,46 @@ public partial class ShpkFile : IWritable
     {
         public uint Selector;
         public uint Node;
+    }
+
+    public unsafe struct NodeAliasSubCluster
+    {
+        public const int DataCapacity = 97;
+
+        public ushort OwnIndex;
+        public ushort AliasCount;
+
+        // This is fixed-capacity and contains AliasCount NodeAliases sorted by Selector ascending.
+        // The slots beyond AliasCount are often all zeros, but sometimes contain stuff that is yet to be understood.
+        private fixed uint _data[DataCapacity];
+
+        public Span<uint> Data
+        {
+            get
+            {
+                fixed (uint* pData = _data)
+                {
+                    return new Span<uint>(pData, DataCapacity);
+                }
+            }
+        }
+
+        public Span<NodeAlias> Aliases
+            => MemoryMarshal.Cast<uint, NodeAlias>(Data[..(Math.Min((int)AliasCount, DataCapacity >> 1) << 1)]);
+
+        public Span<uint> AdditionalData
+            => Data[(Math.Min((int)AliasCount, DataCapacity >> 1) << 1)..];
+    }
+
+    public struct NodeAliasCluster
+    {
+        // This is not a mistake, their order is reversed compared to the other places where they appear.
+        public uint SubViewValue2;
+        public uint SubViewValue1;
+
+        // TODO Update when we know more about this.
+        public uint Unk141E;
+
+        public NodeAliasSubCluster[] SubClusters;
     }
 }
