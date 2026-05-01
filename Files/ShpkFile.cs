@@ -186,11 +186,11 @@ public partial class ShpkFile : IWritable
             Version,                           IsLegacy,               blobs,                                 ref strings);
         PixelShaders = ReadShaderArray(ref r, (int)pixelShaderCount, DisassembledShader.ShaderStage.Pixel, DirectXVersion, disassemble,
             Version,                          IsLegacy,              blobs,                                ref strings);
-        HullShaders = ReadShaderArray(ref r, (int)hullShaderCount, DisassembledShader.ShaderStage.Hull, DirectXVersion, disassemble,
+        HullShaders = ReadShaderArray(ref r, (int)hullShaderCount, DisassembledShader.ShaderStage.Hull, DirectXVersion, false,
             Version,                         IsLegacy,             blobs,                               ref strings);
-        DomainShaders = ReadShaderArray(ref r, (int)domainShaderCount, DisassembledShader.ShaderStage.Domain, DirectXVersion, disassemble,
+        DomainShaders = ReadShaderArray(ref r, (int)domainShaderCount, DisassembledShader.ShaderStage.Domain, DirectXVersion, false,
             Version,                           IsLegacy,               blobs,                                 ref strings);
-        GeometryShaders = ReadShaderArray(ref r, (int)geometryShaderCount, DisassembledShader.ShaderStage.Geometry, DirectXVersion, disassemble,
+        GeometryShaders = ReadShaderArray(ref r, (int)geometryShaderCount, DisassembledShader.ShaderStage.Geometry, DirectXVersion, false,
             Version,                             IsLegacy,                 blobs,                                   ref strings);
 
         MaterialParams = r.Read<MaterialParam>(materialParamCount).ToArray();
@@ -431,6 +431,36 @@ public partial class ShpkFile : IWritable
             CollectUsed(uUsage, shader.Uavs);
         }
 
+        foreach (var shader in HullShaders)
+        {
+            if (filter != null && !filter(shader))
+                continue;
+
+            CollectUsed(cUsage, shader.Constants);
+            CollectUsed(tUsage, shader.IsLegacy ? shader.Samplers : shader.Textures);
+            CollectUsed(uUsage, shader.Uavs);
+        }
+
+        foreach (var shader in DomainShaders)
+        {
+            if (filter != null && !filter(shader))
+                continue;
+
+            CollectUsed(cUsage, shader.Constants);
+            CollectUsed(tUsage, shader.IsLegacy ? shader.Samplers : shader.Textures);
+            CollectUsed(uUsage, shader.Uavs);
+        }
+
+        foreach (var shader in GeometryShaders)
+        {
+            if (filter != null && !filter(shader))
+                continue;
+
+            CollectUsed(cUsage, shader.Constants);
+            CollectUsed(tUsage, shader.IsLegacy ? shader.Samplers : shader.Textures);
+            CollectUsed(uUsage, shader.Uavs);
+        }
+
         if (filter == null)
         {
             CopyUsed(Constants,                      cUsage);
@@ -545,12 +575,21 @@ public partial class ShpkFile : IWritable
 
         InitializeShaderValues(VertexShaders);
         InitializeShaderValues(PixelShaders);
+        InitializeShaderValues(HullShaders);
+        InitializeShaderValues(DomainShaders);
+        InitializeShaderValues(GeometryShaders);
         foreach (var node in Nodes)
         {
             foreach (var pass in node.Passes)
             {
                 CollectShaderValues(ref VertexShaders[pass.VertexShader], node, pass.Id);
                 CollectShaderValues(ref PixelShaders[pass.PixelShader],   node, pass.Id);
+                if (pass.HullShader is not uint.MaxValue)
+                    CollectShaderValues(ref HullShaders[pass.HullShader], node, pass.Id);
+                if (pass.DomainShader is not uint.MaxValue)
+                    CollectShaderValues(ref DomainShaders[pass.DomainShader], node, pass.Id);
+                if (pass.GeometryShader is not uint.MaxValue)
+                    CollectShaderValues(ref GeometryShaders[pass.GeometryShader], node, pass.Id);
             }
         }
     }
