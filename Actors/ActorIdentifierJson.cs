@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Dalamud.Game.ClientState.Objects.Enums;
+using ImSharp;
 using Luna;
 using Newtonsoft.Json.Linq;
 using Penumbra.GameData.Enums;
@@ -122,7 +123,7 @@ public static class ActorIdentifierJson
             {
                 var name      = ByteString.FromStringUnsafe(data[nameof(ActorIdentifier.PlayerName)]?.ToObject<string>(), false);
                 var homeWorld = data[nameof(ActorIdentifier.HomeWorld)]?.ToObject<ushort>() ?? 0;
-                var kind      = data[nameof(ActorIdentifier.Kind)]?.ToObject<ObjectKind>() ?? ObjectKind.CardStand;
+                var kind      = data[nameof(ActorIdentifier.Kind)].GetObjectKind();
                 var dataId    = data[nameof(ActorIdentifier.DataId)]?.ToObject<uint>() ?? 0;
                 return actorManager.CreateOwned(name, homeWorld, kind, dataId);
             }
@@ -134,7 +135,7 @@ public static class ActorIdentifierJson
             case IdentifierType.Npc:
             {
                 var index  = data[nameof(ActorIdentifier.Index)]?.ToObject<ushort>() ?? ushort.MaxValue;
-                var kind   = data[nameof(ActorIdentifier.Kind)]?.ToObject<ObjectKind>() ?? ObjectKind.CardStand;
+                var kind   = data[nameof(ActorIdentifier.Kind)].GetObjectKind();
                 var dataId = data[nameof(ActorIdentifier.DataId)]?.ToObject<uint>() ?? 0;
                 return actorManager.CreateNpc(kind, dataId, index);
             }
@@ -147,4 +148,23 @@ public static class ActorIdentifierJson
             default: return ActorIdentifier.Invalid;
         }
     }
+
+    private static ObjectKind GetObjectKind(this JToken? token)
+    {
+        if (token is null)
+            return ObjectKind.CardStand;
+
+        if (token.ToObject<string>() is { } text)
+        {
+            // Migration.
+            if (text is "MountType")
+                return ObjectKind.Mount;
+
+            if (ObjectKind.Parse(text, out var e))
+                return e;
+        }
+
+        return token.ToObject<ObjectKind>();
+    }
+
 }
