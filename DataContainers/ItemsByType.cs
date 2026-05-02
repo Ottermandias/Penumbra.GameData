@@ -21,8 +21,8 @@ public sealed class ItemsByType(IDalamudPluginInterface pi, LunaLogger log, IDat
         var tmp = FullEquipType.Values.Select(_ => new List<EquipItem>(1024)).ToArray();
 
         var itemSheet = dataManager.GetExcelSheet<Item>(dataManager.Language)!;
-        // Take all items with actual names.
-        foreach (var item in itemSheet.Where(i => i.Name.ByteLength > 1))
+        // Take all items with actual names and models.
+        foreach (var item in itemSheet.Where(i => i.Name.ByteLength > 1 && (i.ModelMain is not 0 || i.ModelSub is not 0)))
         {
             var type = item.ToEquipType();
 
