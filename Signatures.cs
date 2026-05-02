@@ -139,7 +139,10 @@ public static class Sigs
     public const string GetMaterialFileNameBySlot = "48 8B 81 ?? ?? ?? ?? 8B D2 44 0F B7 04 ?? 48 C7 C0";
 
     // ModelRenderer
-    public const string RenderManager = "48 03 2D ?? ?? ?? ?? 0F";
+    public const string RenderManager          = "48 03 2D ?? ?? ?? ?? 0F";
+
+    // CharacterSetupSlotModel
+    public const string CharacterSetupSlotModel = "89 54 24 ?? 55 56 41 56 48 81 EC";
 
     // ShaderReplacementFixer
     public const string ModelRendererOnRenderMaterial = "E8 ?? ?? ?? ?? 40 38 75 ?? 74 ?? 8B 45";
