@@ -131,17 +131,27 @@ public static class CmpFileExtensions
             return ref @this.Scales[idx >> 1][idx & 1];
         }
 
-        public ref CmpData.FullColors GetSkin(SubRace race, Gender gender)
+        public ref CmpData.FullColors GetSkin(SubRace race, Gender gender, bool ui)
         {
             var index = gender is Gender.Female or Gender.FemaleNpc ? ((int)race - 1) * 2 + 1 : ((int)race - 1) * 2;
-            return ref @this.Races[index].SkinInterface;
+            if (ui)
+                return ref @this.Races[index].SkinInterface;
+
+            return ref @this.Races[index].Skin;
         }
 
-        public ref CmpData.FullColors GetHair(SubRace race, Gender gender)
+        public ref CmpData.FullColors GetHairUi(SubRace race, Gender gender)
         {
             var index = gender is Gender.Female or Gender.FemaleNpc ? ((int)race - 1) * 2 + 1 : ((int)race - 1) * 2;
             return ref @this.Races[index].HairInterface;
         }
+
+        public ref CmpData.HairColors GetHair(SubRace race, Gender gender)
+        {
+            var index = gender is Gender.Female or Gender.FemaleNpc ? ((int)race - 1) * 2 + 1 : ((int)race - 1) * 2;
+            return ref @this.Races[index].Hair;
+        }
+
 
         public ref CmpData.FullColors Eyes
             => ref @this.Interface.Eyes;
