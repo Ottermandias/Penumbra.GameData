@@ -141,6 +141,9 @@ public static class Sigs
     // ModelRenderer
     public const string RenderManager          = "48 03 2D ?? ?? ?? ?? 0F";
 
+    // ModelSafetyCheck
+    public const string FaceModelSafetyCheck = "48 8B 41 10 4C 39 88 C8 00 00 00";
+
     // CharacterSetupSlotModel
     public const string CharacterSetupSlotModel = "89 54 24 ?? 55 56 41 56 48 81 EC";
 
