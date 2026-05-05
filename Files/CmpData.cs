@@ -18,27 +18,13 @@ public struct CmpData
         private Rgba32 _color0;
     }
 
-    public ref struct ColorsPair(ref TonedColors dark, ref TonedColors light)
-    {
-        public ref TonedColors Dark  = ref dark;
-        public ref TonedColors Light = ref light;
-
-        public ref Rgba32 this[int index]
-        {
-            get
-            {
-                if (index < 128)
-                    return ref Dark[index];
-
-                return ref Light[index - 128];
-            }
-        }
-    }
-
     [InlineArray(256)]
     public struct FullColors
     {
         private Rgba32 _color0;
+
+        public Rgba32[] ToArray()
+            => ((ReadOnlySpan<Rgba32>)this).ToArray();
     }
 
     public struct ColorParameters
@@ -119,54 +105,41 @@ public struct CmpData
     {
         private BodyTypeScales _scale0;
     }
+
+    public static int Index(SubRace race, Gender gender)
+        => gender is Gender.Female or Gender.FemaleNpc ? ((int)race - 1) * 2 + 1 : ((int)race - 1) * 2;
 }
 
 public static class CmpFileExtensions
 {
-    extension(ref CmpData @this)
+    extension(ref readonly CmpData @this)
     {
-        public ref CmpData.Scale GetScale(SubRace race)
+        public ref readonly CmpData.Scale GetScale(SubRace race)
         {
             var idx = (int)race - 1;
             return ref @this.Scales[idx >> 1][idx & 1];
         }
 
-        public ref CmpData.FullColors GetSkin(SubRace race, Gender gender, bool ui)
+        public ref readonly CmpData.FullColors GetSkin(SubRace race, Gender gender, bool ui)
         {
-            var index = gender is Gender.Female or Gender.FemaleNpc ? ((int)race - 1) * 2 + 1 : ((int)race - 1) * 2;
+            var index = CmpData.Index(race, gender);
             if (ui)
                 return ref @this.Races[index].SkinInterface;
 
             return ref @this.Races[index].Skin;
         }
 
-        public ref CmpData.FullColors GetHairUi(SubRace race, Gender gender)
+        public ref readonly CmpData.FullColors GetHairUi(SubRace race, Gender gender)
         {
-            var index = gender is Gender.Female or Gender.FemaleNpc ? ((int)race - 1) * 2 + 1 : ((int)race - 1) * 2;
+            var index = CmpData.Index(race, gender);
             return ref @this.Races[index].HairInterface;
         }
 
-        public ref CmpData.HairColors GetHair(SubRace race, Gender gender)
+        public ref readonly CmpData.HairColors GetHair(SubRace race, Gender gender)
         {
-            var index = gender is Gender.Female or Gender.FemaleNpc ? ((int)race - 1) * 2 + 1 : ((int)race - 1) * 2;
+            var index = CmpData.Index(race, gender);
             return ref @this.Races[index].Hair;
         }
-
-
-        public ref CmpData.FullColors Eyes
-            => ref @this.Interface.Eyes;
-
-        public ref CmpData.FullColors Highlights
-            => ref @this.Interface.HairHighlights;
-
-        public ref CmpData.FullColors Features
-            => ref @this.Interface.Features;
-
-        public CmpData.ColorsPair Lips
-            => new(ref @this.Interface.LipsDark, ref @this.Interface.LipsLight);
-
-        public CmpData.ColorsPair FacePaint
-            => new(ref @this.Interface.FacePaintDark, ref @this.Interface.FacePaintLight);
     }
 
     extension(ref CmpData.Scale @this)
