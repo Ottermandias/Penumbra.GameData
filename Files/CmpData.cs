@@ -112,6 +112,15 @@ public struct CmpData
 
 public static class CmpFileExtensions
 {
+    extension(ref CmpData @this)
+    {
+        public ref CmpData.Scale GetScaleWrite(SubRace race)
+        {
+            var idx = (int)race - 1;
+            return ref @this.Scales[idx >> 1][idx & 1];
+        }
+    }
+
     extension(ref readonly CmpData @this)
     {
         public ref readonly CmpData.Scale GetScale(SubRace race)
