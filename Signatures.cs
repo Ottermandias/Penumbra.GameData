@@ -68,6 +68,9 @@ public static class Sigs
     public const string LoadActionTmb = "E8 ?? ?? ?? ?? 48 89 43 ?? 0F B6 45";
     public const string SchedulerResourceManagementInstance = "48 89 3D ?? ?? ?? ?? 8B C7";
 
+    public const string BaseClipGetGameObject    = "E8 ?? ?? ?? ?? 48 85 C0 0F 84 ?? ?? ?? ?? 8B 8F ?? ?? ?? ?? 83 E9";
+    public const string BaseClipGetClipResources = "E8 ?? ?? ?? ?? 84 C0 75 ?? 48 8B 5C 24 ?? 48 8B 74 24 ?? 48 83 C4 ?? 5F C3 48 8B CB";
+
     public const string
         ApricotListenerSoundPlay =
             "41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 4D 8B F9"; // Inlined in 48 89 83 ?? ?? ?? ?? 48 8B 46 ?? 48 85 C0 
@@ -139,7 +142,7 @@ public static class Sigs
     public const string GetMaterialFileNameBySlot = "48 8B 81 ?? ?? ?? ?? 8B D2 44 0F B7 04 ?? 48 C7 C0";
 
     // ModelRenderer
-    public const string RenderManager          = "48 03 2D ?? ?? ?? ?? 0F";
+    public const string RenderManager = "48 03 2D ?? ?? ?? ?? 0F";
 
     // ModelSafetyCheck
     public const string FaceModelSafetyCheck = "48 8B 41 10 4C 39 88 C8 00 00 00";
@@ -175,7 +178,7 @@ public static class Sigs
     public const string UpdateOrnament = "E8 ?? ?? ?? ?? F3 0F 10 4E ?? 0F 57 D2";
 
     public const string PrepareColorSet = "E8 ?? ?? ?? ?? 49 89 04 ?? 49 83 C5";
-    public const string CreateNewModel = "89 54 24 ?? 55 56 41 56 48 81 EC";
+    public const string CreateNewModel  = "89 54 24 ?? 55 56 41 56 48 81 EC";
 
     public const string CalculateHeight = "E8 ?? ?? ?? FF 48 8B 0D ?? ?? ?? ?? 0F 28 F0";
 
