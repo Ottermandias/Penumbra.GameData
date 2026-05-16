@@ -55,6 +55,13 @@ public sealed class ItemData(ItemsByType byType, ItemsPrimaryModel primary, Item
         return false;
     }
 
+    /// <summary> Try to obtain an item by ID. </summary>
+    /// <param name="key"> The Item ID to search. </param>
+    /// <param name="value"> The returned item if found. </param>
+    /// <returns> Whether an item was found. </returns>
+    public bool TryGetBonus(BonusItemId key, out EquipItem value)
+        => Primary.TryGetValue(key, out value);
+
     /// <summary> A table to convert weapon primary IDs to a full equip type. </summary>
     /// <remarks> Conversion is [Primary ID]/100 = index, [Primary ID]%100 greater than offset: second type, else first type. </remarks>
     private static readonly (FullEquipType Main, FullEquipType Off, short Offset)[] WeaponIdTable =
