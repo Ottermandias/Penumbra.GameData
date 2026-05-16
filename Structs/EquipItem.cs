@@ -191,7 +191,7 @@ public readonly struct EquipItem : IEquatable<EquipItem>
     public static EquipItem FromBonusIds(BonusItemId itemId, IconId iconId, PrimaryId modelId, Variant variant, BonusItemFlag type, string? name = null)
     {
         name ??= $"Unknown ({modelId}-{variant})";
-        var fullId = itemId.Id is 0
+        var fullId = itemId.Id is 0 || itemId == BonusItemId.Invalid
             ? new CustomItemId(modelId, variant, type)
             : itemId;
         return new EquipItem(name, fullId, iconId, modelId, 0, variant, type.ToEquipType(), 0, 0, 0);

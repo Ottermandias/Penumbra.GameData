@@ -367,6 +367,7 @@ public static partial class FullEquipTypeExtensions
     public static BonusItemFlag ToBonus(this FullEquipType type)
         => type switch
         {
+            FullEquipType.Head    => EquipSlot.Head.ToBonusSlot(),
             FullEquipType.Glasses => BonusItemFlag.Glasses,
             _                     => BonusItemFlag.Unknown,
         };
