@@ -65,6 +65,13 @@ public static partial class BonusExtensions
             _                     => EquipSlot.Unknown,
         };
 
+    public static BonusItemFlag ToBonusSlot(this EquipSlot value)
+        => value switch
+        {
+            EquipSlot.Head => BonusItemFlag.Glasses,
+            _              => BonusItemFlag.Unknown,
+        };
+
     public static BonusItemFlag ToBonusSlot(this uint slot)
         => slot switch
         {
