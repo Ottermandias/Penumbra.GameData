@@ -110,6 +110,9 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
     public static implicit operator StainIds(StainId stain1)
         => new(stain1);
 
+    public static implicit operator StainIds(ReadOnlySpan<StainId> stainIds)
+        => new(stainIds.Length > 0 ? stainIds[0] : (StainId)0, stainIds.Length > 1 ? stainIds[1] : (StainId)0);
+
     public StainIds With(int idx, StainId stain)
     {
         return idx switch
