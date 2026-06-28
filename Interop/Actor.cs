@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Penumbra.GameData.Actors;
 using Penumbra.GameData.DataContainers;
@@ -46,6 +46,9 @@ public readonly unsafe struct Actor : IEquatable<Actor>
 
     public static implicit operator nint(Actor actor)
         => actor.Address;
+
+    public bool IsHostile
+        => IsCharacter && AsCharacter->CharacterData.IsHostile;
 
     public bool IsGPoseOrCutscene
         => Index.Index is >= (int)ScreenActor.CutsceneStart and < (int)ScreenActor.CutsceneEnd;
