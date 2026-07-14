@@ -331,7 +331,8 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
     public static bool VerifyPlayerName(ReadOnlySpan<byte> name)
     {
         // Total no more than 20 characters + space.
-        if (name.Length is < 5 or > 21)
+        // Grandfathered 1.0 characters may have 15 characters in first and last name and a space, so 31.
+        if (name.Length is < 5 or > 31)
             return false;
 
         // Forename and surname, no more spaces.
