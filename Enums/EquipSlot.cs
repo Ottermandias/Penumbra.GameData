@@ -77,7 +77,7 @@ public enum EquipSlot : byte
     [Name("Top")]
     ChestHands = 22,
 
-    [Name("Costum")]
+    [Name("Costume")]
     ChestLegs = 23,
 
     [Name("Unknown")]
