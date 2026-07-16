@@ -183,76 +183,49 @@ public static partial class ModelCombinedSlotsExtensions
         }
 
         /// <returns>
-        /// The <see cref="EquipSlot"/> that corresponds to the largest number of applicable bits
-        /// of the given <see cref="CombinedItemSlotFlag"/>. In case of a tie, the <see cref="EquipSlot"/>
-        /// that corresponds to the least significant applicable bits.
+        /// The <see cref="EquipSlot"/> that exactly matches the given <see cref="ModelCombinedSlots"/>, if any.
+        /// Otherwise, <see cref="EquipSlot.Unknown"/>.
         /// </returns>
         public EquipSlot ToEquipSlot()
-        {
-            // Nothing at all.
-            if (slots is 0)
-                return EquipSlot.Nothing;
-
-            slots &= EquipSlotMask;
-
-            // Nothing applicable.
-            if (slots is 0)
-                return EquipSlot.Unknown;
-
-            // All 3+ bits EquipSlots have those 3.
-            if (slots.HasFlag(Body | Legs | Feet))
+            => slots switch
             {
-                if (!slots.HasFlag(Hands))
-                    return EquipSlot.BodyLegsFeet;
+                0 => EquipSlot.Nothing,
 
-                if (!slots.HasFlag(Head))
-                    return EquipSlot.BodyHandsLegsFeet;
+                Head        => EquipSlot.Head,
+                Body        => EquipSlot.Body,
+                Hands       => EquipSlot.Hands,
+                Legs        => EquipSlot.Legs,
+                Feet        => EquipSlot.Feet,
+                Ears        => EquipSlot.Ears,
+                Neck        => EquipSlot.Neck,
+                Wrists      => EquipSlot.Wrists,
+                RightFinger => EquipSlot.RFinger,
+                LeftFinger  => EquipSlot.LFinger,
+                Mainhand    => EquipSlot.MainHand,
+                Offhand     => EquipSlot.OffHand,
 
-                return slots.HasFlag(AllAccessories)
-                    ? EquipSlot.All
-                    : EquipSlot.FullBody;
-            }
+                Head | Body        => EquipSlot.HeadBody,
+                Body | Hands       => EquipSlot.ChestHands,
+                Body | Legs        => EquipSlot.ChestLegs,
+                Legs | Feet        => EquipSlot.LegsFeet,
+                Mainhand | Offhand => EquipSlot.BothHand,
 
-            // Try 2 bits with Body.
+                Body | Hands | Legs => EquipSlot.BodyHands,
+                Body | Legs | Feet  => EquipSlot.BodyLegsFeet,
 
-            if (slots.HasFlag(Body))
-            {
-                switch (BitOperations.TrailingZeroCount((ulong)(slots & ~Body)))
-                {
-                    case 0: return EquipSlot.HeadBody;
-                    case 2: return EquipSlot.BodyHands;
-                    case 3: return EquipSlot.ChestLegs;
-                }
-            }
+                Body | Hands | Legs | Feet => EquipSlot.BodyHandsLegsFeet,
 
-            if (slots.HasFlag(Legs | Feet))
-                return EquipSlot.LegsFeet;
+                AllEquipment => EquipSlot.FullBody,
 
-            if (slots.HasFlag(Mainhand | Offhand))
-                return EquipSlot.BothHand;
+                AllEquipmentPieces => EquipSlot.All,
 
-            // No known 2 bits, get the value corresponding to the single applicable bit.
-
-            return BitOperations.TrailingZeroCount((ulong)slots) switch
-            {
-                0  => EquipSlot.Head,
-                1  => EquipSlot.Body,
-                2  => EquipSlot.Hands,
-                3  => EquipSlot.Legs,
-                4  => EquipSlot.Feet,
-                5  => EquipSlot.Ears,
-                6  => EquipSlot.Neck,
-                7  => EquipSlot.Wrists,
-                8  => EquipSlot.RFinger,
-                9  => EquipSlot.LFinger,
-                32 => EquipSlot.MainHand,
-                40 => EquipSlot.OffHand,
-
-                // Should not happen, by the masking and tests at the beginning.
                 _ => EquipSlot.Unknown,
             };
-        }
 
+        /// <returns>
+        /// The <see cref="FullEquipType"/> that corresponds to the least significant applicable bit
+        /// of the given <see cref="ModelCombinedSlots"/>.
+        /// </returns>
         public FullEquipType ToFullEquipType()
             => BitOperations.TrailingZeroCount((ulong)(slots & FullEquipTypeMask)) switch
             {
@@ -273,7 +246,7 @@ public static partial class ModelCombinedSlotsExtensions
 
         /// <returns>
         /// The <see cref="HumanSlot"/> that corresponds to the least significant applicable bit
-        /// of the given <see cref="CombinedItemSlotFlag"/>.
+        /// of the given <see cref="ModelCombinedSlots"/>.
         /// </returns>
         public HumanSlot ToHumanSlot()
         {
@@ -350,7 +323,7 @@ public static partial class ModelCombinedSlotsExtensions
             EquipSlot.SoulCrystal       => 0,
             EquipSlot.LegsFeet          => Legs | Feet,
             EquipSlot.FullBody          => AllEquipment,
-            EquipSlot.BodyHands         => Body | Hands,
+            EquipSlot.BodyHands         => Body | Hands | Legs,
             EquipSlot.BodyLegsFeet      => Body | Legs | Feet,
             EquipSlot.ChestHands        => Body | Hands,
             EquipSlot.ChestLegs         => Body | Legs,
