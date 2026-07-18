@@ -30,10 +30,15 @@ internal sealed unsafe class ActorResolver(IGameGui gameGui, ObjectManager objec
     /// <summary> Obtain an identifier for the currently inspected player. </summary>
     public ActorIdentifier GetInspectPlayer(ActorIdentifierFactory factory)
     {
-        var addon = gameGui.GetAddonByName("CharacterInspect");
-        return addon == nint.Zero
-            ? ActorIdentifier.Invalid
-            : factory.CreatePlayer(InspectName, InspectWorldId);
+        var agent = AgentInspect.Instance();
+        if (agent is null || agent->CharaView.State is 0)
+            return ActorIdentifier.Invalid;
+
+        var world = InspectWorldId;
+        if (world == WorldId.AnyWorld)
+            return ActorIdentifier.Invalid;
+
+        return factory.CreatePlayer(InspectName, world);
     }
 
     /// <summary> Obtain an identifier for player banner actors. </summary>
