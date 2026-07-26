@@ -290,7 +290,7 @@ public class GamePathParser(LunaLogger log) : IService
         }
 
         var gr       = Names.GenderRaceFromCode(groups[Parser.Groups.RaceCode].Value);
-        var bodySlot = Names.StringToBodySlot[groups[Parser.Groups.BodyType].Value];
+        var bodySlot = Names.StringToBodySlot.GetValueOrDefault(groups[Parser.Groups.BodyType].Value, BodySlot.Unknown);
         if (fileType is FileType.Skeleton)
             return GameObjectInfo.Customization(fileType, CustomizationType.Skeleton, id, gr, bodySlot);
         if (fileType is FileType.Physics)
