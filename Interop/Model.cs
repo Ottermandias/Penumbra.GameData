@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Penumbra.GameData.Enums;
 using Penumbra.GameData.Structs;
@@ -168,14 +168,14 @@ public readonly unsafe struct Model : IEquatable<Model>
         if (!Valid || !actor.IsCharacter || actor.Model.Address != Address)
             return (Null, Null, CharacterWeapon.Empty, CharacterWeapon.Empty);
 
-        Model main     = actor.AsCharacter->DrawData.Weapon(DrawDataContainer.WeaponSlot.MainHand).DrawObject;
+        Model main     = actor.AsCharacter->DrawData.Weapon(DrawDataContainer.WeaponSlot.MainHand).DrawData.DrawObject;
         var   mainData = CharacterWeapon.Empty;
         if (main.IsWeapon)
             mainData = new CharacterWeapon(main.AsWeapon->ModelSetId, main.AsWeapon->SecondaryId, (Variant)main.AsWeapon->Variant,
                 new StainIds(main.AsWeapon->Stain0, main.AsWeapon->Stain1)); // TODO stain
         else
             main = Null;
-        Model off     = actor.AsCharacter->DrawData.Weapon(DrawDataContainer.WeaponSlot.OffHand).DrawObject;
+        Model off     = actor.AsCharacter->DrawData.Weapon(DrawDataContainer.WeaponSlot.OffHand).DrawData.DrawObject;
         var   offData = CharacterWeapon.Empty;
         if (off.IsWeapon)
             offData = new CharacterWeapon(off.AsWeapon->ModelSetId, off.AsWeapon->SecondaryId, (Variant)off.AsWeapon->Variant,
