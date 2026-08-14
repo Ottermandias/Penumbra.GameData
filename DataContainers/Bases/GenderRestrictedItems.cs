@@ -285,6 +285,12 @@ public static class GenderRestrictedItems
         new(36822, 27934, 2), // Archfiend Armor                            <-  Scion Hearer's Coat
         new(36825, 27935, 2), // Archfiend Sabatons                         <-  Scion Hearer's Shoes
         new(32393, 39302, 2), // Edenmete Gown of Casting                   <-  Gaia's Attire
+        new(52329, 52323, 3), // Avalanche Leader's Vest                    <-> Avalanche Brawler's Top
+        new(52330, 52324, 3), // Avalanche Leader's Halfgloves              <-> Avalanche Brawler's Halfgloves
+        new(52331, 52325, 3), // Avalanche Leader's Cargo Trousers          <-> Avalanche Brawler's Bottoms
+        new(52332, 52326, 3), // Avalanche Leader's Boots                   <-> Avalanche Brawler's Boots,
+        new(52647, 52327, 3), // Avalanche Leader's Earring                 <-> Avalanche Braawler's Earring
+        new(52328, 47924, 1), // Avalanche Leader's Sunglasses               -> Maritime Mirrored Sunglasses
     ];
     // @formatter:on
 }
