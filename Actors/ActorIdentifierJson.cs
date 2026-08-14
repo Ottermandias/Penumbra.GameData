@@ -100,7 +100,7 @@ public static class ActorIdentifierJson
     /// <returns>ActorIdentifier.Invalid if the JObject can not be converted, a valid ActorIdentifier otherwise.</returns>
     public static ActorIdentifier FromJson(this ActorIdentifierFactory actorManager, JObject? data)
     {
-        if (data == null)
+        if (data is null)
             return ActorIdentifier.Invalid;
 
         var type = data[nameof(ActorIdentifier.Type)]?.ToObject<IdentifierType>() ?? IdentifierType.Invalid;
@@ -149,6 +149,62 @@ public static class ActorIdentifierJson
         }
     }
 
+    /// <summary>
+    /// Try to create an ActorIdentifier from an already parsed JObject <paramref name="data"/>.
+    /// </summary>
+    /// <param name="actorManager"> The actor manager using it. </param>
+    /// <param name="data">A parsed JObject</param>
+    /// <returns>ActorIdentifier.Invalid if the JObject can not be converted, a valid ActorIdentifier otherwise.</returns>
+    public static ActorIdentifier FromJson(this ActorIdentifierFactory actorManager, in JsonElement? data)
+    {
+        if (data is not { } j)
+            return ActorIdentifier.Invalid;
+
+        var type = j.EnumOrDefault("Type"u8, IdentifierType.Invalid);
+        switch (type)
+        {
+            case IdentifierType.Player:
+            {
+                var name      = ByteString.FromStringUnsafe(j.PropertyOrDefault("PlayerName"u8, string.Empty), false);
+                var homeWorld = j.PropertyOrDefault("HomeWorld"u8, (ushort)0);
+                return actorManager.CreatePlayer(name, homeWorld);
+            }
+            case IdentifierType.Retainer:
+            {
+                var name         = ByteString.FromStringUnsafe(j.PropertyOrDefault("PlayerName"u8, string.Empty), false);
+                var retainerType = j.EnumOrDefault("Retainer"u8, ActorIdentifier.RetainerType.Both);
+                return actorManager.CreateRetainer(name, retainerType);
+            }
+            case IdentifierType.Owned:
+            {
+                var name      = ByteString.FromStringUnsafe(j.PropertyOrDefault("PlayerName"u8, string.Empty), false);
+                var homeWorld = j.PropertyOrDefault("HomeWorld"u8, (ushort)0);
+                var kind      = j.GetObjectKind();
+                var dataId    = j.PropertyOrDefault("DataId"u8, 0u);
+                return actorManager.CreateOwned(name, homeWorld, kind, dataId);
+            }
+            case IdentifierType.Special:
+            {
+                var special = j.EnumOrDefault("Special"u8, (ScreenActor)0);
+                return actorManager.CreateSpecial(special);
+            }
+            case IdentifierType.Npc:
+            {
+                var index  = j.PropertyOrDefault("Index"u8, ushort.MaxValue);
+                var kind   = j.GetObjectKind();
+                var dataId = j.PropertyOrDefault("DataId"u8, 0u);
+                return actorManager.CreateNpc(kind, dataId, index);
+            }
+            case IdentifierType.UnkObject:
+            {
+                var index = j.PropertyOrDefault("Index"u8, ushort.MaxValue);
+                var name  = ByteString.FromStringUnsafe(j.PropertyOrDefault("PlayerName"u8, string.Empty), false);
+                return actorManager.CreateIndividualUnchecked(IdentifierType.UnkObject, name, index, ObjectKind.None, 0);
+            }
+            default: return ActorIdentifier.Invalid;
+        }
+    }
+
     private static ObjectKind GetObjectKind(this JToken? token)
     {
         if (token is null)
@@ -167,4 +223,22 @@ public static class ActorIdentifierJson
         return token.ToObject<ObjectKind>();
     }
 
+    private static ObjectKind GetObjectKind(this JsonElement parent)
+    {
+        if (!parent.TryGetProperty("Kind"u8, out var value))
+            return ObjectKind.CardStand;
+
+        if (value.ValueKind is JsonValueKind.String)
+        {
+            var text = value.GetString() ?? string.Empty;
+            // Migration.
+            if (text is "MountType")
+                return ObjectKind.Mount;
+
+            if (ObjectKind.Parse(text, out var e))
+                return e;
+        }
+
+        return parent.EnumOrDefault("Kind"u8, ObjectKind.CardStand);
+    }
 }
