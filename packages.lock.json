@@ -70,19 +70,6 @@
         "resolved": "9.0.0",
         "contentHash": "N3qEBzmLMYiASUlKxxFIISP4AiwuPTHF5uCh+2CWSwwzAJiIYx0kBJsS30cp1nvhSySFAVi30jecD307jV+8Kg=="
       },
-      "Serilog": {
-        "type": "Transitive",
-        "resolved": "4.2.0",
-        "contentHash": "gmoWVOvKgbME8TYR+gwMf7osROiWAURterc6Rt2dQyX7wtjZYpqFiA/pY6ztjGQKKV62GGCyOcmtP1UKMHgSmA=="
-      },
-      "Serilog.Sinks.File": {
-        "type": "Transitive",
-        "resolved": "7.0.0",
-        "contentHash": "fKL7mXv7qaiNBUC71ssvn/dU0k9t0o45+qm2XgKAlSt19xF+ijjxyA3R6HmCgfKEKwfcfkwWjayuQtRueZFkYw==",
-        "dependencies": {
-          "Serilog": "4.2.0"
-        }
-      },
       "System.IO.Hashing": {
         "type": "Transitive",
         "resolved": "9.0.8",
@@ -93,12 +80,14 @@
         "dependencies": {
           "JetBrains.Annotations": "[2024.2.0, )",
           "Microsoft.Extensions.Logging": "[9.0.0, )",
-          "Serilog.Sinks.File": "[7.0.0, )",
           "System.IO.Hashing": "[9.0.8, )"
         }
       },
       "penumbra.api": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Luna": "[1.0.0, )"
+        }
       },
       "penumbra.string": {
         "type": "Project"
