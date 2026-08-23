@@ -15,7 +15,7 @@ namespace Penumbra.GameData.Gui;
 public static class PresetExtensions
 {
     public delegate IReadOnlyList<(ModObjectIdentifier, bool)>? GetGroupDataDelegate(in ModObjectIdentifier groupIdentifier,
-        out string? name);
+        out string? name, out bool single);
 
     private static readonly EnumCombo<ModState>    ModStateCombo    = new();
     private static readonly EnumCombo<OptionState> OptionStateCombo = new();
@@ -358,16 +358,16 @@ public static class PresetExtensions
             foreach (var (group, groupData) in preset.Settings)
             {
                 // Skip unknown groups.
-                if (data.Invoke(group, out var name) is not { } groupOptions)
+                if (data.Invoke(group, out var name, out var single) is not { } groupOptions)
                     continue;
 
                 groupList.Clear();
                 groupList.EnsureCapacity(groupOptions.Count);
-                SettingPresetData.DrawGroup(table, name!, groupData, groupOptions, groupList);
+                SettingPresetData.DrawGroup(table, name!, single, groupData, groupOptions, groupList);
             }
         }
 
-        private static void DrawGroup(in Im.TableDisposable table, string groupName, in GroupSettingData groupData,
+        private static void DrawGroup(in Im.TableDisposable table, string groupName, bool single, in GroupSettingData groupData,
             IReadOnlyList<(ModObjectIdentifier, bool)> data, List<(string, bool)> groupList)
         {
             groupList.Clear();
@@ -391,7 +391,8 @@ public static class PresetExtensions
             Im.Line.NoSpacing();
             Im.Dummy(2 * Im.Style.ItemSpacing.X);
             table.NextColumn();
-            if (groupList[0].Item2)
+            var firstItem = single ? groupList.FirstOrDefault(i => i.Item2, groupList[0]) : groupList[0];
+            if (firstItem.Item2)
                 Im.Render.Checkmark(Im.Window.DrawList, Im.Cursor.ScreenPosition.AddY(Im.Style.FramePadding.Y), LunaStyle.SuccessForeground,
                     Im.Style.TextHeight);
             else
@@ -399,6 +400,9 @@ public static class PresetExtensions
                     Im.Style.TextHeight);
             Im.Cursor.X += Im.Style.FrameHeightWithSpacing;
             ImEx.TextFrameAligned(groupList[0].Item1);
+
+            if (single && firstItem.Item2)
+                return;
 
             foreach (var (option, value) in groupList.Skip(1))
             {
@@ -408,7 +412,7 @@ public static class PresetExtensions
                     Im.Render.Checkmark(Im.Window.DrawList, Im.Cursor.ScreenPosition.AddY(Im.Style.FramePadding.Y),
                         LunaStyle.SuccessForeground,
                         Im.Style.TextHeight);
-                else
+                else if (!single)
                     Im.Render.Cross(Im.Window.DrawList, Im.Cursor.ScreenPosition.AddY(Im.Style.FramePadding.Y), LunaStyle.ErrorForeground,
                         Im.Style.TextHeight);
                 Im.Cursor.X += Im.Style.FrameHeightWithSpacing;
