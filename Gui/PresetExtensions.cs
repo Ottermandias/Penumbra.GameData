@@ -17,8 +17,11 @@ public static class PresetExtensions
     public delegate IReadOnlyList<(ModObjectIdentifier, bool)>? GetGroupDataDelegate(in ModObjectIdentifier groupIdentifier,
         out string? name, out bool single);
 
-    private static readonly EnumCombo<ModState>    ModStateCombo    = new();
-    private static readonly EnumCombo<OptionState> OptionStateCombo = new();
+    private static readonly EnumCombo<ModState> ModStateCombo =
+        new(ModStateExtensions.ToNameU8, ModStateExtensions.ToName, ModStateExtensions.Tooltip);
+
+    private static readonly EnumCombo<OptionState> OptionStateCombo =
+        new(OptionStateExtensions.ToNameU8, OptionStateExtensions.ToName, OptionStateExtensions.Tooltip);
 
     extension(SettingPreset preset)
     {
