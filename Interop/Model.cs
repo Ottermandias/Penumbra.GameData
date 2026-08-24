@@ -172,14 +172,14 @@ public readonly unsafe struct Model : IEquatable<Model>
         var   mainData = CharacterWeapon.Empty;
         if (main.IsWeapon)
             mainData = new CharacterWeapon(main.AsWeapon->ModelSetId, main.AsWeapon->SecondaryId, (Variant)main.AsWeapon->Variant,
-                new StainIds(main.AsWeapon->Stain0, main.AsWeapon->Stain1)); // TODO stain
+                new StainIds(main.AsWeapon->Stain0, main.AsWeapon->Stain1)); 
         else
             main = Null;
         Model off     = actor.AsCharacter->DrawData.Weapon(DrawDataContainer.WeaponSlot.OffHand).DrawData.DrawObject;
         var   offData = CharacterWeapon.Empty;
         if (off.IsWeapon)
             offData = new CharacterWeapon(off.AsWeapon->ModelSetId, off.AsWeapon->SecondaryId, (Variant)off.AsWeapon->Variant,
-                new StainIds(off.AsWeapon->Stain0, off.AsWeapon->Stain1)); // TODO stain
+                new StainIds(off.AsWeapon->Stain0, off.AsWeapon->Stain1)); 
         else
             off = Null;
         return (main, off, mainData, offData);
