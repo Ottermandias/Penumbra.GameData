@@ -2,6 +2,7 @@ using System.Text.Json;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using Luna;
 using Luna.Generators;
 using Newtonsoft.Json.Linq;
 using Penumbra.GameData.Enums;
@@ -153,13 +154,13 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
         return j;
     }
 
-    public static StainIds ParseFromObject(JObject? obj)
+    public static StainIds ParseFromElement(in JsonElement? element)
     {
-        if (obj == null)
+        if (element is not {} j)
             return None;
 
-        var stain  = (StainId)(obj["Stain"]?.ToObject<byte>() ?? 0);
-        var stain2 = (StainId)(obj["Stain2"]?.ToObject<byte>() ?? 0);
+        var stain  = j.PropertyOrDefault("Stain"u8, (byte)0);
+        var stain2 = j.PropertyOrDefault("Stain2"u8, (byte)0);
         return new StainIds(stain, stain2);
     }
 

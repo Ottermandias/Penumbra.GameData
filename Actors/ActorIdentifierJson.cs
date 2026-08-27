@@ -157,7 +157,7 @@ public static class ActorIdentifierJson
     /// <returns>ActorIdentifier.Invalid if the JObject can not be converted, a valid ActorIdentifier otherwise.</returns>
     public static ActorIdentifier FromJson(this ActorIdentifierFactory actorManager, in JsonElement? data)
     {
-        if (data is not { } j)
+        if (data is not { ValueKind: JsonValueKind.Object } j)
             return ActorIdentifier.Invalid;
 
         var type = j.EnumOrDefault("Type"u8, IdentifierType.Invalid);
