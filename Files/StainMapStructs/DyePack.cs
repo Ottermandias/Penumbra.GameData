@@ -1,3 +1,4 @@
+using Penumbra.GameData.Interop;
 using Penumbra.GameData.Structs;
 
 namespace Penumbra.GameData.Files.StainMapStructs;
@@ -11,6 +12,9 @@ public record struct DyePack : IDyePack
     public const string DefaultStmPath = "chara/base_material/stainingtemplate_gud.stm";
 
     static string IDyePack.DefaultStmPath => DefaultStmPath;
+
+    static int IDyePack.DefaultStmIndex
+        => StainAccessor.GudStmIndex;
 
     public   HalfColor DiffuseColor;
     public   HalfColor SpecularColor;
