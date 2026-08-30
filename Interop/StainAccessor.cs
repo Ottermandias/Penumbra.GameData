@@ -4,10 +4,11 @@ using Luna;
 using Microsoft.Extensions.Logging;
 using Penumbra.GameData.Files;
 using Penumbra.GameData.Files.StainMapStructs;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Penumbra.GameData.Interop;
 
-public class StainAccessor : IService
+public partial class StainAccessor : IService
 {
     public const int GudStmIndex    = 95;
     public const int LegacyStmIndex = 96;
@@ -23,7 +24,7 @@ public class StainAccessor : IService
         GudStmFile    = LoadStmFile<DyePack>(log, characterUtility, dataManager);
     }
 
-    /// <summary> Loads a STM file. Opportunistically attempts to re-use the file already read by the game, with Lumina fallback. </summary>
+    /// <summary> Loads an STM file. Opportunistically attempts to re-use the file already read by the game, with Lumina fallback. </summary>
     private static unsafe StmFile<TDyePack> LoadStmFile<TDyePack>(ILogger? log, CharacterUtility* characterUtility, IDataManager dataManager)
         where TDyePack : unmanaged, IDyePack
         => LoadStmFile<TDyePack>(log, characterUtility) ?? LoadStmFile<TDyePack>(log, dataManager);
@@ -41,9 +42,7 @@ public class StainAccessor : IService
         var stmPath = stmResourceHandle->FileName.ToString();
         if (!string.Equals(stmPath, TDyePack.DefaultStmPath, StringComparison.OrdinalIgnoreCase))
         {
-            log?.LogWarning(
-                "[StainAccessor] Cannot load StmFile<{Type}> ({DefaultStmPath}) from ResourceHandle 0x{StmResourceHandle:X} ({StmPath})",
-                typeof(TDyePack), TDyePack.DefaultStmPath, (nint)stmResourceHandle, stmPath);
+            LogLoadFailure(log, typeof(TDyePack), TDyePack.DefaultStmPath, (nint)stmResourceHandle, stmPath);
             return null;
         }
 
@@ -51,14 +50,23 @@ public class StainAccessor : IService
         if (stmData.Length is 0)
             return null;
 
-        log?.LogDebug("[StainAccessor] Loading StmFile<{Type}> from ResourceHandle 0x{StmResourceHandle:X}", typeof(TDyePack),
-            (nint)stmResourceHandle);
+        LogResourceHandleLoad(log, typeof(TDyePack), (nint)stmResourceHandle);
         return new StmFile<TDyePack>(stmData);
     }
 
     private static StmFile<TDyePack> LoadStmFile<TDyePack>(ILogger? log, IDataManager dataManager) where TDyePack : unmanaged, IDyePack
     {
-        log?.LogDebug("[StainAccessor] Loading StmFile<{Type}> from Lumina", typeof(TDyePack));
+        LogLuminaLoad(log, typeof(TDyePack));
         return new StmFile<TDyePack>(dataManager);
     }
+
+    [LoggerMessage(LogLevel.Warning,
+        "[StainAccessor] Could not load StmFile<{Type}> ({DefaultPath}) from ResourceHandle 0x{ResourceHandle:X} ({Path})")]
+    static partial void LogLoadFailure(ILogger? logger, Type type, string defaultPath, nint resourceHandle, string path);
+
+    [LoggerMessage(LogLevel.Trace, "[StainAccessor] Loading StmFile<{Type}> from ResourceHandle 0x{ResourceHandle:X}")]
+    static partial void LogResourceHandleLoad(ILogger? logger, Type type, nint resourceHandle);
+
+    [LoggerMessage(LogLevel.Trace, "[StainAccessor] Loading StmFile<{Type}> from Lumina")]
+    static partial void LogLuminaLoad(ILogger? logger, Type type);
 }
