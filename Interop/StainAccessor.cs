@@ -2,6 +2,7 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Luna;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Penumbra.GameData.Files;
 using Penumbra.GameData.Files.StainMapStructs;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -20,16 +21,17 @@ public partial class StainAccessor : IService
     {
         var characterUtility = CharacterUtility.Instance();
 
-        LegacyStmFile = LoadStmFile<LegacyDyePack>(log, characterUtility, dataManager);
-        GudStmFile    = LoadStmFile<DyePack>(log, characterUtility, dataManager);
+        log           ??= NullLogger.Instance;
+        LegacyStmFile =   LoadStmFile<LegacyDyePack>(log, characterUtility, dataManager);
+        GudStmFile    =   LoadStmFile<DyePack>(log, characterUtility, dataManager);
     }
 
     /// <summary> Loads an STM file. Opportunistically attempts to re-use the file already read by the game, with Lumina fallback. </summary>
-    private static unsafe StmFile<TDyePack> LoadStmFile<TDyePack>(ILogger? log, CharacterUtility* characterUtility, IDataManager dataManager)
+    private static unsafe StmFile<TDyePack> LoadStmFile<TDyePack>(ILogger log, CharacterUtility* characterUtility, IDataManager dataManager)
         where TDyePack : unmanaged, IDyePack
         => LoadStmFile<TDyePack>(log, characterUtility) ?? LoadStmFile<TDyePack>(log, dataManager);
 
-    private static unsafe StmFile<TDyePack>? LoadStmFile<TDyePack>(ILogger? log, CharacterUtility* characterUtility)
+    private static unsafe StmFile<TDyePack>? LoadStmFile<TDyePack>(ILogger log, CharacterUtility* characterUtility)
         where TDyePack : unmanaged, IDyePack
     {
         if (characterUtility is null)
@@ -62,11 +64,11 @@ public partial class StainAccessor : IService
 
     [LoggerMessage(LogLevel.Warning,
         "[StainAccessor] Could not load StmFile<{Type}> ({DefaultPath}) from ResourceHandle 0x{ResourceHandle:X} ({Path})")]
-    static partial void LogLoadFailure(ILogger? logger, Type type, string defaultPath, nint resourceHandle, string path);
+    static partial void LogLoadFailure(ILogger logger, Type type, string defaultPath, nint resourceHandle, string path);
 
     [LoggerMessage(LogLevel.Trace, "[StainAccessor] Loading StmFile<{Type}> from ResourceHandle 0x{ResourceHandle:X}")]
-    static partial void LogResourceHandleLoad(ILogger? logger, Type type, nint resourceHandle);
+    static partial void LogResourceHandleLoad(ILogger logger, Type type, nint resourceHandle);
 
     [LoggerMessage(LogLevel.Trace, "[StainAccessor] Loading StmFile<{Type}> from Lumina")]
-    static partial void LogLuminaLoad(ILogger? logger, Type type);
+    static partial void LogLuminaLoad(ILogger logger, Type type);
 }
