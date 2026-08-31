@@ -21,8 +21,7 @@ public sealed unsafe class TextureArraySlicePickers : IUiService
 
     public TextureArraySlicePickers(TextureArraySlicer textureArraySlicer)
     {
-        _textureArraySlicer = textureArraySlicer;
-
+        _textureArraySlicer  = textureArraySlicer;
         TileIndexPicker      = ((IEditor<float>)new Editor(DrawTileIndexPicker)).Reinterpreting<byte>();
         SphereMapIndexPicker = ((IEditor<float>)new Editor(DrawSphereMapIndexPicker)).Reinterpreting<byte>();
     }
@@ -53,38 +52,28 @@ public sealed unsafe class TextureArraySlicePickers : IUiService
     public bool DrawTextureArrayIndexPicker(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref ushort value, bool compact,
         ReadOnlySpan<FFXIVClientStructs.Interop.Pointer<TextureResourceHandle>> textureRHs)
     {
-        TextureResourceHandle* firstNonNullTextureRh = null;
-        foreach (var texture in textureRHs)
-        {
-            if (texture.Value is not null && texture.Value->Texture is not null)
-            {
-                firstNonNullTextureRh = texture;
-                break;
-            }
-        }
+        const ComboFlags flags = ComboFlags.NoArrowButton | ComboFlags.HeightLarge;
 
-        var firstNonNullTexture = firstNonNullTextureRh is not null ? firstNonNullTextureRh->Texture : null;
+        var firstNonNullTextureRh = textureRHs.FindFirst(t => !t.IsNull && t.Value->Texture is not null, out var p) ? p.Value : null;
+        var firstNonNullTexture   = firstNonNullTextureRh is not null ? firstNonNullTextureRh->Texture : null;
 
         var textureSize = firstNonNullTexture is not null
             ? new Vector2(firstNonNullTexture->ActualWidth, firstNonNullTexture->ActualHeight).Contain(new Vector2(MaximumTextureSize))
             : Vector2.Zero;
         var count = firstNonNullTexture is not null ? firstNonNullTexture->ArraySize : 0;
 
-        var ret = false;
-
         var framePadding = Im.Style.FramePadding;
         var itemSpacing  = Im.Style.ItemSpacing;
+
+        var ret = false;
         using (Im.Font.PushMono())
         {
-            var spaceSize = Im.Font.Mono.GetCharacterAdvance(' ');
-            var spaces = (int)((Im.Item.CalculateWidth()
-                  - framePadding.X * 2.0f
-                  - (compact ? 0.0f : (textureSize.X + itemSpacing.X) * textureRHs.Length))
-              / spaceSize);
-            using var padding = ImStyleDouble.FramePadding.Push(
-                framePadding + new Vector2(0.0f, Math.Max(textureSize.Y - Im.Style.FrameHeight + itemSpacing.Y, 0.0f) * 0.5f), !compact);
-            using var combo = Im.Combo.Begin(label, (value is ushort.MaxValue ? "\u2014" : value.ToString()).PadLeft(spaces),
-                ComboFlags.NoArrowButton | ComboFlags.HeightLarge);
+            var       spaceSize  = Im.Font.Mono.GetCharacterAdvance(' ');
+            var       compactX   = compact ? 0.0f : (textureSize.X + itemSpacing.X) * textureRHs.Length;
+            var       spaces     = (int)((Im.Item.CalculateWidth() - framePadding.X * 2.0f - compactX) / spaceSize);
+            var       newPadding = framePadding.AddX(Math.Max(textureSize.Y - Im.Style.FrameHeight + itemSpacing.Y, 0.0f) * 0.5f);
+            using var padding    = ImStyleDouble.FramePadding.Push(newPadding, !compact);
+            using var combo      = Im.Combo.Begin(label, (value is ushort.MaxValue ? "\u2014" : value.ToString()).PadLeft(spaces), flags);
             if (combo.Success && firstNonNullTextureRh is not null)
             {
                 var lineHeight = Math.Max(Im.Style.TextHeightWithSpacing, framePadding.Y * 2.0f + textureSize.Y);
@@ -104,9 +93,8 @@ public sealed unsafe class TextureArraySlicePickers : IUiService
 
                     var rectMin = Im.Item.UpperLeftCorner;
                     var rectMax = Im.Item.LowerRightCorner;
-                    var textureRegionStart = new Vector2(
-                        rectMax.X - framePadding.X - textureSize.X * textureRHs.Length - itemSpacing.X * (textureRHs.Length - 1),
-                        rectMin.Y + framePadding.Y);
+                    var startX = rectMax.X - framePadding.X - textureSize.X * textureRHs.Length - itemSpacing.X * (textureRHs.Length - 1);
+                    var textureRegionStart = new Vector2(startX, rectMin.Y + framePadding.Y);
                     var maxSize = textureSize with { Y = rectMax.Y - framePadding.Y - textureRegionStart.Y };
                     DrawTextureSlices(textureRegionStart, maxSize, itemSpacing.X, textureRHs, (byte)index);
                 }
@@ -117,9 +105,8 @@ public sealed unsafe class TextureArraySlicePickers : IUiService
         {
             var cbRectMin = Im.Item.UpperLeftCorner;
             var cbRectMax = Im.Item.LowerRightCorner;
-            var cbTextureRegionStart =
-                new Vector2(cbRectMax.X - framePadding.X - textureSize.X * textureRHs.Length - itemSpacing.X * (textureRHs.Length - 1),
-                    cbRectMin.Y + framePadding.Y);
+            var startX = cbRectMax.X - framePadding.X - textureSize.X * textureRHs.Length - itemSpacing.X * (textureRHs.Length - 1);
+            var cbTextureRegionStart = new Vector2(startX, cbRectMin.Y + framePadding.Y);
             var cbMaxSize = textureSize with { Y = cbRectMax.Y - framePadding.Y - cbTextureRegionStart.Y };
             DrawTextureSlices(cbTextureRegionStart, cbMaxSize, itemSpacing.X, textureRHs, (byte)value);
         }
@@ -142,7 +129,7 @@ public sealed unsafe class TextureArraySlicePickers : IUiService
             using var tt       = Im.Tooltip.Begin();
             if (description.Length > 0)
                 Im.Text(description);
-            if (compact && value != ushort.MaxValue)
+            if (compact && value is not ushort.MaxValue)
             {
                 Im.Dummy(textureSize with { X = textureSize.X * textureRHs.Length + itemSpacing.X * (textureRHs.Length - 1) });
                 var rectMin = Im.Item.UpperLeftCorner;
@@ -158,11 +145,11 @@ public sealed unsafe class TextureArraySlicePickers : IUiService
     {
         for (var j = 0; j < textureRHs.Length; ++j)
         {
-            if (textureRHs[j].Value == null)
+            if (textureRHs[j].Value is null)
                 continue;
 
             var texture = textureRHs[j].Value->Texture;
-            if (texture == null || sliceIndex >= texture->ArraySize)
+            if (texture is null || sliceIndex >= texture->ArraySize)
                 continue;
 
             var handle = _textureArraySlicer.GetImGuiHandle(texture, sliceIndex);
