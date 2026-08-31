@@ -56,7 +56,7 @@ public partial class StainAccessor : IService
         return new StmFile<TDyePack>(stmData);
     }
 
-    private static StmFile<TDyePack> LoadStmFile<TDyePack>(ILogger? log, IDataManager dataManager) where TDyePack : unmanaged, IDyePack
+    private static StmFile<TDyePack> LoadStmFile<TDyePack>(ILogger log, IDataManager dataManager) where TDyePack : unmanaged, IDyePack
     {
         LogLuminaLoad(log, typeof(TDyePack));
         return new StmFile<TDyePack>(dataManager);
