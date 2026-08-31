@@ -73,7 +73,7 @@ public sealed unsafe class TextureArraySlicePickers : IUiService
             var       spaces     = (int)((Im.Item.CalculateWidth() - framePadding.X * 2.0f - compactX) / spaceSize);
             var       newPadding = framePadding.AddX(Math.Max(textureSize.Y - Im.Style.FrameHeight + itemSpacing.Y, 0.0f) * 0.5f);
             using var padding    = ImStyleDouble.FramePadding.Push(newPadding, !compact);
-            using var combo      = Im.Combo.Begin(label, (value is ushort.MaxValue ? "\u2014" : value.ToString()).PadLeft(spaces), flags);
+            using var combo      = Im.Combo.Begin(label, (value is ushort.MaxValue ? string.EmDash : value.ToString()).PadLeft(spaces), flags);
             if (combo.Success && firstNonNullTextureRh is not null)
             {
                 var lineHeight = Math.Max(Im.Style.TextHeightWithSpacing, framePadding.Y * 2.0f + textureSize.Y);
