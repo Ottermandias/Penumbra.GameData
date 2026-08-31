@@ -48,7 +48,7 @@ public struct LegacyColorDyeTableRow : IEquatable<LegacyColorDyeTableRow>
         DiffuseColor  = row.DiffuseColor;
         SpecularColor = row.SpecularColor;
         EmissiveColor = row.EmissiveColor;
-        Shininess     = row.Scalar3;
+        Shininess     = row.Exposure;
         SpecularMask  = row.Metalness;
     }
 

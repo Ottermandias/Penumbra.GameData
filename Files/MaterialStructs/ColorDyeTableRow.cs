@@ -36,7 +36,7 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>
         set => _data = value ? _data | 0x0004u : _data & ~0x0004u;
     }
 
-    public bool Scalar3
+    public bool Exposure
     {
         readonly get => (_data & 0x0008) != 0;
         set => _data = value ? _data | 0x0008u : _data & ~0x0008u;
@@ -96,7 +96,7 @@ public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>
         DiffuseColor  = oldRow.DiffuseColor;
         SpecularColor = oldRow.SpecularColor;
         EmissiveColor = oldRow.EmissiveColor;
-        Scalar3       = oldRow.Shininess;
+        Exposure      = oldRow.Shininess;
         Metalness     = oldRow.SpecularMask;
     }
 
