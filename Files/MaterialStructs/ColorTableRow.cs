@@ -8,12 +8,12 @@ namespace Penumbra.GameData.Files.MaterialStructs;
 /// <code>
 /// #       |    X (+0)    |    |    Y (+1)    |    |    Z (+2)   |    |   W (+3)    |
 /// --------------------------------------------------------------------------------------
-/// 0 (+ 0) |    Diffuse.R |  0 |    Diffuse.G |  0 |   Diffuse.B |  0 |         Unk |  
+/// 0 (+ 0) |    Diffuse.R |  0 |    Diffuse.G |  0 |   Diffuse.B |  0 |         Unk |
 /// 1 (+ 4) |   Specular.R |  1 |   Specular.G |  1 |  Specular.B |  1 |         Unk |
-/// 2 (+ 8) |   Emissive.R |  2 |   Emissive.G |  2 |  Emissive.B |  2 |         Unk |  3
+/// 2 (+ 8) |   Emissive.R |  2 |   Emissive.G |  2 |  Emissive.B |  2 |    Exposure |  3
 /// 3 (+12) |   Sheen Rate |  6 |   Sheen Tint |  7 |  Sheen Apt. |  8 |         Unk |
-/// 4 (+16) |   Rougnhess? |  5 |              |    |  Metalness? |  4 |  Anisotropy |  9
-/// 5 (+20) |          Unk |    |  Sphere Mask | 11 |         Unk |    |         Unk |   
+/// 4 (+16) |    Rougnhess |  5 |              |    |   Metalness |  4 |  Anisotropy |  9
+/// 5 (+20) |          Unk |    |  Sphere Mask | 11 |         Unk |    |         Unk |
 /// 6 (+24) |   Shader Idx |    |   Tile Index |    |  Tile Alpha |    |  Sphere Idx | 10
 /// 7 (+28) |   Tile XF UU |    |   Tile XF UV |    |  Tile XF VU |    |  Tile XF VV |
 /// </code>
@@ -36,7 +36,7 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
         SpecularColor  = HalfColor.White,
         Scalar7        = Half.Zero,
         EmissiveColor  = HalfColor.Black,
-        Scalar11       = Half.One,
+        Exposure       = Half.One,
         SheenRate      = (Half)0.1f,
         SheenTintRate  = (Half)0.2f,
         SheenAperture  = (Half)5.0f,
@@ -102,7 +102,7 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
         }
     }
 
-    public Half Scalar11
+    public Half Exposure
     {
         get => this[11];
         set => this[11] = value;
@@ -240,7 +240,7 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
             ret           = true;
         }
 
-        if (dyeRow.Scalar3 && Scalar3 != dyes.Shininess)
+        if (dyeRow.Exposure && Scalar3 != dyes.Shininess)
         {
             Scalar3 = dyes.Shininess;
             ret     = true;
@@ -277,9 +277,9 @@ public struct ColorTableRow : IEquatable<ColorTableRow>
             ret           = true;
         }
 
-        if (dyeRow.Scalar3 && Scalar11 != dye.Scalar3)
+        if (dyeRow.Exposure && Exposure != dye.Exposure)
         {
-            Scalar11 = dye.Scalar3;
+            Exposure = dye.Exposure;
             ret      = true;
         }
 

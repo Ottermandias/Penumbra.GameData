@@ -19,7 +19,7 @@ public record struct DyePack : IDyePack
     public   HalfColor DiffuseColor;
     public   HalfColor SpecularColor;
     public   HalfColor EmissiveColor;
-    public   Half      Scalar3;
+    public   Half      Exposure;
     public   Half      Metalness;
     public   Half      Roughness;
     public   Half      SheenRate;
