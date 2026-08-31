@@ -173,15 +173,6 @@ public static partial class ModelCombinedSlotsExtensions
             return unchecked((EquipFlag)(equipment | mainhand | offhand));
         }
 
-        public CombinedItemSlotFlag ToCombinedItemSlotFlag()
-        {
-            var equipment = (ulong)(slots & AllEquipmentPieces);
-            var bonus     = (ulong)(slots & BonusItemFlagMask) >> 4;
-            var mainhand  = (ulong)(slots & Mainhand) >> 22;
-            var offhand   = (ulong)(slots & Offhand) >> 29;
-            return unchecked((CombinedItemSlotFlag)(equipment | bonus | mainhand | offhand));
-        }
-
         /// <returns>
         /// The <see cref="EquipSlot"/> that exactly matches the given <see cref="ModelCombinedSlots"/>, if any.
         /// Otherwise, <see cref="EquipSlot.Unknown"/>.
@@ -289,15 +280,6 @@ public static partial class ModelCombinedSlotsExtensions
             var offhand   = (ModelCombinedSlots)((ulong)flag << 17) & Offhand;
             return equipment | mainhand | offhand;
         }
-    }
-
-    public static ModelCombinedSlots ToModelCombinedSlots(this CombinedItemSlotFlag flag)
-    {
-        var equipment = (ModelCombinedSlots)flag & AllEquipmentPieces;
-        var bonus     = (ModelCombinedSlots)((ulong)flag << 4) & BonusItemFlagMask;
-        var mainhand  = (ModelCombinedSlots)((ulong)flag << 22) & Mainhand;
-        var offhand   = (ModelCombinedSlots)((ulong)flag << 29) & Offhand;
-        return equipment | bonus | mainhand | offhand;
     }
 
     public static ModelCombinedSlots ToModelCombinedSlots(this EquipSlot slot)
