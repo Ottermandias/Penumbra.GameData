@@ -12,7 +12,7 @@ public sealed unsafe class TextureArraySlicePickers : IUiService
     public const int TileNormArrayTexIndex = 82;
     public const int SphereDArrayTexIndex  = 97;
 
-    private const float MaximumTextureSize = 64.0f;
+    public const float MaximumTextureSize = 64.0f;
 
     private readonly TextureArraySlicer _textureArraySlicer;
 
