@@ -152,4 +152,25 @@ partial class SpmFile
                 _          => throw new ArgumentException($"Invalid SPM value type {type}", nameof(type)),
             };
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Header
+    {
+        public uint   Version;
+        public byte   ColumnCount;
+        public byte   RowCount;
+        public ushort ColumnsOffset;
+        public ushort RowsOffset;
+        public ushort ValuesOffset;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct ColumnDefinition
+    {
+        public Column Name;
+        public Type   Type;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private record struct RowDefinition(Table Table, uint Index);
 }

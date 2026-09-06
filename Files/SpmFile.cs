@@ -1,21 +1,19 @@
-using System.Collections.Frozen;
-using System.Collections.Immutable;
 using Dalamud.Plugin.Services;
 
 namespace Penumbra.GameData.Files;
 
 using ColumnTuple = (SpmFile.Column Name, SpmFile.Type Type, SpmFile.Value? ConstantValue);
-using RowTuple = (SpmFile.Table Table, uint Index, bool IsBlank, ImmutableArray<SpmFile.Value> Values);
+using RowTuple = (SpmFile.Table Table, uint Index, bool IsBlank, SpmFile.Value[] Values);
 
 public partial class SpmFile
 {
     public readonly uint Version;
 
-    public readonly ImmutableArray<ColumnTuple> Columns;
-    public readonly ImmutableArray<RowTuple>    Rows;
+    public readonly List<ColumnTuple> Columns;
+    public readonly List<RowTuple>    Rows;
 
-    public readonly FrozenDictionary<Column, int>                    ColumnDictionary;
-    public readonly FrozenDictionary<(Table Table, uint Index), int> RowDictionary;
+    public readonly Dictionary<Column, int>                    ColumnDictionary;
+    public readonly Dictionary<(Table Table, uint Index), int> RowDictionary;
 
     public SpmFile(byte[] data)
         : this((ReadOnlySpan<byte>)data)
@@ -38,21 +36,21 @@ public partial class SpmFile
         var valueSpan =
             MemoryMarshal.Cast<byte, Value>(data.Slice(header.ValuesOffset << 2, header.ColumnCount * header.RowCount * sizeof(Value)));
 
-        var rows = new List<RowTuple>();
+        Rows          = new List<RowTuple>(header.RowCount);
+        RowDictionary = new Dictionary<(Table Table, uint Index), int>(header.RowCount);
         for (var i = 0; i < header.RowCount; ++i)
         {
             ref readonly var definition = ref rowSpan[i];
 
-            var values  = valueSpan.Slice(header.ColumnCount * i, header.ColumnCount).ToImmutableArray();
+            var values  = valueSpan.Slice(header.ColumnCount * i, header.ColumnCount).ToArray();
             var isBlank = MemoryMarshal.AsBytes(values.AsSpan()).IndexOfAnyExcept((byte)0) < 0;
 
-            rows.Add((definition.Table, definition.Index, isBlank, values));
+            Rows.Add((definition.Table, definition.Index, isBlank, values));
+            RowDictionary.TryAdd((definition.Table, definition.Index), i);
         }
 
-        Rows          = [.. rows];
-        RowDictionary = rows.Index().ToFrozenDictionary(entry => (entry.Item.Table, entry.Item.Index), entry => entry.Index);
-
-        var columns = new List<ColumnTuple>();
+        Columns          = new List<ColumnTuple>(header.ColumnCount);
+        ColumnDictionary = new Dictionary<Column, int>(header.ColumnCount);
         for (var i = 0; i < header.ColumnCount; ++i)
         {
             ref readonly var definition = ref columnSpan[i];
@@ -79,11 +77,9 @@ public partial class SpmFile
                 }
             }
 
-            columns.Add((definition.Name, definition.Type, isConstant ? first : null));
+            Columns.Add((definition.Name, definition.Type, isConstant ? first : null));
+            ColumnDictionary.TryAdd(definition.Name, i);
         }
-
-        Columns          = [.. columns];
-        ColumnDictionary = columns.Index().ToFrozenDictionary(entry => entry.Item.Name, entry => entry.Index);
     }
 
     /// <summary>
@@ -92,25 +88,4 @@ public partial class SpmFile
     public SpmFile(IDataManager gameData, Table table)
         : this(gameData.GetFile(DefaultSpmPath(table))?.Data ?? [])
     { }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct Header
-    {
-        public uint   Version;
-        public byte   ColumnCount;
-        public byte   RowCount;
-        public ushort ColumnsOffset;
-        public ushort RowsOffset;
-        public ushort ValuesOffset;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct ColumnDefinition
-    {
-        public Column Name;
-        public Type   Type;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private record struct RowDefinition(Table Table, uint Index);
 }
