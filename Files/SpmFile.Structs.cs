@@ -165,11 +165,7 @@ partial class SpmFile
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct ColumnDefinition
-    {
-        public Column Name;
-        public Type   Type;
-    }
+    private record struct ColumnDefinition(Column Name, Type Type);
 
     [StructLayout(LayoutKind.Sequential)]
     private record struct RowDefinition(Table Table, uint Index);
