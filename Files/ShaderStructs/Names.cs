@@ -9,6 +9,7 @@ public static class Names
     public static readonly int                          LongestKnownSuffixLength;
     public static readonly FrozenSet<string>            KnownSuffixes;
 
+    public static readonly Name ShaderIdConstantName       = "g_ShaderID";
     public static readonly Name SphereMapIndexConstantName = "g_SphereMapIndex";
     public static readonly Name TileIndexConstantName      = "g_TileIndex";
 
@@ -71,6 +72,7 @@ public static class Names
             ShpkFile.MaskSamplerName,
 
             // Special material constants
+            ShaderIdConstantName,
             SphereMapIndexConstantName,
             TileIndexConstantName,
 
@@ -175,7 +177,6 @@ public static class Names
             "g_ScrollTransTimeV_1",
             "g_ScrollTransTimeV_2",
             "g_SeaWaveScale",
-            "g_ShaderID",
             "g_ShadowAlphaThreshold",
             "g_ShadowOffset",
             "g_ShadowPosOffset",
