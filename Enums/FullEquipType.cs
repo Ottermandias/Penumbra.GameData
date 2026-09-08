@@ -200,7 +200,7 @@ public enum FullEquipType : byte
     [Name("Twinfangs (Offhand)")]
     TwinfangsOff, // VPR Off
 
-    [Name("Handaxe")]
+    [Name("Hand Axe")]
     Handaxe, // BST
 
     [Name("Glasses")]

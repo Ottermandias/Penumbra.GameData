@@ -45,17 +45,13 @@ public readonly struct JobGroup : IEquatable<JobGroup>
         {
             var abbr = job.Abbreviation.ToString();
             // They removed the Adventurer abbreviation and name in 7.2 for some reason.
-            if (job.RowId == 0)
+            if (job.RowId is 0)
                 abbr = "ADV";
 
-            if (abbr.Length == 0)
+            if (abbr.Length is 0)
                 continue;
 
-            var prop = group.GetType().GetProperty(abbr);
-            if (prop is null)
-                continue; // Could not get job abbreviation property, job is not yet implemented.
-
-            if (!(bool)prop.GetValue(group)!)
+            if (!group.ExcelPage.ReadBool(group.RowOffset + 4 + job.RowId))
                 continue;
 
             ++Count;
