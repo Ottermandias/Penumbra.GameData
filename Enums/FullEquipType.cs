@@ -201,7 +201,7 @@ public enum FullEquipType : byte
     TwinfangsOff, // VPR Off
 
     [Name("Handaxe")]
-    Handaxe, // BST TODO
+    Handaxe, // BST
 
     [Name("Glasses")]
     Glasses,
@@ -272,7 +272,8 @@ public static partial class FullEquipTypeExtensions
         {
             FullEquipType.Scepter or FullEquipType.Wand or FullEquipType.StaffWhm or FullEquipType.StaffBlm => other is FullEquipType.Scepter
                 or FullEquipType.Wand or FullEquipType.StaffBlm or FullEquipType.StaffWhm,
-            _ => type == other,
+            FullEquipType.Sword or FullEquipType.Handaxe => other is FullEquipType.Sword or FullEquipType.Handaxe,
+            _                                            => type == other,
         };
 
     /// <summary> Return whether an offhand weapon type is compatible with the current mainhand state. </summary>
@@ -301,6 +302,8 @@ public static partial class FullEquipTypeExtensions
             FullEquipType.Wand     => [FullEquipType.Scepter, FullEquipType.StaffWhm, FullEquipType.StaffBlm],
             FullEquipType.StaffWhm => [FullEquipType.Scepter, FullEquipType.Wand, FullEquipType.StaffBlm],
             FullEquipType.StaffBlm => [FullEquipType.Scepter, FullEquipType.Wand, FullEquipType.StaffWhm],
+            FullEquipType.Sword    => [FullEquipType.Handaxe],
+            FullEquipType.Handaxe  => [FullEquipType.Sword],
             _                      => [],
         };
 

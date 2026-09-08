@@ -51,5 +51,5 @@ public enum WeaponCategory : byte
     Sage        = 109,
     Viper       = 110,
     Pictomancer = 111,
-    Beastmaster = 112,
+    Beastmaster = 113,
 }

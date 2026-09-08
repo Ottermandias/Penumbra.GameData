@@ -98,7 +98,8 @@ public sealed class ItemData(ItemsByType byType, ItemsPrimaryModel primary, Item
         (FullEquipType.Brush, FullEquipType.Palette, 50),
         (FullEquipType.Twinfangs, FullEquipType.TwinfangsOff, 50),
         (FullEquipType.Twinfangs, FullEquipType.TwinfangsOff, 50),
-        (FullEquipType.Handaxe, FullEquipType.Unknown, 100), // TODO
+        (FullEquipType.Unknown, FullEquipType.Unknown, 100),
+        (FullEquipType.Handaxe, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
         (FullEquipType.Unknown, FullEquipType.Unknown, 100),
@@ -210,7 +211,7 @@ public sealed class ItemData(ItemsByType byType, ItemsPrimaryModel primary, Item
         //     > 3050 and <= 3100 => FullEquipType.TwinfangsOff,
         //     > 3100 and <= 3150 => FullEquipType.Twinfangs,
         //     > 3150 and <= 3200 => FullEquipType.TwinfangsOff,
-        //     > 3200 and <= 3300 => FullEquipType.Handaxe, TODO
+        //     > 3400 and <= 3400 => FullEquipType.Handaxe, TODO
         //     > 5000 and <= 5040 => FullEquipType.Saw,
         //     > 5040 and <= 5100 => FullEquipType.ClawHammer,
         //     > 5100 and <= 5140 => FullEquipType.CrossPeinHammer,
