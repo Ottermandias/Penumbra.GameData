@@ -63,12 +63,12 @@ public partial class StainAccessor : IService
     }
 
     [LoggerMessage(LogLevel.Warning,
-        "[StainAccessor] Could not load StmFile<{Type}> ({DefaultPath}) from ResourceHandle 0x{ResourceHandle:X} ({Path})")]
+        "[StainAccessor] Could not load StmFile<{Type:l}> ({DefaultPath:l}) from ResourceHandle 0x{ResourceHandle:X} ({Path:l})")]
     static partial void LogLoadFailure(ILogger logger, Type type, string defaultPath, nint resourceHandle, string path);
 
     [LoggerMessage(LogLevel.Trace, "[StainAccessor] Loading StmFile<{Type}> from ResourceHandle 0x{ResourceHandle:X}")]
     static partial void LogResourceHandleLoad(ILogger logger, Type type, nint resourceHandle);
 
-    [LoggerMessage(LogLevel.Trace, "[StainAccessor] Loading StmFile<{Type}> from Lumina")]
+    [LoggerMessage(LogLevel.Trace, "[StainAccessor] Loading StmFile<{Type:l}> from Lumina")]
     static partial void LogLuminaLoad(ILogger logger, Type type);
 }
