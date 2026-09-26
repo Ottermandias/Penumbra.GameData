@@ -37,6 +37,13 @@ public readonly partial struct CompanionId;
 public readonly partial struct OrnamentId;
 
 [StrongType<uint>(IdTypes.IdName, IdTypes.Flags)]
+public readonly partial struct EntityId
+{
+    public const           uint     InvalidEntity = 0xE0000000u;
+    public static readonly EntityId Invalid       = InvalidEntity;
+}
+
+[StrongType<uint>(IdTypes.IdName, IdTypes.Flags)]
 public readonly partial struct NpcId
 {
     public static implicit operator NpcId(ENpcId id)
@@ -156,10 +163,10 @@ public readonly record struct StainIds(StainId Stain1, StainId Stain2) : IReadOn
 
     public static StainIds ParseFromElement(in JsonElement? element)
     {
-        if (element is not {} j)
+        if (element is not { } j)
             return None;
 
-        var stain  = j.PropertyOrDefault("Stain"u8, (byte)0);
+        var stain  = j.PropertyOrDefault("Stain"u8,  (byte)0);
         var stain2 = j.PropertyOrDefault("Stain2"u8, (byte)0);
         return new StainIds(stain, stain2);
     }

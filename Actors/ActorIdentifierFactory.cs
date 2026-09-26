@@ -496,8 +496,8 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
     {
         var ownerId = actor.AsObject->OwnerId;
         // 952 -> 780 is a special case for chocobos because they have NameId == 0 otherwise.
-        var nameId = actor.AsObject->BaseId == 952 ? 780 : actor.AsCharacter->NameId;
-        if (ownerId != 0xE0000000)
+        var nameId = actor.AsObject->BaseId is 952 ? 780 : actor.AsCharacter->NameId;
+        if (ownerId is not EntityId.InvalidEntity)
         {
             owner = HandleCutscene(objects.ById(ownerId));
             if (!owner.Valid)
@@ -512,7 +512,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
 
         owner = Actor.Null;
         // Hack to support Anamnesis changing ObjectKind for NPC faces.
-        if (nameId == 0 && allowPlayerNpc)
+        if (nameId is 0 && allowPlayerNpc)
         {
             var name = actor.Utf8Name;
             if (!name.IsEmpty)
@@ -536,7 +536,7 @@ public class ActorIdentifierFactory(ObjectManager objects, IFramework framework,
     {
         var dataId = actor.AsObject->BaseId;
         // Special case for squadron that is also in the game functions, cf. E8 ?? ?? ?? ?? 89 87 ?? ?? ?? ?? 4C 89 BF
-        if (dataId == 0xF845D)
+        if (dataId is 0xF845D)
             dataId = actor.AsObject->GetNameId();
         if (MannequinIds.Contains(dataId))
         {
