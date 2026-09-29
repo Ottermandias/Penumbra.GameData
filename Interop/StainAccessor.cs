@@ -9,7 +9,7 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Penumbra.GameData.Interop;
 
-public partial class StainAccessor : IService
+public sealed partial class StainAccessor : ISingletonService
 {
     public const int GudStmIndex    = 95;
     public const int LegacyStmIndex = 96;

@@ -4,7 +4,7 @@ using Penumbra.GameData.Files;
 
 namespace Penumbra.GameData.Interop;
 
-public class ShaderParameterAccessor(IDataManager gameData) : IService
+public sealed class ShaderParameterAccessor(IDataManager gameData) : ISingletonService
 {
     private readonly Lazy<SpmFile> _bgSpmFile     = new(() => new SpmFile(gameData, SpmFile.Table.Bg));
     private readonly Lazy<SpmFile> _charaSpmFile  = new(() => new SpmFile(gameData, SpmFile.Table.Chara));

@@ -8,7 +8,7 @@ namespace Penumbra.GameData.Data;
 
 /// <summary> A service wrapper around all basic EquipItem dictionaries. </summary>
 public sealed class ItemData(ItemsByType byType, ItemsPrimaryModel primary, ItemsSecondaryModel secondary, ItemsTertiaryModel tertiary)
-    : IAsyncService
+    : IAsyncService, ISingletonService
 {
     /// <summary> Item lists ordered by type. </summary>
     public readonly ItemsByType ByType = byType;

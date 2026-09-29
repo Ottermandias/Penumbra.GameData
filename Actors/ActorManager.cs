@@ -10,7 +10,7 @@ namespace Penumbra.GameData.Actors;
 public delegate short CutsceneResolver(ushort index);
 
 /// <summary> Manage transformation, generation and conversion of actor identifiers. </summary>
-public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncService
+public sealed class ActorManager : ActorIdentifierFactory, IDisposable, IAsyncService, IScopedService
 {
     /// <summary> The names used for NPC types. </summary>
     public readonly NameDicts Data;

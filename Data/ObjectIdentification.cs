@@ -18,7 +18,7 @@ public sealed class ObjectIdentification(
     IdentificationListWeapons weaponIdentification,
     IdentificationListModels modelIdentification,
     GamePathParser gamePathParser)
-    : IAsyncService
+    : IAsyncService, ISingletonService
 {
     /// <summary> Finished when all data tasks are finished. </summary>
     public Task Awaiter { get; } = Task.WhenAll(bNpcNames.Awaiter, actions.Awaiter, emotes.Awaiter, modelCharaToObjects.Awaiter,

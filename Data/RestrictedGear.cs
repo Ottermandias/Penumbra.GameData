@@ -12,7 +12,7 @@ namespace Penumbra.GameData.Data;
 /// with some items getting send to emperor's new clothes and a few funny entries.
 /// </summary>
 public sealed class RestrictedGear(RestrictedItemsRace raceSet, RestrictedItemsMale maleSet, RestrictedItemsFemale femaleSet)
-    : IAsyncService
+    : IAsyncService, ISingletonService
 {
     /// <summary>
     /// Resolve a model given by its model id, variant and slot for your current race and gender.

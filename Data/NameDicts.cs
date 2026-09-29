@@ -13,7 +13,7 @@ public sealed class NameDicts(
     DictOrnament ornaments,
     DictBNpc bNpcs,
     DictENpc eNpcs)
-    : IAsyncService
+    : IAsyncService, ISingletonService
 {
     /// <summary> Worlds available for players. </summary>
     public readonly DictWorld Worlds = worlds;
