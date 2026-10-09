@@ -192,7 +192,7 @@ public partial class MdlFile : IWritable
         ShapeValues = r.ReadStructuresAsArray<ShapeValueStruct>(modelHeader.ShapeValueCount);
 
         var submeshBoneMapSize = r.ReadUInt32();
-        SubMeshBoneMap = r.ReadStructures<ushort>((int)submeshBoneMapSize / 2).ToArray();
+        SubMeshBoneMap = [.. r.ReadStructures<ushort>((int)submeshBoneMapSize / 2)];
 
         var paddingAmount = r.ReadByte();
         r.Seek(r.BaseStream.Position + paddingAmount);
@@ -310,7 +310,7 @@ public partial class MdlFile : IWritable
         Color        = 7,
     }
 
-    public static BoundingBoxStruct EmptyBoundingBox = new()
+    public static readonly BoundingBoxStruct EmptyBoundingBox = new()
     {
         Min = [0f, 0f, 0f, 0f],
         Max = [0f, 0f, 0f, 0f],
