@@ -1,7 +1,7 @@
 using Penumbra.GameData.Enums;
+using Penumbra.GameData.Files.Materials;
 using Penumbra.GameData.Structs;
 using Penumbra.String.Classes;
-using MtrlFile = Penumbra.GameData.Files.MtrlFile;
 
 namespace Penumbra.GameData.Data;
 

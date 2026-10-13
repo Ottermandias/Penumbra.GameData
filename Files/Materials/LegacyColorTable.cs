@@ -2,7 +2,7 @@ using Luna;
 using Penumbra.GameData.Files.StainMapStructs;
 using Penumbra.GameData.Structs;
 
-namespace Penumbra.GameData.Files.MaterialStructs;
+namespace Penumbra.GameData.Files.Materials;
 
 public sealed class LegacyColorTable : IEnumerable<LegacyColorTableRow>, IColorTable
 {

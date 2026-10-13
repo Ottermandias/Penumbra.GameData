@@ -1,4 +1,4 @@
-namespace Penumbra.GameData.Files.MaterialStructs;
+namespace Penumbra.GameData.Files.Materials;
 
 /// <inheritdoc cref="ColorTableRow"/>
 public struct ColorDyeTableRow : IEquatable<ColorDyeTableRow>

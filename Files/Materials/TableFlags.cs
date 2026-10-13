@@ -1,4 +1,4 @@
-namespace Penumbra.GameData.Files.MaterialStructs;
+namespace Penumbra.GameData.Files.Materials;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct TableFlags(uint flags) : IEquatable<TableFlags>

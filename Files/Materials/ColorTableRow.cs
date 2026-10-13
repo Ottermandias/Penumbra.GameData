@@ -1,7 +1,7 @@
 using Penumbra.GameData.Files.StainMapStructs;
 using Penumbra.GameData.Structs;
 
-namespace Penumbra.GameData.Files.MaterialStructs;
+namespace Penumbra.GameData.Files.Materials;
 
 /// <summary>
 /// The number after the parameter is the bit in the dye flags.

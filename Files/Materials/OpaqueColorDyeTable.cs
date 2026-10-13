@@ -1,6 +1,6 @@
 using Luna;
 
-namespace Penumbra.GameData.Files.MaterialStructs;
+namespace Penumbra.GameData.Files.Materials;
 
 /// <summary>
 /// A color dye table of yet unknown structure.

@@ -1,10 +1,9 @@
 using Lumina.Data.Parsing;
 using Luna;
-using Penumbra.GameData.Files.MaterialStructs;
 using Penumbra.GameData.Files.StainMapStructs;
 using Penumbra.GameData.Structs;
 
-namespace Penumbra.GameData.Files;
+namespace Penumbra.GameData.Files.Materials;
 
 public partial class MtrlFile : IWritable, ICloneable
 {

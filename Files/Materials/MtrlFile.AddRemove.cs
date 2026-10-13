@@ -2,7 +2,7 @@ using Lumina.Data.Parsing;
 using Luna;
 using Penumbra.GameData.Data;
 
-namespace Penumbra.GameData.Files;
+namespace Penumbra.GameData.Files.Materials;
 
 public partial class MtrlFile
 {

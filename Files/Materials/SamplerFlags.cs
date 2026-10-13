@@ -1,6 +1,6 @@
 using Luna.Generators;
 
-namespace Penumbra.GameData.Files.MaterialStructs;
+namespace Penumbra.GameData.Files.Materials;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct SamplerFlags(uint flags) : IEquatable<SamplerFlags>

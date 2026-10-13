@@ -1,6 +1,6 @@
 using Penumbra.GameData.Files.Utility;
 
-namespace Penumbra.GameData.Files;
+namespace Penumbra.GameData.Files.Materials;
 
 public partial class MtrlFile
 {
