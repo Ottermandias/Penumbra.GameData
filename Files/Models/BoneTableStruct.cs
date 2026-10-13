@@ -1,6 +1,6 @@
 using Lumina.Data;
 
-namespace Penumbra.GameData.Files.ModelStructs;
+namespace Penumbra.GameData.Files.Models;
 
 public struct BoneTableStruct
 {

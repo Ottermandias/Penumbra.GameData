@@ -1,13 +1,12 @@
 using Lumina.Data;
 using Lumina.Extensions;
-using Penumbra.GameData.Files.ModelStructs;
+using Luna;
 using static Lumina.Data.Parsing.MdlStructs;
-using MeshStruct = Penumbra.GameData.Files.ModelStructs.MeshStruct;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Penumbra.GameData.Files;
+namespace Penumbra.GameData.Files.Models;
 
 public partial class MdlFile : IWritable
 {
@@ -57,25 +56,24 @@ public partial class MdlFile : IWritable
     public ModelFlags1 Flags1;
     public ModelFlags2 Flags2;
 
-    public BoundingBoxStruct BoundingBoxes            = EmptyBoundingBox;
-    public BoundingBoxStruct ModelBoundingBoxes       = EmptyBoundingBox;
-    public BoundingBoxStruct WaterBoundingBoxes       = EmptyBoundingBox;
-    public BoundingBoxStruct VerticalFogBoundingBoxes = EmptyBoundingBox;
-
-    public VertexDeclarationStruct[]      VertexDeclarations     = [];
-    public ElementIdStruct[]              ElementIds             = [];
-    public MeshStruct[]                   Meshes                 = [];
-    public ModelStructs.BoneTableStruct[] BoneTables             = [];
-    public BoundingBoxStruct[]            BoneBoundingBoxes      = [];
-    public SubmeshStruct[]                SubMeshes              = [];
-    public ShapeMeshStruct[]              ShapeMeshes            = [];
-    public ShapeValueStruct[]             ShapeValues            = [];
-    public TerrainShadowMeshStruct[]      TerrainShadowMeshes    = [];
-    public TerrainShadowSubmeshStruct[]   TerrainShadowSubMeshes = [];
-    public NeckMorphStruct[]              NeckMorphs             = [];
-    public LodStruct[]                    Lods                   = [];
-    public ExtraLodStruct[]               ExtraLods              = [];
-    public ushort[]                       SubMeshBoneMap         = [];
+    public BoundingBoxStruct            BoundingBoxes            = BoundingBoxStruct.Empty;
+    public BoundingBoxStruct            ModelBoundingBoxes       = BoundingBoxStruct.Empty;
+    public BoundingBoxStruct            WaterBoundingBoxes       = BoundingBoxStruct.Empty;
+    public BoundingBoxStruct            VerticalFogBoundingBoxes = BoundingBoxStruct.Empty;
+    public VertexDeclarationStruct[]    VertexDeclarations       = [];
+    public ElementIdStruct[]            ElementIds               = [];
+    public MeshStruct[]                 Meshes                   = [];
+    public BoneTableStruct[]            BoneTables               = [];
+    public BoundingBoxStruct[]          BoneBoundingBoxes        = [];
+    public SubmeshStruct[]              SubMeshes                = [];
+    public ShapeMeshStruct[]            ShapeMeshes              = [];
+    public ShapeValueStruct[]           ShapeValues              = [];
+    public TerrainShadowMeshStruct[]    TerrainShadowMeshes      = [];
+    public TerrainShadowSubmeshStruct[] TerrainShadowSubMeshes   = [];
+    public NeckMorphStruct[]            NeckMorphs               = [];
+    public LodStruct[]                  Lods                     = [];
+    public ExtraLodStruct[]             ExtraLods                = [];
+    public ushort[]                     SubMeshBoneMap           = [];
 
     // Strings are written in order
     public string[] Attributes = [];
@@ -170,16 +168,16 @@ public partial class MdlFile : IWritable
             Bones[i] = stringIdx >= 0 ? strings[stringIdx] : string.Empty;
         }
 
-        BoneTables = new ModelStructs.BoneTableStruct[modelHeader.BoneTableCount];
+        BoneTables = new BoneTableStruct[modelHeader.BoneTableCount];
         if (Version is V5)
         {
             for (var i = 0; i < modelHeader.BoneTableCount; i++)
-                BoneTables[i] = ModelStructs.BoneTableStruct.ReadV5(r);
+                BoneTables[i] = BoneTableStruct.ReadV5(r);
         }
         else if (Version is V6)
         {
             for (var i = 0; i < modelHeader.BoneTableCount; i++)
-                BoneTables[i] = ModelStructs.BoneTableStruct.ReadV6(r);
+                BoneTables[i] = BoneTableStruct.ReadV6(r);
             r.Position += modelHeader.BoneTableArrayCountTotal * 2;
         }
 
@@ -218,8 +216,78 @@ public partial class MdlFile : IWritable
         if (Version != V5 || !Valid)
             return false;
 
+        RecalculateBoundingBoxes();
         Version = V6;
         return true;
+    }
+
+    public void RecalculateBoundingBoxes()
+    {
+        if (LodCount is 0)
+            return;
+
+        ref readonly var lod = ref Lods[0];
+
+        var min     = Vector3.PositiveInfinity;
+        var max     = Vector3.NegativeInfinity;
+        var boneMin = Array.Repeat(Vector3.PositiveInfinity, Bones.Length);
+        var boneMax = Array.Repeat(Vector3.NegativeInfinity, Bones.Length);
+        for (var meshIndex = lod.MeshIndex; meshIndex < lod.MeshIndex + lod.MeshCount; ++meshIndex)
+        {
+            ref readonly var boneTable = ref BoneTables[Meshes[meshIndex].BoneTableIndex];
+
+            var positionReader = new VertexReader(this, 0, meshIndex);
+            var indexReader    = positionReader;
+            var weightsReader  = positionReader;
+            for (var vertexIndex = 0; vertexIndex < positionReader.Count; ++vertexIndex)
+            {
+                var position = positionReader.GetPosition(vertexIndex);
+                min = Vector3.Min(min, position);
+                max = Vector3.Max(max, position);
+
+                var weightData = weightsReader.GetBlendWeights(vertexIndex);
+                var indexData  = indexReader.GetBlendIndices(vertexIndex);
+                for (var i = 0; i < 4; ++i)
+                {
+                    if (weightData[i] is 0)
+                        continue;
+
+                    var localIndex = (int)indexData[i];
+                    if (localIndex >= boneTable.BoneCount)
+                        continue;
+
+                    var boneIndex = boneTable.BoneIndex[localIndex];
+                    if (boneIndex >= Bones.Length)
+                        continue;
+
+                    boneMin[boneIndex] = Vector3.Min(boneMin[boneIndex], position);
+                    boneMax[boneIndex] = Vector3.Max(boneMax[boneIndex], position);
+                }
+            }
+        }
+
+        // Treat a model with no vertices as empty boxed.
+        if (min == Vector3.PositiveInfinity || max == Vector3.NegativeInfinity)
+        {
+            BoundingBoxes      = BoundingBoxStruct.Empty;
+            ModelBoundingBoxes = BoundingBoxStruct.Empty;
+        }
+        else
+        {
+            BoundingBoxes      = BoundingBoxStruct.Create(Vector3.Min(min, Vector3.Zero), Vector3.Max(max, Vector3.Zero));
+            ModelBoundingBoxes = BoundingBoxStruct.Create(min,                            max);
+        }
+
+        WaterBoundingBoxes       = BoundingBoxStruct.Empty;
+        VerticalFogBoundingBoxes = BoundingBoxStruct.Empty;
+
+        Array.Resize(ref BoneBoundingBoxes, Bones.Length);
+        for (var boneIndex = 0; boneIndex < Bones.Length; ++boneIndex)
+        {
+            // Skip unused bones and keep current box. Could also set to empty?
+            if (boneMin[boneIndex] != Vector3.PositiveInfinity || boneMax[boneIndex] != Vector3.NegativeInfinity)
+                BoneBoundingBoxes[boneIndex] = BoundingBoxStruct.Create(boneMin[boneIndex], boneMax[boneIndex]);
+        }
     }
 
     private ModelFileHeader LoadModelFileHeader(LuminaBinaryReader r)
@@ -231,9 +299,9 @@ public partial class MdlFile : IWritable
         return header;
     }
 
-    private ModelStructs.ModelHeader LoadModelHeader(BinaryReader r)
+    private ModelHeader LoadModelHeader(BinaryReader r)
     {
-        var modelHeader = r.ReadStructure<ModelStructs.ModelHeader>();
+        var modelHeader = r.ReadStructure<ModelHeader>();
         Radius                     = modelHeader.Radius;
         Flags1                     = modelHeader.Flags1;
         Flags2                     = modelHeader.Flags2;
@@ -273,7 +341,7 @@ public partial class MdlFile : IWritable
     public unsafe uint StackSize
         => (uint)(VertexDeclarations.Length * NumVertices * sizeof(VertexElement));
 
-    public enum VertexType
+    public enum VertexType : byte
     {
         Single1 = 0,
         Single2 = 1,
@@ -296,9 +364,10 @@ public partial class MdlFile : IWritable
         // Unk15 = 15
         UShort2 = 16,
         UShort4 = 17,
+        String,
     }
 
-    public enum VertexUsage
+    public enum VertexUsage : byte
     {
         Position     = 0,
         BlendWeights = 1,
@@ -309,10 +378,4 @@ public partial class MdlFile : IWritable
         Tangent1     = 6,
         Color        = 7,
     }
-
-    public static BoundingBoxStruct EmptyBoundingBox = new()
-    {
-        Min = [0f, 0f, 0f, 0f],
-        Max = [0f, 0f, 0f, 0f],
-    };
 }

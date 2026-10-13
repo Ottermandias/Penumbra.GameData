@@ -1,6 +1,6 @@
 using Lumina.Data;
 
-namespace Penumbra.GameData.Files.ModelStructs;
+namespace Penumbra.GameData.Files.Models;
 
 #pragma warning disable 0169
 // ReSharper disable UnassignedField.Local
@@ -54,10 +54,10 @@ public unsafe struct MeshStruct
         set => _vertexBufferStride[2] = value;
     }
 
-    public uint VertexBufferOffset(int idx)
+    public readonly uint VertexBufferOffset(int idx)
         => _vertexBufferOffset[idx];
 
-    public byte VertexBufferStride(int idx)
+    public readonly byte VertexBufferStride(int idx)
         => _vertexBufferStride[idx];
 
     public byte VertexStreamCount

@@ -1,7 +1,6 @@
 using Lumina.Data.Parsing;
-using Penumbra.GameData.Files.ModelStructs;
 
-namespace Penumbra.GameData.Files;
+namespace Penumbra.GameData.Files.Models;
 
 public partial class MdlFile
 {
@@ -119,7 +118,7 @@ public partial class MdlFile
         foreach (var vertex in vertexDecl.VertexElements)
             Write(w, vertex);
 
-        Write(w, new MdlStructs.VertexElement() { Stream = 255 });
+        Write(w, new MdlStructs.VertexElement { Stream = 255 });
         w.Seek((int)(NumVertices - 1 - vertexDecl.VertexElements.Length) * 8, SeekOrigin.Current);
     }
 
@@ -156,7 +155,7 @@ public partial class MdlFile
         w.Write((byte)0);
     }
 
-    private void Write(BinaryWriter w, int shapeIdx, IReadOnlyList<uint> offsets)
+    private void Write(BinaryWriter w, int shapeIdx, List<uint> offsets)
     {
         var shape  = Shapes[shapeIdx];
         var offset = offsets[Attributes.Length + Bones.Length + Materials.Length + shapeIdx];

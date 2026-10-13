@@ -1,4 +1,4 @@
-namespace Penumbra.GameData.Files.ModelStructs;
+namespace Penumbra.GameData.Files.Models;
 
 public unsafe struct NeckMorphStruct
 {
