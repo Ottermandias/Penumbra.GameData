@@ -66,14 +66,14 @@ public partial class MtrlFile : IWritable, ICloneable
         var normalSamplerIdx = FindSampler(ShpkFile.NormalSamplerId);
         if (normalSamplerIdx >= 0)
         {
-            var normalSampler    = ShaderPackage.Samplers[normalSamplerIdx];
-            var normalTexture    = Textures[normalSampler.TextureIndex];
-            var indexPath        = normalTexture.Path.Replace("_norm", "_id").Replace("_n", "_id");
-            ref var indexSampler = ref GetOrAddSampler(ShpkFile.IndexSamplerId, indexPath);
-            ref var indexTexture = ref Textures[indexSampler.TextureIndex];
-            indexSampler.Flags   = normalSampler.Flags;
-            indexTexture.Path    = indexPath;
-            indexTexture.Flags   = normalTexture.Flags;
+            var     normalSampler = ShaderPackage.Samplers[normalSamplerIdx];
+            var     normalTexture = Textures[normalSampler.TextureIndex];
+            var     indexPath     = normalTexture.Path.Replace("_norm", "_id").Replace("_n", "_id");
+            ref var indexSampler  = ref GetOrAddSampler(ShpkFile.IndexSamplerId, indexPath);
+            ref var indexTexture  = ref Textures[indexSampler.TextureIndex];
+            indexSampler.Flags = normalSampler.Flags;
+            indexTexture.Path  = indexPath;
+            indexTexture.Flags = normalTexture.Flags;
         }
 
         UpdateFlags();
@@ -83,7 +83,7 @@ public partial class MtrlFile : IWritable, ICloneable
 
     public bool ApplyDye(StmFile<DyePack> stm, ReadOnlySpan<StainId> stainIds)
     {
-        if (DyeTable == null || stainIds.Length == 0)
+        if (DyeTable is null || stainIds.Length is 0)
             return false;
 
         if (Table is ColorTable table && DyeTable is ColorDyeTable dyeTable)
@@ -94,7 +94,7 @@ public partial class MtrlFile : IWritable, ICloneable
 
     public bool ApplyDye(StmFile<LegacyDyePack> stm, ReadOnlySpan<StainId> stainIds)
     {
-        if (DyeTable == null || stainIds.Length == 0)
+        if (DyeTable is null || stainIds.Length is 0)
             return false;
 
         if (Table is ColorTable table && DyeTable is ColorDyeTable dyeTable)
@@ -107,7 +107,7 @@ public partial class MtrlFile : IWritable, ICloneable
 
     public bool ApplyDyeToRow(StmFile<DyePack> stm, ReadOnlySpan<StainId> stainIds, int rowIdx)
     {
-        if (DyeTable == null || rowIdx < 0 || rowIdx >= DyeTable.Height || stainIds.Length == 0)
+        if (DyeTable is null || rowIdx < 0 || rowIdx >= DyeTable.Height || stainIds.Length is 0)
             return false;
 
         if (Table is ColorTable table && DyeTable is ColorDyeTable dyeTable)
@@ -118,7 +118,7 @@ public partial class MtrlFile : IWritable, ICloneable
 
     public bool ApplyDyeToRow(StmFile<LegacyDyePack> stm, ReadOnlySpan<StainId> stainIds, int rowIdx)
     {
-        if (DyeTable == null || rowIdx < 0 || rowIdx >= DyeTable.Height || stainIds.Length == 0)
+        if (DyeTable is null || rowIdx < 0 || rowIdx >= DyeTable.Height || stainIds.Length is 0)
             return false;
 
         if (Table is ColorTable table && DyeTable is ColorDyeTable dyeTable)
@@ -193,14 +193,12 @@ public partial class MtrlFile : IWritable, ICloneable
                 var logs  => OpaqueColorTable.TryReadFrom(logs, ref dataSet),
             };
             if (tableFlags.HasDyeTable)
-            {
                 DyeTable = tableFlags.TableDimensionLogs switch
                 {
                     0                   => LegacyColorDyeTable.TryReadFrom(ref dataSet),
                     >= 0x50 and <= 0x5F => ColorDyeTable.TryReadFrom(ref dataSet),
                     _                   => OpaqueColorDyeTable.TryReadFrom(tableFlags.TableHeightLog, ref dataSet),
                 };
-            }
         }
 
         var shaderValueListSize = r.ReadUInt16();
@@ -238,8 +236,8 @@ public partial class MtrlFile : IWritable, ICloneable
     {
         TableFlags = TableFlags with
         {
-            HasTable           = Table != null,
-            HasDyeTable        = Table != null && DyeTable != null,
+            HasTable = Table != null,
+            HasDyeTable = Table != null && DyeTable != null,
             TableDimensionLogs = Table?.DimensionLogs ?? 0,
         };
     }
