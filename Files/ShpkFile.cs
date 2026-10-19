@@ -77,7 +77,7 @@ public partial class ShpkFile : IWritable
 
     public Span<T> GetMaterialParamDefault<T>(MaterialParam param) where T : struct
     {
-        if (MaterialParamsDefaults == null || param.ByteOffset >= MaterialParamsDefaults.Length)
+        if (MaterialParamsDefaults is null || param.ByteOffset >= MaterialParamsDefaults.Length)
             return [];
 
         var byteEnd = Math.Min(param.ByteOffset + param.ByteSize, MaterialParamsDefaults.Length);
@@ -154,7 +154,7 @@ public partial class ShpkFile : IWritable
         var pixelShaderCount  = r.ReadUInt32();
         MaterialParamsSize = r.ReadUInt32();
         var materialParamCount  = r.ReadUInt16();
-        var hasMatParamDefaults = r.ReadUInt16() != 0;
+        var hasMatParamDefaults = r.ReadUInt16() is not 0;
         var constantCount       = r.ReadUInt32();
         var samplerCount        = r.ReadUInt16();
         var textureCount        = r.ReadUInt16();
@@ -165,9 +165,9 @@ public partial class ShpkFile : IWritable
         var nodeCount           = r.ReadUInt32();
         var nodeAliasCount      = r.ReadUInt32();
 
-        var hullShaderCount       = 0u;
-        var domainShaderCount     = 0u;
-        var geometryShaderCount   = 0u;
+        var hullShaderCount     = 0u;
+        var domainShaderCount   = 0u;
+        var geometryShaderCount = 0u;
         if (Version >= 0x0D01)
         {
             hullShaderCount     = r.ReadUInt32();
@@ -177,7 +177,7 @@ public partial class ShpkFile : IWritable
 
         var nodeAliasClusterCount = Version >= 0x0E01 ? r.ReadUInt32() : 0;
 
-        IsLegacy = Version < 0x0D01 && !hasMatParamDefaults && textureCount == 0;
+        IsLegacy = Version < 0x0D01 && !hasMatParamDefaults && textureCount is 0;
 
         var blobs   = data[(int)blobsOffset..(int)stringsOffset];
         var strings = new SpanBinaryReader(data[(int)stringsOffset..]);

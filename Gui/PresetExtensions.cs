@@ -402,7 +402,7 @@ public static class PresetExtensions
                 Im.Render.Cross(Im.Window.DrawList, Im.Cursor.ScreenPosition.AddY(Im.Style.FramePadding.Y), LunaStyle.ErrorForeground,
                     Im.Style.TextHeight);
             Im.Cursor.X += Im.Style.FrameHeightWithSpacing;
-            ImEx.TextFrameAligned(groupList[0].Item1);
+            ImEx.TextFrameAligned(firstItem.Item1);
 
             if (single && firstItem.Item2)
                 return;
